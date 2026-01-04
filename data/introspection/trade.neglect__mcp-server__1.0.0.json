@@ -1,0 +1,675 @@
+{
+  "server_name": "trade.neglect/mcp-server",
+  "server_version": "1.0.0",
+  "introspected_at": "2026-01-04T12:31:14.383714+00:00",
+  "success": true,
+  "tools": [
+    {
+      "name": "get-token-metadata",
+      "description": "Returns the metadata for a given token address stored in the database. Social fields are omitted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "tokenAddress": {
+                "description": "The token's address (e.g., a Solana address)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tokenAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-token-marketdata",
+      "description": "Returns real-time metrics including price, market capitalization, FDV, liquidity, total and circulating supply, and current holder count. This endpoint does not use time windows and does not include trade statistics.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "tokenAddress": {
+                "description": "The token's mint address (e.g., a Solana SPL token address)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tokenAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-token-holders",
+      "description": "Returns ranked holder wallets, amounts, and percentage ownership for a given token address.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "queryParams": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "description": "Optional limit on number of holders returned (default: 25, max: 100)",
+                "default": 25,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 100
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "tokenAddress": {
+                "description": "The token's mint address (e.g., Solana token address)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tokenAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "queryParams",
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-trending-tokens",
+      "description": "Returns a list of trending tokens ordered by transaction count for a given interval.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "queryParams": {
+            "type": "object",
+            "properties": {
+              "interval": {
+                "description": "Time interval window for counting transactions (default: 5m)",
+                "examples": [
+                  "5m",
+                  "1m",
+                  "30m",
+                  "1h"
+                ],
+                "default": "5m",
+                "enum": [
+                  "1m",
+                  "5m",
+                  "30m",
+                  "1h"
+                ]
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "queryParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "search-tokens",
+      "description": "Performs a flexible search for tokens by name, symbol, or address, with optional filters, sorting, and symbol-only mode.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "queryParams": {
+            "type": "object",
+            "properties": {
+              "searchQuery": {
+                "description": "Query text to search in name, symbol, or address",
+                "type": "string"
+              },
+              "limit": {
+                "description": "Number of results to return (1\u201325)",
+                "default": 10,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 25
+              },
+              "sortBy": {
+                "description": "Field to sort results by",
+                "default": "created",
+                "enum": [
+                  "created",
+                  "name",
+                  "symbol",
+                  "mcap"
+                ]
+              },
+              "sortOrder": {
+                "description": "Sort order direction",
+                "default": "desc",
+                "enum": [
+                  "asc",
+                  "desc"
+                ]
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "queryParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-latest-graduated-tokens",
+      "description": "Fetches the most recently graduated tokens, ordered by graduation time (descending).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "queryParams": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "description": "Number of results to return (1\u2013100). Defaults to 25.",
+                "default": 25,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "queryParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-token-ath",
+      "description": "Returns the all-time-high (ATH) market cap and the timestamp when it occurred, based on all historical trades for the token.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "tokenAddress": {
+                "description": "The token's mint address (Solana SPL token).",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tokenAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-tokens-by-deployer",
+      "description": "Returns a list of tokens where the specified wallet address is the developer (devWallet).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "queryParams": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "description": "Maximum number of tokens to return (default: 10, min: 1, max: 100)",
+                "default": 10,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "walletAddress": {
+                "description": "The wallet address of the deployer (devWallet)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "walletAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "queryParams",
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-token-history",
+      "description": "Fetches historical price, market cap, or liquidity snapshots for a token across multiple time windows.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "token": {
+                "description": "The token's address",
+                "type": "string"
+              },
+              "metrics": {
+                "description": "List of metrics to fetch (default: [\"price\"])",
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "price",
+                    "mcap",
+                    "liquidity"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "token"
+            ],
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-token-performance",
+      "description": "Returns percentage performance change for selected metrics over multiple time windows compared to the current value.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "token": {
+                "description": "Token address to fetch performance data for",
+                "type": "string"
+              },
+              "metrics": {
+                "description": "List of metrics to evaluate. Supported values: `price`, `mcap`, `liquidity`.",
+                "default": [
+                  "price"
+                ],
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "price",
+                    "mcap",
+                    "liquidity"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "token"
+            ],
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-token-price",
+      "description": "Returns the latest price, market cap, and liquidity for a specific token address.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "tokenAddress": {
+                "description": "The token's contract address",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tokenAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-wallet-holdings",
+      "description": "Retrieve the token holdings of a given wallet address, including balances and percentage ownership per token.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "queryParams": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "description": "Maximum number of tokens to return (default 10, max 100)",
+                "default": 10,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "walletAddress": {
+                "description": "The wallet address to fetch holdings for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "walletAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "queryParams",
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-wallet-token-pnl",
+      "description": "Calculate realized and unrealized profit and loss (PnL) for a wallet on a specific token.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "walletAddress": {
+                "description": "The wallet address to calculate PnL for",
+                "type": "string"
+              },
+              "tokenAddress": {
+                "description": "The token contract address",
+                "type": "string"
+              }
+            },
+            "required": [
+              "walletAddress",
+              "tokenAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-token-history-range",
+      "description": "Returns the lowest and highest values of selected metrics (price, market cap, liquidity) within a specified time range for a token.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "time_from": {
+                "description": "Unix timestamp (seconds) for range start",
+                "type": "number"
+              },
+              "time_to": {
+                "description": "Unix timestamp (seconds) for range end",
+                "type": "number"
+              },
+              "metrics": {
+                "description": "Which metrics to return (price, mcap, liquidity)",
+                "default": [
+                  "price"
+                ],
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "price",
+                    "mcap",
+                    "liquidity"
+                  ]
+                }
+              },
+              "mode": {
+                "description": "Behavior when requested range falls outside token lifespan",
+                "default": "clamp",
+                "enum": [
+                  "clamp",
+                  "error"
+                ]
+              }
+            },
+            "required": [
+              "time_from",
+              "time_to"
+            ],
+            "additionalProperties": {}
+          },
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "tokenAddress": {
+                "description": "The token's contract address",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tokenAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "body",
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-mcp-config",
+      "description": "Exposes MCP discovery schema for Smithery and other MCP clients.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-token-audit",
+      "description": "Returns audit data for a given token address, including developer, top holder, insider, bundler, sniper, and LP burn distributions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "tokenAddress": {
+                "description": "The token's address (e.g., a Solana mint address)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tokenAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-api-health",
+      "description": "Returns 200 OK if the API service is healthy and responding.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-pair-audit",
+      "description": "Returns audit data for a single liquidity pair and its underlying token. Includes token-level distribution (developer, top holders, insiders, bundlers) and pair-level ownership breakdown (snipers, LP burn).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "properties": {
+              "pairAddress": {
+                "description": "The pair address (e.g., liquidity pool address)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "pairAddress"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "pathParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-token-audit-multiple",
+      "description": "Returns audit data for multiple tokens in a single batch call. Accepts up to 10 token addresses via a comma-separated `addresses` query parameter. Each entry includes developer, top holder, insider, bundler, sniper, and LP burn distributions.\n\n**Cost:** 10 credits per request.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "queryParams": {
+            "type": "object",
+            "properties": {
+              "addresses": {
+                "description": "Comma-separated list of up to 10 token mint addresses",
+                "examples": [
+                  "address1,address2"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "addresses"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "queryParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    },
+    {
+      "name": "get-pair-audit-multiple",
+      "description": "Returns audit data for multiple liquidity pairs in a single batch call. Accepts up to 10 pair addresses via the `addresses` query parameter. Each entry includes pair-level and token-level audit details including developer, top holders, insiders, bundlers, snipers, and LP burn distribution.\n\n**Cost:** 10 credits per request.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "queryParams": {
+            "type": "object",
+            "properties": {
+              "addresses": {
+                "description": "Comma-separated list of up to 10 pair addresses",
+                "examples": [
+                  "pairAddress1,pairAddress2"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "addresses"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "queryParams"
+        ],
+        "additionalProperties": false,
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      }
+    }
+  ],
+  "prompts": [],
+  "resources": [],
+  "transport_used": "streamable-http",
+  "error": null,
+  "endpoint_url": "https://api.neglect.trade/mcp"
+}

@@ -1,0 +1,246 @@
+{
+  "server_name": "so.jinko/jinko-mcp",
+  "server_version": "0.0.27",
+  "introspected_at": "2026-01-04T12:31:11.705341+00:00",
+  "success": true,
+  "tools": [
+    {
+      "name": "search-hotels",
+      "description": "Search for hotels with structured filtering parameters. Returns an interactive widget showing hotel results with images, pricing, ratings, and amenities.\n\nWHEN TO USE:\nUse this tool when you have structured search criteria with specific filters (location, dates, amenities, price range, star rating). For natural language queries like \"pet-friendly hotel with pool in Paris\", use semantic-search-hotels instead.\n\nREQUIRED PARAMETERS:\n\u2022 location: City, region, or area name (e.g., \"Paris\", \"Manhattan NYC\", \"Tokyo Shibuya\")\n\u2022 check_in_date: Check-in date in YYYY-MM-DD format\n\u2022 check_out_date: Check-out date in YYYY-MM-DD format  \n\u2022 adults: Number of adult guests (minimum 1)\n\nOPTIONAL FILTERS:\n\u2022 children: Array of children ages (e.g., [8, 12] for two children)\n\u2022 infants: Number of infants under 2 years\n\u2022 facility_ids: Filter by amenities (pool, gym, WiFi, parking - use get-filtering-metadata for IDs)\n\u2022 hotel_type_ids: Filter by property type (hotel, resort, apartment - use get-filtering-metadata for IDs)\n\u2022 min_star_rating: Minimum star rating 1-5\n\u2022 min_rating: Minimum guest rating 0-10\n\u2022 max_price: Maximum price per night in specified currency\n\u2022 board_type: Meal plan (RO=Room Only, BB=Breakfast, HB=Half Board, FB=Full Board, AI=All Inclusive)\n\u2022 refundable_only: Set true to show only refundable rates\n\u2022 currency: Price currency (default: USD)\n\u2022 language: Result language (default: en_US)\n\u2022 market: Regional pricing preference\n\nOUTPUT:\nReturns structured hotel data including name, location, pricing, ratings, images, and key amenities. Results are displayed in an interactive table widget with sorting and filtering. Includes session_id for pagination (load-more-hotels) and detail viewing (get-hotel-details).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "Location for hotel search (city, region, or specific area)"
+          },
+          "check_in_date": {
+            "type": "string",
+            "description": "Check-in date (YYYY-MM-DD)"
+          },
+          "check_out_date": {
+            "type": "string",
+            "description": "Check-out date (YYYY-MM-DD)"
+          },
+          "adults": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Number of adult guests"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Array of children ages (empty array if no children)"
+          },
+          "infants": {
+            "type": "number",
+            "description": "Number of infant guests (typically under 2 years)"
+          },
+          "facility_ids": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Array of facility/amenity IDs to filter by"
+          },
+          "hotel_type_ids": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Array of hotel type IDs (resort, business, etc.)"
+          },
+          "min_star_rating": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Minimum star rating (1-5 stars)"
+          },
+          "min_rating": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Minimum user rating (0-10 scale)"
+          },
+          "max_price": {
+            "type": "number",
+            "description": "Maximum price per night"
+          },
+          "board_type": {
+            "type": "string",
+            "description": "Meal plan preference (RO=Room Only, BB=Bed & Breakfast, HB=Half Board)"
+          },
+          "refundable_only": {
+            "type": "boolean",
+            "description": "Only show refundable rates if true"
+          },
+          "currency": {
+            "type": "string",
+            "default": "USD",
+            "description": "Currency code (e.g., 'USD')"
+          },
+          "price_currency": {
+            "type": "string",
+            "description": "Price display currency"
+          },
+          "language": {
+            "type": "string",
+            "default": "en_US",
+            "description": "Language code (e.g., 'en_US')"
+          },
+          "market": {
+            "type": "string",
+            "description": "Market/region code for pricing and availability"
+          },
+          "offset": {
+            "type": "number",
+            "description": "Pagination offset for retrieving additional results"
+          }
+        },
+        "required": [
+          "location",
+          "check_in_date",
+          "check_out_date",
+          "adults"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/hotel/search-results-v1.0.7.html",
+        "openai/toolInvocation/invoking": "Searching for hotels...",
+        "openai/toolInvocation/invoked": "Found hotels",
+        "openai/widgetAccessible": true
+      }
+    },
+    {
+      "name": "load-more-hotels",
+      "description": "Load additional hotel results from a previous search. Returns the next page of hotels using the same search criteria and filters.\n\nWHEN TO USE:\nUse this tool when:\n\u2022 Previous search results indicated more hotels are available (has_more: true)\n\u2022 User wants to see additional options beyond initial results\n\u2022 Browsing through paginated search results\n\u2022 Expanding search results without changing filters\n\nREQUIRED PARAMETER:\n\u2022 session_id: Session ID from a previous search-hotels or semantic-search-hotels response\n\nHOW IT WORKS:\nThis tool continues pagination from where the previous search left off, automatically maintaining:\n\u2022 Original search parameters (location, dates, guest counts)\n\u2022 All applied filters (facilities, price, ratings, hotel types)\n\u2022 Semantic query context (for AI-powered searches)\n\u2022 Current pagination state and offset\n\nNO NEED TO REPEAT:\nYou do NOT need to re-specify the original search filters, location, dates, or any other parameters. The session maintains all search context.\n\nRESPONSE FORMAT:\nReturns the same structured format as the original search tool:\n\u2022 List of hotels with names, prices, ratings, images, and amenities\n\u2022 Interactive widget showing results in a table format\n\u2022 Pagination indicator (has_more) showing if additional results exist\n\u2022 Same session_id for subsequent pagination or detail requests\n\nIMPORTANT:\n\u2022 Session_id must be from a recent, active search operation\n\u2022 Sessions may expire after extended periods of inactivity\n\u2022 Works seamlessly with both search-hotels and semantic-search-hotels sessions\n\u2022 Check has_more field in response to determine if further pagination is possible\n\nTYPICAL USAGE FLOW:\n1. User performs search (search-hotels or semantic-search-hotels)\n2. Results show has_more: true\n3. User requests more options\n4. Call load-more-hotels with the session_id\n5. Repeat as needed while has_more remains true\n\nOUTPUT:\nReturns structured hotel data in interactive widget format, identical to the original search results. Includes updated pagination state and session_id for continued browsing.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Session ID from a previous search-hotels or semantic-search-hotels response"
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/hotel/load-more-v1.0.7.html",
+        "openai/toolInvocation/invoking": "Loading more hotels",
+        "openai/toolInvocation/invoked": "Loaded additional hotel results",
+        "openai/widgetAccessible": true
+      }
+    },
+    {
+      "name": "get-filtering-metadata",
+      "description": "Retrieve reference data for hotel search filter options. Returns structured metadata for facilities, hotel types, and meal plans with IDs and descriptions.\n\nWHEN TO USE:\nCall this tool when you need to:\n\u2022 Understand available filtering options before performing a search\n\u2022 Get facility/amenity IDs to use in search-hotels or semantic-search-hotels\n\u2022 Look up hotel type IDs for property type filtering\n\u2022 Reference meal plan codes and descriptions\n\u2022 Provide users with available filter categories\n\nNO PARAMETERS REQUIRED:\nThis tool requires no input parameters. It returns a comprehensive reference dataset.\n\nRETURNED METADATA:\n\n1. FACILITIES (Amenities):\n   Complete list of hotel facilities with unique IDs for filtering:\n   \u2022 WiFi (ID: 47, 107) - Internet connectivity\n   \u2022 Swimming Pool (ID: 433) - Pool access\n   \u2022 Fitness Center/Gym (ID: 457, 493) - Exercise facilities\n   \u2022 Parking (ID: 19, 20, 21) - Various parking options\n   \u2022 Restaurant (ID: 89) - On-site dining\n   \u2022 Spa (ID: 325) - Wellness facilities\n   \u2022 Pet-Friendly (ID: 456) - Allows pets\n   ...and many more amenities\n\n2. HOTEL TYPES:\n   Property classification IDs for type filtering:\n   \u2022 Hotels (ID: 204) - Standard hotel properties\n   \u2022 Resorts (ID: 206) - Resort properties\n   \u2022 Apartments (ID: 201) - Apartment-style accommodations\n   \u2022 Villas (ID: 213) - Villa properties\n   \u2022 Hostels (ID: 203) - Budget hostels\n   \u2022 Bed & Breakfasts (ID: 208) - B&B properties\n   ...and other property types\n\n3. BOARD TYPES (Meal Plans):\n   Meal plan codes and descriptions:\n   \u2022 RO - Room Only (no meals included)\n   \u2022 BB - Bed & Breakfast (breakfast included)\n   \u2022 HB - Half Board (breakfast + dinner)\n   \u2022 FB - Full Board (all meals)\n   \u2022 AI - All Inclusive (meals + drinks)\n\nUSAGE EXAMPLE:\nAfter calling this tool, use the returned facility_ids and hotel_type_ids arrays in your search-hotels calls:\n{\n  \"location\": \"Paris\",\n  \"facility_ids\": [47, 433, 457],  // WiFi, Pool, Gym\n  \"hotel_type_ids\": [204],          // Hotels only\n  \"board_type\": \"BB\"                // Breakfast included\n}\n\nOUTPUT:\nReturns structured JSON with three main sections: facilities array, hotelTypes array, and boardTypes array. Each entry includes ID, name, description, and additional metadata for proper usage.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "get-hotel-details",
+      "description": "Retrieve comprehensive details for a specific hotel from search results. Returns complete property information including rooms, rates, policies, and amenities.\n\nWHEN TO USE:\nUse this tool when a user wants to:\n\u2022 View detailed information about a specific hotel from search results\n\u2022 Compare room types and rates within a single property\n\u2022 Review cancellation policies and booking terms\n\u2022 Check complete amenity list and property facilities\n\u2022 Get detailed descriptions before booking\n\nREQUIRED PARAMETERS:\n\u2022 session_id: Session ID from a recent search-hotels or semantic-search-hotels call\n\u2022 hotel_id: Unique hotel identifier from the search results\n\nIMPORTANT:\nBoth parameters must be from recent, active searches. Sessions expire after periods of inactivity. Always use fresh search results to ensure valid session and hotel IDs.\n\nDETAILED INFORMATION RETURNED:\n\nProperty Overview:\n\u2022 Full hotel name, description, and category\n\u2022 Star rating and guest review scores\n\u2022 Complete address and location details\n\u2022 Contact information\n\u2022 Check-in/check-out times and policies\n\nFacilities & Amenities:\n\u2022 Complete list of hotel facilities (WiFi, pool, gym, spa, parking, etc.)\n\u2022 Room-specific amenities by room type\n\u2022 Accessibility features\n\u2022 On-site services and activities\n\nRoom Types & Configurations:\n\u2022 All available room categories\n\u2022 Room size and layout details\n\u2022 Bed configurations (king, queen, twin, etc.)\n\u2022 Maximum occupancy per room\n\u2022 Room-specific facilities\n\nRate Information:\n\u2022 Multiple rate options per room type\n\u2022 Detailed pricing breakdown\n\u2022 Meal plan inclusions (Room Only, Breakfast, Half Board, etc.)\n\u2022 Rate comparison across booking conditions\n\u2022 Special offers and packages\n\u2022 Taxes and fees breakdown\n\nBooking Policies:\n\u2022 Cancellation policies and deadlines\n\u2022 Refundability conditions and penalties\n\u2022 Payment terms and requirements\n\u2022 Hotel-specific booking rules\n\u2022 Age restrictions and requirements\n\u2022 Pet policies\n\nLocation Details:\n\u2022 Nearby attractions and landmarks\n\u2022 Distance to airport/transit\n\u2022 Neighborhood description\n\nOUTPUT:\nReturns structured JSON with comprehensive hotel data organized by sections. Use this information to help users make informed booking decisions. The hotel_id and session_id are required for the book-hotel tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Session ID from a previous search-hotels or semantic-search-hotels response"
+          },
+          "hotel_id": {
+            "type": "string",
+            "description": "Unique identifier for the hotel from search results"
+          }
+        },
+        "required": [
+          "session_id",
+          "hotel_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "book-hotel",
+      "description": "Initiate hotel reservation and generate secure payment link. Creates a booking quote and provides a payment URL for the user to complete their reservation.\n\nWHEN TO USE:\nUse this tool when:\n\u2022 User has selected a specific hotel and rate to book\n\u2022 User is ready to proceed with reservation\n\u2022 You have valid session_id, hotel_id, and rate_id from search/detail results\n\nIMPORTANT: This tool creates a booking quote but does NOT process payment directly. Users must complete payment through the provided link to confirm their reservation.\n\nREQUIRED PARAMETERS:\n\u2022 session_id: Session ID from a recent search-hotels or semantic-search-hotels call\n\u2022 hotel_id: Unique identifier of the hotel to book (from search results)\n\u2022 room_id: Specific room ID to reserve (from search or detail results)\n\u2022 rate_id: Specific rate/room offer ID to reserve (from search or detail results)\n\nOPTIONAL PARAMETER:\n\u2022 guest_info: Guest information and preferences (name, contact, special requests)\n\nBOOKING PROCESS:\n\nStep 1 - Quote Creation:\nThis tool sends a booking request to the hotel provider and creates a reservation quote with:\n\u2022 Selected hotel and room details\n\u2022 Final pricing including all taxes and fees\n\u2022 Booking terms and conditions\n\u2022 Cancellation policy specific to this rate\n\nStep 2 - Payment Link Generation:\nReturns a secure, time-limited payment URL where the user can:\n\u2022 Review final booking details\n\u2022 Enter payment information securely\n\u2022 Complete the reservation\n\u2022 Receive booking confirmation\n\nStep 3 - User Action Required:\n\u2022 Present the payment link prominently to the user\n\u2022 Inform user that reservation is NOT confirmed until payment is processed\n\u2022 Note that payment links typically expire within 24-48 hours\n\u2022 Advise checking email for confirmation after payment\n\nWHAT YOU GET BACK:\n\u2022 Booking reference/quote ID\n\u2022 Payment link URL (secure HTTPS)\n\u2022 Quote expiration time\n\u2022 Final price breakdown\n\u2022 Booking terms summary\n\u2022 Hotel and room details confirmation\n\nUSAGE GUIDELINES:\n\u2713 Always verify hotel_id and rate_id match the user's selection\n\u2713 Use fresh search results (recent session_id) for accurate availability and pricing\n\u2713 Clearly explain to users that they must complete payment to confirm booking\n\u2713 Remind users to check their email for booking confirmation after payment\n\u2713 Note any time sensitivity (quote expiration, limited availability)\n\nIMPORTANT REMINDERS:\n\u2022 Payment is NOT processed by this tool - it only generates the payment link\n\u2022 Booking is NOT confirmed until user completes payment through the link\n\u2022 Session_id, hotel_id, and rate_id must all be from recent, active searches\n\u2022 Payment links expire - users should complete payment promptly\n\u2022 Booking availability and pricing may change if session expires\n\nOUTPUT:\nReturns structured booking quote data including payment URL, booking reference, pricing details, and instructions for completing the reservation. The payment link is the critical output that must be provided to the user.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Search session ID from a previous hotel search"
+          },
+          "hotel_id": {
+            "type": "string",
+            "description": "Unique identifier of the hotel to book"
+          },
+          "room_id": {
+            "type": "string",
+            "description": "Specific room ID to book"
+          },
+          "rate_id": {
+            "type": "string",
+            "description": "Specific rate/room offer ID to book"
+          },
+          "guest_info": {
+            "description": "Guest information and preferences (optional)"
+          }
+        },
+        "required": [
+          "session_id",
+          "hotel_id",
+          "room_id",
+          "rate_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    }
+  ],
+  "prompts": [],
+  "resources": [
+    {
+      "uri": "ui://widget/hotel/search-results-v1.0.7.html",
+      "name": "Hotel Search Results",
+      "description": "Hotel Search Results widget template",
+      "mimeType": "text/html+skybridge",
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/hotel/search-results-v1.0.7.html",
+        "openai/toolInvocation/invoking": "Searching for hotels...",
+        "openai/toolInvocation/invoked": "Found hotels",
+        "openai/widgetAccessible": true,
+        "openai/resultCanProduceWidget": true,
+        "openai/widgetDescription": "Interactive UI widget for hotel search results. Renders structured hotel data in an interactive table format with filtering and sorting capabilities."
+      }
+    },
+    {
+      "uri": "ui://widget/hotel/load-more-v1.0.7.html",
+      "name": "More Hotel Results",
+      "description": "More Hotel Results widget template",
+      "mimeType": "text/html+skybridge",
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/hotel/load-more-v1.0.7.html",
+        "openai/toolInvocation/invoking": "Loading more hotels",
+        "openai/toolInvocation/invoked": "Loaded additional hotel results",
+        "openai/widgetAccessible": true,
+        "openai/resultCanProduceWidget": true,
+        "openai/widgetDescription": "Interactive UI widget for more hotel results. Renders structured hotel data in an interactive table format with filtering and sorting capabilities."
+      }
+    }
+  ],
+  "transport_used": "streamable-http",
+  "error": null,
+  "endpoint_url": "https://mcp-remote.jinko.so/mcp"
+}

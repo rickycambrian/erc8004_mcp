@@ -182,7 +182,8 @@ class MCPIntrospector:
             "tools": [],
             "prompts": [],
             "resources": [],
-            "transport": "streamable-http"
+            "transport": "streamable-http",
+            "errors": []
         }
 
         # Try to get tools
@@ -190,21 +191,27 @@ class MCPIntrospector:
             tools_result = await self._make_jsonrpc_request(url, "tools/list", headers=headers)
             result["tools"] = tools_result.get("tools", [])
         except Exception as e:
-            logger.debug(f"tools/list failed: {e}")
+            error_str = str(e)[:200]
+            logger.debug(f"tools/list failed: {error_str}")
+            result["errors"].append(f"tools/list: {error_str}")
 
         # Try to get prompts
         try:
             prompts_result = await self._make_jsonrpc_request(url, "prompts/list", headers=headers)
             result["prompts"] = prompts_result.get("prompts", [])
         except Exception as e:
-            logger.debug(f"prompts/list failed: {e}")
+            error_str = str(e)[:200]
+            logger.debug(f"prompts/list failed: {error_str}")
+            result["errors"].append(f"prompts/list: {error_str}")
 
         # Try to get resources
         try:
             resources_result = await self._make_jsonrpc_request(url, "resources/list", headers=headers)
             result["resources"] = resources_result.get("resources", [])
         except Exception as e:
-            logger.debug(f"resources/list failed: {e}")
+            error_str = str(e)[:200]
+            logger.debug(f"resources/list failed: {error_str}")
+            result["errors"].append(f"resources/list: {error_str}")
 
         return result
 
@@ -274,6 +281,12 @@ class MCPIntrospector:
                     result["endpoint_url"] = url
                     result["success"] = True
                     return result
+                else:
+                    # All requests failed - capture the errors
+                    errors = caps.get("errors", [])
+                    if errors:
+                        result["error"] = errors[0] if len(errors) == 1 else "; ".join(errors[:2])
+                    result["endpoint_url"] = url
 
             except asyncio.TimeoutError:
                 logger.debug(f"Timeout connecting to {url}")

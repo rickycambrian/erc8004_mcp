@@ -1,0 +1,796 @@
+{
+  "server_name": "biz.icecat/mcp",
+  "server_version": "1.0.3",
+  "introspected_at": "2026-01-04T12:16:41.373835+00:00",
+  "success": true,
+  "tools": [
+    {
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "description": "Retrieves gallery-related information about a product, including product, lifestyle, annotated and other images with different resolutions and indication of the main image. Use this tool when the user asks about product images, gallery, visuals, or photos related to a product.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "BrandName": {
+            "description": "Brand name of the product (e.g., 'HP', 'Dell', 'Apple'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GTIN": {
+            "description": "Global Trade Item Number (GTIN/EAN/UPC) for direct product lookup (e.g., '0195949038747'). When provided and valid, takes priority over Brand+ProductCode. Supported formats: EAN-13, UPC-12, GTIN-14.",
+            "maxLength": 14,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ProductCode": {
+            "description": "Product code/part number/MPN (e.g., 'ABC123', 'XYZ-456'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "name": "product_gallery",
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "images": {
+            "description": "List of product images from the gallery sorted by order. Each image contains order, type, main indicator, and URLs for different resolutions. If empty, gallery information is not available for this product.",
+            "items": {
+              "properties": {
+                "images": {
+                  "description": "Object that groups the URLs of the same image in different resolutions. Example: { \"high\": \"url\", \"medium\": \"url\", \"low\": \"url\", \"thumb\": \"url\" }.",
+                  "properties": {
+                    "high": {
+                      "description": "High resolution image URL",
+                      "type": "string"
+                    },
+                    "low": {
+                      "description": "Low resolution image URL",
+                      "type": "string"
+                    },
+                    "medium": {
+                      "description": "Medium resolution image URL (500x500)",
+                      "type": "string"
+                    },
+                    "thumb": {
+                      "description": "Thumbnail image URL",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "high",
+                    "medium",
+                    "low",
+                    "thumb"
+                  ],
+                  "type": "object"
+                },
+                "is_main": {
+                  "description": "Indicates whether this is the main (default) image for the product. Example: true.",
+                  "type": "boolean"
+                },
+                "order": {
+                  "description": "The display sequence number of the image within the product gallery. Example: 1 (the first image to display).",
+                  "type": "integer"
+                },
+                "type": {
+                  "description": "The category of the image, indicating its purpose (e.g., Product Image, Lifestyle Image, Product Image Annotated).",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "order",
+                "is_main",
+                "type",
+                "images"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "images"
+        ]
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "description": "Retrieves fundamental information about a product, including its brand, name, product code, GTINs, and category. Use this tool when the user asks for basic product identifiers.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "BrandName": {
+            "description": "Brand name of the product (e.g., 'HP', 'Dell', 'Apple'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GTIN": {
+            "description": "Global Trade Item Number (GTIN/EAN/UPC) for direct product lookup (e.g., '0195949038747'). When provided and valid, takes priority over Brand+ProductCode. Supported formats: EAN-13, UPC-12, GTIN-14.",
+            "maxLength": 14,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ProductCode": {
+            "description": "Product code/part number/MPN (e.g., 'ABC123', 'XYZ-456'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "name": "product_identifiers",
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "brand": {
+            "description": "The official brand name of the product. Example: HP, Samsung, Disney",
+            "type": "string"
+          },
+          "category": {
+            "description": "The final product category in the Icecat category hierarchy. Always represents the most specific category level. Example: Laptops, Smartphones",
+            "type": "string"
+          },
+          "family": {
+            "description": "The official product family that groups related products under the same brand. Indicates that similar products exist in this line. Example: Frozen (Disney), Batman (LEGO), EliteBook (HP)",
+            "type": "string"
+          },
+          "gtins": {
+            "description": "Global Trade Item Numbers (GTINs), which are internationally recognized product identifiers. Supported lengths are 12, 13, or 14 digits. Example: 0885909950805",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "product_code": {
+            "description": "The official product identifier assigned by the manufacturer. This may be referred to as MPN (Manufacturer Part Number), SKU, or Part Number. Example: 20YHCTO1WW",
+            "type": "string"
+          },
+          "product_name": {
+            "description": "The official full product name as provided by the brand. Typically descriptive and user-facing. Example: ThinkPad E14 Gen 7 (AMD)",
+            "type": "string"
+          },
+          "series": {
+            "description": "The official product series, representing a subgroup within a family. A series is defined only when a family is present. Example: 1000 Series (HP EliteBook Family)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "brand",
+          "product_name",
+          "product_code",
+          "category"
+        ]
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "description": "Retrieves product manual information, including links to PDF documents and their related locales. Use this tool when the user asks about product manuals, instruction guides, or usage instructions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "BrandName": {
+            "description": "Brand name of the product (e.g., 'HP', 'Dell', 'Apple'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GTIN": {
+            "description": "Global Trade Item Number (GTIN/EAN/UPC) for direct product lookup (e.g., '0195949038747'). When provided and valid, takes priority over Brand+ProductCode. Supported formats: EAN-13, UPC-12, GTIN-14.",
+            "maxLength": 14,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ProductCode": {
+            "description": "Product code/part number/MPN (e.g., 'ABC123', 'XYZ-456'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "name": "product_manual",
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "manuals": {
+            "description": "List of available product manuals. Each manual includes a direct URL and optional locale information. If no manuals are available, this will be an empty array.",
+            "items": {
+              "properties": {
+                "locale": {
+                  "description": "The language/locale code of the manual (e.g., 'EN', 'DE', 'FR'). Indicates which language the manual is written in.",
+                  "type": "string"
+                },
+                "manual_url": {
+                  "description": "The direct URL link to the product manual file (PDF or equivalent). Example: https://objects.icecat.biz/objects/mmo_12345678.pdf",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "manual_url"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "manuals"
+        ]
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "description": "Retrieves comprehensive information about a product, combining fundamental identifiers, descriptive texts, technical specifications/features, warranty details, and product gallery visuals. Use this tool when the user asks for all available product information in one response.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "BrandName": {
+            "description": "Brand name of the product (e.g., 'HP', 'Dell', 'Apple'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GTIN": {
+            "description": "Global Trade Item Number (GTIN/EAN/UPC) for direct product lookup (e.g., '0195949038747'). When provided and valid, takes priority over Brand+ProductCode. Supported formats: EAN-13, UPC-12, GTIN-14.",
+            "maxLength": 14,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ProductCode": {
+            "description": "Product code/part number/MPN (e.g., 'ABC123', 'XYZ-456'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "name": "product_overview",
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "gallery": {
+            "description": "Product gallery images sorted by order. Each image contains order, type, main indicator, and URLs for different resolutions. If empty, gallery information is not available for this product.",
+            "items": {
+              "properties": {
+                "images": {
+                  "description": "Object that groups the URLs of the same image in different resolutions. Example: { \"high\": \"url\", \"medium\": \"url\", \"low\": \"url\", \"thumb\": \"url\" }.",
+                  "properties": {
+                    "high": {
+                      "description": "High resolution image URL",
+                      "type": "string"
+                    },
+                    "low": {
+                      "description": "Low resolution image URL",
+                      "type": "string"
+                    },
+                    "medium": {
+                      "description": "Medium resolution image URL (500x500)",
+                      "type": "string"
+                    },
+                    "thumb": {
+                      "description": "Thumbnail image URL",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "high",
+                    "medium",
+                    "low",
+                    "thumb"
+                  ],
+                  "type": "object"
+                },
+                "is_main": {
+                  "description": "Indicates whether this is the main (default) image for the product. Example: true.",
+                  "type": "boolean"
+                },
+                "order": {
+                  "description": "The display sequence number of the image within the product gallery. Example: 1 (the first image to display).",
+                  "type": "integer"
+                },
+                "type": {
+                  "description": "The category of the image, indicating its purpose (e.g., Product Image, Lifestyle Image, Product Image Annotated).",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "order",
+                "is_main",
+                "type",
+                "images"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "identifiers": {
+            "description": "Retrieves fundamental information about a product, including its brand, name, product code, GTINs, and category.",
+            "properties": {
+              "brand": {
+                "description": "The official brand name of the product. Example: HP, Samsung, Disney",
+                "type": "string"
+              },
+              "category": {
+                "description": "The final product category in the Icecat category hierarchy. Always represents the most specific category level. Example: Laptops, Smartphones",
+                "type": "string"
+              },
+              "family": {
+                "description": "The official product family that groups related products under the same brand. Indicates that similar products exist in this line. Example: Frozen (Disney), Batman (LEGO), EliteBook (HP)",
+                "type": "string"
+              },
+              "gtins": {
+                "description": "Global Trade Item Numbers (GTINs), which are internationally recognized product identifiers. Supported lengths are 12, 13, or 14 digits. Example: 0885909950805",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "product_code": {
+                "description": "The official product identifier assigned by the manufacturer. This may be referred to as MPN (Manufacturer Part Number), SKU, or Part Number. Example: 20YHCTO1WW",
+                "type": "string"
+              },
+              "product_name": {
+                "description": "The official full product name as provided by the brand. Typically descriptive and user-facing. Example: ThinkPad E14 Gen 7 (AMD)",
+                "type": "string"
+              },
+              "series": {
+                "description": "The official product series, representing a subgroup within a family. A series is defined only when a family is present. Example: 1000 Series (HP EliteBook Family)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "brand",
+              "product_name",
+              "product_code",
+              "category"
+            ],
+            "type": "object"
+          },
+          "manuals": {
+            "description": "List of available product manuals with direct URLs and locale information. If no manuals are available, this will be an empty array.",
+            "items": {
+              "properties": {
+                "locale": {
+                  "description": "The language/locale code of the manual (e.g., 'EN', 'DE', 'FR'). Indicates which language the manual is written in.",
+                  "type": "string"
+                },
+                "manual_url": {
+                  "description": "The direct URL link to the product manual file (PDF or equivalent). Example: https://objects.icecat.biz/objects/mmo_12345678.pdf",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "manual_url"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "safety_docs": {
+            "description": "List of safety and regulatory compliance documents (carbon footprint, energy labels, CE markings, declarations of conformity, etc.). If empty, safety documentation is not available for this product.",
+            "items": {
+              "properties": {
+                "document_type": {
+                  "description": "The type of the document (e.g., 'Carbon Footprint', 'Repairability Index', 'Durability Index', 'EU Energy Label', 'UK Energy Label', 'EU Product Fiche', 'EU Declaration of Conformity', 'UK Declaration of Conformity', 'CE Marking', 'Safety Data Sheet').",
+                  "type": "string"
+                },
+                "document_url": {
+                  "description": "The direct URL link to the document (PDF or equivalent). Example: https://objects.icecat.biz/objects/mmo_98765432.pdf",
+                  "type": "string"
+                },
+                "source_locale": {
+                  "description": "The locale of the document actually provided by the MCP. Example: FR (French - France). Different documents may have different locales.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "document_type",
+                "document_url",
+                "source_locale"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "specs": {
+            "description": "Structured product specifications and features organized into groups. Each group contains a list of specifications with names, values, and optional descriptions",
+            "items": {
+              "properties": {
+                "group": {
+                  "description": "A logical grouping of related product specifications and features. Used to organize individual specifications and features into structured sections. Example: Display, Processor, Memory, Connectivity.",
+                  "type": "string"
+                },
+                "specifications": {
+                  "description": "A list of product specifications",
+                  "items": {
+                    "properties": {
+                      "feature_description": {
+                        "description": "The definition or explanation of the feature or specification itself, independent of any product-specific value. Clarifies the meaning and scope of the aspect. Example: Processor Speed \u2014 the maximum clock frequency at which the processor operates.",
+                        "type": "string"
+                      },
+                      "name": {
+                        "description": "The name of a specific product specification or feature within a group. Defines what aspect of the product is described. Example: Processor Speed, Screen Size, Battery Capacity.",
+                        "type": "string"
+                      },
+                      "value": {
+                        "description": "The value that corresponds to the specification or feature for the product. Provides the actual detail for that aspect. Example: 2.3 GHz, 14\", 56 Wh (for Battery Capacity).",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "value"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "group",
+                "specifications"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "texts": {
+            "description": "Retrieves brand-supplied product texts, including marketing text, official product naming, summaries, disclaimers, and bullet point highlights.",
+            "properties": {
+              "brief_description": {
+                "description": "A short descriptive text of the product, typically one or two sentences, summarizing its main characteristics",
+                "type": "string"
+              },
+              "bullet_points": {
+                "description": "A list of product highlights or key features in bullet point format. Each bullet describes a single feature or benefit",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "disclaimer": {
+                "description": "Legal or informational disclaimer text provided by the brand. Usually clarifies limitations, responsibilities, or usage conditions",
+                "type": "string"
+              },
+              "full_product_name": {
+                "description": "The complete official product naming string provided by the brand. It includes detailed specifications and other key attributes. Example: 6th gen Intel\u00ae Core\u2122 i5-6200U (3M Cache, 2.3 GHz), 8GB DDR4-SDRAM, 256GB SSD, 35.6 cm (14\") Full HD 1920 x 1080 Touch, Intel\u00ae HD Graphics 520, WLAN, WebCam, Windows 10 Pro 64-bit",
+                "type": "string"
+              },
+              "long_summary": {
+                "description": "A detailed product summary with extended descriptions of features or specifications",
+                "type": "string"
+              },
+              "marketing_text": {
+                "description": "Promotional or commercial text provided by the brand. Focused on highlighting product features, benefits, or selling points",
+                "type": "string"
+              },
+              "short_summary": {
+                "description": "A concise product summary highlighting the most important features. Optimized for quick understanding",
+                "type": "string"
+              }
+            },
+            "required": [
+              "full_product_name",
+              "short_summary"
+            ],
+            "type": "object"
+          },
+          "warranty": {
+            "description": "The warranty period or terms provided for the product. If warranty information is not available, this field will contain: 'Warranty information is not available.'",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifiers",
+          "texts",
+          "specs",
+          "warranty",
+          "manuals",
+          "gallery",
+          "safety_docs"
+        ]
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "description": "Retrieves links to official product safety and compliance documents, such as carbon footprint reports, repairability indexes, CE markings, energy labels, and declarations of conformity. Use this tool when the user asks about sustainability data, regulatory compliance, or safety documentation for a product.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "BrandName": {
+            "description": "Brand name of the product (e.g., 'HP', 'Dell', 'Apple'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GTIN": {
+            "description": "Global Trade Item Number (GTIN/EAN/UPC) for direct product lookup (e.g., '0195949038747'). When provided and valid, takes priority over Brand+ProductCode. Supported formats: EAN-13, UPC-12, GTIN-14.",
+            "maxLength": 14,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ProductCode": {
+            "description": "Product code/part number/MPN (e.g., 'ABC123', 'XYZ-456'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "name": "product_safety_docs",
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "documents": {
+            "description": "A list of safety documentation entries available for the product. Each document object includes its type, URL, and source locale. If no documents are available, this will be an empty array.",
+            "items": {
+              "properties": {
+                "document_type": {
+                  "description": "The type of the document (e.g., 'Carbon Footprint', 'Repairability Index', 'Durability Index', 'EU Energy Label', 'UK Energy Label', 'EU Product Fiche', 'EU Declaration of Conformity', 'UK Declaration of Conformity', 'CE Marking', 'Safety Data Sheet').",
+                  "type": "string"
+                },
+                "document_url": {
+                  "description": "The direct URL link to the document (PDF or equivalent). Example: https://objects.icecat.biz/objects/mmo_98765432.pdf",
+                  "type": "string"
+                },
+                "source_locale": {
+                  "description": "The locale of the document actually provided by the MCP. Example: FR (French - France). Different documents may have different locales.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "document_type",
+                "document_url",
+                "source_locale"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "requested_locale": {
+            "description": "The locale originally requested by the user or AI when asking for safety documentation. Example: EN (English - United Kingdom).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "requested_locale",
+          "documents"
+        ]
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "description": "Retrieves the full list of technical features and specifications for a product. Use this tool when the user asks for detailed product specs, feature groups, or specific attributes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "BrandName": {
+            "description": "Brand name of the product (e.g., 'HP', 'Dell', 'Apple'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GTIN": {
+            "description": "Global Trade Item Number (GTIN/EAN/UPC) for direct product lookup (e.g., '0195949038747'). When provided and valid, takes priority over Brand+ProductCode. Supported formats: EAN-13, UPC-12, GTIN-14.",
+            "maxLength": 14,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ProductCode": {
+            "description": "Product code/part number/MPN (e.g., 'ABC123', 'XYZ-456'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "name": "product_specs",
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "description": "List of specification groups, each containing related product specifications",
+            "items": {
+              "properties": {
+                "group": {
+                  "description": "A logical grouping of related product specifications and features. Used to organize individual specifications and features into structured sections. Example: Display, Processor, Memory, Connectivity.",
+                  "type": "string"
+                },
+                "specifications": {
+                  "description": "A list of product specifications",
+                  "items": {
+                    "properties": {
+                      "feature_description": {
+                        "description": "The definition or explanation of the feature or specification itself, independent of any product-specific value. Clarifies the meaning and scope of the aspect. Example: Processor Speed \u2014 the maximum clock frequency at which the processor operates.",
+                        "type": "string"
+                      },
+                      "name": {
+                        "description": "The name of a specific product specification or feature within a group. Defines what aspect of the product is described. Example: Processor Speed, Screen Size, Battery Capacity.",
+                        "type": "string"
+                      },
+                      "value": {
+                        "description": "The value that corresponds to the specification or feature for the product. Provides the actual detail for that aspect. Example: 2.3 GHz, 14\", 56 Wh (for Battery Capacity).",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "value"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "group",
+                "specifications"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "groups"
+        ]
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "description": "Retrieves brand-supplied product texts, including marketing text, official product naming, summaries, disclaimers, and bullet point highlights. Use this tool when the user asks for descriptive or promotional product information.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "BrandName": {
+            "description": "Brand name of the product (e.g., 'HP', 'Dell', 'Apple'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GTIN": {
+            "description": "Global Trade Item Number (GTIN/EAN/UPC) for direct product lookup (e.g., '0195949038747'). When provided and valid, takes priority over Brand+ProductCode. Supported formats: EAN-13, UPC-12, GTIN-14.",
+            "maxLength": 14,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ProductCode": {
+            "description": "Product code/part number/MPN (e.g., 'ABC123', 'XYZ-456'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "name": "product_texts",
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "brief_description": {
+            "description": "A short descriptive text of the product, typically one or two sentences, summarizing its main characteristics",
+            "type": "string"
+          },
+          "bullet_points": {
+            "description": "A list of product highlights or key features in bullet point format. Each bullet describes a single feature or benefit",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "disclaimer": {
+            "description": "Legal or informational disclaimer text provided by the brand. Usually clarifies limitations, responsibilities, or usage conditions",
+            "type": "string"
+          },
+          "full_product_name": {
+            "description": "The complete official product naming string provided by the brand. It includes detailed specifications and other key attributes. Example: 6th gen Intel\u00ae Core\u2122 i5-6200U (3M Cache, 2.3 GHz), 8GB DDR4-SDRAM, 256GB SSD, 35.6 cm (14\") Full HD 1920 x 1080 Touch, Intel\u00ae HD Graphics 520, WLAN, WebCam, Windows 10 Pro 64-bit",
+            "type": "string"
+          },
+          "long_summary": {
+            "description": "A detailed product summary with extended descriptions of features or specifications",
+            "type": "string"
+          },
+          "marketing_text": {
+            "description": "Promotional or commercial text provided by the brand. Focused on highlighting product features, benefits, or selling points",
+            "type": "string"
+          },
+          "short_summary": {
+            "description": "A concise product summary highlighting the most important features. Optimized for quick understanding",
+            "type": "string"
+          }
+        },
+        "required": [
+          "full_product_name",
+          "short_summary"
+        ]
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "description": "Retrieves warranty-related information about a product, including warranty duration, coverage, and conditions. Use this tool when the user asks about product warranty, guarantee, or related terms.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "BrandName": {
+            "description": "Brand name of the product (e.g., 'HP', 'Dell', 'Apple'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GTIN": {
+            "description": "Global Trade Item Number (GTIN/EAN/UPC) for direct product lookup (e.g., '0195949038747'). When provided and valid, takes priority over Brand+ProductCode. Supported formats: EAN-13, UPC-12, GTIN-14.",
+            "maxLength": 14,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ProductCode": {
+            "description": "Product code/part number/MPN (e.g., 'ABC123', 'XYZ-456'). Required when using Brand+ProductCode identification method.",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "name": "product_warranty",
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "warranty": {
+            "description": "The warranty period or terms provided for the product. Example: 2-year manufacturer warranty covering parts and labor. If warranty information is not available, this field will contain: 'Warranty information is not available.'",
+            "type": "string"
+          }
+        },
+        "required": [
+          "warranty"
+        ]
+      }
+    }
+  ],
+  "prompts": [],
+  "resources": [],
+  "transport_used": "sse",
+  "error": null,
+  "endpoint_url": "https://mcp.icecat.biz"
+}

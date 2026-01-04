@@ -1,0 +1,860 @@
+{
+  "server_name": "io.github.isakskogstad/kolada-mcp",
+  "server_version": "2.2.1",
+  "introspected_at": "2026-01-04T12:24:28.909460+00:00",
+  "success": true,
+  "tools": [
+    {
+      "name": "search_kpis",
+      "description": "S\u00f6k efter nyckeltal (KPIs) med fritexts\u00f6kning, publiceringsdatum eller verksamhetsomr\u00e5de. Returnerar en lista med matchande KPIs. Svenska s\u00f6ktermer ger b\u00e4st resultat.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "S\u00f6kterm f\u00f6r att filtrera KPIs efter titel (svenska termer ger b\u00e4st resultat)"
+          },
+          "publication_date": {
+            "type": "string",
+            "description": "Filtrera efter publiceringsdatum (YYYY-MM-DD)"
+          },
+          "operating_area": {
+            "type": "string",
+            "description": "Filtrera efter verksamhetsomr\u00e5de (t.ex. \"Utbildning\", \"H\u00e4lso- och sjukv\u00e5rd\")"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20,
+            "description": "Max antal resultat (standard: 20, max: 100)"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_kpi",
+      "description": "H\u00e4mta detaljerad information om ett specifikt nyckeltal (KPI) via dess ID. Returnerar fullst\u00e4ndig metadata inklusive publiceringsdatum och k\u00f6nsuppdelning.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpi_id": {
+            "type": "string",
+            "description": "KPI-ID (t.ex. \"N15033\")"
+          }
+        },
+        "required": [
+          "kpi_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_kpis",
+      "description": "H\u00e4mta flera nyckeltal (KPIs) via deras ID:n i en enda f\u00f6rfr\u00e5gan. Accepterar upp till 25 KPI-ID:n per anrop.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpi_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 25,
+            "description": "Lista med KPI-ID:n (max 25)"
+          }
+        },
+        "required": [
+          "kpi_ids"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_kpi_groups",
+      "description": "Lista KPI-grupper (tematiska samlingar av nyckeltal) med valfri s\u00f6kning. Grupper hj\u00e4lper till att organisera KPIs efter \u00e4mne.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "S\u00f6kterm f\u00f6r att filtrera grupper efter titel"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_kpi_group",
+      "description": "H\u00e4mta detaljerad information om en specifik KPI-grupp inklusive alla ing\u00e5ende nyckeltal. Anv\u00e4ndbar f\u00f6r att utforska relaterade KPIs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "group_id": {
+            "type": "string",
+            "description": "KPI-grupp ID"
+          }
+        },
+        "required": [
+          "group_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "search_municipalities",
+      "description": "S\u00f6k efter svenska kommuner eller regioner (landsting). Filtrera efter namn eller typ. Det finns 290 kommuner och 21 regioner i Sverige.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "S\u00f6kterm f\u00f6r att filtrera kommuner efter namn"
+          },
+          "municipality_type": {
+            "type": "string",
+            "enum": [
+              "K",
+              "L",
+              "all"
+            ],
+            "default": "all",
+            "description": "Typfilter: K=Kommun, L=Landsting/Region, all=b\u00e5da"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_municipality",
+      "description": "H\u00e4mta detaljerad information om en specifik kommun via dess ID. Kommun-ID \u00e4r 4-siffriga koder (t.ex. \"0180\" f\u00f6r Stockholm, \"1480\" f\u00f6r G\u00f6teborg).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "municipality_id": {
+            "type": "string",
+            "description": "Kommun-ID (4-siffrig kod, t.ex. \"0180\" f\u00f6r Stockholm)"
+          }
+        },
+        "required": [
+          "municipality_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_municipality_groups",
+      "description": "Lista kommungrupper som storstadsregioner, kustkommuner etc. Grupper hj\u00e4lper till att j\u00e4mf\u00f6ra liknande kommuner.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "S\u00f6kterm f\u00f6r att filtrera grupper efter titel"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_municipality_group",
+      "description": "H\u00e4mta detaljerad information om en specifik kommungrupp inklusive alla medlemskommuner. Anv\u00e4ndbar f\u00f6r att analysera grupper av liknande kommuner.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "group_id": {
+            "type": "string",
+            "description": "Kommungrupp-ID"
+          }
+        },
+        "required": [
+          "group_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "search_organizational_units",
+      "description": "S\u00f6k efter organisationsenheter som skolor, f\u00f6rskolor, \u00e4ldreboenden etc. Filtrera efter namn, kommun eller typ. OBS: Resultat trunkeras till limit (max 100). Kontrollera \"truncated\" i svaret f\u00f6r att veta om det finns fler tr\u00e4ffar.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "S\u00f6kterm f\u00f6r att filtrera enheter efter namn"
+          },
+          "municipality": {
+            "type": "string",
+            "description": "Filtrera efter kommun-ID (4-siffrig kod)"
+          },
+          "ou_type": {
+            "type": "string",
+            "description": "Filtrera efter OU-typ (t.ex. \"V11\" f\u00f6r f\u00f6rskola, \"V15\" f\u00f6r grundskola)"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20,
+            "description": "Max antal resultat (standard: 20, max: 100)"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_organizational_unit",
+      "description": "H\u00e4mta detaljerad information om en specifik organisationsenhet via dess ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ou_id": {
+            "type": "string",
+            "description": "Organisationsenhet-ID"
+          }
+        },
+        "required": [
+          "ou_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_ou_types",
+      "description": "H\u00e4mta en lista \u00f6ver vanliga organisationsenhetstyper och deras beskrivningar (t.ex. V11=F\u00f6rskola, V15=Grundskola).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_kpi_data",
+      "description": "H\u00e4mta faktiska KPI-datav\u00e4rden f\u00f6r specifika kommuner eller organisationsenheter. Kan filtrera efter \u00e5r och k\u00f6n (T=Totalt, M=M\u00e4n, K=Kvinnor).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpi_id": {
+            "type": "string",
+            "description": "KPI-ID f\u00f6r att h\u00e4mta data"
+          },
+          "municipality_id": {
+            "type": "string",
+            "description": "Kommun-ID (anv\u00e4nd detta ELLER ou_id, inte b\u00e5da)"
+          },
+          "ou_id": {
+            "type": "string",
+            "description": "Organisationsenhet-ID (anv\u00e4nd detta ELLER municipality_id, inte b\u00e5da)"
+          },
+          "years": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Filtrera efter specifika \u00e5r (t.ex. [2020, 2021, 2022])"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "T",
+              "M",
+              "K",
+              "all"
+            ],
+            "default": "all",
+            "description": "K\u00f6nsfilter: T=Totalt, M=M\u00e4n, K=Kvinnor, all=visa alla"
+          }
+        },
+        "required": [
+          "kpi_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_municipality_kpis",
+      "description": "Visa tillg\u00e4ngliga KPIs f\u00f6r en kommun. Filtrera p\u00e5 verksamhetsomr\u00e5de f\u00f6r att hitta relevanta nyckeltal. Snabb och p\u00e5litlig - anv\u00e4nder cachad KPI-katalog.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "municipality_id": {
+            "type": "string",
+            "description": "Kommun-ID (4-siffrig kod)"
+          },
+          "operating_area": {
+            "type": "string",
+            "description": "Filtrera p\u00e5 verksamhetsomr\u00e5de (t.ex. \"Utbildning\", \"V\u00e5rd\"). Anv\u00e4nd list_operating_areas f\u00f6r att se tillg\u00e4ngliga omr\u00e5den."
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20,
+            "description": "Max antal KPIs att returnera (standard: 20, max: 50)"
+          }
+        },
+        "required": [
+          "municipality_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "compare_municipalities",
+      "description": "J\u00e4mf\u00f6r ett specifikt nyckeltal \u00f6ver flera kommuner f\u00f6r angivna \u00e5r. Utm\u00e4rkt f\u00f6r benchmarking. St\u00f6der k\u00f6nsfiltrering (T/M/K).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpi_id": {
+            "type": "string",
+            "description": "KPI-ID att j\u00e4mf\u00f6ra"
+          },
+          "municipality_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "maxItems": 10,
+            "description": "Lista med kommun-ID:n att j\u00e4mf\u00f6ra (2-10 kommuner)"
+          },
+          "years": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Specifika \u00e5r att inkludera i j\u00e4mf\u00f6relsen"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "T",
+              "M",
+              "K",
+              "all"
+            ],
+            "default": "all",
+            "description": "K\u00f6nsfilter: T=Totalt, M=M\u00e4n, K=Kvinnor, all=visa alla"
+          }
+        },
+        "required": [
+          "kpi_id",
+          "municipality_ids"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_kpi_trend",
+      "description": "H\u00e4mta historisk trenddata f\u00f6r ett nyckeltal som visar f\u00f6r\u00e4ndringar \u00f6ver tid. Anv\u00e4ndbart f\u00f6r att analysera utveckling och identifiera trender. St\u00f6der k\u00f6nsfiltrering (T/M/K).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpi_id": {
+            "type": "string",
+            "description": "KPI-ID att analysera"
+          },
+          "municipality_id": {
+            "type": "string",
+            "description": "Kommun-ID"
+          },
+          "start_year": {
+            "type": "number",
+            "description": "Start\u00e5r f\u00f6r trendanalysen"
+          },
+          "end_year": {
+            "type": "number",
+            "description": "Slut\u00e5r (standard: innevarande \u00e5r)"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "T",
+              "M",
+              "K",
+              "all"
+            ],
+            "default": "all",
+            "description": "K\u00f6nsfilter: T=Totalt, M=M\u00e4n, K=Kvinnor, all=visa alla"
+          }
+        },
+        "required": [
+          "kpi_id",
+          "municipality_id",
+          "start_year"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "analyze_kpi_across_municipalities",
+      "description": "Analysera ett KPI \u00f6ver alla kommuner med statistik (min, max, medel, median) och rankning. Visar toppkommuner och bottenkommuner. Perfekt f\u00f6r benchmarking och j\u00e4mf\u00f6relser.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpi_id": {
+            "type": "string",
+            "description": "KPI-ID att analysera (t.ex. \"N15033\")"
+          },
+          "year": {
+            "type": "number",
+            "description": "\u00c5r att analysera"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "T",
+              "M",
+              "K"
+            ],
+            "default": "T",
+            "description": "K\u00f6n: T=Totalt, M=M\u00e4n, K=Kvinnor"
+          },
+          "municipality_type": {
+            "type": "string",
+            "enum": [
+              "K",
+              "L",
+              "all"
+            ],
+            "default": "K",
+            "description": "Kommuntyp: K=Kommun, L=Region, all=alla"
+          },
+          "top_n": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 10,
+            "description": "Antal topprankade att visa (standard: 10)"
+          },
+          "bottom_n": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 10,
+            "description": "Antal bottenprestanda att visa (standard: 10)"
+          }
+        },
+        "required": [
+          "kpi_id",
+          "year"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "filter_municipalities_by_kpi",
+      "description": "Filtrera kommuner baserat p\u00e5 KPI-tr\u00f6skelv\u00e4rde. Hitta t.ex. alla kommuner d\u00e4r l\u00e4rart\u00e4thet > 12 eller arbetsl\u00f6shet < 5%. Anv\u00e4ndbart f\u00f6r att identifiera kommuner som uppfyller specifika kriterier.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpi_id": {
+            "type": "string",
+            "description": "KPI-ID att filtrera p\u00e5"
+          },
+          "year": {
+            "type": "number",
+            "description": "\u00c5r att analysera"
+          },
+          "threshold": {
+            "type": "number",
+            "description": "Tr\u00f6skelv\u00e4rde f\u00f6r filtrering"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "gt",
+              "lt",
+              "gte",
+              "lte",
+              "eq"
+            ],
+            "description": "Operator: gt (>), lt (<), gte (>=), lte (<=), eq (=)"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "T",
+              "M",
+              "K"
+            ],
+            "default": "T",
+            "description": "K\u00f6n: T=Totalt, M=M\u00e4n, K=Kvinnor"
+          },
+          "municipality_type": {
+            "type": "string",
+            "enum": [
+              "K",
+              "L",
+              "all"
+            ],
+            "default": "K",
+            "description": "Kommuntyp: K=Kommun, L=Region, all=alla"
+          }
+        },
+        "required": [
+          "kpi_id",
+          "year",
+          "threshold",
+          "operator"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "compare_kpis",
+      "description": "Ber\u00e4kna Pearson-korrelation mellan tv\u00e5 KPIs f\u00f6r att se om det finns samband. T.ex. korrelation mellan l\u00e4rart\u00e4thet och skolresultat. V\u00e4rden n\u00e4ra 1 = starkt positivt samband, n\u00e4ra -1 = starkt negativt, n\u00e4ra 0 = inget samband.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpi_id_1": {
+            "type": "string",
+            "description": "F\u00f6rsta KPI-ID f\u00f6r korrelationsanalys"
+          },
+          "kpi_id_2": {
+            "type": "string",
+            "description": "Andra KPI-ID f\u00f6r korrelationsanalys"
+          },
+          "year": {
+            "type": "number",
+            "description": "\u00c5r att analysera"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "T",
+              "M",
+              "K"
+            ],
+            "default": "T",
+            "description": "K\u00f6n: T=Totalt, M=M\u00e4n, K=Kvinnor"
+          },
+          "municipality_type": {
+            "type": "string",
+            "enum": [
+              "K",
+              "L",
+              "all"
+            ],
+            "default": "K",
+            "description": "Kommuntyp: K=Kommun, L=Region, all=alla"
+          }
+        },
+        "required": [
+          "kpi_id_1",
+          "kpi_id_2",
+          "year"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_operating_areas",
+      "description": "Lista alla verksamhetsomr\u00e5den (t.ex. Utbildning, V\u00e5rd och omsorg) med antal KPIs per omr\u00e5de. Ger \u00f6verblick \u00f6ver vilka typer av data som finns tillg\u00e4nglig.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_kpis_by_operating_area",
+      "description": "H\u00e4mta alla KPIs inom ett specifikt verksamhetsomr\u00e5de. T.ex. alla utbildnings-KPIs eller alla v\u00e5rd-KPIs. Enklare \u00e4n fritexts\u00f6kning f\u00f6r att hitta relaterade nyckeltal.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "operating_area": {
+            "type": "string",
+            "description": "Verksamhetsomr\u00e5de att filtrera p\u00e5 (t.ex. \"Utbildning\", \"V\u00e5rd och omsorg\")"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50,
+            "description": "Max antal KPIs att returnera (standard: 50)"
+          }
+        },
+        "required": [
+          "operating_area"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "name": "analyze_municipality",
+      "description": "Analyze key metrics and performance for a Swedish municipality",
+      "arguments": [
+        {
+          "name": "municipality_name",
+          "description": "Name of the municipality to analyze (e.g., \"Stockholm\", \"G\u00f6teborg\")",
+          "required": true
+        },
+        {
+          "name": "focus_areas",
+          "description": "Specific areas to focus on (e.g., \"education\", \"healthcare\", \"environment\")",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "compare_municipalities",
+      "description": "Compare multiple municipalities on selected key performance indicators",
+      "arguments": [
+        {
+          "name": "municipalities",
+          "description": "Comma-separated list of municipality names to compare",
+          "required": true
+        },
+        {
+          "name": "kpi_topics",
+          "description": "Topics to compare (e.g., \"schools\", \"healthcare quality\", \"environmental sustainability\")",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "trend_analysis",
+      "description": "Analyze trends over time for specific performance indicators",
+      "arguments": [
+        {
+          "name": "municipality",
+          "description": "Municipality name to analyze trends for",
+          "required": true
+        },
+        {
+          "name": "topic",
+          "description": "Topic area to analyze (e.g., \"education quality\", \"elderly care\")",
+          "required": true
+        },
+        {
+          "name": "years",
+          "description": "Number of years to analyze (default: 5)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "find_schools",
+      "description": "Find and analyze schools and educational institutions",
+      "arguments": [
+        {
+          "name": "municipality",
+          "description": "Municipality to search schools in",
+          "required": true
+        },
+        {
+          "name": "school_type",
+          "description": "Type of school (e.g., \"grundskola\", \"gymnasium\", \"f\u00f6rskola\")",
+          "required": false
+        },
+        {
+          "name": "school_name",
+          "description": "Specific school name to search for",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "regional_comparison",
+      "description": "Compare municipalities within the same region or group",
+      "arguments": [
+        {
+          "name": "region",
+          "description": "Region name or municipality group (e.g., \"Stockholm l\u00e4n\", \"Storst\u00e4der\")",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "kpi_discovery",
+      "description": "Discover and explore available key performance indicators",
+      "arguments": [
+        {
+          "name": "query",
+          "description": "Search keywords for KPIs",
+          "required": false
+        },
+        {
+          "name": "operating_area",
+          "description": "Operating area to filter by (e.g., \"Utbildning\", \"H\u00e4lso- och sjukv\u00e5rd\")",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "uri": "kolada://municipalities",
+      "name": "Swedish Municipalities List",
+      "description": "Complete list of Swedish municipalities and county councils",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "kolada://kpi-catalog",
+      "name": "KPI Catalog",
+      "description": "Complete catalog of available KPIs with metadata",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "kolada://api-info",
+      "name": "Kolada API Information",
+      "description": "API information, endpoints, and usage guidelines",
+      "mimeType": "text/markdown"
+    }
+  ],
+  "transport_used": "streamable-http",
+  "error": null,
+  "endpoint_url": "https://kolada-mcp-pafn.onrender.com/mcp"
+}

@@ -1,0 +1,3276 @@
+{
+  "server_name": "com.cryptorefills/mcp-server",
+  "server_version": "1.1",
+  "introspected_at": "2026-01-04T12:19:38.859860+00:00",
+  "success": true,
+  "tools": [
+    {
+      "name": "purchaseElicitation",
+      "description": "Interactive, stateful endpoint to guide small-footprint AI agents through a purchase flow for gift cards or mobile top-ups. Call repeatedly with the same session_token until 'status' is 'complete' or 'error'. For the first call, provide an empty 'body': {} (session_token will be generated and returned). Provide 'answer' in the body to respond to the current question. Use 'action: back' in the body to go to the previous step. Handles product type selection, country, brand, amount, beneficiary, coin, network, user email, and final confirmation/validation/order creation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "session_token": {
+                "type": "string",
+                "description": "Unique token for the session (returned in first response; required for subsequent calls)."
+              },
+              "answer": {
+                "type": "string",
+                "description": "User's response to the current question (e.g., 'giftcard', 'IT', 'Amazon.it', '50', 'user@example.com', 'USDC', 'SOLANA', 'yes')."
+              },
+              "action": {
+                "type": "string",
+                "description": "Optional action like 'back' to revert to the previous step.",
+                "enum": [
+                  "back"
+                ]
+              }
+            },
+            "required": []
+          }
+        },
+        "definitions": {
+          "CategoryModel": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "category": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "brands": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/BrandModel"
+                }
+              },
+              "popular_brands": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/BrandModel"
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "brands",
+              "popular_brands"
+            ]
+          },
+          "BrandModel": {
+            "type": "object",
+            "properties": {
+              "family": {
+                "type": "string"
+              },
+              "brand_id": {
+                "type": "string"
+              },
+              "brand": {
+                "type": "string"
+              },
+              "logo_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "logo_base_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "bg_color": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "is_out_of_stock": {
+                "type": "boolean"
+              },
+              "min": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "max": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "country_code": {
+                "type": "string"
+              },
+              "additional_categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "promotion": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "product_type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "family",
+              "brand_id",
+              "brand",
+              "logo_url",
+              "category",
+              "is_out_of_stock",
+              "country_code",
+              "product_type"
+            ]
+          },
+          "ProductsForBrandResponse": {
+            "type": "object",
+            "properties": {
+              "country_code": {
+                "type": "string",
+                "description": "ISO 3166-1 alpha-2 country code",
+                "examples": [
+                  "US",
+                  "GB",
+                  "FR",
+                  "DE"
+                ]
+              },
+              "category": {
+                "type": "string"
+              },
+              "additional_categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "kind": {
+                "type": "string"
+              },
+              "default_denomination": {
+                "type": "string"
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ProductResponse"
+                }
+              },
+              "family": {
+                "type": "string"
+              },
+              "brand_id": {
+                "type": "string"
+              },
+              "brand": {
+                "type": "string"
+              },
+              "is_out_of_stock": {
+                "type": "boolean"
+              },
+              "logo_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "logo_base_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "product_tc": {
+                "type": "string"
+              },
+              "redeem_method": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "rich_description": {
+                "$ref": "#/definitions/RichDescription"
+              },
+              "product_type": {
+                "type": "string"
+              },
+              "promotion": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "country_code",
+              "category",
+              "additional_categories",
+              "kind",
+              "default_denomination",
+              "products",
+              "family",
+              "brand_id",
+              "brand",
+              "is_out_of_stock",
+              "logo_url",
+              "logo_base_url",
+              "product_tc",
+              "redeem_method",
+              "product_type"
+            ]
+          },
+          "ProductResponse": {
+            "type": "object",
+            "properties": {
+              "product_id": {
+                "type": "string"
+              },
+              "is_dynamic": {
+                "type": "boolean"
+              },
+              "range": {
+                "$ref": "#/definitions/Range"
+              },
+              "customer_specific": {
+                "$ref": "#/definitions/CustomerSpecific"
+              },
+              "denomination": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "localized_denomination": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "coin_amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "coin": {
+                "type": "string"
+              },
+              "original_coin_amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "face_value": {
+                "$ref": "#/definitions/FaceValue"
+              },
+              "payment_method": {
+                "type": "string"
+              },
+              "delivery_type": {
+                "type": "string"
+              },
+              "points": {
+                "type": "string"
+              },
+              "benefits": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "$ref": "#/definitions/Benefit"
+                }
+              },
+              "additional_details": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "valid_regions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "product_type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "product_id",
+              "is_dynamic",
+              "coin",
+              "payment_method",
+              "delivery_type",
+              "points",
+              "product_type"
+            ]
+          },
+          "Range": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "step_size": {
+                "type": "number"
+              },
+              "default": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "min",
+              "max",
+              "currency",
+              "step_size",
+              "default"
+            ]
+          },
+          "CustomerSpecific": {
+            "type": "object",
+            "properties": {
+              "account": {
+                "type": "string"
+              },
+              "face_value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "account",
+              "face_value"
+            ]
+          },
+          "FaceValue": {
+            "type": "object",
+            "properties": {
+              "currency_code": {
+                "type": "string"
+              },
+              "amount": {
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/Fixed"
+                  },
+                  {
+                    "$ref": "#/definitions/FaceValueRange"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "currency_code",
+              "amount"
+            ]
+          },
+          "Fixed": {
+            "type": "object",
+            "properties": {
+              "price": {
+                "type": "string",
+                "description": "Display label for fixed denomination (e.g., '5 EUR', '3 months subscription', '100 diamonds + 10 free')."
+              }
+            },
+            "required": [
+              "price"
+            ]
+          },
+          "FaceValueRange": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "string"
+              },
+              "max": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "min",
+              "max"
+            ]
+          },
+          "Benefit": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "unit_type": {
+                "type": "string"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "amount": {
+                "$ref": "#/definitions/Amount"
+              },
+              "additional_information": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "unit_type",
+              "unit",
+              "amount",
+              "additional_information"
+            ]
+          },
+          "Amount": {
+            "type": "object",
+            "properties": {
+              "base": {
+                "$ref": "#/definitions/IAmount"
+              },
+              "promotion_bonus": {
+                "$ref": "#/definitions/IAmount"
+              },
+              "total_excluding_tax": {
+                "$ref": "#/definitions/IAmount"
+              },
+              "total_including_tax": {
+                "$ref": "#/definitions/IAmount"
+              }
+            },
+            "required": [
+              "base",
+              "promotion_bonus",
+              "total_excluding_tax",
+              "total_including_tax"
+            ]
+          },
+          "IAmount": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "PaymentViaWithCurrencies": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "logo_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "currencies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/CurrencyWithNetwork"
+                }
+              }
+            },
+            "required": [
+              "name",
+              "currencies"
+            ]
+          },
+          "CurrencyWithNetwork": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "logo_url": {
+                "type": "string"
+              },
+              "threshold": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "networks": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/PaymentNetwork"
+                }
+              },
+              "is_suspended": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "logo_url",
+              "networks",
+              "is_suspended"
+            ]
+          },
+          "PaymentNetwork": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "examples": [
+                  "Base",
+                  "Ethereum",
+                  "Mainnet",
+                  "Solana"
+                ]
+              },
+              "chain_id": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "logo_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "threshold": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "smart_contract_engine": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "base_token": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  "ETH",
+                  "SOL"
+                ]
+              },
+              "smart_contract": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "estimated_transfer_cost": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "ISmartContract": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "decimals": {
+                "type": "integer"
+              },
+              "symbol": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "address",
+              "decimals",
+              "symbol"
+            ]
+          },
+          "RichDescription": {
+            "type": "object",
+            "properties": {
+              "markup": {
+                "type": "string"
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "how_to_redeem": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "term_and_conditions": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "country_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "locale": {
+                "type": "string"
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "redeem_geo": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": []
+          },
+          "DetailedMultiProductsOrderValidationRequest": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/definitions/UserOptional"
+              },
+              "payment": {
+                "$ref": "#/definitions/IPayment"
+              },
+              "coupon_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "promo_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "nft_codes": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "$ref": "#/definitions/NFTCode"
+                }
+              },
+              "acquisition": {
+                "$ref": "#/definitions/AcquisitionOptional"
+              },
+              "deliveries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ProductDeliverable"
+                }
+              },
+              "lang": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "time_zone": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "binance_sku": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "external_store": {
+                "$ref": "#/definitions/ExternalStoreOptional"
+              },
+              "state_transition_notification_url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri"
+              },
+              "refund_wallet_address": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "payment",
+              "deliveries"
+            ],
+            "additionalProperties": false
+          },
+          "UserOptional": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "User": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string"
+              },
+              "has_accepted_newsletter": {
+                "type": "boolean"
+              },
+              "referral_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "email"
+            ],
+            "additionalProperties": false
+          },
+          "IPayment": {
+            "type": "object",
+            "oneOf": [
+              {
+                "description": "User pays directly from an on-chain wallet",
+                "properties": {
+                  "type": {
+                    "const": "via"
+                  },
+                  "payment_via": {
+                    "type": "string",
+                    "examples": [
+                      "USER_WALLET"
+                    ]
+                  },
+                  "coin": {
+                    "type": "string",
+                    "examples": [
+                      "USDC",
+                      "USDT",
+                      "BTC",
+                      "SOL",
+                      "WLD"
+                    ]
+                  },
+                  "network": {
+                    "type": "string",
+                    "examples": [
+                      "Solana",
+                      "Polygon (Matic)",
+                      "Mainnet"
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "payment_via",
+                  "coin",
+                  "network"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "description": "User pays through Binance Pay",
+                "properties": {
+                  "type": {
+                    "const": "binance_pay"
+                  },
+                  "coin": {
+                    "type": "string",
+                    "examples": [
+                      "USDT"
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "coin"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "NFTCode": {
+            "type": "object",
+            "properties": {
+              "tokenId": {
+                "type": "string"
+              },
+              "contract_address": {
+                "type": "string"
+              },
+              "network": {
+                "type": "string"
+              },
+              "permit": {
+                "$ref": "#/definitions/PermitOptional"
+              }
+            },
+            "required": [
+              "tokenId",
+              "contract_address",
+              "network"
+            ],
+            "additionalProperties": false
+          },
+          "PermitOptional": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/Permit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "Permit": {
+            "type": "object",
+            "properties": {
+              "signature": {
+                "type": "string"
+              },
+              "deadline": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "signature",
+              "deadline"
+            ],
+            "additionalProperties": false
+          },
+          "AcquisitionOptional": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/Acquisition"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "Acquisition": {
+            "type": "object",
+            "properties": {
+              "gclid": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "cid": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utm_source": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utm_campaign": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utm_medium": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utm_term": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utm_content": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "click_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "referer": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "session_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "conversion_flow": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "ExternalStoreOptional": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/ExternalStore"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ExternalStore": {
+            "type": "object",
+            "properties": {
+              "coin_name": {
+                "type": "string"
+              },
+              "coin_amount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "coin_name",
+              "coin_amount"
+            ],
+            "additionalProperties": false
+          },
+          "DetailedMultiProductsOrderValidationResponse": {
+            "type": "object",
+            "properties": {
+              "coin": {
+                "type": "string"
+              },
+              "coin_amount": {
+                "type": "string"
+              },
+              "original_coin_amount": {
+                "type": "string"
+              },
+              "coupon_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "deliveries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Delivery"
+                }
+              },
+              "payment_fee": {
+                "$ref": "#/definitions/PaymentFee"
+              },
+              "points": {
+                "$ref": "#/definitions/Points"
+              },
+              "nft_codes": {
+                "$ref": "#/definitions/NFTCodeSpendingSummary"
+              },
+              "summary": {
+                "$ref": "#/definitions/OrderSummary"
+              },
+              "problems": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/IEnrichedProblem"
+                }
+              },
+              "is_payment_processor_external": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "coin",
+              "coin_amount",
+              "original_coin_amount",
+              "deliveries",
+              "payment_fee",
+              "points",
+              "summary",
+              "is_payment_processor_external"
+            ],
+            "additionalProperties": false
+          },
+          "CreateOrderRequest": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/definitions/User"
+              },
+              "payment": {
+                "$ref": "#/definitions/IPayment"
+              },
+              "coupon_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "promo_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "nft_codes": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "$ref": "#/definitions/NFTCode"
+                }
+              },
+              "acquisition": {
+                "$ref": "#/definitions/AcquisitionOptional"
+              },
+              "deliveries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ProductDeliverable"
+                }
+              },
+              "lang": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "time_zone": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "binance_sku": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "external_store": {
+                "$ref": "#/definitions/ExternalStoreOptional"
+              },
+              "state_transition_notification_url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri"
+              },
+              "refund_wallet_address": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "user",
+              "payment",
+              "deliveries"
+            ],
+            "additionalProperties": false
+          },
+          "MultiProductsOrderResponse": {
+            "type": "object",
+            "description": "Full payload returned after creating an order or polling its status.",
+            "properties": {
+              "order_id": {
+                "type": "string",
+                "description": "UUID v4 that uniquely identifies the order"
+              },
+              "created_at": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Unix epoch (seconds) when the order was created"
+              },
+              "wallet_address": {
+                "type": "string",
+                "description": "Destination wallet address (if applicable)"
+              },
+              "payment_method": {
+                "type": "string"
+              },
+              "network": {
+                "type": "string",
+                "description": "Blockchain / network (e.g. 'Solana')"
+              },
+              "coin": {
+                "type": "string",
+                "description": "Ticker of the settlement currency"
+              },
+              "coin_amount": {
+                "type": "string"
+              },
+              "original_price": {
+                "type": "string"
+              },
+              "qr_url": {
+                "type": "string",
+                "format": "uri",
+                "description": "uri to retrieve a QR code that can be used to start the payment"
+              },
+              "qr_text": {
+                "type": "string"
+              },
+              "sent_coin_amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payment_state": {
+                "type": "string",
+                "enum": [
+                  "WalletRequested",
+                  "WalletCreated",
+                  "PaymentRequested",
+                  "PaymentStarted",
+                  "WaitingForComplianceReport",
+                  "PaymentQuarantined",
+                  "PaymentReceived",
+                  "PartialPaymentStarted",
+                  "Failed",
+                  "WaitingForExpiry",
+                  "WaitingForExpiryAfterPaymentDetection",
+                  "Expired",
+                  "ExpiredAfterPaymentDetection",
+                  "PaymentCanceled"
+                ]
+              },
+              "deliveries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Delivery"
+                }
+              },
+              "order_state": {
+                "type": "string",
+                "enum": [
+                  "WaitingForPayment",
+                  "PaymentStarted",
+                  "PaymentFailed",
+                  "WaitingForNFTCards",
+                  "NFTCardsSpent",
+                  "WaitingForDelivery",
+                  "WaitingForCoupon",
+                  "Refunded",
+                  "Completed",
+                  "WaitingForManualAction",
+                  "Done",
+                  "Expired",
+                  "Canceled"
+                ]
+              },
+              "missing_amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "missing_amount_qr_text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "missing_amount_qr_url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri"
+              },
+              "received_amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "checkout_url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri",
+                "description": "when present, redirect the use here to start the payment"
+              },
+              "nft_codes": {
+                "$ref": "#/definitions/NFTCodeSpendingSummary"
+              },
+              "summary": {
+                "$ref": "#/definitions/OrderSummary"
+              },
+              "user": {
+                "$ref": "#/definitions/User"
+              },
+              "payment_via": {
+                "type": "string"
+              },
+              "payment_requested_at": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "payment_transactions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Blockchain TX hashes or processor IDs"
+              },
+              "payment_method_protocol": {
+                "type": "string"
+              },
+              "payment_id": {
+                "type": "string"
+              },
+              "payment_value": {
+                "type": "string"
+              },
+              "campaign_rewards": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "$ref": "#/definitions/CampaignReward"
+                }
+              },
+              "state_transition_notification_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sandbox_mode": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "store_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "is_payment_processor_external": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "order_id",
+              "created_at",
+              "payment_state",
+              "order_state",
+              "is_payment_processor_external"
+            ],
+            "additionalProperties": false
+          },
+          "Delivery": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "delivery_state": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "deliverable": {
+                "$ref": "#/definitions/ProductDeliverable"
+              },
+              "sandbox_mode": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "delivery_state",
+              "kind",
+              "deliverable"
+            ]
+          },
+          "ProductDeliverable": {
+            "type": "object",
+            "properties": {
+              "denomination": {
+                "type": "string"
+              },
+              "localized_denomination": {
+                "type": "string"
+              },
+              "family": {
+                "type": "string"
+              },
+              "brand_name": {
+                "type": "string"
+              },
+              "brand_logo": {
+                "type": "string"
+              },
+              "brand_bg_color": {
+                "type": "string"
+              },
+              "error_description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pin_code": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL the user must open to reveal / activate the code."
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9-]{4,}$",
+                    "description": "The gift-card code itself."
+                  }
+                ]
+              },
+              "pin_serial": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Serial number (shown on some physical/virtual cards)."
+              },
+              "security_code": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Extra security / CVV code if required by the brand."
+              },
+              "failure_reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pin_usage_instructions": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "HTML instructions on how to redeem the code."
+              },
+              "barcode_image_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "qr_image_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "beneficiary_account": {
+                "type": "string",
+                "description": "A string formatted as an email (if delivery_type requires email) or a phone number (if delivery_type requires phone).",
+                "oneOf": [
+                  {
+                    "format": "email",
+                    "description": "Email format when delivery_type indicates email-based delivery."
+                  },
+                  {
+                    "pattern": "^\\+?[1-9]\\d{1,14}$",
+                    "description": "Phone number format (E.164, up to 15 digits, optional leading +) when delivery_type indicates phone-based delivery."
+                  }
+                ]
+              },
+              "country_code": {
+                "type": "string"
+              },
+              "delivery_type": {
+                "type": "string"
+              },
+              "points": {
+                "type": "string"
+              },
+              "coin_amount": {
+                "type": "string"
+              },
+              "original_coin_amount": {
+                "type": "string"
+              },
+              "original_price": {
+                "type": "string"
+              },
+              "product_value": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "currency_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "redeem_instructions": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "terms_and_conditions": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "promotion": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "denomination",
+              "brand_name",
+              "beneficiary_account",
+              "country_code"
+            ]
+          },
+          "OrderSummary": {
+            "type": "object",
+            "properties": {
+              "coin_amount_before_discount": {
+                "type": "string"
+              },
+              "coin_amount_after_discount": {
+                "type": "string"
+              },
+              "coin_amount_to_pay_in_crypto": {
+                "type": "string"
+              },
+              "coin_amount_to_pay_via_nft": {
+                "type": "string"
+              },
+              "coin_amount_to_pay_via_coupon": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "coin_amount_before_discount",
+              "coin_amount_after_discount",
+              "coin_amount_to_pay_in_crypto",
+              "coin_amount_to_pay_via_nft",
+              "coin_amount_to_pay_via_coupon"
+            ]
+          },
+          "PaymentFee": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "Points": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "NFTCodeSpendingSummary": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "IEnrichedProblem": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "CampaignReward": {
+            "type": "object",
+            "properties": {
+              "campaign_name": {
+                "type": "string"
+              },
+              "campaign_description": {
+                "type": "string"
+              },
+              "reward": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "campaign_name",
+              "reward"
+            ]
+          },
+          "BaseCurrency": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "examples": [
+                  "BTC, ETH, USDT, USDC, SOL"
+                ]
+              },
+              "logo_url": {
+                "type": "string"
+              },
+              "is_suspended": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "logo_url",
+              "is_suspended"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "continue",
+                  "complete",
+                  "error"
+                ],
+                "description": "'continue' = more questions; 'complete' = order created; 'error' = validation or execution failed."
+              },
+              "session_token": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Token for this session (returned for continue; may be null for complete or error)."
+              },
+              "question": {
+                "type": "string",
+                "description": "Next question to ask the user (if status=continue)."
+              },
+              "expected_format": {
+                "type": "string",
+                "description": "Expected format for the answer (if status=continue)."
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Suggested options for the answer (if applicable, for status=continue)."
+              },
+              "previous_answers": {
+                "type": "object",
+                "description": "Map of data collected so far (e.g., {'country': 'IT', 'brand': 'Amazon.it'})."
+              },
+              "error": {
+                "type": "string",
+                "description": "Error message (if status=error)."
+              },
+              "fix": {
+                "type": "string",
+                "description": "Suggestion to fix the error (if status=error)."
+              },
+              "suggestions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Alternative suggestions (if status=error)."
+              },
+              "next_step": {
+                "type": "string",
+                "description": "Instructions for payment/polling (if status=complete)."
+              },
+              "payment_details": {
+                "type": "object",
+                "properties": {
+                  "walletAddress": {
+                    "type": "string"
+                  },
+                  "coinSymbol": {
+                    "type": "string"
+                  },
+                  "coinAmount": {
+                    "type": "string"
+                  },
+                  "network": {
+                    "type": "string"
+                  }
+                },
+                "description": "Payment info (if status=complete)."
+              }
+            },
+            "required": [
+              "status"
+            ],
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "error"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "status",
+                "error",
+                "fix"
+              ]
+            },
+            "else": {
+              "if": {
+                "properties": {
+                  "status": {
+                    "const": "continue"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "status",
+                  "session_token",
+                  "question",
+                  "expected_format",
+                  "previous_answers"
+                ]
+              },
+              "else": {
+                "required": [
+                  "status",
+                  "next_step",
+                  "payment_details"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "definitions": {
+          "CategoryModel": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "category": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "brands": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/BrandModel"
+                }
+              },
+              "popular_brands": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/BrandModel"
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "brands",
+              "popular_brands"
+            ]
+          },
+          "BrandModel": {
+            "type": "object",
+            "properties": {
+              "family": {
+                "type": "string"
+              },
+              "brand_id": {
+                "type": "string"
+              },
+              "brand": {
+                "type": "string"
+              },
+              "logo_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "logo_base_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "bg_color": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "is_out_of_stock": {
+                "type": "boolean"
+              },
+              "min": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "max": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "country_code": {
+                "type": "string"
+              },
+              "additional_categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "promotion": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "product_type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "family",
+              "brand_id",
+              "brand",
+              "logo_url",
+              "category",
+              "is_out_of_stock",
+              "country_code",
+              "product_type"
+            ]
+          },
+          "ProductsForBrandResponse": {
+            "type": "object",
+            "properties": {
+              "country_code": {
+                "type": "string",
+                "description": "ISO 3166-1 alpha-2 country code",
+                "examples": [
+                  "US",
+                  "GB",
+                  "FR",
+                  "DE"
+                ]
+              },
+              "category": {
+                "type": "string"
+              },
+              "additional_categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "kind": {
+                "type": "string"
+              },
+              "default_denomination": {
+                "type": "string"
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ProductResponse"
+                }
+              },
+              "family": {
+                "type": "string"
+              },
+              "brand_id": {
+                "type": "string"
+              },
+              "brand": {
+                "type": "string"
+              },
+              "is_out_of_stock": {
+                "type": "boolean"
+              },
+              "logo_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "logo_base_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "product_tc": {
+                "type": "string"
+              },
+              "redeem_method": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "rich_description": {
+                "$ref": "#/definitions/RichDescription"
+              },
+              "product_type": {
+                "type": "string"
+              },
+              "promotion": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "country_code",
+              "category",
+              "additional_categories",
+              "kind",
+              "default_denomination",
+              "products",
+              "family",
+              "brand_id",
+              "brand",
+              "is_out_of_stock",
+              "logo_url",
+              "logo_base_url",
+              "product_tc",
+              "redeem_method",
+              "product_type"
+            ]
+          },
+          "ProductResponse": {
+            "type": "object",
+            "properties": {
+              "product_id": {
+                "type": "string"
+              },
+              "is_dynamic": {
+                "type": "boolean"
+              },
+              "range": {
+                "$ref": "#/definitions/Range"
+              },
+              "customer_specific": {
+                "$ref": "#/definitions/CustomerSpecific"
+              },
+              "denomination": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "localized_denomination": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "coin_amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "coin": {
+                "type": "string"
+              },
+              "original_coin_amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "face_value": {
+                "$ref": "#/definitions/FaceValue"
+              },
+              "payment_method": {
+                "type": "string"
+              },
+              "delivery_type": {
+                "type": "string"
+              },
+              "points": {
+                "type": "string"
+              },
+              "benefits": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "$ref": "#/definitions/Benefit"
+                }
+              },
+              "additional_details": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "valid_regions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "product_type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "product_id",
+              "is_dynamic",
+              "coin",
+              "payment_method",
+              "delivery_type",
+              "points",
+              "product_type"
+            ]
+          },
+          "Range": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "step_size": {
+                "type": "number"
+              },
+              "default": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "min",
+              "max",
+              "currency",
+              "step_size",
+              "default"
+            ]
+          },
+          "CustomerSpecific": {
+            "type": "object",
+            "properties": {
+              "account": {
+                "type": "string"
+              },
+              "face_value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "account",
+              "face_value"
+            ]
+          },
+          "FaceValue": {
+            "type": "object",
+            "properties": {
+              "currency_code": {
+                "type": "string"
+              },
+              "amount": {
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/Fixed"
+                  },
+                  {
+                    "$ref": "#/definitions/FaceValueRange"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "currency_code",
+              "amount"
+            ]
+          },
+          "Fixed": {
+            "type": "object",
+            "properties": {
+              "price": {
+                "type": "string",
+                "description": "Display label for fixed denomination (e.g., '5 EUR', '3 months subscription', '100 diamonds + 10 free')."
+              }
+            },
+            "required": [
+              "price"
+            ]
+          },
+          "FaceValueRange": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "string"
+              },
+              "max": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "min",
+              "max"
+            ]
+          },
+          "Benefit": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "unit_type": {
+                "type": "string"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "amount": {
+                "$ref": "#/definitions/Amount"
+              },
+              "additional_information": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "unit_type",
+              "unit",
+              "amount",
+              "additional_information"
+            ]
+          },
+          "Amount": {
+            "type": "object",
+            "properties": {
+              "base": {
+                "$ref": "#/definitions/IAmount"
+              },
+              "promotion_bonus": {
+                "$ref": "#/definitions/IAmount"
+              },
+              "total_excluding_tax": {
+                "$ref": "#/definitions/IAmount"
+              },
+              "total_including_tax": {
+                "$ref": "#/definitions/IAmount"
+              }
+            },
+            "required": [
+              "base",
+              "promotion_bonus",
+              "total_excluding_tax",
+              "total_including_tax"
+            ]
+          },
+          "IAmount": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "PaymentViaWithCurrencies": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "logo_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "currencies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/CurrencyWithNetwork"
+                }
+              }
+            },
+            "required": [
+              "name",
+              "currencies"
+            ]
+          },
+          "CurrencyWithNetwork": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "logo_url": {
+                "type": "string"
+              },
+              "threshold": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "networks": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/PaymentNetwork"
+                }
+              },
+              "is_suspended": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "logo_url",
+              "networks",
+              "is_suspended"
+            ]
+          },
+          "PaymentNetwork": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "examples": [
+                  "Base",
+                  "Ethereum",
+                  "Mainnet",
+                  "Solana"
+                ]
+              },
+              "chain_id": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "logo_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "threshold": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "smart_contract_engine": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "base_token": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  "ETH",
+                  "SOL"
+                ]
+              },
+              "smart_contract": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "estimated_transfer_cost": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "ISmartContract": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "decimals": {
+                "type": "integer"
+              },
+              "symbol": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "address",
+              "decimals",
+              "symbol"
+            ]
+          },
+          "RichDescription": {
+            "type": "object",
+            "properties": {
+              "markup": {
+                "type": "string"
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "how_to_redeem": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "term_and_conditions": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "country_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "locale": {
+                "type": "string"
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "redeem_geo": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": []
+          },
+          "DetailedMultiProductsOrderValidationRequest": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/definitions/UserOptional"
+              },
+              "payment": {
+                "$ref": "#/definitions/IPayment"
+              },
+              "coupon_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "promo_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "nft_codes": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "$ref": "#/definitions/NFTCode"
+                }
+              },
+              "acquisition": {
+                "$ref": "#/definitions/AcquisitionOptional"
+              },
+              "deliveries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ProductDeliverable"
+                }
+              },
+              "lang": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "time_zone": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "binance_sku": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "external_store": {
+                "$ref": "#/definitions/ExternalStoreOptional"
+              },
+              "state_transition_notification_url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri"
+              },
+              "refund_wallet_address": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "payment",
+              "deliveries"
+            ],
+            "additionalProperties": false
+          },
+          "UserOptional": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "User": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string"
+              },
+              "has_accepted_newsletter": {
+                "type": "boolean"
+              },
+              "referral_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "email"
+            ],
+            "additionalProperties": false
+          },
+          "IPayment": {
+            "type": "object",
+            "oneOf": [
+              {
+                "description": "User pays directly from an on-chain wallet",
+                "properties": {
+                  "type": {
+                    "const": "via"
+                  },
+                  "payment_via": {
+                    "type": "string",
+                    "examples": [
+                      "USER_WALLET"
+                    ]
+                  },
+                  "coin": {
+                    "type": "string",
+                    "examples": [
+                      "USDC",
+                      "USDT",
+                      "BTC",
+                      "SOL",
+                      "WLD"
+                    ]
+                  },
+                  "network": {
+                    "type": "string",
+                    "examples": [
+                      "Solana",
+                      "Polygon (Matic)",
+                      "Mainnet"
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "payment_via",
+                  "coin",
+                  "network"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "description": "User pays through Binance Pay",
+                "properties": {
+                  "type": {
+                    "const": "binance_pay"
+                  },
+                  "coin": {
+                    "type": "string",
+                    "examples": [
+                      "USDT"
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "coin"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "NFTCode": {
+            "type": "object",
+            "properties": {
+              "tokenId": {
+                "type": "string"
+              },
+              "contract_address": {
+                "type": "string"
+              },
+              "network": {
+                "type": "string"
+              },
+              "permit": {
+                "$ref": "#/definitions/PermitOptional"
+              }
+            },
+            "required": [
+              "tokenId",
+              "contract_address",
+              "network"
+            ],
+            "additionalProperties": false
+          },
+          "PermitOptional": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/Permit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "Permit": {
+            "type": "object",
+            "properties": {
+              "signature": {
+                "type": "string"
+              },
+              "deadline": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "signature",
+              "deadline"
+            ],
+            "additionalProperties": false
+          },
+          "AcquisitionOptional": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/Acquisition"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "Acquisition": {
+            "type": "object",
+            "properties": {
+              "gclid": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "cid": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utm_source": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utm_campaign": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utm_medium": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utm_term": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utm_content": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "click_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "referer": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "session_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "conversion_flow": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "ExternalStoreOptional": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/ExternalStore"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ExternalStore": {
+            "type": "object",
+            "properties": {
+              "coin_name": {
+                "type": "string"
+              },
+              "coin_amount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "coin_name",
+              "coin_amount"
+            ],
+            "additionalProperties": false
+          },
+          "DetailedMultiProductsOrderValidationResponse": {
+            "type": "object",
+            "properties": {
+              "coin": {
+                "type": "string"
+              },
+              "coin_amount": {
+                "type": "string"
+              },
+              "original_coin_amount": {
+                "type": "string"
+              },
+              "coupon_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "deliveries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Delivery"
+                }
+              },
+              "payment_fee": {
+                "$ref": "#/definitions/PaymentFee"
+              },
+              "points": {
+                "$ref": "#/definitions/Points"
+              },
+              "nft_codes": {
+                "$ref": "#/definitions/NFTCodeSpendingSummary"
+              },
+              "summary": {
+                "$ref": "#/definitions/OrderSummary"
+              },
+              "problems": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/IEnrichedProblem"
+                }
+              },
+              "is_payment_processor_external": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "coin",
+              "coin_amount",
+              "original_coin_amount",
+              "deliveries",
+              "payment_fee",
+              "points",
+              "summary",
+              "is_payment_processor_external"
+            ],
+            "additionalProperties": false
+          },
+          "CreateOrderRequest": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/definitions/User"
+              },
+              "payment": {
+                "$ref": "#/definitions/IPayment"
+              },
+              "coupon_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "promo_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "nft_codes": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "$ref": "#/definitions/NFTCode"
+                }
+              },
+              "acquisition": {
+                "$ref": "#/definitions/AcquisitionOptional"
+              },
+              "deliveries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/ProductDeliverable"
+                }
+              },
+              "lang": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "time_zone": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "binance_sku": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "external_store": {
+                "$ref": "#/definitions/ExternalStoreOptional"
+              },
+              "state_transition_notification_url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri"
+              },
+              "refund_wallet_address": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "user",
+              "payment",
+              "deliveries"
+            ],
+            "additionalProperties": false
+          },
+          "MultiProductsOrderResponse": {
+            "type": "object",
+            "description": "Full payload returned after creating an order or polling its status.",
+            "properties": {
+              "order_id": {
+                "type": "string",
+                "description": "UUID v4 that uniquely identifies the order"
+              },
+              "created_at": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Unix epoch (seconds) when the order was created"
+              },
+              "wallet_address": {
+                "type": "string",
+                "description": "Destination wallet address (if applicable)"
+              },
+              "payment_method": {
+                "type": "string"
+              },
+              "network": {
+                "type": "string",
+                "description": "Blockchain / network (e.g. 'Solana')"
+              },
+              "coin": {
+                "type": "string",
+                "description": "Ticker of the settlement currency"
+              },
+              "coin_amount": {
+                "type": "string"
+              },
+              "original_price": {
+                "type": "string"
+              },
+              "qr_url": {
+                "type": "string",
+                "format": "uri",
+                "description": "uri to retrieve a QR code that can be used to start the payment"
+              },
+              "qr_text": {
+                "type": "string"
+              },
+              "sent_coin_amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payment_state": {
+                "type": "string",
+                "enum": [
+                  "WalletRequested",
+                  "WalletCreated",
+                  "PaymentRequested",
+                  "PaymentStarted",
+                  "WaitingForComplianceReport",
+                  "PaymentQuarantined",
+                  "PaymentReceived",
+                  "PartialPaymentStarted",
+                  "Failed",
+                  "WaitingForExpiry",
+                  "WaitingForExpiryAfterPaymentDetection",
+                  "Expired",
+                  "ExpiredAfterPaymentDetection",
+                  "PaymentCanceled"
+                ]
+              },
+              "deliveries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Delivery"
+                }
+              },
+              "order_state": {
+                "type": "string",
+                "enum": [
+                  "WaitingForPayment",
+                  "PaymentStarted",
+                  "PaymentFailed",
+                  "WaitingForNFTCards",
+                  "NFTCardsSpent",
+                  "WaitingForDelivery",
+                  "WaitingForCoupon",
+                  "Refunded",
+                  "Completed",
+                  "WaitingForManualAction",
+                  "Done",
+                  "Expired",
+                  "Canceled"
+                ]
+              },
+              "missing_amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "missing_amount_qr_text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "missing_amount_qr_url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri"
+              },
+              "received_amount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "checkout_url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri",
+                "description": "when present, redirect the use here to start the payment"
+              },
+              "nft_codes": {
+                "$ref": "#/definitions/NFTCodeSpendingSummary"
+              },
+              "summary": {
+                "$ref": "#/definitions/OrderSummary"
+              },
+              "user": {
+                "$ref": "#/definitions/User"
+              },
+              "payment_via": {
+                "type": "string"
+              },
+              "payment_requested_at": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "payment_transactions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Blockchain TX hashes or processor IDs"
+              },
+              "payment_method_protocol": {
+                "type": "string"
+              },
+              "payment_id": {
+                "type": "string"
+              },
+              "payment_value": {
+                "type": "string"
+              },
+              "campaign_rewards": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "$ref": "#/definitions/CampaignReward"
+                }
+              },
+              "state_transition_notification_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sandbox_mode": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "store_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "is_payment_processor_external": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "order_id",
+              "created_at",
+              "payment_state",
+              "order_state",
+              "is_payment_processor_external"
+            ],
+            "additionalProperties": false
+          },
+          "Delivery": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "delivery_state": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "deliverable": {
+                "$ref": "#/definitions/ProductDeliverable"
+              },
+              "sandbox_mode": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "delivery_state",
+              "kind",
+              "deliverable"
+            ]
+          },
+          "ProductDeliverable": {
+            "type": "object",
+            "properties": {
+              "denomination": {
+                "type": "string"
+              },
+              "localized_denomination": {
+                "type": "string"
+              },
+              "family": {
+                "type": "string"
+              },
+              "brand_name": {
+                "type": "string"
+              },
+              "brand_logo": {
+                "type": "string"
+              },
+              "brand_bg_color": {
+                "type": "string"
+              },
+              "error_description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pin_code": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL the user must open to reveal / activate the code."
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9-]{4,}$",
+                    "description": "The gift-card code itself."
+                  }
+                ]
+              },
+              "pin_serial": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Serial number (shown on some physical/virtual cards)."
+              },
+              "security_code": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Extra security / CVV code if required by the brand."
+              },
+              "failure_reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pin_usage_instructions": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "HTML instructions on how to redeem the code."
+              },
+              "barcode_image_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "qr_image_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "beneficiary_account": {
+                "type": "string",
+                "description": "A string formatted as an email (if delivery_type requires email) or a phone number (if delivery_type requires phone).",
+                "oneOf": [
+                  {
+                    "format": "email",
+                    "description": "Email format when delivery_type indicates email-based delivery."
+                  },
+                  {
+                    "pattern": "^\\+?[1-9]\\d{1,14}$",
+                    "description": "Phone number format (E.164, up to 15 digits, optional leading +) when delivery_type indicates phone-based delivery."
+                  }
+                ]
+              },
+              "country_code": {
+                "type": "string"
+              },
+              "delivery_type": {
+                "type": "string"
+              },
+              "points": {
+                "type": "string"
+              },
+              "coin_amount": {
+                "type": "string"
+              },
+              "original_coin_amount": {
+                "type": "string"
+              },
+              "original_price": {
+                "type": "string"
+              },
+              "product_value": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "currency_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "redeem_instructions": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "terms_and_conditions": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "promotion": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "denomination",
+              "brand_name",
+              "beneficiary_account",
+              "country_code"
+            ]
+          },
+          "OrderSummary": {
+            "type": "object",
+            "properties": {
+              "coin_amount_before_discount": {
+                "type": "string"
+              },
+              "coin_amount_after_discount": {
+                "type": "string"
+              },
+              "coin_amount_to_pay_in_crypto": {
+                "type": "string"
+              },
+              "coin_amount_to_pay_via_nft": {
+                "type": "string"
+              },
+              "coin_amount_to_pay_via_coupon": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "coin_amount_before_discount",
+              "coin_amount_after_discount",
+              "coin_amount_to_pay_in_crypto",
+              "coin_amount_to_pay_via_nft",
+              "coin_amount_to_pay_via_coupon"
+            ]
+          },
+          "PaymentFee": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "Points": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "NFTCodeSpendingSummary": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "IEnrichedProblem": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "CampaignReward": {
+            "type": "object",
+            "properties": {
+              "campaign_name": {
+                "type": "string"
+              },
+              "campaign_description": {
+                "type": "string"
+              },
+              "reward": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "campaign_name",
+              "reward"
+            ]
+          },
+          "BaseCurrency": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "examples": [
+                  "BTC, ETH, USDT, USDC, SOL"
+                ]
+              },
+              "logo_url": {
+                "type": "string"
+              },
+              "is_suspended": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "logo_url",
+              "is_suspended"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  ],
+  "prompts": [],
+  "resources": [],
+  "transport_used": "sse",
+  "error": null,
+  "endpoint_url": "https://api.cryptorefills.com/mcp/sse"
+}
