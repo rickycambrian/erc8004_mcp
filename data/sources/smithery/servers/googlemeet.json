@@ -1,0 +1,477 @@
+{
+  "qualifiedName": "googlemeet",
+  "displayName": "Google Meet",
+  "description": "Google Meet is a secure video conferencing platform that integrates with Google Workspace, facilitating remote meetings, screen sharing, and chat",
+  "iconUrl": "https://logos.composio.dev/api/googlemeet",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/googlemeet",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/googlemeet/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "GOOGLEMEET_CREATE_MEET",
+      "description": "Creates a new Google Meet space, optionally configuring its access type and entry point access controls.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateMeetRequest",
+        "properties": {
+          "access_type": {
+            "enum": [
+              "OPEN",
+              "TRUSTED",
+              "RESTRICTED",
+              "ACCESS_TYPE_UNSPECIFIED"
+            ],
+            "type": "string",
+            "title": "Access Type",
+            "description": "Access control level for the meeting space."
+          },
+          "entry_point_access": {
+            "enum": [
+              "ENTRY_POINT_ACCESS_UNSPECIFIED",
+              "ALL",
+              "CREATOR_APP_ONLY"
+            ],
+            "type": "string",
+            "title": "Entry Point Access",
+            "description": "Access control for meeting entry points."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEMEET_GET_CONFERENCE_RECORD_FOR_MEET",
+      "description": "Get conference record",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetConferenceRecordRequest",
+        "properties": {
+          "end_time": {
+            "type": "string",
+            "title": "End Time",
+            "default": null,
+            "examples": [
+              "2024-01-15T11:00:00Z"
+            ],
+            "nullable": true,
+            "description": "The end time of the meeting in RFC3339 timestamp format (e.g., '2024-01-15T11:00:00Z' or '2024-01-15T11:00:00+00:00')."
+          },
+          "space_name": {
+            "type": "string",
+            "title": "Space Name",
+            "default": null,
+            "examples": [
+              "spaces/mV63iV9-KxoB"
+            ],
+            "nullable": true,
+            "description": "The resource name of the Google Meet space in the format 'spaces/{space_id}'. Example: 'spaces/mV63iV9-KxoB'."
+          },
+          "start_time": {
+            "type": "string",
+            "title": "Start Time",
+            "default": null,
+            "examples": [
+              "2024-01-15T10:00:00Z"
+            ],
+            "nullable": true,
+            "description": "The start time of the meeting in RFC3339 timestamp format (e.g., '2024-01-15T10:00:00Z' or '2024-01-15T10:00:00+00:00')."
+          },
+          "meeting_code": {
+            "type": "string",
+            "title": "Meeting Code",
+            "default": null,
+            "nullable": true,
+            "description": "The meeting code of the Google Meet space."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEMEET_GET_MEET",
+      "description": "Retrieve details of a Google Meet space using its unique identifier.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMeetRequest",
+        "required": [
+          "space_name"
+        ],
+        "properties": {
+          "space_name": {
+            "type": "string",
+            "title": "Space Name",
+            "examples": [
+              "mV63iV9-KxoB"
+            ],
+            "description": "The unique identifier (space ID) for the Google Meet space. Provide only the raw space ID without the 'spaces/' prefix. Example: 'mV63iV9-KxoB'."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEMEET_GET_PARTICIPANT_SESSION",
+      "description": "Tool to get a specific participant session from a conference record. Use when you need to retrieve details about a particular participant in a past meeting.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetParticipantSessionRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "conferenceRecords/123456789/participants/abcdefg"
+            ],
+            "description": "Required. Resource name of the participant. Format: conferenceRecords/{conference_record}/participants/{participant}"
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEMEET_GET_RECORDINGS_BY_CONFERENCE_RECORD_ID",
+      "description": "Retrieves recordings from Google Meet for a given conference record ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetRecordingsByConferenceRecordIdRequest",
+        "required": [
+          "conferenceRecord_id"
+        ],
+        "properties": {
+          "conferenceRecord_id": {
+            "type": "string",
+            "title": "Conference Record Id",
+            "description": "Unique identifier for the conference record."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEMEET_GET_TRANSCRIPTS_BY_CONFERENCE_RECORD_ID",
+      "description": "Retrieves all transcripts for a specific Google Meet conference using its conferenceRecord_id.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTranscriptsByConferenceRecordIdRequest",
+        "required": [
+          "conferenceRecord_id"
+        ],
+        "properties": {
+          "conferenceRecord_id": {
+            "type": "string",
+            "title": "Conference Record Id",
+            "description": "Unique identifier of the conference record."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEMEET_LIST_CONFERENCE_RECORDS",
+      "description": "Tool to list conference records. Use when you need to retrieve a list of past conferences, optionally filtering them by criteria like meeting code, space name, or time range.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListConferenceRecordsRequest",
+        "properties": {
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. User specified filtering condition in EBNF format. Filterable fields: `space.meeting_code`, `space.name`, `start_time`, `end_time`. Examples: `space.name = \"spaces/NAME\"`, `space.meeting_code = \"abc-mnop-xyz\"`, `start_time>=\"2024-01-01T00:00:00.000Z\" AND start_time<=\"2024-01-02T00:00:00.000Z\"`, `end_time IS NULL`"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Maximum number of conference records to return. The service might return fewer than this value. If unspecified, at most 25 conference records are returned. The maximum value is 100; values above 100 are coerced to 100."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "nullable": true,
+            "description": "Page token returned from previous List Call."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEMEET_LIST_PARTICIPANT_SESSIONS",
+      "description": "Tool to list all participant sessions for a specific conference record in Google Meet. Use this when you need to retrieve a list of participants who joined a particular meeting.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListParticipantSessionsRequest",
+        "required": [
+          "parent"
+        ],
+        "properties": {
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "latest_end_time IS NULL"
+            ],
+            "nullable": true,
+            "description": "Optional. User-specified filtering condition in EBNF format. Filterable fields include `earliest_start_time` and `latest_end_time`."
+          },
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "examples": [
+              "conferenceRecords/my-conference-123"
+            ],
+            "description": "Required. The identifier of the conference record, in the format `conferenceRecords/{conferenceRecord}`."
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "maximum": 250,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Optional. Maximum number of participants to return. The service might return fewer than this value. If unspecified, at most 100 participants are returned. The maximum value is 250; values above 250 are coerced to 250."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "examples": [
+              "CiAKGjBpNDBibWxqNGx..."
+            ],
+            "nullable": true,
+            "description": "Optional. Page token returned from a previous list call, used to retrieve the next page of results."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEMEET_UPDATE_SPACE",
+      "description": "Updates a meeting space. Use this tool to modify the settings of an existing Google Meet space. Requires the Space resource in the request body and the space name in the path.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateSpaceRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "spaces/jQCFfuBOdN5z"
+            ],
+            "description": "Immutable. Resource name of the space. Format: `spaces/{space}`."
+          },
+          "config": {
+            "type": "object",
+            "title": "SpaceConfig",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "accessType": {
+                "enum": [
+                  "OPEN",
+                  "TRUSTED",
+                  "RESTRICTED"
+                ],
+                "type": "string",
+                "title": "AccessType",
+                "default": null,
+                "nullable": true,
+                "description": "Access type of the meeting space."
+              },
+              "moderation": {
+                "enum": [
+                  "OFF",
+                  "ON"
+                ],
+                "type": "string",
+                "title": "ModerationMode",
+                "default": null,
+                "nullable": true,
+                "description": "The pre-configured moderation mode for the Meeting."
+              },
+              "artifactConfig": {
+                "type": "object",
+                "title": "ArtifactConfig",
+                "default": null,
+                "nullable": true,
+                "properties": {
+                  "recordingConfig": {
+                    "type": "object",
+                    "title": "RecordingConfig",
+                    "default": null,
+                    "nullable": true,
+                    "properties": {
+                      "autoRecordingGeneration": {
+                        "enum": [
+                          "ON",
+                          "OFF"
+                        ],
+                        "type": "string",
+                        "title": "AutoGenerationType",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Defines whether a meeting space is automatically recorded."
+                      }
+                    },
+                    "description": "Configuration for recording.",
+                    "additionalProperties": false
+                  },
+                  "smartNotesConfig": {
+                    "type": "object",
+                    "title": "SmartNotesConfig",
+                    "default": null,
+                    "nullable": true,
+                    "properties": {
+                      "autoSmartNotesGeneration": {
+                        "enum": [
+                          "ON",
+                          "OFF"
+                        ],
+                        "type": "string",
+                        "title": "AutoGenerationType",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Defines whether to automatically generate a summary and recap of the meeting."
+                      }
+                    },
+                    "description": "Configuration for auto-smart-notes.",
+                    "additionalProperties": false
+                  },
+                  "transcriptionConfig": {
+                    "type": "object",
+                    "title": "TranscriptionConfig",
+                    "default": null,
+                    "nullable": true,
+                    "properties": {
+                      "autoTranscriptionGeneration": {
+                        "enum": [
+                          "ON",
+                          "OFF"
+                        ],
+                        "type": "string",
+                        "title": "AutoGenerationType",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Defines whether the content of a meeting is automatically transcribed."
+                      }
+                    },
+                    "description": "Configuration for auto-transcript.",
+                    "additionalProperties": false
+                  }
+                },
+                "description": "Configuration pertaining to the auto-generated artifacts.",
+                "additionalProperties": false
+              },
+              "entryPointAccess": {
+                "enum": [
+                  "ALL",
+                  "CREATOR_APP_ONLY"
+                ],
+                "type": "string",
+                "title": "EntryPointAccess",
+                "default": null,
+                "nullable": true,
+                "description": "Defines the entry points that can be used to join meetings."
+              },
+              "moderationRestrictions": {
+                "type": "object",
+                "title": "ModerationRestrictions",
+                "default": null,
+                "nullable": true,
+                "properties": {
+                  "chatRestriction": {
+                    "enum": [
+                      "HOSTS_ONLY",
+                      "NO_RESTRICTION"
+                    ],
+                    "type": "string",
+                    "title": "RestrictionType",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Defines who has permission to send chat messages."
+                  },
+                  "presentRestriction": {
+                    "enum": [
+                      "HOSTS_ONLY",
+                      "NO_RESTRICTION"
+                    ],
+                    "type": "string",
+                    "title": "RestrictionType",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Defines who has permission to share their screen."
+                  },
+                  "reactionRestriction": {
+                    "enum": [
+                      "HOSTS_ONLY",
+                      "NO_RESTRICTION"
+                    ],
+                    "type": "string",
+                    "title": "RestrictionType",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Defines who has permission to send reactions."
+                  },
+                  "defaultJoinAsViewerType": {
+                    "enum": [
+                      "ON",
+                      "OFF"
+                    ],
+                    "type": "string",
+                    "title": "DefaultJoinAsViewerType",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Defines whether to restrict the default role assigned to users as viewer."
+                  }
+                },
+                "description": "When moderation.ON, these restrictions go into effect.",
+                "additionalProperties": false
+              },
+              "attendanceReportGenerationType": {
+                "enum": [
+                  "GENERATE_REPORT",
+                  "DO_NOT_GENERATE"
+                ],
+                "type": "string",
+                "title": "AttendanceReportGenerationType",
+                "default": null,
+                "nullable": true,
+                "description": "Whether attendance report is enabled for the meeting space."
+              }
+            },
+            "description": "Configuration pertaining to the meeting space.",
+            "additionalProperties": false
+          },
+          "updateMask": {
+            "type": "string",
+            "title": "Update Mask",
+            "default": null,
+            "examples": [
+              "config.accessType,config.moderationRestrictions.chatRestriction"
+            ],
+            "nullable": true,
+            "description": "Optional. Field mask used to specify the fields to be updated. Comma-separated list of fully qualified field names. Example: \"config.accessType,config.moderationRestrictions.chatRestriction\". Use \"*\" to update all fields."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T12:58:21.079492+00:00",
+    "source": "smithery"
+  }
+}

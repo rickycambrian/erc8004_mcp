@@ -1,0 +1,1430 @@
+{
+  "qualifiedName": "google_maps",
+  "displayName": "Google Maps",
+  "description": "Integrate Google Maps to access location data, geocoding, directions, and mapping services in your application.",
+  "iconUrl": "https://logos.composio.dev/api/google_maps",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/google_maps",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/google_maps/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "GOOGLE_MAPS_COMPUTE_ROUTE_MATRIX",
+      "description": "Calculates travel distance and duration matrix between multiple origins and destinations using the modern Routes API; supports OAuth2 authentication and various travel modes.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ComputeRouteMatrixRequest",
+        "required": [
+          "origins",
+          "destinations"
+        ],
+        "properties": {
+          "units": {
+            "enum": [
+              "METRIC",
+              "IMPERIAL"
+            ],
+            "type": "string",
+            "title": "Units",
+            "default": "IMPERIAL",
+            "examples": [
+              "IMPERIAL",
+              "METRIC"
+            ],
+            "description": "Unit system (e.g., 'METRIC' for kilometers, 'IMPERIAL' for miles) for displaying distances."
+          },
+          "origins": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "RouteMatrixOriginDestination",
+              "properties": {
+                "address": {
+                  "type": "string",
+                  "title": "Address",
+                  "default": null,
+                  "examples": [
+                    "1600 Amphitheatre Parkway, Mountain View, CA"
+                  ],
+                  "nullable": true,
+                  "description": "Address as a string. Provide either address or latitude/longitude."
+                },
+                "latitude": {
+                  "type": "number",
+                  "title": "Latitude",
+                  "default": null,
+                  "examples": [
+                    37.4224764
+                  ],
+                  "nullable": true,
+                  "description": "Latitude in decimal degrees. Must be used with longitude."
+                },
+                "longitude": {
+                  "type": "number",
+                  "title": "Longitude",
+                  "default": null,
+                  "examples": [
+                    -122.0842499
+                  ],
+                  "nullable": true,
+                  "description": "Longitude in decimal degrees. Must be used with latitude."
+                }
+              },
+              "description": "A single origin or destination location for the route matrix."
+            },
+            "title": "Origins",
+            "examples": [
+              [
+                {
+                  "address": "1600 Amphitheatre Parkway, Mountain View, CA"
+                },
+                {
+                  "latitude": 37.403184,
+                  "longitude": -122.097371
+                }
+              ]
+            ],
+            "minItems": 1,
+            "description": "List of origin locations. Each can be specified as an address or latitude/longitude coordinates."
+          },
+          "fieldMask": {
+            "type": "string",
+            "title": "Field Mask",
+            "default": "originIndex,destinationIndex,duration,distanceMeters,status,condition",
+            "examples": [
+              "originIndex,destinationIndex,duration,distanceMeters",
+              "originIndex,destinationIndex,duration,distanceMeters,status,condition"
+            ],
+            "description": "Comma-separated list of response fields to include (e.g., 'originIndex,destinationIndex,duration,distanceMeters'). Use '*' for all fields."
+          },
+          "travelMode": {
+            "enum": [
+              "DRIVE",
+              "BICYCLE",
+              "WALK",
+              "TWO_WHEELER",
+              "TRANSIT"
+            ],
+            "type": "string",
+            "title": "Travel Mode",
+            "default": "DRIVE",
+            "examples": [
+              "DRIVE",
+              "BICYCLE",
+              "WALK",
+              "TRANSIT"
+            ],
+            "description": "Mode of transportation for the route matrix calculation."
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "RouteMatrixOriginDestination",
+              "properties": {
+                "address": {
+                  "type": "string",
+                  "title": "Address",
+                  "default": null,
+                  "examples": [
+                    "1600 Amphitheatre Parkway, Mountain View, CA"
+                  ],
+                  "nullable": true,
+                  "description": "Address as a string. Provide either address or latitude/longitude."
+                },
+                "latitude": {
+                  "type": "number",
+                  "title": "Latitude",
+                  "default": null,
+                  "examples": [
+                    37.4224764
+                  ],
+                  "nullable": true,
+                  "description": "Latitude in decimal degrees. Must be used with longitude."
+                },
+                "longitude": {
+                  "type": "number",
+                  "title": "Longitude",
+                  "default": null,
+                  "examples": [
+                    -122.0842499
+                  ],
+                  "nullable": true,
+                  "description": "Longitude in decimal degrees. Must be used with latitude."
+                }
+              },
+              "description": "A single origin or destination location for the route matrix."
+            },
+            "title": "Destinations",
+            "examples": [
+              [
+                {
+                  "address": "85 10th Ave, New York, NY"
+                },
+                {
+                  "latitude": 37.383047,
+                  "longitude": -122.044651
+                }
+              ]
+            ],
+            "minItems": 1,
+            "description": "List of destination locations. Each can be specified as an address or latitude/longitude coordinates."
+          },
+          "languageCode": {
+            "type": "string",
+            "title": "Language Code",
+            "default": "en-US",
+            "examples": [
+              "en-US",
+              "es",
+              "fr"
+            ],
+            "description": "BCP-47 language code (e.g., 'en-US', 'es') for textual information."
+          },
+          "routingPreference": {
+            "enum": [
+              "ROUTING_PREFERENCE_UNSPECIFIED",
+              "TRAFFIC_UNAWARE",
+              "TRAFFIC_AWARE",
+              "TRAFFIC_AWARE_OPTIMAL"
+            ],
+            "type": "string",
+            "title": "Routing Preference",
+            "default": "TRAFFIC_AWARE",
+            "examples": [
+              "TRAFFIC_AWARE",
+              "TRAFFIC_UNAWARE"
+            ],
+            "description": "Specifies routing preference: `TRAFFIC_UNAWARE` (fastest, ignores traffic), `TRAFFIC_AWARE` (considers traffic, optimized), `TRAFFIC_AWARE_OPTIMAL` (most accurate traffic-based routing), or `ROUTING_PREFERENCE_UNSPECIFIED` (behavior similar to `TRAFFIC_UNAWARE`)."
+          }
+        },
+        "description": "Parameters for computing a route matrix between multiple origins and destinations."
+      }
+    },
+    {
+      "name": "GOOGLE_MAPS_DISTANCE_MATRIX_API",
+      "description": "DEPRECATED: Legacy API that calculates travel distance and time for a matrix of origins and destinations. This API only works with API keys (no OAuth2 support). Use the modern 'Compute Route Matrix' action instead, which supports OAuth2 authentication. Supports different modes of transportation and options like departure/arrival times.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DistanceMatrixApiRequest",
+        "required": [
+          "origins",
+          "destinations"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "default": null,
+            "examples": [
+              "YOUR_API_KEY"
+            ],
+            "nullable": true,
+            "description": "Your application's API key. This key identifies your application for purposes of quota management."
+          },
+          "mode": {
+            "enum": [
+              "driving",
+              "walking",
+              "bicycling",
+              "transit"
+            ],
+            "type": "string",
+            "title": "Mode",
+            "default": "driving",
+            "examples": [
+              "driving"
+            ],
+            "nullable": true,
+            "description": "Specifies the mode of transport to use."
+          },
+          "avoid": {
+            "enum": [
+              "tolls",
+              "highways",
+              "ferries",
+              "indoor"
+            ],
+            "type": "string",
+            "title": "Avoid",
+            "default": null,
+            "examples": [
+              "tolls"
+            ],
+            "nullable": true,
+            "description": "Indicates that the calculated route should avoid the specified features. Multiple values can be pipe-separated e.g. 'tolls|highways'."
+          },
+          "units": {
+            "enum": [
+              "metric",
+              "imperial"
+            ],
+            "type": "string",
+            "title": "Units",
+            "default": null,
+            "examples": [
+              "imperial"
+            ],
+            "nullable": true,
+            "description": "Specifies the unit system to use when displaying results. The default is metric."
+          },
+          "region": {
+            "type": "string",
+            "title": "Region",
+            "default": null,
+            "examples": [
+              "us",
+              "uk"
+            ],
+            "nullable": true,
+            "description": "The region code, specified as a ccTLD ('top-level domain') two-character value. This helps influence results based on the region."
+          },
+          "origins": {
+            "type": "string",
+            "title": "Origins",
+            "examples": [
+              "Washington, DC|New York City, NY",
+              "place_id:ChIJ69P_A4EBwokR7sD2pE2A|enc:gfo}EtohhU:"
+            ],
+            "description": "The starting point for calculating travel distance and time. You can supply one or more locations separated by the pipe character (|), in the form of a place ID (prefixed with place_id:), an address, latitude/longitude coordinates (e.g., '40.7128,-74.0060'), a plus code, or an encoded polyline (prefixed with enc: and a colon)."
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": null,
+            "examples": [
+              "en-US",
+              "fr-FR"
+            ],
+            "nullable": true,
+            "description": "The language in which to return results. See the list of supported languages: https://developers.google.com/maps/faq#languagesupport"
+          },
+          "arrival_time": {
+            "type": "integer",
+            "title": "Arrival Time",
+            "default": null,
+            "examples": [
+              1493890000
+            ],
+            "nullable": true,
+            "description": "Specifies the desired time of arrival for transit directions, in seconds since midnight, January 1, 1970 UTC. You can specify either departure_time or arrival_time, but not both."
+          },
+          "destinations": {
+            "type": "string",
+            "title": "Destinations",
+            "examples": [
+              "San Francisco, CA|Victoria, BC",
+              "40.659569,-73.933783|place_id:ChIJ3S-JXmauEmsRUcIaWtf4MzE"
+            ],
+            "description": "One or more locations to use as the finishing point for calculating travel distance and time. Accepts the same formats as origins."
+          },
+          "transit_mode": {
+            "enum": [
+              "bus",
+              "subway",
+              "train",
+              "tram",
+              "rail"
+            ],
+            "type": "string",
+            "title": "Transit Mode",
+            "default": null,
+            "examples": [
+              "bus"
+            ],
+            "nullable": true,
+            "description": "Specifies one or more preferred modes of transit. This parameter may only be specified for transit directions. Multiple values can be pipe-separated e.g. 'bus|train'."
+          },
+          "traffic_model": {
+            "enum": [
+              "best_guess",
+              "pessimistic",
+              "optimistic"
+            ],
+            "type": "string",
+            "title": "Traffic Model",
+            "default": null,
+            "examples": [
+              "best_guess"
+            ],
+            "nullable": true,
+            "description": "Specifies the assumptions to use when calculating time in traffic. This parameter is only used if the request includes a departure_time and mode is 'driving'."
+          },
+          "departure_time": {
+            "type": "integer",
+            "title": "Departure Time",
+            "default": null,
+            "examples": [
+              1493879400,
+              "now"
+            ],
+            "nullable": true,
+            "description": "Specifies the desired time of departure. You can specify the time as an integer in seconds since midnight, January 1, 1970 UTC, or as the string 'now'. Required for duration_in_traffic."
+          },
+          "transit_routing_preference": {
+            "enum": [
+              "less_walking",
+              "fewer_transfers"
+            ],
+            "type": "string",
+            "title": "Transit Routing Preference",
+            "default": null,
+            "examples": [
+              "less_walking"
+            ],
+            "nullable": true,
+            "description": "Specifies preferences for transit routes. This parameter may only be specified for transit directions."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLE_MAPS_GEOCODING_API",
+      "description": "DEPRECATED: Legacy API to convert addresses into geographic coordinates (latitude and longitude) and vice versa (reverse geocoding), or get an address for a Place ID. This API only works with API keys (no OAuth2 support). Consider using the modern Places API (Text Search or Nearby Search) for similar functionality with OAuth2 authentication.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GeocodingApiRequest",
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "default": null,
+            "examples": [
+              "YOUR_API_KEY"
+            ],
+            "nullable": true,
+            "description": "Your application's API key. If not provided, will be extracted from connection metadata."
+          },
+          "bounds": {
+            "type": "string",
+            "title": "Bounds",
+            "default": null,
+            "examples": [
+              "34.172684,-118.604794|34.236144,-118.500938"
+            ],
+            "nullable": true,
+            "description": "The bounding box of the viewport within which to bias geocode results more prominently (e.g., '34.172684,-118.604794|34.236144,-118.500938'). This parameter will only influence, not fully restrict, results."
+          },
+          "latlng": {
+            "type": "string",
+            "title": "Latlng",
+            "default": null,
+            "examples": [
+              "40.714224,-73.961452"
+            ],
+            "nullable": true,
+            "description": "The latitude and longitude coordinates specifying the location for which you want the closest, human-readable address (e.g., '40.714224,-73.961452'). Provide for reverse geocoding."
+          },
+          "region": {
+            "type": "string",
+            "title": "Region",
+            "default": null,
+            "examples": [
+              "US",
+              "ES"
+            ],
+            "nullable": true,
+            "description": "The region code, specified as a ccTLD ('top-level domain') two-character value. This parameter will only influence, not fully restrict, results from the geocoder."
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "default": null,
+            "examples": [
+              "1600 Amphitheatre Parkway, Mountain View, CA"
+            ],
+            "nullable": true,
+            "description": "The street address or plus code that you want to geocode. Provide for geocoding (address to coordinates)."
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": null,
+            "examples": [
+              "en",
+              "es"
+            ],
+            "nullable": true,
+            "description": "The language in which to return results. If language is not supplied, the geocoder attempts to use the preferred language as specified in the Accept-Language header, or the native language of the domain from which the request is sent."
+          },
+          "place_id": {
+            "type": "string",
+            "title": "Place Id",
+            "default": null,
+            "examples": [
+              "ChIJd8BlQ2BZwokRAFUEcm_qrcA"
+            ],
+            "nullable": true,
+            "description": "The place ID of the place for which you wish to obtain the human-readable address. Provide for place ID geocoding."
+          },
+          "components": {
+            "type": "string",
+            "title": "Components",
+            "default": null,
+            "examples": [
+              "postal_code:94043|country:US"
+            ],
+            "nullable": true,
+            "description": "A components filter with elements separated by a pipe (|). E.g., 'postal_code:94043|country:US'. Used for geocoding, can be restrictive or biasing."
+          },
+          "result_type": {
+            "type": "string",
+            "title": "Result Type",
+            "default": null,
+            "examples": [
+              "street_address|locality"
+            ],
+            "nullable": true,
+            "description": "A filter of one or more address types, separated by a pipe (|) (e.g., 'street_address|locality'). Used for reverse geocoding and place ID geocoding."
+          },
+          "location_type": {
+            "type": "string",
+            "title": "Location Type",
+            "default": null,
+            "examples": [
+              "ROOFTOP|RANGE_INTERPOLATED"
+            ],
+            "nullable": true,
+            "description": "A filter of one or more location types, separated by a pipe (|) (e.g., 'ROOFTOP|RANGE_INTERPOLATED'). Used for reverse geocoding and place ID geocoding."
+          },
+          "extra_computations": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "ADDRESS_DESCRIPTORS",
+                "BUILDING_AND_ENTRANCES"
+              ],
+              "type": "string",
+              "title": "ExtraComputationEnum",
+              "properties": {}
+            },
+            "title": "Extra Computations",
+            "default": null,
+            "examples": [
+              [
+                "ADDRESS_DESCRIPTORS"
+              ]
+            ],
+            "nullable": true,
+            "description": "Use this parameter to specify additional features in the response. Can select multiple values."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLE_MAPS_GET_DIRECTION",
+      "description": "DEPRECATED: Legacy API that fetches detailed directions between an origin and a destination, supporting intermediate waypoints and various travel modes. This API only works with API keys (no OAuth2 support). Use the modern 'Get Route' action instead, which supports OAuth2 authentication.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetDirectionRequest",
+        "required": [
+          "origin",
+          "destination"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "driving",
+            "examples": [
+              "driving",
+              "walking",
+              "bicycling",
+              "transit"
+            ],
+            "description": "The mode of transportation for which to calculate directions. Supported values are 'driving' (default), 'walking', 'bicycling', and 'transit'."
+          },
+          "avoid": {
+            "type": "string",
+            "title": "Avoid",
+            "default": null,
+            "examples": [
+              "tolls",
+              "highways",
+              "ferries",
+              "tolls|highways"
+            ],
+            "nullable": true,
+            "description": "Specifies features to avoid in the generated route. Multiple values can be combined using a pipe delimiter (e.g., 'tolls|highways'). Valid options include 'tolls', 'highways', and 'ferries'."
+          },
+          "units": {
+            "type": "string",
+            "title": "Units",
+            "default": "imperial",
+            "examples": [
+              "metric",
+              "imperial"
+            ],
+            "description": "The unit system for displaying distances. Supported values are 'metric' (kilometers and meters) and 'imperial' (miles and feet). Defaults to 'imperial'."
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin",
+            "examples": [
+              "Disneyland",
+              "123 Main St, Los Angeles, CA",
+              "34.0522,-118.2437"
+            ],
+            "description": "The starting point for the directions. This can be a textual address (e.g., '123 Main St, Los Angeles, CA'), a place name (e.g., 'Disneyland'), or latitude/longitude coordinates (e.g., '34.0522,-118.2437')."
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "en",
+            "examples": [
+              "en",
+              "es",
+              "fr"
+            ],
+            "description": "The language code for returning results, e.g., 'en' for English, 'es' for Spanish. Defaults to 'en'."
+          },
+          "waypoints": {
+            "type": "string",
+            "title": "Waypoints",
+            "default": null,
+            "examples": [
+              "Hollywood Bowl,GettyCenter"
+            ],
+            "nullable": true,
+            "description": "A comma-separated string of intermediate locations (addresses, place names, or coordinates) to visit between the origin and destination."
+          },
+          "destination": {
+            "type": "string",
+            "title": "Destination",
+            "examples": [
+              "Universal Studios Hollywood",
+              "456 Park Ave, New York, NY",
+              "40.7128,-74.0060"
+            ],
+            "description": "The ending point for the directions. This can be a textual address (e.g., '456 Park Ave, New York, NY'), a place name (e.g., 'Universal Studios Hollywood'), or latitude/longitude coordinates (e.g., '40.7128,-74.0060')."
+          }
+        },
+        "description": "Parameters for requesting directions between specified locations."
+      }
+    },
+    {
+      "name": "GOOGLE_MAPS_GET_ROUTE",
+      "description": "Calculates one or more routes between two specified locations. Uses various travel modes and preferences; addresses must be resolvable by Google Maps.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetRouteRequest",
+        "required": [
+          "origin_address",
+          "destination_address"
+        ],
+        "properties": {
+          "units": {
+            "enum": [
+              "METRIC",
+              "IMPERIAL"
+            ],
+            "type": "string",
+            "title": "Units",
+            "default": "IMPERIAL",
+            "examples": [
+              "IMPERIAL",
+              "METRIC"
+            ],
+            "description": "Unit system (e.g., 'METRIC' for kilometers, 'IMPERIAL' for miles) for displaying distances."
+          },
+          "fieldMask": {
+            "type": "string",
+            "title": "Field Mask",
+            "default": "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline",
+            "examples": [
+              "routes.distanceMeters,routes.duration"
+            ],
+            "description": "Comma-separated list of `Route` object fields to include in the response (e.g., 'routes.distanceMeters,routes.duration') for efficiency."
+          },
+          "travelMode": {
+            "enum": [
+              "DRIVE",
+              "BICYCLE",
+              "WALK",
+              "TWO_WHEELER",
+              "TRANSIT"
+            ],
+            "type": "string",
+            "title": "Travel Mode",
+            "default": "DRIVE",
+            "examples": [
+              "DRIVE",
+              "BICYCLE",
+              "WALK"
+            ],
+            "description": "Mode of transportation for the route."
+          },
+          "languageCode": {
+            "type": "string",
+            "title": "Language Code",
+            "default": "en-US",
+            "examples": [
+              "en-US",
+              "es",
+              "fr"
+            ],
+            "description": "BCP-47 language code (e.g., 'en-US', 'es') for textual information like navigation instructions."
+          },
+          "origin_address": {
+            "type": "string",
+            "title": "Origin Address",
+            "examples": [
+              "1600 Amphitheatre Parkway, Mountain View, CA"
+            ],
+            "description": "Starting point address or place name for the route calculation."
+          },
+          "routingPreference": {
+            "enum": [
+              "ROUTING_PREFERENCE_UNSPECIFIED",
+              "TRAFFIC_UNAWARE",
+              "TRAFFIC_AWARE",
+              "TRAFFIC_AWARE_OPTIMAL"
+            ],
+            "type": "string",
+            "title": "Routing Preference",
+            "examples": [
+              "TRAFFIC_AWARE",
+              "TRAFFIC_UNAWARE"
+            ],
+            "description": "Specifies routing preference: `TRAFFIC_UNAWARE` (fastest, ignores traffic), `TRAFFIC_AWARE` (considers traffic, optimized), `TRAFFIC_AWARE_OPTIMAL` (most accurate traffic-based routing), or `ROUTING_PREFERENCE_UNSPECIFIED` (behavior similar to `TRAFFIC_UNAWARE`). Cannot be set when travelMode is WALK, BICYCLE, or TRANSIT - must be omitted for these modes."
+          },
+          "destination_address": {
+            "type": "string",
+            "title": "Destination Address",
+            "examples": [
+              "85 10th Ave, New York, NY"
+            ],
+            "description": "Destination point address or place name for the route calculation."
+          },
+          "computeAlternativeRoutes": {
+            "type": "boolean",
+            "title": "Compute Alternative Routes",
+            "default": false,
+            "description": "Computes and returns alternative routes if true."
+          },
+          "routeModifiers_avoidTolls": {
+            "type": "boolean",
+            "title": "Route Modifiers Avoid Tolls",
+            "default": false,
+            "description": "Attempts to avoid toll roads if true."
+          },
+          "routeModifiers_avoidFerries": {
+            "type": "boolean",
+            "title": "Route Modifiers Avoid Ferries",
+            "default": false,
+            "description": "Attempts to avoid ferries if true."
+          },
+          "routeModifiers_avoidHighways": {
+            "type": "boolean",
+            "title": "Route Modifiers Avoid Highways",
+            "default": false,
+            "description": "Attempts to avoid highways if true."
+          }
+        },
+        "description": "Parameters for requesting a route, including origin, destination, travel mode, and preferences."
+      }
+    },
+    {
+      "name": "GOOGLE_MAPS_MAPS_EMBED_API",
+      "description": "Tool to generate an embeddable Google Map URL and HTML iframe code. Use when you need to display a map (place, view, directions, street view, search) on a webpage without JavaScript. Note: This API only works with API keys (no OAuth2 support). It generates embed URLs and does not make direct API calls.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MapsEmbedApiRequest",
+        "required": [
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "place",
+              "view",
+              "directions",
+              "streetview",
+              "search"
+            ],
+            "type": "string",
+            "title": "Mode",
+            "examples": [
+              "place"
+            ],
+            "description": "The mode of the embedded map."
+          },
+          "view_params": {
+            "type": "object",
+            "title": "ViewModeParams",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "zoom": {
+                "type": "integer",
+                "title": "Zoom",
+                "default": null,
+                "maximum": 21,
+                "minimum": 0,
+                "examples": [
+                  15
+                ],
+                "nullable": true,
+                "description": "Sets the initial zoom level of the map. Values range from 0 (the whole world) to 21 (individual buildings)."
+              },
+              "center": {
+                "type": "string",
+                "title": "Center",
+                "default": null,
+                "examples": [
+                  "-33.8569,151.2152"
+                ],
+                "nullable": true,
+                "description": "Defines the center of the map view. Accepts comma-separated latitude and longitude value (e.g., '37.4218,-122.0840'). This is REQUIRED for view mode."
+              },
+              "region": {
+                "type": "string",
+                "title": "Region",
+                "default": null,
+                "examples": [
+                  "US"
+                ],
+                "nullable": true,
+                "description": "Defines appropriate borders and labels based on geopolitical sensitivities (e.g., 'US', 'GB'). Accepts a two-character ccTLD code."
+              },
+              "maptype": {
+                "enum": [
+                  "roadmap",
+                  "satellite"
+                ],
+                "type": "string",
+                "title": "Maptype",
+                "default": null,
+                "examples": [
+                  "satellite"
+                ],
+                "nullable": true,
+                "description": "Defines the type of map tiles to load."
+              },
+              "language": {
+                "type": "string",
+                "title": "Language",
+                "default": null,
+                "examples": [
+                  "es"
+                ],
+                "nullable": true,
+                "description": "Defines the language for UI elements and map labels (e.g., 'en', 'es', 'fr')."
+              }
+            },
+            "description": "Parameters for 'view' mode.",
+            "additionalProperties": false
+          },
+          "place_params": {
+            "type": "object",
+            "title": "PlaceModeParams",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "q"
+            ],
+            "properties": {
+              "q": {
+                "type": "string",
+                "title": "Q",
+                "examples": [
+                  "Space+Needle,Seattle+WA",
+                  "place_id:ChIJrTLr-GyuEmsRBfy61i59si0"
+                ],
+                "description": "Defines the map marker location. Accepts a URL-escaped place name, address, plus code, or Place ID (prefixed with 'place_id:')."
+              },
+              "zoom": {
+                "type": "integer",
+                "title": "Zoom",
+                "default": null,
+                "maximum": 21,
+                "minimum": 0,
+                "examples": [
+                  15
+                ],
+                "nullable": true,
+                "description": "Sets the initial zoom level of the map. Values range from 0 (the whole world) to 21 (individual buildings)."
+              },
+              "center": {
+                "type": "string",
+                "title": "Center",
+                "default": null,
+                "examples": [
+                  "37.4218,-122.0840"
+                ],
+                "nullable": true,
+                "description": "Defines the center of the map view. Accepts comma-separated latitude and longitude value (e.g., '37.4218,-122.0840')."
+              },
+              "region": {
+                "type": "string",
+                "title": "Region",
+                "default": null,
+                "examples": [
+                  "US"
+                ],
+                "nullable": true,
+                "description": "Defines appropriate borders and labels based on geopolitical sensitivities (e.g., 'US', 'GB'). Accepts a two-character ccTLD code."
+              },
+              "maptype": {
+                "enum": [
+                  "roadmap",
+                  "satellite"
+                ],
+                "type": "string",
+                "title": "Maptype",
+                "default": null,
+                "examples": [
+                  "satellite"
+                ],
+                "nullable": true,
+                "description": "Defines the type of map tiles to load."
+              },
+              "language": {
+                "type": "string",
+                "title": "Language",
+                "default": null,
+                "examples": [
+                  "es"
+                ],
+                "nullable": true,
+                "description": "Defines the language for UI elements and map labels (e.g., 'en', 'es', 'fr')."
+              }
+            },
+            "description": "Parameters for 'place' mode.",
+            "additionalProperties": false
+          },
+          "search_params": {
+            "type": "object",
+            "title": "SearchModeParams",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "q"
+            ],
+            "properties": {
+              "q": {
+                "type": "string",
+                "title": "Q",
+                "examples": [
+                  "record+stores+in+Seattle"
+                ],
+                "description": "Defines the search term. Can include a geographic restriction (e.g., 'record+stores+in+Seattle')."
+              },
+              "zoom": {
+                "type": "integer",
+                "title": "Zoom",
+                "default": null,
+                "maximum": 21,
+                "minimum": 0,
+                "examples": [
+                  15
+                ],
+                "nullable": true,
+                "description": "Sets the initial zoom level of the map. Values range from 0 (the whole world) to 21 (individual buildings)."
+              },
+              "center": {
+                "type": "string",
+                "title": "Center",
+                "default": null,
+                "examples": [
+                  "37.4218,-122.0840"
+                ],
+                "nullable": true,
+                "description": "Defines the center of the map view. Accepts comma-separated latitude and longitude value (e.g., '37.4218,-122.0840')."
+              },
+              "region": {
+                "type": "string",
+                "title": "Region",
+                "default": null,
+                "examples": [
+                  "US"
+                ],
+                "nullable": true,
+                "description": "Defines appropriate borders and labels based on geopolitical sensitivities (e.g., 'US', 'GB'). Accepts a two-character ccTLD code."
+              },
+              "maptype": {
+                "enum": [
+                  "roadmap",
+                  "satellite"
+                ],
+                "type": "string",
+                "title": "Maptype",
+                "default": null,
+                "examples": [
+                  "satellite"
+                ],
+                "nullable": true,
+                "description": "Defines the type of map tiles to load."
+              },
+              "language": {
+                "type": "string",
+                "title": "Language",
+                "default": null,
+                "examples": [
+                  "es"
+                ],
+                "nullable": true,
+                "description": "Defines the language for UI elements and map labels (e.g., 'en', 'es', 'fr')."
+              }
+            },
+            "description": "Parameters for 'search' mode.",
+            "additionalProperties": false
+          },
+          "directions_params": {
+            "type": "object",
+            "title": "DirectionsModeParams",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "origin",
+              "destination"
+            ],
+            "properties": {
+              "mode": {
+                "enum": [
+                  "driving",
+                  "walking",
+                  "bicycling",
+                  "transit",
+                  "flying"
+                ],
+                "type": "string",
+                "title": "Mode",
+                "default": null,
+                "examples": [
+                  "driving"
+                ],
+                "nullable": true,
+                "description": "Defines the method of travel."
+              },
+              "zoom": {
+                "type": "integer",
+                "title": "Zoom",
+                "default": null,
+                "maximum": 21,
+                "minimum": 0,
+                "examples": [
+                  15
+                ],
+                "nullable": true,
+                "description": "Sets the initial zoom level of the map. Values range from 0 (the whole world) to 21 (individual buildings)."
+              },
+              "avoid": {
+                "type": "string",
+                "title": "Avoid",
+                "default": null,
+                "examples": [
+                  "tolls|highways"
+                ],
+                "nullable": true,
+                "description": "Specifies features to avoid in directions (e.g., 'tolls', 'highways', 'ferries'). Separate multiple values with the pipe character (|). E.g. 'tolls|highways'."
+              },
+              "units": {
+                "enum": [
+                  "metric",
+                  "imperial"
+                ],
+                "type": "string",
+                "title": "Units",
+                "default": null,
+                "examples": [
+                  "metric"
+                ],
+                "nullable": true,
+                "description": "Specifies measurement units for distances."
+              },
+              "center": {
+                "type": "string",
+                "title": "Center",
+                "default": null,
+                "examples": [
+                  "37.4218,-122.0840"
+                ],
+                "nullable": true,
+                "description": "Defines the center of the map view. Accepts comma-separated latitude and longitude value (e.g., '37.4218,-122.0840')."
+              },
+              "origin": {
+                "type": "string",
+                "title": "Origin",
+                "examples": [
+                  "Oslo+Norway",
+                  "place_id:ChIJs--MqP1YwokRBwAhjXWIHn8"
+                ],
+                "description": "Defines the starting point for directions. Accepts URL-escaped place name, address, plus code, lat/lng coordinates, or Place ID (prefixed with 'place_id:')."
+              },
+              "region": {
+                "type": "string",
+                "title": "Region",
+                "default": null,
+                "examples": [
+                  "US"
+                ],
+                "nullable": true,
+                "description": "Defines appropriate borders and labels based on geopolitical sensitivities (e.g., 'US', 'GB'). Accepts a two-character ccTLD code."
+              },
+              "maptype": {
+                "enum": [
+                  "roadmap",
+                  "satellite"
+                ],
+                "type": "string",
+                "title": "Maptype",
+                "default": null,
+                "examples": [
+                  "satellite"
+                ],
+                "nullable": true,
+                "description": "Defines the type of map tiles to load."
+              },
+              "language": {
+                "type": "string",
+                "title": "Language",
+                "default": null,
+                "examples": [
+                  "es"
+                ],
+                "nullable": true,
+                "description": "Defines the language for UI elements and map labels (e.g., 'en', 'es', 'fr')."
+              },
+              "waypoints": {
+                "type": "string",
+                "title": "Waypoints",
+                "default": null,
+                "examples": [
+                  "Berlin,Germany|Paris,France"
+                ],
+                "nullable": true,
+                "description": "Specifies one or more intermediary places to route directions. Separate multiple waypoints with the pipe character (|). E.g., 'Berlin,Germany|Paris,France'. Up to 20 waypoints."
+              },
+              "destination": {
+                "type": "string",
+                "title": "Destination",
+                "examples": [
+                  "Telemark+Norway",
+                  "place_id:ChIJ3S-JXmauEmsRUcIaWtf4MzE"
+                ],
+                "description": "Defines the endpoint of the directions. Accepts URL-escaped place name, address, plus code, lat/lng coordinates, or Place ID (prefixed with 'place_id:')."
+              }
+            },
+            "description": "Parameters for 'directions' mode.",
+            "additionalProperties": false
+          },
+          "streetview_params": {
+            "type": "object",
+            "title": "StreetViewModeParams",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "fov": {
+                "type": "number",
+                "title": "Fov",
+                "default": null,
+                "maximum": 100,
+                "minimum": 10,
+                "examples": [
+                  90
+                ],
+                "nullable": true,
+                "description": "Horizontal field of view in degrees (10-100). Smaller numbers mean higher zoom."
+              },
+              "pano": {
+                "type": "string",
+                "title": "Pano",
+                "default": null,
+                "examples": [
+                  "street_view_pano_id"
+                ],
+                "nullable": true,
+                "description": "A specific panorama ID. Required if 'location' is not provided. 'location' can be a fallback."
+              },
+              "zoom": {
+                "type": "integer",
+                "title": "Zoom",
+                "default": null,
+                "maximum": 21,
+                "minimum": 0,
+                "examples": [
+                  15
+                ],
+                "nullable": true,
+                "description": "Sets the initial zoom level of the map. Values range from 0 (the whole world) to 21 (individual buildings)."
+              },
+              "pitch": {
+                "type": "number",
+                "title": "Pitch",
+                "default": null,
+                "maximum": 90,
+                "minimum": -90,
+                "examples": [
+                  10
+                ],
+                "nullable": true,
+                "description": "Angle, up or down, of the camera in degrees (-90 to 90). Positive is up."
+              },
+              "center": {
+                "type": "string",
+                "title": "Center",
+                "default": null,
+                "examples": [
+                  "37.4218,-122.0840"
+                ],
+                "nullable": true,
+                "description": "Defines the center of the map view. Accepts comma-separated latitude and longitude value (e.g., '37.4218,-122.0840')."
+              },
+              "radius": {
+                "type": "integer",
+                "title": "Radius",
+                "default": null,
+                "minimum": 0,
+                "examples": [
+                  50
+                ],
+                "nullable": true,
+                "description": "Radius in meters to search for a panorama, centered on lat/lng. Default 50."
+              },
+              "region": {
+                "type": "string",
+                "title": "Region",
+                "default": null,
+                "examples": [
+                  "US"
+                ],
+                "nullable": true,
+                "description": "Defines appropriate borders and labels based on geopolitical sensitivities (e.g., 'US', 'GB'). Accepts a two-character ccTLD code."
+              },
+              "source": {
+                "enum": [
+                  "default",
+                  "outdoor"
+                ],
+                "type": "string",
+                "title": "Source",
+                "default": null,
+                "examples": [
+                  "outdoor"
+                ],
+                "nullable": true,
+                "description": "Limits Street View searches to selected sources. 'default' or 'outdoor'."
+              },
+              "heading": {
+                "type": "number",
+                "title": "Heading",
+                "default": null,
+                "maximum": 360,
+                "minimum": -180,
+                "examples": [
+                  210
+                ],
+                "nullable": true,
+                "description": "Compass heading of the camera in degrees clockwise from North (-180 to 360)."
+              },
+              "maptype": {
+                "enum": [
+                  "roadmap",
+                  "satellite"
+                ],
+                "type": "string",
+                "title": "Maptype",
+                "default": null,
+                "examples": [
+                  "satellite"
+                ],
+                "nullable": true,
+                "description": "Defines the type of map tiles to load."
+              },
+              "language": {
+                "type": "string",
+                "title": "Language",
+                "default": null,
+                "examples": [
+                  "es"
+                ],
+                "nullable": true,
+                "description": "Defines the language for UI elements and map labels (e.g., 'en', 'es', 'fr')."
+              },
+              "location": {
+                "type": "string",
+                "title": "Location",
+                "default": null,
+                "examples": [
+                  "46.414382,10.013988"
+                ],
+                "nullable": true,
+                "description": "Latitude and longitude as comma-separated values (e.g., '46.414382,10.013988'). Displays panorama closest to this location. Required if 'pano' is not provided."
+              }
+            },
+            "description": "Parameters for 'streetview' mode.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLE_MAPS_NEARBY_SEARCH",
+      "description": "Searches for places (e.g., restaurants, parks) within a specified circular area, with options to filter by place types and customize the returned fields and number of results.",
+      "inputSchema": {
+        "type": "object",
+        "title": "NearbySearchRequest",
+        "required": [
+          "latitude",
+          "longitude",
+          "radius"
+        ],
+        "properties": {
+          "radius": {
+            "type": "number",
+            "title": "Radius",
+            "maximum": 50000,
+            "minimum": 0,
+            "examples": [
+              1500,
+              5000
+            ],
+            "description": "Radius of the circular search area in meters."
+          },
+          "latitude": {
+            "type": "number",
+            "title": "Latitude",
+            "maximum": 90,
+            "minimum": -90,
+            "examples": [
+              -33.8670522,
+              34.052235
+            ],
+            "description": "Latitude coordinate of the search center in decimal degrees."
+          },
+          "fieldMask": {
+            "type": "string",
+            "title": "Field Mask",
+            "default": "places.displayName",
+            "examples": [
+              "places.displayName",
+              "places.id,places.formattedAddress,places.types",
+              "*"
+            ],
+            "description": "Comma-separated list of place fields for the response (e.g., 'places.displayName,places.formattedAddress'); use '*' for all fields."
+          },
+          "longitude": {
+            "type": "number",
+            "title": "Longitude",
+            "maximum": 180,
+            "minimum": -180,
+            "examples": [
+              151.1957362,
+              -118.243683
+            ],
+            "description": "Longitude coordinate of the search center in decimal degrees."
+          },
+          "excludedTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Excluded Types",
+            "default": null,
+            "examples": [
+              [
+                "cafe"
+              ],
+              [
+                "store"
+              ]
+            ],
+            "nullable": true,
+            "description": "Place types to exclude (e.g., 'cafe', 'store'); results matching any of these types are omitted. For supported types, see Google Maps Places API documentation."
+          },
+          "includedTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Included Types",
+            "default": null,
+            "examples": [
+              [
+                "restaurant"
+              ],
+              [
+                "atm",
+                "bank"
+              ],
+              [
+                "park"
+              ]
+            ],
+            "nullable": true,
+            "description": "Place types to include (e.g., 'restaurant', 'park'); results will match at least one of these types. For supported types, see Google Maps Places API documentation."
+          },
+          "maxResultCount": {
+            "type": "integer",
+            "title": "Max Result Count",
+            "default": 10,
+            "examples": [
+              5,
+              10,
+              20
+            ],
+            "description": "Maximum number of search results to return (up to 20); the actual count may be lower."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLE_MAPS_TEXT_SEARCH",
+      "description": "Searches for places on Google Maps using a textual query (e.g., \"restaurants in London\", \"Eiffel Tower\").",
+      "inputSchema": {
+        "type": "object",
+        "title": "TextSearchRequest",
+        "required": [
+          "textQuery"
+        ],
+        "properties": {
+          "fieldMask": {
+            "type": "string",
+            "title": "Field Mask",
+            "default": "places.displayName,places.formattedAddress,places.priceLevel",
+            "examples": [
+              "places.id,places.displayName",
+              "places.displayName,places.formattedAddress,places.types,places.rating",
+              "*"
+            ],
+            "description": "Comma-separated list of place fields to return. Use `*` for all fields (not recommended for performance/cost). See Google Maps Places API documentation for field names."
+          },
+          "textQuery": {
+            "type": "string",
+            "title": "Text Query",
+            "examples": [
+              "restaurants in London",
+              "Eiffel Tower",
+              "coffee shops near me"
+            ],
+            "description": "Text query for searching places. Matched against place name, address, and category."
+          },
+          "maxResultCount": {
+            "type": "integer",
+            "title": "Max Result Count",
+            "default": 10,
+            "examples": [
+              5,
+              10,
+              20
+            ],
+            "description": "Maximum number of place results to return (must be 1-20). Note: Google prefers `pageSize`, but this action uses `maxResultCount`."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:00:55.917668+00:00",
+    "source": "smithery"
+  }
+}

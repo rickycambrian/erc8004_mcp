@@ -1,0 +1,481 @@
+{
+  "qualifiedName": "attio",
+  "displayName": "Attio",
+  "description": "Attio is a fully customizable workspace for your team's relationships and workflows.",
+  "iconUrl": "https://logos.composio.dev/api/attio",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/attio",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/attio/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "ATTIO_CREATE_NOTE",
+      "description": "This tool creates a new note on a given record in Attio. The note can be attached to any record type (like person, company, or deal) and includes a title and content. It requires parameters such as parent_object, parent_record_id, title, and content, with an optional created_at timestamp.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateNoteRequest",
+        "required": [
+          "parent_object",
+          "parent_record_id",
+          "title",
+          "content"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "Meeting Notes",
+              "Follow-up Required"
+            ],
+            "description": "The title of the note"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "Discussed project timeline and next steps"
+            ],
+            "description": "The content of the note"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "default": null,
+            "examples": [
+              "2023-12-25T10:30:00Z"
+            ],
+            "nullable": true,
+            "description": "Optional timestamp for when the note was created (ISO 8601 format)"
+          },
+          "parent_object": {
+            "type": "string",
+            "title": "Parent Object",
+            "examples": [
+              "people",
+              "companies",
+              "deals",
+              "users",
+              "workspaces"
+            ],
+            "description": "The object type the note is associated with. Standard object types include 'people', 'companies', 'deals', 'users', 'workspaces'."
+          },
+          "parent_record_id": {
+            "type": "string",
+            "title": "Parent Record Id",
+            "examples": [
+              "f3b2962b-febb-4e01-8431-f7ffb4d87e5e"
+            ],
+            "description": "The UUID of the specific record within the object (must be a valid UUID format)"
+          }
+        }
+      }
+    },
+    {
+      "name": "ATTIO_CREATE_RECORD",
+      "description": "This tool creates a new record in Attio for a specified object type (people, companies, deals, users, workspaces, etc.). It requires the object type and a values dictionary containing the attributes for the new record.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateRecordRequest",
+        "required": [
+          "object_type",
+          "values"
+        ],
+        "properties": {
+          "values": {
+            "type": "object",
+            "title": "Values",
+            "examples": [
+              {
+                "name": [
+                  {
+                    "full_name": "John Doe",
+                    "last_name": "Doe",
+                    "first_name": "John"
+                  }
+                ],
+                "domains": [
+                  {
+                    "domain": "example.com"
+                  }
+                ],
+                "phone_numbers": [
+                  {
+                    "original_phone_number": "+1234567890"
+                  }
+                ],
+                "credits_bought": [
+                  {
+                    "currency_value": 1000
+                  }
+                ],
+                "email_addresses": [
+                  {
+                    "email_address": "john@example.com"
+                  }
+                ],
+                "foundation_date": [
+                  {
+                    "value": "2004-07-29"
+                  }
+                ],
+                "primary_location": [
+                  {
+                    "line_1": "123 Main St",
+                    "line_2": "Suite 100",
+                    "region": "CA",
+                    "latitude": 37.7749,
+                    "postcode": "94102",
+                    "longitude": -122.4194
+                  }
+                ]
+              }
+            ],
+            "description": "The attribute values for the new record. Field-specific requirements: domains attribute expects array of objects with 'domain' key (e.g., [{'domain': 'example.com'}]). phone_numbers attribute expects array of objects with 'original_phone_number' key (e.g., [{'original_phone_number': '+1234567890'}]). primary_location attribute expects object with address schema including line_1, line_2, region, postcode, latitude, longitude keys. Currency fields require 'currency_value' key, while most other fields use 'value' key.",
+            "additionalProperties": true
+          },
+          "object_type": {
+            "type": "string",
+            "title": "Object Type",
+            "examples": [
+              "people",
+              "companies",
+              "deals",
+              "users",
+              "workspaces"
+            ],
+            "description": "The type of object to create a record for. Standard object types include 'people', 'companies', 'deals', 'users', 'workspaces'. You can also use custom object types from your workspace."
+          }
+        }
+      }
+    },
+    {
+      "name": "ATTIO_DELETE_NOTE",
+      "description": "This tool allows users to delete a specific note in Attio by its ID. It is implemented via DELETE https://api.attio.com/v2/notes/{note_id} and handles note deletion by validating the provided note_id. It complements ATTIO_CREATE_NOTE functionality, providing complete note management capabilities within the Attio platform.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteNoteRequest",
+        "required": [
+          "note_id"
+        ],
+        "properties": {
+          "note_id": {
+            "type": "string",
+            "title": "Note Id",
+            "examples": [
+              "note_123abc"
+            ],
+            "description": "The ID of the note to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "ATTIO_DELETE_RECORD",
+      "description": "This tool allows you to delete a record from Attio permanently. The deletion is irreversible, and the data will eventually be removed from the system.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteRecordRequest",
+        "required": [
+          "object_type",
+          "record_id"
+        ],
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "title": "Record Id",
+            "examples": [
+              "rec_01H3PQWSN8KZQKM6KX2XS4W8PJ"
+            ],
+            "description": "The unique identifier of the record to delete"
+          },
+          "object_type": {
+            "type": "string",
+            "title": "Object Type",
+            "examples": [
+              "people",
+              "companies",
+              "deals",
+              "users",
+              "workspaces"
+            ],
+            "description": "The type of object to delete. Standard object types include 'people', 'companies', 'deals', 'users', 'workspaces'. You can also use custom object types from your workspace."
+          }
+        }
+      }
+    },
+    {
+      "name": "ATTIO_FIND_RECORD",
+      "description": "This tool allows users to find a record in Attio by either its unique ID or by searching using unique attributes. It provides two methods: one for directly retrieving a record by its ID with the GET /v2/objects/{object}/records/{record_id} endpoint, and another for searching by attributes using the POST /v2/objects/{object}/records/query endpoint.",
+      "inputSchema": {
+        "type": "object",
+        "title": "FindRecordRequest",
+        "required": [
+          "object_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 500,
+            "maximum": 1000,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Maximum number of records to return when searching"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": 0,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Number of records to skip for pagination"
+          },
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "examples": [
+              "people",
+              "companies",
+              "deals",
+              "users",
+              "workspaces"
+            ],
+            "description": "The ID or slug of the object type to search in. Standard object types include 'people', 'companies', 'deals', 'users', 'workspaces'."
+          },
+          "record_id": {
+            "type": "string",
+            "title": "Record Id",
+            "default": null,
+            "examples": [
+              "f3b2962b-febb-4e01-8431-f7ffb4d87e5e"
+            ],
+            "nullable": true,
+            "description": "The unique ID of the record to retrieve directly"
+          },
+          "attributes": {
+            "type": "object",
+            "title": "Attributes",
+            "default": null,
+            "examples": [
+              {
+                "email_addresses": "john@example.com"
+              },
+              {
+                "name": "John Doe"
+              }
+            ],
+            "nullable": true,
+            "description": "Dictionary of attributes to search by using workspace-specific attribute slugs (not generic names). For select/multi-select attributes, use Attio option slugs or IDs (not plain text values). For relational/entity-reference attributes, use nested structure with 'field' and 'operator' keys (e.g., {'company': {'field': 'record_id', 'operator': 'equals', 'value': 'uuid'}}). Check your workspace schema for valid attribute slugs.",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "ATTIO_GET_OBJECT",
+      "description": "This tool retrieves detailed information about a specific object type in Attio, including all its attributes and their properties. This is useful for understanding what fields are available when creating or updating records of this type.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetObjectRequest",
+        "required": [
+          "object_id"
+        ],
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "examples": [
+              "people",
+              "companies",
+              "deals",
+              "users",
+              "workspaces"
+            ],
+            "description": "The ID or slug of the object to retrieve details for. Standard object types include 'people', 'companies', 'deals', 'users', 'workspaces'."
+          }
+        }
+      }
+    },
+    {
+      "name": "ATTIO_LIST_LISTS",
+      "description": "This tool retrieves all lists available in the Attio workspace. The lists are returned sorted as they appear in the sidebar. This tool is essential for managing and navigating lists, and is a prerequisite for many list-related operations. It requires the list_configuration:read permission scope.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListListsRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "ATTIO_LIST_NOTES",
+      "description": "This tool lists all notes associated with a specific record in Attio. Notes are returned in reverse chronological order (newest first).",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListNotesRequest",
+        "required": [
+          "parent_object",
+          "parent_record_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50,
+            "maximum": 100,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Maximum number of notes to return"
+          },
+          "parent_object": {
+            "type": "string",
+            "title": "Parent Object",
+            "examples": [
+              "people",
+              "companies",
+              "deals",
+              "users",
+              "workspaces"
+            ],
+            "description": "The object type the notes are associated with. Standard object types include 'people', 'companies', 'deals', 'users', 'workspaces'."
+          },
+          "parent_record_id": {
+            "type": "string",
+            "title": "Parent Record Id",
+            "examples": [
+              "92446133-64cf-4f83-bca9-594ca2f8da57"
+            ],
+            "description": "The ID of the specific record to get notes for"
+          }
+        }
+      }
+    },
+    {
+      "name": "ATTIO_LIST_OBJECTS",
+      "description": "This tool retrieves a list of all available objects (both system-defined and user-defined) in the Attio workspace. It makes a GET request to the /v2/objects endpoint and returns a JSON response containing key metadata about each object, which is fundamental for understanding and accessing the workspace's structure.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListObjectsRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "ATTIO_LIST_RECORDS",
+      "description": "This tool lists records from a specific object type in Attio. It provides simple pagination support and returns records in the order they were created. For complex filtering, use the FindRecord action instead. Standard object types include: people, companies, deals, users, workspaces. If you get a 404 error, verify the object type exists using the List Objects action first.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListRecordsRequest",
+        "required": [
+          "object_type"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 20,
+            "maximum": 500,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Maximum number of records to return"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": 0,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Number of records to skip for pagination"
+          },
+          "object_type": {
+            "type": "string",
+            "title": "Object Type",
+            "examples": [
+              "people",
+              "companies",
+              "deals",
+              "users",
+              "workspaces"
+            ],
+            "description": "The type of object to list records for. Standard object types include 'people', 'companies', 'deals', 'users', 'workspaces'. You can also use custom object types from your workspace. Use the List Objects action to discover all available object types."
+          }
+        }
+      }
+    },
+    {
+      "name": "ATTIO_UPDATE_RECORD",
+      "description": "This tool updates an existing record in Attio for a specified object type (people, companies, deals, users, workspaces, etc.). It uses PATCH to partially update only the provided fields, leaving other fields unchanged.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateRecordRequest",
+        "required": [
+          "object_type",
+          "record_id",
+          "values"
+        ],
+        "properties": {
+          "values": {
+            "type": "object",
+            "title": "Values",
+            "examples": [
+              {
+                "name": [
+                  {
+                    "full_name": "Jane Smith",
+                    "last_name": "Smith",
+                    "first_name": "Jane"
+                  }
+                ],
+                "job_title": [
+                  {
+                    "value": "Senior Developer"
+                  }
+                ],
+                "credits_bought": [
+                  {
+                    "currency_value": 1400
+                  }
+                ],
+                "last_credit_purchase": [
+                  {
+                    "value": "2025-07-28"
+                  }
+                ]
+              }
+            ],
+            "description": "The attribute values to update on the record. Note: Currency fields require 'currency_value' key, while most other fields use 'value' key.",
+            "additionalProperties": true
+          },
+          "record_id": {
+            "type": "string",
+            "title": "Record Id",
+            "examples": [
+              "92446133-64cf-4f83-bca9-594ca2f8da57"
+            ],
+            "description": "The unique identifier of the record to update"
+          },
+          "object_type": {
+            "type": "string",
+            "title": "Object Type",
+            "examples": [
+              "people",
+              "companies",
+              "deals",
+              "users",
+              "workspaces"
+            ],
+            "description": "The type of object to update. Standard object types include 'people', 'companies', 'deals', 'users', 'workspaces'. You can also use custom object types from your workspace."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:01:12.175372+00:00",
+    "source": "smithery"
+  }
+}

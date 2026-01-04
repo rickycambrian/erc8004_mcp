@@ -1,0 +1,1206 @@
+{
+  "qualifiedName": "brightdata",
+  "displayName": "Bright Data",
+  "description": "One (free) MCP for the Web. Easily search, crawl, navigate, and extract websites without getting blocked. Ideal for discovering and retrieving structured insights from any public source - effortlessly and ethically.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/brightdata.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/brightdata",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/brightdata/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "properties": {
+          "pro": {
+            "type": "string",
+            "default": "0",
+            "description": "Enable pro mode tools (search_engine_batch, scrape_batch)"
+          },
+          "token": {
+            "type": "string",
+            "description": "Bright Data API key, available in https://brightdata.com/cp/setting/users"
+          },
+          "browser": {
+            "type": "string",
+            "default": "mcp_browser",
+            "description": "Optional: Zone name for the Browser API (enables browser control tools, defaults to 'mcp_browser')"
+          },
+          "unlocker": {
+            "type": "string",
+            "default": "mcp_unlocker",
+            "description": "Optional: The Web Unlocker zone name (defaults to 'mcp_unlocker')"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_engine",
+      "description": "Scrape search results from Google, Bing or Yandex. Returns SERP results in JSON or Markdown (URL, title, description), Ideal forgathering current information, news, and detailed search results.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor for next page"
+          },
+          "engine": {
+            "enum": [
+              "google",
+              "bing",
+              "yandex"
+            ],
+            "type": "string",
+            "default": "google"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scrape_as_markdown",
+      "description": "Scrape a single webpage URL with advanced options for content extraction and get back the results in MarkDown language. This tool can unlock any webpage even if it uses bot detection or CAPTCHA.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_engine_batch",
+      "description": "Run multiple search queries simultaneously. Returns JSON for Google, Markdown for Bing/Yandex.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "queries"
+        ],
+        "properties": {
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "cursor": {
+                  "type": "string"
+                },
+                "engine": {
+                  "enum": [
+                    "google",
+                    "bing",
+                    "yandex"
+                  ],
+                  "type": "string",
+                  "default": "google"
+                }
+              },
+              "additionalProperties": false
+            },
+            "maxItems": 10,
+            "minItems": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scrape_batch",
+      "description": "Scrape multiple webpages URLs with advanced options for content extraction and get back the results in MarkDown language. This tool can unlock any webpage even if it uses bot detection or CAPTCHA.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urls"
+        ],
+        "properties": {
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "description": "Array of URLs to scrape (max 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scrape_as_html",
+      "description": "Scrape a single webpage URL with advanced options for content extraction and get back the results in HTML. This tool can unlock any webpage even if it uses bot detection or CAPTCHA.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_stats",
+      "description": "Tell the user about the tool usage during this session",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_amazon_product",
+      "description": "Quickly read structured amazon product data.\nRequires a valid product URL with /dp/ in it.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_amazon_product_reviews",
+      "description": "Quickly read structured amazon product review data.\nRequires a valid product URL with /dp/ in it.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_amazon_product_search",
+      "description": "Quickly read structured amazon product search data.\nRequires a valid search keyword and amazon domain URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "keyword",
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "keyword": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_walmart_product",
+      "description": "Quickly read structured walmart product data.\nRequires a valid product URL with /ip/ in it.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_walmart_seller",
+      "description": "Quickly read structured walmart seller data.\nRequires a valid walmart seller URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_ebay_product",
+      "description": "Quickly read structured ebay product data.\nRequires a valid ebay product URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_homedepot_products",
+      "description": "Quickly read structured homedepot product data.\nRequires a valid homedepot product URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_zara_products",
+      "description": "Quickly read structured zara product data.\nRequires a valid zara product URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_etsy_products",
+      "description": "Quickly read structured etsy product data.\nRequires a valid etsy product URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_bestbuy_products",
+      "description": "Quickly read structured bestbuy product data.\nRequires a valid bestbuy product URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_linkedin_person_profile",
+      "description": "Quickly read structured linkedin people profile data.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_linkedin_company_profile",
+      "description": "Quickly read structured linkedin company profile data\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_linkedin_job_listings",
+      "description": "Quickly read structured linkedin job listings data\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_linkedin_posts",
+      "description": "Quickly read structured linkedin posts data\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_linkedin_people_search",
+      "description": "Quickly read structured linkedin people search data\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url",
+          "first_name",
+          "last_name"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_crunchbase_company",
+      "description": "Quickly read structured crunchbase company data\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_zoominfo_company_profile",
+      "description": "Quickly read structured ZoomInfo company profile data.\nRequires a valid ZoomInfo company URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_instagram_profiles",
+      "description": "Quickly read structured Instagram profile data.\nRequires a valid Instagram URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_instagram_posts",
+      "description": "Quickly read structured Instagram post data.\nRequires a valid Instagram URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_instagram_reels",
+      "description": "Quickly read structured Instagram reel data.\nRequires a valid Instagram URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_instagram_comments",
+      "description": "Quickly read structured Instagram comments data.\nRequires a valid Instagram URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_facebook_posts",
+      "description": "Quickly read structured Facebook post data.\nRequires a valid Facebook post URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_facebook_marketplace_listings",
+      "description": "Quickly read structured Facebook marketplace listing data.\nRequires a valid Facebook marketplace listing URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_facebook_company_reviews",
+      "description": "Quickly read structured Facebook company reviews data.\nRequires a valid Facebook company URL and number of reviews.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url",
+          "num_of_reviews"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "num_of_reviews": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_facebook_events",
+      "description": "Quickly read structured Facebook events data.\nRequires a valid Facebook event URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_tiktok_profiles",
+      "description": "Quickly read structured Tiktok profiles data.\nRequires a valid Tiktok profile URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_tiktok_posts",
+      "description": "Quickly read structured Tiktok post data.\nRequires a valid Tiktok post URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_tiktok_shop",
+      "description": "Quickly read structured Tiktok shop data.\nRequires a valid Tiktok shop product URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_tiktok_comments",
+      "description": "Quickly read structured Tiktok comments data.\nRequires a valid Tiktok video URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_google_maps_reviews",
+      "description": "Quickly read structured Google maps reviews data.\nRequires a valid Google maps URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "days_limit": {
+            "type": "string",
+            "default": "3"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_google_shopping",
+      "description": "Quickly read structured Google shopping data.\nRequires a valid Google shopping product URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_google_play_store",
+      "description": "Quickly read structured Google play store data.\nRequires a valid Google play store app URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_apple_app_store",
+      "description": "Quickly read structured apple app store data.\nRequires a valid apple app store app URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_reuter_news",
+      "description": "Quickly read structured reuter news data.\nRequires a valid reuter news report URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_github_repository_file",
+      "description": "Quickly read structured github repository data.\nRequires a valid github repository file URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_yahoo_finance_business",
+      "description": "Quickly read structured yahoo finance business data.\nRequires a valid yahoo finance business URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_x_posts",
+      "description": "Quickly read structured X post data.\nRequires a valid X post URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_zillow_properties_listing",
+      "description": "Quickly read structured zillow properties listing data.\nRequires a valid zillow properties listing URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_booking_hotel_listings",
+      "description": "Quickly read structured booking hotel listings data.\nRequires a valid booking hotel listing URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_youtube_profiles",
+      "description": "Quickly read structured youtube profiles data.\nRequires a valid youtube profile URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_youtube_comments",
+      "description": "Quickly read structured youtube comments data.\nRequires a valid youtube video URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "num_of_comments": {
+            "type": "string",
+            "default": "10"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_reddit_posts",
+      "description": "Quickly read structured reddit posts data.\nRequires a valid reddit post URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "web_data_youtube_videos",
+      "description": "Quickly read structured YouTube videos data.\nRequires a valid YouTube video URL.\nThis can be a cache lookup, so it can be more reliable than scraping",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_navigate",
+      "description": "Navigate a scraping browser session to a new URL",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL to navigate to"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_go_back",
+      "description": "Go back to the previous page",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_go_forward",
+      "description": "Go forward to the next page",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_snapshot",
+      "description": "Capture an ARIA snapshot of the current page showing all interactive elements with their refs.\nThis provides accurate element references that can be used with ref-based tools.\nUse this before interacting with elements to get proper refs instead of guessing selectors.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "filtered": {
+            "type": "boolean",
+            "description": "Whether to apply filtering/compaction (default: false). Set to true to get a compacted version of the snapshot."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_click_ref",
+      "description": "Click on an element using its ref from the ARIA snapshot.\nUse scraping_browser_snapshot first to get the correct ref values.\nThis is more reliable than CSS selectors.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "ref"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "The ref attribute from the ARIA snapshot (e.g., \"23\")"
+          },
+          "element": {
+            "type": "string",
+            "description": "Description of the element being clicked for context"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_type_ref",
+      "description": "Type text into an element using its ref from the ARIA snapshot.\nUse scraping_browser_snapshot first to get the correct ref values.\nThis is more reliable than CSS selectors.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "ref",
+          "element",
+          "text"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "The ref attribute from the ARIA snapshot (e.g., \"23\")"
+          },
+          "text": {
+            "type": "string",
+            "description": "Text to type"
+          },
+          "submit": {
+            "type": "boolean",
+            "description": "Whether to submit the form after typing (press Enter)"
+          },
+          "element": {
+            "type": "string",
+            "description": "Description of the element being typed into for context"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_screenshot",
+      "description": "Take a screenshot of the current page",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "full_page": {
+            "type": "boolean",
+            "description": "Whether to screenshot the full page (default: false)\nYou should avoid fullscreen if it's not important, since the images can be quite large"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_network_requests",
+      "description": "Get all network requests made since loading the current page.\nShows HTTP method, URL, status code and status text for each request.\nUseful for debugging API calls, tracking data fetching, and understanding page behavior.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_wait_for_ref",
+      "description": "Wait for an element to be visible using its ref from the ARIA snapshot.\nUse scraping_browser_snapshot first to get the correct ref values.\nThis is more reliable than CSS selectors.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "ref",
+          "element"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "The ref attribute from the ARIA snapshot (e.g., \"23\")"
+          },
+          "element": {
+            "type": "string",
+            "description": "Description of the element being waited for"
+          },
+          "timeout": {
+            "type": "number",
+            "description": "Maximum time to wait in milliseconds (default: 30000)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_get_text",
+      "description": "Get the text content of the current page",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_get_html",
+      "description": "Get the HTML content of the current page. Avoid using this tool and if used, use full_page option unless it is important to see things like script tags since this can be large",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "full_page": {
+            "type": "boolean",
+            "description": "Whether to get the full page HTML including head and script tags\nAvoid this if you only need the extra HTML, since it can be quite large"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_scroll",
+      "description": "Scroll to the bottom of the current page",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scraping_browser_scroll_to_ref",
+      "description": "Scroll to a specific element using its ref from the ARIA snapshot.\nUse scraping_browser_snapshot first to get the correct ref values.\nThis is more reliable than CSS selectors.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "ref",
+          "element"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "The ref attribute from the ARIA snapshot (e.g., \"23\")"
+          },
+          "element": {
+            "type": "string",
+            "description": "Description of the element to scroll to"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:01:01.152778+00:00",
+    "source": "smithery"
+  }
+}

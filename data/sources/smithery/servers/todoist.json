@@ -1,0 +1,1275 @@
+{
+  "qualifiedName": "todoist",
+  "displayName": "Todoist",
+  "description": "Todoist is a task management tool allowing users to create to-do lists, set deadlines, and collaborate on projects with reminders and cross-platform syncing",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/todoist.svg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/todoist",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/todoist/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "TODOIST_ADD_WORKSPACE",
+      "description": "Tool to create a new workspace in Todoist. Use when you need a separate workspace to organize projects. Generates UUID and temp_id automatically.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddWorkspaceRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "icon": {
+            "type": "string",
+            "title": "Icon",
+            "default": null,
+            "examples": [
+              "\ud83c\udfe2"
+            ],
+            "nullable": true,
+            "description": "Icon for the workspace (optional)."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "My Workspace"
+            ],
+            "description": "Name of the new workspace."
+          },
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "default": null,
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "nullable": true,
+            "description": "UUID for this command for idempotency. If omitted, a new UUID is generated."
+          },
+          "color": {
+            "type": "integer",
+            "title": "Color",
+            "default": null,
+            "examples": [
+              30
+            ],
+            "nullable": true,
+            "description": "Color ID for the workspace (optional)."
+          },
+          "temp_id": {
+            "type": "string",
+            "title": "Temp Id",
+            "default": null,
+            "examples": [
+              "temp_123"
+            ],
+            "nullable": true,
+            "description": "Temporary identifier to map the command to the created resource. If omitted, a new UUID is generated."
+          }
+        },
+        "description": "Request model for adding a new workspace via Todoist Sync API v9."
+      }
+    },
+    {
+      "name": "TODOIST_CLOSE_TASK",
+      "description": "This tool marks an existing task as completed in Todoist. It requires the `task_id` of the task to be closed.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CloseTaskRequest",
+        "required": [
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "2995104339"
+            ],
+            "description": "The ID of the task to close."
+          }
+        }
+      }
+    },
+    {
+      "name": "TODOIST_CREATE_COMMENT",
+      "description": "Tool to create a new comment in Todoist. Use when you need to add a note to a specific task or project after confirming its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateCommentRequest",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "This is a comment."
+            ],
+            "description": "The content of the comment."
+          },
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "default": null,
+            "examples": [
+              "2995104589"
+            ],
+            "nullable": true,
+            "description": "The ID of the task to attach the comment to. Required if project_id is not provided."
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "default": null,
+            "examples": [
+              "7025"
+            ],
+            "nullable": true,
+            "description": "The ID of the project to attach the comment to. Required if task_id is not provided."
+          }
+        },
+        "description": "Request model for creating a comment."
+      }
+    },
+    {
+      "name": "TODOIST_CREATE_LABEL",
+      "description": "Creates a new label.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateLabelRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Work",
+              "Personal"
+            ],
+            "maxLength": 80,
+            "minLength": 1,
+            "description": "Name of the label."
+          },
+          "color": {
+            "enum": [
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49
+            ],
+            "type": "integer",
+            "title": "TodoistColor",
+            "default": null,
+            "examples": [
+              30,
+              41
+            ],
+            "nullable": true,
+            "description": "Color of the label. See https://developer.todoist.com/guides/#colors for available colors."
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order",
+            "default": null,
+            "examples": [
+              1,
+              2
+            ],
+            "nullable": true,
+            "description": "The order of the label in the list."
+          },
+          "is_favorite": {
+            "type": "boolean",
+            "title": "Is Favorite",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Whether the label is a favorite."
+          }
+        }
+      }
+    },
+    {
+      "name": "TODOIST_CREATE_PROJECT",
+      "description": "Creates a new project in Todoist.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateProjectRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Work Tasks",
+              "Personal Errands"
+            ],
+            "description": "Name of the project."
+          },
+          "color": {
+            "enum": [
+              "berry_red",
+              "red",
+              "orange",
+              "yellow",
+              "olive_green",
+              "lime_green",
+              "green",
+              "mint_green",
+              "teal",
+              "sky_blue",
+              "light_blue",
+              "blue",
+              "grape",
+              "violet",
+              "lavender",
+              "magenta",
+              "salmon",
+              "charcoal",
+              "gray",
+              "taupe"
+            ],
+            "type": "string",
+            "title": "ProjectColor",
+            "default": null,
+            "examples": [
+              "blue"
+            ],
+            "nullable": true,
+            "description": "Enum for project colors. Names are based on Todoist's standard palette."
+          },
+          "favorite": {
+            "type": "boolean",
+            "title": "Favorite",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Whether the project should be marked as a favorite."
+          },
+          "parent_id": {
+            "type": "string",
+            "title": "Parent Id",
+            "default": null,
+            "examples": [
+              "2203306141"
+            ],
+            "nullable": true,
+            "description": "ID of the parent project to create a sub-project. If not set, it's a top-level project."
+          },
+          "view_style": {
+            "enum": [
+              "list",
+              "board"
+            ],
+            "type": "string",
+            "title": "ProjectViewStyle",
+            "default": null,
+            "examples": [
+              "list"
+            ],
+            "nullable": true,
+            "description": "Enum for project view styles."
+          }
+        }
+      }
+    },
+    {
+      "name": "TODOIST_CREATE_SECTION",
+      "description": "Tool to create a new section within a specific project. Use when you need to group tasks under a new heading in a project.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateSectionRequest",
+        "required": [
+          "project_id",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Backlog"
+            ],
+            "description": "Name of the new section."
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order",
+            "default": null,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Position of this section within the project. Sections with lower values appear first."
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id",
+            "examples": [
+              123456
+            ],
+            "description": "ID of the project to create the section in."
+          }
+        },
+        "description": "Request model for creating a new section in a project."
+      }
+    },
+    {
+      "name": "TODOIST_CREATE_TASK",
+      "description": "Create a new task in Todoist. This action allows users to create tasks with various parameters including content, due dates, priority, and more. The task can be created in a specific project, section, or as a subtask of another task.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateTaskRequest",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "order": {
+            "type": "integer",
+            "title": "Order",
+            "default": null,
+            "examples": [
+              1,
+              2,
+              3
+            ],
+            "nullable": true,
+            "description": "Non-zero integer value used to sort tasks under the same parent."
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Labels",
+            "default": null,
+            "examples": [
+              [
+                "Food",
+                "Shopping"
+              ]
+            ],
+            "nullable": true,
+            "description": "The task's labels (list of names for personal/shared labels)."
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "Buy milk",
+              "Call John about the project"
+            ],
+            "description": "Task content/title. Can contain markdown-formatted text and hyperlinks."
+          },
+          "due_date": {
+            "type": "string",
+            "title": "Due Date",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "examples": [
+              "2023-12-25"
+            ],
+            "nullable": true,
+            "description": "Specific date in YYYY-MM-DD format relative to user's timezone."
+          },
+          "due_lang": {
+            "type": "string",
+            "title": "Due Lang",
+            "default": null,
+            "pattern": "^[a-z]{2}$",
+            "examples": [
+              "en",
+              "fr",
+              "de"
+            ],
+            "nullable": true,
+            "description": "2-letter code specifying language if due_string is not in English."
+          },
+          "duration": {
+            "type": "integer",
+            "title": "Duration",
+            "default": null,
+            "examples": [
+              15,
+              30,
+              60
+            ],
+            "nullable": true,
+            "description": "Positive integer for task duration amount.",
+            "exclusiveMinimum": 0
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority",
+            "default": null,
+            "maximum": 4,
+            "minimum": 1,
+            "examples": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "nullable": true,
+            "description": "Task priority from 1 (normal) to 4 (urgent)."
+          },
+          "parent_id": {
+            "type": "string",
+            "title": "Parent Id",
+            "default": null,
+            "examples": [
+              "2995104589"
+            ],
+            "nullable": true,
+            "description": "Parent task ID."
+          },
+          "due_string": {
+            "type": "string",
+            "title": "Due String",
+            "default": null,
+            "examples": [
+              "tomorrow at 12:00",
+              "next Monday at 15:00"
+            ],
+            "nullable": true,
+            "description": "Human defined task due date (e.g., 'next Monday', 'Tomorrow'). Value is set using local time."
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "default": null,
+            "examples": [
+              "2203306141"
+            ],
+            "nullable": true,
+            "description": "Project ID of the task. If not set, task is put to user's Inbox."
+          },
+          "section_id": {
+            "type": "string",
+            "title": "Section Id",
+            "default": null,
+            "examples": [
+              "7025"
+            ],
+            "nullable": true,
+            "description": "ID of section to put task into."
+          },
+          "assignee_id": {
+            "type": "string",
+            "title": "Assignee Id",
+            "default": null,
+            "examples": [
+              "2671362"
+            ],
+            "nullable": true,
+            "description": "The responsible user ID (only for shared tasks)."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "examples": [
+              "Need to get 2 gallons of milk from the store"
+            ],
+            "nullable": true,
+            "description": "Task description. Can contain markdown-formatted text and hyperlinks."
+          },
+          "due_datetime": {
+            "type": "string",
+            "title": "Due Datetime",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+            "examples": [
+              "2023-12-25T12:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Specific date and time in RFC3339 format in UTC."
+          },
+          "duration_unit": {
+            "type": "string",
+            "title": "Duration Unit",
+            "default": null,
+            "pattern": "^(minute|day)$",
+            "examples": [
+              "minute",
+              "day"
+            ],
+            "nullable": true,
+            "description": "Unit for duration - either 'minute' or 'day'."
+          }
+        },
+        "description": "Request model for creating a task."
+      }
+    },
+    {
+      "name": "TODOIST_DELETE_LABEL",
+      "description": "Tool to delete a specific label. Use when you need to permanently remove an unused label by its ID after confirming it's not in use. Example: \"Delete label with ID 2298391482\".",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteLabelRequest",
+        "required": [
+          "label_id"
+        ],
+        "properties": {
+          "label_id": {
+            "type": "string",
+            "title": "Label Id",
+            "examples": [
+              "2298391482"
+            ],
+            "description": "The ID of the label to delete."
+          }
+        },
+        "description": "Request model for deleting a label."
+      }
+    },
+    {
+      "name": "TODOIST_DELETE_PROJECT",
+      "description": "Tool to delete a specific Todoist project. Use when you need to permanently remove a project by its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteProjectRequest",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "examples": [
+              "2203306141"
+            ],
+            "description": "The ID of the project to delete."
+          }
+        },
+        "description": "Request model for deleting a project."
+      }
+    },
+    {
+      "name": "TODOIST_DELETE_SECTION",
+      "description": "Tool to delete a specific section. Use when you need to permanently remove unused section by its ID after confirming it's not in use. Example: \"Delete section with ID 82181370\".",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteSectionRequest",
+        "required": [
+          "section_id"
+        ],
+        "properties": {
+          "section_id": {
+            "type": "string",
+            "title": "Section Id",
+            "examples": [
+              "82181370"
+            ],
+            "description": "ID of the section to delete."
+          }
+        },
+        "description": "Request model for deleting a section."
+      }
+    },
+    {
+      "name": "TODOIST_DELETE_TASK",
+      "description": "Delete a task from Todoist. This action permanently removes the task and all its subtasks.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTaskRequest",
+        "required": [
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "2995104339"
+            ],
+            "description": "The ID of the task to delete."
+          }
+        },
+        "description": "Request model for deleting a task."
+      }
+    },
+    {
+      "name": "TODOIST_GET_ALL_COMMENTS",
+      "description": "This tool retrieves all comments associated with a specific task or project in Todoist. It requires either a task_id or a project_id to fetch the comments, and it returns a JSON array of comment objects with details such as id, posted_at, content, and attachment information.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAllCommentsRequest",
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "default": null,
+            "nullable": true,
+            "description": "The ID of the task for which to retrieve comments."
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "default": null,
+            "nullable": true,
+            "description": "ID of the project for which to retrieve comments."
+          }
+        }
+      }
+    },
+    {
+      "name": "TODOIST_GET_ALL_PROJECTS",
+      "description": "Get all projects from a user's Todoist account. This tool retrieves all projects from the authenticated user's Todoist account. The response includes details like project ID, name, color, parent project, sharing status, and other metadata for each project.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAllProjectsRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "TODOIST_GET_ALL_SECTIONS",
+      "description": "Tool to retrieve all the sections for a specific project in Todoist. Use when you need to list section structure within a project after selecting the project.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAllSectionsRequest",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "examples": [
+              "2203306141"
+            ],
+            "description": "The ID of the project to retrieve sections from."
+          }
+        },
+        "description": "Request model for retrieving all sections in a project."
+      }
+    },
+    {
+      "name": "TODOIST_GET_ALL_TASKS",
+      "description": "Fetches all INCOMPLETE tasks from Todoist and returns their details. IMPORTANT LIMITATIONS: - This endpoint only returns active (incomplete) tasks - Cannot retrieve completed tasks - use a different endpoint for that - Filter queries using 'completed', '!completed', or 'completed after' will fail - Project references must use existing project names or IDs Common use cases: - Get all tasks: no filter - Get today's tasks: filter=\"today\" - Get overdue tasks: filter=\"overdue\" - Get tasks from specific project: filter=\"#ProjectName\" - Get high priority tasks: filter=\"p1\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAllTasksRequest",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "properties": {}
+            },
+            "title": "Ids",
+            "default": null,
+            "examples": [
+              [
+                2995104339,
+                2995104338
+              ]
+            ],
+            "nullable": true,
+            "description": "List of task IDs to retrieve."
+          },
+          "lang": {
+            "type": "string",
+            "title": "Lang",
+            "default": null,
+            "examples": [
+              "en",
+              "es"
+            ],
+            "nullable": true,
+            "description": "Language code for parsing date/times in queries."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "today | overdue",
+              "p1 & !#Work",
+              "#Personal",
+              "project: Getting Started Guide",
+              "due after: 2024-01-01",
+              "no due date",
+              "created after: 2024-09-01 & p1"
+            ],
+            "nullable": true,
+            "description": "Filter tasks using Todoist's filter syntax. IMPORTANT: This endpoint only returns INCOMPLETE tasks. Common filters: 'today', 'overdue', 'no due date', 'p1' (priority 1), 'p2', 'p3', 'p4'. Project filters: '#ProjectName' or 'project: ProjectName'. Date filters: 'due after: YYYY-MM-DD', 'due before: YYYY-MM-DD', 'created after: YYYY-MM-DD'. Logical operators: '&' (AND), '|' (OR), '!' (NOT). DO NOT USE: 'completed', '!completed', 'completed after' - these will cause 400 errors. Always use existing project names/IDs, not made-up ones."
+          }
+        }
+      }
+    },
+    {
+      "name": "TODOIST_GET_BACKUPS",
+      "description": "Tool to list all available backup archives for the user. Use when you need to retrieve and review all existing backups.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetBackupsRequest",
+        "properties": {},
+        "description": "Empty request model for fetching all available backup archives."
+      }
+    },
+    {
+      "name": "TODOIST_GET_COMMENT",
+      "description": "Tool to retrieve details of a specific comment by its comment_id. Use when you need full information (content, timestamp, or attachment) about a known comment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCommentRequest",
+        "required": [
+          "comment_id"
+        ],
+        "properties": {
+          "comment_id": {
+            "type": "string",
+            "title": "Comment Id",
+            "examples": [
+              "2995104339"
+            ],
+            "description": "The ID of the comment to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific comment."
+      }
+    },
+    {
+      "name": "TODOIST_GET_LABEL",
+      "description": "Tool to retrieve a specific label by its ID. Use when you need detailed info about a label after you have its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetLabelRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "123456789"
+            ],
+            "description": "The ID of the label to retrieve (numeric string)."
+          }
+        },
+        "description": "Request model for retrieving a specific label."
+      }
+    },
+    {
+      "name": "TODOIST_GET_PROJECT",
+      "description": "Tool to retrieve a specific project by its ID. Use when you have a project ID and need its metadata before display or update.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetProjectRequest",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "examples": [
+              "2249962680"
+            ],
+            "description": "The ID of the project to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a single Todoist project by ID."
+      }
+    },
+    {
+      "name": "TODOIST_GET_SECTION",
+      "description": "Tool to retrieve a specific section by its ID. Use when you have a section ID and need its metadata before display or update.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSectionRequest",
+        "required": [
+          "section_id"
+        ],
+        "properties": {
+          "section_id": {
+            "type": "string",
+            "title": "Section Id",
+            "examples": [
+              "2995104339"
+            ],
+            "description": "The ID of the section to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific Todoist section by ID."
+      }
+    },
+    {
+      "name": "TODOIST_GET_SPECIAL_BACKUPS",
+      "description": "Tool to list special backup archives for the user. Use when you need to retrieve all project backups for the authenticated user after creating or managing projects.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSpecialBackupsRequest",
+        "properties": {},
+        "description": "Empty request model for fetching all special backup archives."
+      }
+    },
+    {
+      "name": "TODOIST_GET_TASK",
+      "description": "Tool to retrieve a specific task by its ID. Use when you need to fetch all details of an existing task before processing or display.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTaskRequest",
+        "required": [
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "2203306141"
+            ],
+            "description": "The ID of the task to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific Todoist task by ID."
+      }
+    },
+    {
+      "name": "TODOIST_LIST_ARCHIVED_WORKSPACE_PROJECTS",
+      "description": "Tool to list all archived projects in a workspace. Use when you need to retrieve archived workspace projects with optional filters or pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListArchivedWorkspaceProjectsRequest",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Limit the number of returned projects."
+          },
+          "since": {
+            "type": "string",
+            "title": "Since",
+            "default": null,
+            "examples": [
+              "2023-01-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Return archived projects updated after this datetime (ISO 8601)."
+          },
+          "until": {
+            "type": "string",
+            "title": "Until",
+            "default": null,
+            "examples": [
+              "2023-02-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Return archived projects updated before this datetime (ISO 8601)."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Offset for pagination."
+          },
+          "project_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Project Ids",
+            "default": null,
+            "examples": [
+              [
+                "123456789",
+                "987654321"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of project IDs to filter the results."
+          }
+        },
+        "description": "Request model for listing archived workspace projects with optional filters and pagination."
+      }
+    },
+    {
+      "name": "TODOIST_LIST_FILTERS",
+      "description": "Tool to list all filters for the authenticated user. Use when you need to retrieve the current set of custom filters.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFiltersRequest",
+        "properties": {
+          "sync_token": {
+            "type": "string",
+            "title": "Sync Token",
+            "default": "*",
+            "examples": [
+              "*"
+            ],
+            "description": "Token for incremental sync. Use '*' for full sync."
+          }
+        },
+        "description": "Request model for listing filters via Todoist Sync API."
+      }
+    },
+    {
+      "name": "TODOIST_LIST_PENDING_WORKSPACE_INVITATIONS",
+      "description": "Tool to list pending invitation emails in a workspace. Use when you need to check which email invites are still pending acceptance in a workspace.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPendingWorkspaceInvitationsRequest",
+        "required": [
+          "workspace_id"
+        ],
+        "properties": {
+          "workspace_id": {
+            "type": "string",
+            "title": "Workspace Id",
+            "examples": [
+              "1234567890"
+            ],
+            "description": "ID of the workspace to list pending invitations for."
+          }
+        },
+        "description": "Request model for listing pending workspace invitations via Todoist Sync API."
+      }
+    },
+    {
+      "name": "TODOIST_REOPEN_TASK",
+      "description": "This tool reopens previously completed task.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReopenTaskRequest",
+        "required": [
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "2995104339"
+            ],
+            "description": "The ID of the task to reopen."
+          }
+        }
+      }
+    },
+    {
+      "name": "TODOIST_UPDATE_COMMENT",
+      "description": "Tool to update a specific comment's content. Use when you need to correct or clarify an existing comment after confirming its ID and the new text.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateCommentRequest",
+        "required": [
+          "comment_id",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "Updated comment content."
+            ],
+            "description": "New text content for the comment."
+          },
+          "comment_id": {
+            "type": "string",
+            "title": "Comment Id",
+            "examples": [
+              "12345"
+            ],
+            "description": "The ID of the comment to update."
+          }
+        },
+        "description": "Request model for updating a comment."
+      }
+    },
+    {
+      "name": "TODOIST_UPDATE_PROJECT",
+      "description": "Tool to update a specific project's attributes such as name, color, indent, and order. Use when you need to rename or reorder a project after reviewing its current settings. Example: \"Update project 2203306141 name to 'Q1 Goals'.\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateProjectRequest",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Q1 Planning"
+            ],
+            "nullable": true,
+            "description": "New name for the project."
+          },
+          "color": {
+            "type": "integer",
+            "title": "Color",
+            "default": null,
+            "examples": [
+              30
+            ],
+            "nullable": true,
+            "description": "New color ID for the project."
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order",
+            "default": null,
+            "examples": [
+              1,
+              2,
+              3
+            ],
+            "nullable": true,
+            "description": "New order position for the project."
+          },
+          "indent": {
+            "type": "integer",
+            "title": "Indent",
+            "default": null,
+            "maximum": 4,
+            "minimum": 1,
+            "examples": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "nullable": true,
+            "description": "New indent level for the project (1-4)."
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "examples": [
+              "2203306141"
+            ],
+            "description": "The ID of the project to update."
+          }
+        },
+        "description": "Request model for updating a project in Todoist."
+      }
+    },
+    {
+      "name": "TODOIST_UPDATE_SECTION",
+      "description": "Tool to update a specific section's attributes such as name and order. Use when you need to rename or reorder a section after confirming its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateSectionRequest",
+        "required": [
+          "section_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Sprint Backlog"
+            ],
+            "nullable": true,
+            "description": "New name for the section. If omitted, the name remains unchanged."
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order",
+            "default": null,
+            "examples": [
+              0,
+              1
+            ],
+            "nullable": true,
+            "description": "New position of the section within its project (0 is first)."
+          },
+          "section_id": {
+            "type": "string",
+            "title": "Section Id",
+            "examples": [
+              "7025"
+            ],
+            "description": "The ID of the section to update."
+          }
+        },
+        "description": "Request model for updating a section."
+      }
+    },
+    {
+      "name": "TODOIST_UPDATE_TASK",
+      "description": "Tool to update an existing task's properties. Use when you need to modify a task's details after confirming its ID and new values.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateTaskRequest",
+        "required": [
+          "task_id"
+        ],
+        "properties": {
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Labels",
+            "default": null,
+            "examples": [
+              [
+                "Food",
+                "Shopping"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of label names to assign to the task."
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "default": null,
+            "examples": [
+              "Buy groceries and snacks"
+            ],
+            "nullable": true,
+            "description": "New content for the task."
+          },
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "2995104339"
+            ],
+            "description": "The ID of the task to update."
+          },
+          "due_date": {
+            "type": "string",
+            "title": "Due Date",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "examples": [
+              "2023-12-31"
+            ],
+            "nullable": true,
+            "description": "Due date in YYYY-MM-DD format."
+          },
+          "due_lang": {
+            "type": "string",
+            "title": "Due Lang",
+            "default": null,
+            "pattern": "^[a-z]{2}$",
+            "examples": [
+              "en",
+              "fr",
+              "de"
+            ],
+            "nullable": true,
+            "description": "Language code for parsing `due_string`, e.g., 'en'."
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority",
+            "default": null,
+            "maximum": 4,
+            "minimum": 1,
+            "examples": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "nullable": true,
+            "description": "Task priority from 1 (normal) to 4 (urgent)."
+          },
+          "due_string": {
+            "type": "string",
+            "title": "Due String",
+            "default": null,
+            "examples": [
+              "tomorrow at 17:00"
+            ],
+            "nullable": true,
+            "description": "Human-readable due date string, e.g., 'tomorrow at 12:00'."
+          },
+          "assignee_id": {
+            "type": "string",
+            "title": "Assignee Id",
+            "default": null,
+            "examples": [
+              "1234567"
+            ],
+            "nullable": true,
+            "description": "User ID to assign the task to."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "examples": [
+              "Include fruits and vegetables"
+            ],
+            "nullable": true,
+            "description": "New description for the task."
+          },
+          "due_datetime": {
+            "type": "string",
+            "title": "Due Datetime",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+            "examples": [
+              "2023-12-31T17:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Due date and time in RFC3339 format."
+          }
+        },
+        "description": "Request model for updating an existing task in Todoist."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:01:08.810362+00:00",
+    "source": "smithery"
+  }
+}

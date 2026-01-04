@@ -1,0 +1,1255 @@
+{
+  "qualifiedName": "gmail",
+  "displayName": "Gmail",
+  "description": "Manage Gmail end-to-end: send, draft, reply, forward, and bulk-modify or delete messages and threads. Organize your inbox with labels, archiving, and trashing, and retrieve messages, attachments, and profile details on demand. Access and search contacts to autofill recipients and keep people data in sync.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/69919e2f-2b9a-4c17-9867-e46bab4c3b28.svg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/gmail",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/gmail/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "GMAIL_ADD_LABEL_TO_EMAIL",
+      "title": "Modify email labels",
+      "description": "Adds and/or removes specified gmail labels for a message; ensure `message id` and all `label ids` are valid (use 'listlabels' for custom label ids).",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddLabelToEmailRequest",
+        "required": [
+          "message_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's email address or 'me' for the authenticated user."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "17f1b2b9c1b2a3d4"
+            ],
+            "description": "Immutable ID of the message to modify (e.g., from 'fetchEmails' or 'fetchMessagesByThreadId')."
+          },
+          "add_label_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Add Label Ids",
+            "default": [],
+            "examples": [
+              "STARRED",
+              "IMPORTANT",
+              "Label_123"
+            ],
+            "description": "Label IDs to add. For custom labels, obtain IDs via 'listLabels'. System labels (e.g., 'INBOX', 'SPAM') can also be used."
+          },
+          "remove_label_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Remove Label Ids",
+            "default": [],
+            "examples": [
+              "UNREAD",
+              "Label_456"
+            ],
+            "description": "Label IDs to remove. For custom labels, obtain IDs via 'listLabels'. System labels can also be used."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_CREATE_EMAIL_DRAFT",
+      "title": "Create email draft",
+      "description": "Creates a gmail email draft, supporting to/cc/bcc, subject, plain/html body (ensure `is html=true` for html), attachments, and threading.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateEmailDraftRequest",
+        "required": [
+          "recipient_email",
+          "subject",
+          "body"
+        ],
+        "properties": {
+          "cc": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Cc",
+            "default": [],
+            "examples": [
+              [
+                "cc.recipient1@example.com",
+                "cc.recipient2@example.com"
+              ]
+            ],
+            "description": "'Cc' (carbon copy) recipient email addresses."
+          },
+          "bcc": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Bcc",
+            "default": [],
+            "examples": [
+              [
+                "bcc.recipient@example.com"
+              ]
+            ],
+            "description": "'Bcc' (blind carbon copy) recipient email addresses."
+          },
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "examples": [
+              "Hello Team,\n\nPlease find the attached report for your review.\n\nBest regards,\nYour Name",
+              "<h1>Meeting Confirmation</h1><p>This email confirms our meeting scheduled for next Tuesday.</p>"
+            ],
+            "description": "Email body content (plain text or HTML); `is_html` must be True if HTML."
+          },
+          "is_html": {
+            "type": "boolean",
+            "title": "Is Html",
+            "default": false,
+            "examples": [
+              "True",
+              "False"
+            ],
+            "description": "Set to True if `body` is HTML, otherwise the action may fail."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "examples": [
+              "Project Update Q3",
+              "Meeting Reminder"
+            ],
+            "description": "Email subject line."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's email address or 'me' for the authenticated user."
+          },
+          "thread_id": {
+            "type": "string",
+            "title": "Thread Id",
+            "default": null,
+            "examples": [
+              "17f45ec49a9c3f1b"
+            ],
+            "nullable": true,
+            "description": "ID of an existing Gmail thread to reply to; omit for new thread."
+          },
+          "attachment": {
+            "type": "object",
+            "title": "FileUploadable",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "name",
+              "mimetype",
+              "s3key"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Name"
+              },
+              "s3key": {
+                "type": "string",
+                "title": "S3Key"
+              },
+              "mimetype": {
+                "type": "string",
+                "title": "Mimetype"
+              }
+            },
+            "description": "File to attach to the email.",
+            "file_uploadable": true,
+            "additionalProperties": false
+          },
+          "recipient_email": {
+            "type": "string",
+            "title": "Recipient Email",
+            "examples": [
+              "john.doe@example.com"
+            ],
+            "description": "Primary recipient's email address."
+          },
+          "extra_recipients": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Extra Recipients",
+            "default": [],
+            "examples": [
+              [
+                "jane.doe@example.com",
+                "another.recipient@example.com"
+              ]
+            ],
+            "description": "Additional 'To' recipient email addresses."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_CREATE_LABEL",
+      "title": "Create label",
+      "description": "Creates a new label with a unique name in the specified user's gmail account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateLabelRequest",
+        "required": [
+          "label_name"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "The email address of the user in whose account the label will be created."
+          },
+          "label_name": {
+            "type": "string",
+            "title": "Label Name",
+            "examples": [
+              "Work",
+              "Important Documents",
+              "Receipts 2024"
+            ],
+            "description": "The name for the new label. Must be unique within the account, non-blank, maximum length 225 characters, cannot contain ',' or '/', not only whitespace, and must not be a reserved system label (e.g., INBOX, DRAFTS, SENT)."
+          },
+          "text_color": {
+            "type": "string",
+            "title": "Text Color",
+            "default": null,
+            "examples": [
+              "#000000",
+              "#FF0000"
+            ],
+            "nullable": true,
+            "description": "The text color of the label, in hex (e.g., \"#000000\")."
+          },
+          "background_color": {
+            "type": "string",
+            "title": "Background Color",
+            "default": null,
+            "examples": [
+              "#FFFFFF",
+              "#00FF00"
+            ],
+            "nullable": true,
+            "description": "The background color of the label, in hex (e.g., \"#FFFFFF\")."
+          },
+          "label_list_visibility": {
+            "type": "string",
+            "title": "Label List Visibility",
+            "default": "labelShow",
+            "examples": [
+              "labelShow",
+              "labelShowIfUnread",
+              "labelHide"
+            ],
+            "description": "Controls how the label is displayed in the label list in the Gmail sidebar."
+          },
+          "message_list_visibility": {
+            "type": "string",
+            "title": "Message List Visibility",
+            "default": "show",
+            "examples": [
+              "show",
+              "hide"
+            ],
+            "description": "Controls how messages with this label are displayed in the message list."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_DELETE_DRAFT",
+      "title": "Delete Draft",
+      "description": "Permanently deletes a specific gmail draft using its id; ensure the draft exists and the user has necessary permissions for the given `user id`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteDraftRequest",
+        "required": [
+          "draft_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's email address or 'me' for the authenticated user; 'me' is recommended."
+          },
+          "draft_id": {
+            "type": "string",
+            "title": "Draft Id",
+            "examples": [
+              "r-8388446164079304564"
+            ],
+            "description": "Immutable ID of the draft to delete, typically obtained when the draft was created."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_DELETE_MESSAGE",
+      "title": "Delete message",
+      "description": "Permanently deletes a specific email message by its id from a gmail mailbox; for `user id`, use 'me' for the authenticated user or an email address to which the authenticated user has delegated access.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteMessageRequest",
+        "required": [
+          "message_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's email address. The special value 'me' refers to the authenticated user."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "185120e4428ba8cf",
+              "17a872b77b9e7a3b"
+            ],
+            "description": "Identifier of the email message to delete."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_FETCH_EMAILS",
+      "title": "Fetch emails",
+      "description": "Fetches a list of email messages from a gmail account, supporting filtering, pagination, and optional full content retrieval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "FetchEmailsRequest",
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "default": null,
+            "examples": [
+              "from:john@example.com is:unread",
+              "subject:meeting has:attachment",
+              "after:2024/01/01 before:2024/02/01",
+              "is:important OR is:starred",
+              "label:work -label:spam"
+            ],
+            "nullable": true,
+            "description": "Gmail advanced search query (e.g., 'from:user subject:meeting'). Supports operators like 'from:', 'to:', 'subject:', 'label:', 'has:attachment', 'is:unread', 'after:YYYY/MM/DD', 'before:YYYY/MM/DD', AND/OR/NOT. Use quotes for exact phrases. Omit for no query filter."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's email address or 'me' for the authenticated user."
+          },
+          "verbose": {
+            "type": "boolean",
+            "title": "Verbose",
+            "default": true,
+            "examples": [
+              "True",
+              "False"
+            ],
+            "description": "If false, uses optimized concurrent metadata fetching for faster performance (~75% improvement). If true, uses standard detailed message fetching. When false, only essential fields (subject, sender, recipient, time, labels) are guaranteed."
+          },
+          "ids_only": {
+            "type": "boolean",
+            "title": "Ids Only",
+            "default": false,
+            "examples": [
+              "True",
+              "False"
+            ],
+            "description": "If true, only returns message IDs from the list API without fetching individual message details. Fastest option for getting just message IDs and thread IDs."
+          },
+          "label_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Label Ids",
+            "description": "Filter by label IDs; only messages with all specified labels are returned. Common IDs: 'INBOX', 'SPAM', 'TRASH', 'UNREAD', 'STARRED', 'IMPORTANT', 'CATEGORY_PRIMARY' (alias 'CATEGORY_PERSONAL'), 'CATEGORY_SOCIAL', 'CATEGORY_PROMOTIONS', 'CATEGORY_UPDATES', 'CATEGORY_FORUMS'. Use 'listLabels' action for custom IDs."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "nullable": true,
+            "description": "Token for retrieving a specific page, obtained from a previous response's `nextPageToken`. Omit for the first page."
+          },
+          "max_results": {
+            "type": "integer",
+            "title": "Max Results",
+            "default": 1,
+            "maximum": 500,
+            "minimum": 1,
+            "examples": [
+              "10",
+              "100",
+              "500"
+            ],
+            "description": "Maximum number of messages to retrieve per page."
+          },
+          "include_payload": {
+            "type": "boolean",
+            "title": "Include Payload",
+            "default": true,
+            "examples": [
+              "True",
+              "False"
+            ],
+            "description": "Set to true to include full message payload (headers, body, attachments); false for metadata only."
+          },
+          "include_spam_trash": {
+            "type": "boolean",
+            "title": "Include Spam Trash",
+            "default": false,
+            "examples": [
+              "True",
+              "False"
+            ],
+            "description": "Set to true to include messages from 'SPAM' and 'TRASH'."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID",
+      "title": "Fetch message by message ID",
+      "description": "Fetches a specific email message by its id, provided the `message id` exists and is accessible to the authenticated `user id`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "FetchMessageByMessageIdRequest",
+        "required": [
+          "message_id"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "title": "Format",
+            "default": "full",
+            "examples": [
+              "minimal",
+              "full",
+              "raw",
+              "metadata"
+            ],
+            "description": "Format for message content: 'minimal' (ID/labels), 'full' (complete data), 'raw' (base64url string), 'metadata' (ID/labels/headers)."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "user@example.com",
+              "me"
+            ],
+            "description": "User's email address or 'me' for the authenticated user."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "xsdfe3264vrfw"
+            ],
+            "minLength": 1,
+            "description": "Unique ID of the email message to retrieve, obtainable from actions like 'List Messages'."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_FETCH_MESSAGE_BY_THREAD_ID",
+      "title": "Fetch Message by Thread ID",
+      "description": "Retrieves messages from a gmail thread using its `thread id`, where the thread must be accessible by the specified `user id`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "FetchMessageByThreadIdRequest",
+        "required": [
+          "thread_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "The email address of the user."
+          },
+          "thread_id": {
+            "type": "string",
+            "title": "Thread Id",
+            "examples": [
+              "xsdfe3264vrfw"
+            ],
+            "description": "Unique ID of the thread, obtainable from actions like 'listThreads' or 'fetchEmails'."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "default": "",
+            "examples": [
+              "CiAKGhIKJdealEffectivelyPageToken"
+            ],
+            "description": "Opaque page token for fetching a specific page of messages if results are paginated."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_GET_ATTACHMENT",
+      "title": "Get Gmail attachment",
+      "description": "Retrieves a specific attachment by id from a message in a user's gmail mailbox, requiring valid message and attachment ids.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAttachmentRequest",
+        "required": [
+          "message_id",
+          "attachment_id",
+          "file_name"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's email address ('me' for authenticated user)."
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name",
+            "examples": [
+              "invoice.pdf",
+              "report.docx"
+            ],
+            "description": "Desired filename for the downloaded attachment."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "18exampleMessageId7f9"
+            ],
+            "description": "Immutable ID of the message containing the attachment."
+          },
+          "attachment_id": {
+            "type": "string",
+            "title": "Attachment Id",
+            "examples": [
+              "A_PART0.1_18exampleAttachmentId7f9"
+            ],
+            "description": "ID of the attachment to retrieve."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_GET_CONTACTS",
+      "title": "Get contacts",
+      "description": "Fetches contacts (connections) for the authenticated google account, allowing selection of specific data fields and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetContactsRequest",
+        "properties": {
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "description": "Token to retrieve a specific page of results, obtained from 'nextPageToken' in a previous response."
+          },
+          "person_fields": {
+            "type": "string",
+            "title": "Person Fields",
+            "default": "emailAddresses,names,birthdays,genders",
+            "examples": [
+              "addresses",
+              "ageRanges",
+              "biographies",
+              "birthdays",
+              "coverPhotos",
+              "emailAddresses",
+              "events",
+              "genders",
+              "imClients",
+              "interests",
+              "locales",
+              "memberships",
+              "metadata",
+              "names",
+              "nicknames",
+              "occupations",
+              "organizations",
+              "phoneNumbers",
+              "photos",
+              "relations",
+              "residences",
+              "sipAddresses",
+              "skills",
+              "urls",
+              "userDefined"
+            ],
+            "description": "Comma-separated person fields to retrieve for each contact (e.g., 'names,emailAddresses')."
+          },
+          "resource_name": {
+            "type": "string",
+            "title": "Resource Name",
+            "default": "people/me",
+            "description": "Identifier for the person resource whose connections are listed; use 'people/me' for the authenticated user."
+          },
+          "include_other_contacts": {
+            "type": "boolean",
+            "title": "Include Other Contacts",
+            "default": true,
+            "description": "Include 'Other Contacts' (interacted with but not explicitly saved) in addition to regular contacts; if true, fetches from both endpoints and merges results."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_GET_PEOPLE",
+      "title": "Get People",
+      "description": "Retrieves either a specific person's details (using `resource name`) or lists 'other contacts' (if `other contacts` is true), with `person fields` specifying the data to return.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPeopleRequest",
+        "properties": {
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 10,
+            "maximum": 1000,
+            "minimum": 1,
+            "description": "The number of 'Other Contacts' to return per page. Applicable only when `other_contacts` is true."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "default": "",
+            "description": "An opaque token from a previous response to retrieve the next page of 'Other Contacts' results. Applicable only when `other_contacts` is true and paginating."
+          },
+          "sync_token": {
+            "type": "string",
+            "title": "Sync Token",
+            "default": "",
+            "description": "A token from a previous 'Other Contacts' list call to retrieve only changes since the last sync; leave empty for an initial full sync. Applicable only when `other_contacts` is true."
+          },
+          "person_fields": {
+            "type": "string",
+            "title": "Person Fields",
+            "default": "emailAddresses,names,birthdays,genders",
+            "examples": [
+              "names,emailAddresses",
+              "emailAddresses,names,birthdays,genders",
+              "addresses,phoneNumbers,metadata"
+            ],
+            "description": "A comma-separated field mask to restrict which fields on the person (or persons) are returned. Consult the Google People API documentation for a comprehensive list of valid fields."
+          },
+          "resource_name": {
+            "type": "string",
+            "title": "Resource Name",
+            "default": "people/me",
+            "examples": [
+              "people/me",
+              "people/c12345678901234567890",
+              "people/102345678901234567890"
+            ],
+            "description": "Resource name identifying the person for whom to retrieve information (like the authenticated user or a specific contact). Used only when `other_contacts` is false."
+          },
+          "other_contacts": {
+            "type": "boolean",
+            "title": "Other Contacts",
+            "default": false,
+            "description": "If true, retrieves 'Other Contacts' (people interacted with but not explicitly saved), ignoring `resource_name` and enabling pagination/sync. If false, retrieves information for the single person specified by `resource_name`."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_GET_PROFILE",
+      "title": "Get Profile",
+      "description": "Retrieves key gmail profile information (email address, message/thread totals, history id) for a user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetProfileRequest",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "user@example.com",
+              "me"
+            ],
+            "description": "The email address of the Gmail user whose profile is to be retrieved, or the special value 'me' to indicate the currently authenticated user."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_LIST_DRAFTS",
+      "title": "List drafts",
+      "description": "Retrieves a paginated list of email drafts from a user's gmail account. use verbose=true to get full draft details including subject, body, sender, and timestamp.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListDraftsRequest",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's mailbox ID; use 'me' for the authenticated user."
+          },
+          "verbose": {
+            "type": "boolean",
+            "title": "Verbose",
+            "default": false,
+            "examples": [
+              true,
+              false
+            ],
+            "description": "If true, fetches full draft details including subject, sender, recipient, body, and timestamp. If false, returns only draft IDs (faster)."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "default": "",
+            "examples": [
+              "CiaKJDhWSE5UURE9PSIsImMiOiJhYmMxMjMifQ=="
+            ],
+            "description": "Token from a previous response to retrieve a specific page of drafts."
+          },
+          "max_results": {
+            "type": "integer",
+            "title": "Max Results",
+            "default": 1,
+            "maximum": 500,
+            "minimum": 1,
+            "examples": [
+              10,
+              100,
+              500
+            ],
+            "description": "Maximum number of drafts to return per page."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_LIST_LABELS",
+      "title": "List Gmail labels",
+      "description": "Retrieves a list of all system and user-created labels for the specified gmail account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListLabelsRequest",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "Identifies the Gmail account (owner's email or 'me' for authenticated user) for which labels will be listed."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_LIST_THREADS",
+      "title": "List threads",
+      "description": "Retrieves a list of email threads from a gmail account, identified by `user id` (email address or 'me'), supporting filtering and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListThreadsRequest",
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "default": "",
+            "examples": [
+              "is:unread",
+              "from:john.doe@example.com",
+              "subject:important"
+            ],
+            "description": "Filter for threads, using Gmail search query syntax (e.g., 'from:user@example.com is:unread')."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "The user's email address or 'me' to specify the authenticated Gmail account."
+          },
+          "verbose": {
+            "type": "boolean",
+            "title": "Verbose",
+            "default": false,
+            "examples": [
+              "True",
+              "False"
+            ],
+            "description": "If false, returns threads with basic fields (id, snippet, historyId). If true, returns threads with complete message details including headers, body, attachments, and metadata for each message in the thread."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "default": "",
+            "examples": [
+              "abcPageToken123"
+            ],
+            "description": "Token from a previous response to retrieve a specific page of results; omit for the first page."
+          },
+          "max_results": {
+            "type": "integer",
+            "title": "Max Results",
+            "default": 10,
+            "maximum": 500,
+            "minimum": 1,
+            "examples": [
+              "10",
+              "50",
+              "100"
+            ],
+            "description": "Maximum number of threads to return."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_MODIFY_THREAD_LABELS",
+      "title": "Modify thread labels",
+      "description": "Adds or removes specified existing label ids from a gmail thread, affecting all its messages; ensure the thread id is valid.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ModifyThreadLabelsRequest",
+        "required": [
+          "thread_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "user@example.com",
+              "me"
+            ],
+            "description": "User's email address or 'me' for the authenticated user."
+          },
+          "thread_id": {
+            "type": "string",
+            "title": "Thread Id",
+            "examples": [
+              "18ea7715b619f09c"
+            ],
+            "description": "Immutable ID of the thread to modify."
+          },
+          "add_label_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Add Label Ids",
+            "default": null,
+            "examples": [
+              "STARRED",
+              "INBOX"
+            ],
+            "nullable": true,
+            "description": "List of label IDs to add to the thread; these labels must exist."
+          },
+          "remove_label_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Remove Label Ids",
+            "default": null,
+            "examples": [
+              "IMPORTANT",
+              "CATEGORY_UPDATES"
+            ],
+            "nullable": true,
+            "description": "List of label IDs to remove from the thread; these labels must exist."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_MOVE_TO_TRASH",
+      "title": "Move to Trash",
+      "description": "Moves an existing, non-deleted email message to the trash for the specified user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MoveToTrashRequest",
+        "required": [
+          "message_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "user@example.com",
+              "me"
+            ],
+            "description": "User's email address or 'me' for the authenticated user."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "1875f42779f726f2"
+            ],
+            "description": "Identifier of the email message to move to trash."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_PATCH_LABEL",
+      "title": "Patch Label",
+      "description": "Patches the specified label.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PatchLabelRequest",
+        "required": [
+          "userId",
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "LABEL_123"
+            ],
+            "description": "The ID of the label to update."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "My Updated Label"
+            ],
+            "nullable": true,
+            "description": "The display name of the label."
+          },
+          "color": {
+            "type": "object",
+            "title": "PatchLabelColor",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "textColor": {
+                "type": "string",
+                "title": "Text Color",
+                "default": null,
+                "examples": [
+                  "#000000",
+                  "#434343",
+                  "#666666",
+                  "#ffffff"
+                ],
+                "nullable": true,
+                "description": "The text color of the label, represented as a hex string. Must be one of Gmail's predefined colors from the color palette. See: https://developers.google.com/workspace/gmail/api/guides/labels#color_palette"
+              },
+              "backgroundColor": {
+                "type": "string",
+                "title": "Background Color",
+                "default": null,
+                "examples": [
+                  "#ffffff",
+                  "#f3f3f3",
+                  "#efefef",
+                  "#cccccc"
+                ],
+                "nullable": true,
+                "description": "The background color of the label, represented as a hex string. Must be one of Gmail's predefined colors from the color palette. See: https://developers.google.com/workspace/gmail/api/guides/labels#color_palette"
+              }
+            },
+            "description": "The color to assign to the label. Color is only available for labels that have their `type` set to `user`.",
+            "additionalProperties": false
+          },
+          "userId": {
+            "type": "string",
+            "title": "User Id",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "The user's email address. The special value `me` can be used to indicate the authenticated user."
+          },
+          "labelListVisibility": {
+            "type": "string",
+            "title": "Label List Visibility",
+            "default": null,
+            "examples": [
+              "labelShow",
+              "labelShowIfUnread",
+              "labelHide"
+            ],
+            "nullable": true,
+            "description": "The visibility of the label in the label list in the Gmail web interface."
+          },
+          "messageListVisibility": {
+            "type": "string",
+            "title": "Message List Visibility",
+            "default": null,
+            "examples": [
+              "show",
+              "hide"
+            ],
+            "nullable": true,
+            "description": "The visibility of messages with this label in the message list in the Gmail web interface."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_REMOVE_LABEL",
+      "title": "Remove label",
+      "description": "Permanently deletes a specific, existing user-created gmail label by its id for a user; cannot delete system labels.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RemoveLabelRequest",
+        "required": [
+          "label_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's email address or 'me' for the authenticated user."
+          },
+          "label_id": {
+            "type": "string",
+            "title": "Label Id",
+            "examples": [
+              "Label_123",
+              "Label_xyz789"
+            ],
+            "description": "ID of the user-created label to be permanently deleted; must exist and not be a system label."
+          }
+        }
+      }
+    },
+    {
+      "name": "GMAIL_REPLY_TO_THREAD",
+      "title": "Reply to email thread",
+      "description": "Sends a reply within a specific gmail thread using the original thread's subject, requiring a valid `thread id` and correctly formatted email addresses. supports attachments via the `attachment` parameter with valid `s3key`, `mimetype`, and `name`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReplyToThreadRequest",
+        "required": [
+          "thread_id",
+          "message_body",
+          "recipient_email"
+        ],
+        "properties": {
+          "cc": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Cc",
+            "default": [],
+            "examples": [
+              [
+                "cc.recipient1@example.com",
+                "cc.recipient2@example.com"
+              ]
+            ],
+            "description": "CC recipients' email addresses."
+          },
+          "bcc": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Bcc",
+            "default": [],
+            "examples": [
+              [
+                "bcc.recipient@example.com"
+              ]
+            ],
+            "description": "BCC recipients' email addresses (hidden from other recipients)."
+          },
+          "is_html": {
+            "type": "boolean",
+            "title": "Is Html",
+            "default": false,
+            "examples": [
+              "True",
+              "False"
+            ],
+            "description": "Indicates if `message_body` is HTML; if True, body must be valid HTML, if False, body should not contain HTML tags."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "Identifier for the user sending the reply; 'me' refers to the authenticated user."
+          },
+          "thread_id": {
+            "type": "string",
+            "title": "Thread Id",
+            "examples": [
+              "x53r3vdevff"
+            ],
+            "description": "Identifier of the Gmail thread for the reply."
+          },
+          "attachment": {
+            "type": "object",
+            "title": "FileUploadable",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "name",
+              "mimetype",
+              "s3key"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Name"
+              },
+              "s3key": {
+                "type": "string",
+                "title": "S3Key"
+              },
+              "mimetype": {
+                "type": "string",
+                "title": "Mimetype"
+              }
+            },
+            "description": "File to attach to the reply. Just Provide file path here",
+            "file_uploadable": true,
+            "additionalProperties": false
+          },
+          "message_body": {
+            "type": "string",
+            "title": "Message Body",
+            "examples": [
+              "Dear Sir, Nice talking to you. Yours respectfully, John"
+            ],
+            "description": "Content of the reply message, either plain text or HTML."
+          },
+          "recipient_email": {
+            "type": "string",
+            "title": "Recipient Email",
+            "examples": [
+              "john@doe.com"
+            ],
+            "description": "Primary recipient's email address."
+          },
+          "extra_recipients": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Extra Recipients",
+            "default": [],
+            "examples": [
+              [
+                "jane.doe@example.com",
+                "another.person@example.com"
+              ]
+            ],
+            "description": "Additional 'To' recipients' email addresses."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T12:58:22.971510+00:00",
+    "source": "smithery"
+  }
+}
