@@ -1,0 +1,804 @@
+{
+  "qualifiedName": "instagram",
+  "displayName": "Instagram",
+  "description": "Instagram is a social media platform for sharing photos, videos, and stories. Only supports Instagram Business and Creator accounts, not Instagram Personal accounts.",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/instagram.svg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/instagram",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/instagram/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "INSTAGRAM_CREATE_CAROUSEL_CONTAINER",
+      "description": "Create a draft carousel post with multiple images/videos before publishing.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateCarouselContainerRequest",
+        "required": [
+          "ig_user_id"
+        ],
+        "properties": {
+          "caption": {
+            "type": "string",
+            "title": "Caption",
+            "default": null,
+            "nullable": true
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Children",
+            "default": null,
+            "nullable": true,
+            "description": "List of child creation_ids (image/video items)"
+          },
+          "ig_user_id": {
+            "type": "string",
+            "title": "Ig User Id",
+            "description": "Instagram Business Account ID"
+          },
+          "child_image_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Child Image Urls",
+            "default": null,
+            "nullable": true,
+            "description": "List of image URLs to include as children"
+          },
+          "child_video_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Child Video Urls",
+            "default": null,
+            "nullable": true,
+            "description": "List of video URLs to include as children"
+          },
+          "child_image_files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "FileUploadable",
+              "required": [
+                "name",
+                "mimetype",
+                "s3key"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "examples": [
+                    "document.pdf",
+                    "image.jpg",
+                    "report.docx"
+                  ],
+                  "description": "The filename that will be used when uploading the file to the destination service"
+                },
+                "s3key": {
+                  "type": "string",
+                  "title": "S3Key",
+                  "examples": [
+                    "47563/gmail/GET_ATTACHMENT/response/12345"
+                  ],
+                  "description": "The S3 key of a publicly accessible file, typically returned from a previous download action that stored the file in S3. This key references an existing file that can be uploaded to another service."
+                },
+                "mimetype": {
+                  "type": "string",
+                  "title": "Mimetype",
+                  "examples": [
+                    "application/pdf",
+                    "image/jpeg",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ],
+                  "description": "The MIME type of the file"
+                }
+              },
+              "file_uploadable": true
+            },
+            "title": "Child Image Files",
+            "default": null,
+            "nullable": true,
+            "description": "List of local image files to include as children"
+          },
+          "child_video_files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "FileUploadable",
+              "required": [
+                "name",
+                "mimetype",
+                "s3key"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "examples": [
+                    "document.pdf",
+                    "image.jpg",
+                    "report.docx"
+                  ],
+                  "description": "The filename that will be used when uploading the file to the destination service"
+                },
+                "s3key": {
+                  "type": "string",
+                  "title": "S3Key",
+                  "examples": [
+                    "47563/gmail/GET_ATTACHMENT/response/12345"
+                  ],
+                  "description": "The S3 key of a publicly accessible file, typically returned from a previous download action that stored the file in S3. This key references an existing file that can be uploaded to another service."
+                },
+                "mimetype": {
+                  "type": "string",
+                  "title": "Mimetype",
+                  "examples": [
+                    "application/pdf",
+                    "image/jpeg",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ],
+                  "description": "The MIME type of the file"
+                }
+              },
+              "file_uploadable": true
+            },
+            "title": "Child Video Files",
+            "default": null,
+            "nullable": true,
+            "description": "List of local video files to include as children"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_CREATE_MEDIA_CONTAINER",
+      "description": "Create a draft media container for photos/videos/reels before publishing.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateMediaContainerRequest",
+        "required": [
+          "ig_user_id"
+        ],
+        "properties": {
+          "caption": {
+            "type": "string",
+            "title": "Caption",
+            "default": null,
+            "nullable": true,
+            "description": "Post caption"
+          },
+          "cover_url": {
+            "type": "string",
+            "title": "Cover Url",
+            "default": null,
+            "nullable": true,
+            "description": "Optional cover image URL for reels/videos"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url",
+            "default": null,
+            "nullable": true,
+            "description": "Public URL of the image. Must be a directly downloadable URL (no redirects) accessible to Meta crawlers. Supported formats: JPG, PNG (WebP not supported). Must pass correct Content-Type header, Content-Length header, max 8MB file size, minimum 320px width, aspect ratio between 4:5 and 1.91:1. URL must return the image file directly, not an HTML page."
+          },
+          "video_url": {
+            "type": "string",
+            "title": "Video Url",
+            "default": null,
+            "nullable": true,
+            "description": "Public URL of the video. Must be a directly downloadable URL (no redirects) accessible to Meta crawlers. Supported formats: MP4, MOV. Must pass correct Content-Type header, Content-Length header, max 100MB file size for feed videos, max 1GB for IGTV, minimum 3 seconds duration. URL must return the video file directly, not an HTML page."
+          },
+          "ig_user_id": {
+            "type": "string",
+            "title": "Ig User Id",
+            "description": "Instagram Business Account ID"
+          },
+          "image_file": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "Local image file to upload. File will be uploaded to a public URL automatically. Use this instead of image_url for local files.",
+            "file_uploadable": true
+          },
+          "media_type": {
+            "type": "string",
+            "title": "Media Type",
+            "default": null,
+            "nullable": true,
+            "description": "Explicit media type override, e.g., REELS or CAROUSEL."
+          },
+          "video_file": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "Local video file to upload. File will be uploaded to a public URL automatically. Use this instead of video_url for local files.",
+            "file_uploadable": true
+          },
+          "content_type": {
+            "enum": [
+              "photo",
+              "video",
+              "reel",
+              "carousel_item"
+            ],
+            "type": "string",
+            "title": "Content Type",
+            "default": null,
+            "nullable": true,
+            "description": "What you want to post: 'photo', 'video', 'reel', or 'carousel_item' (for carousel drafts)"
+          },
+          "is_carousel_item": {
+            "type": "boolean",
+            "title": "Is Carousel Item",
+            "default": null,
+            "nullable": true
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_CREATE_POST",
+      "description": "Publish a draft media container to Instagram (final publishing step).",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreatePostRequest",
+        "required": [
+          "ig_user_id",
+          "creation_id"
+        ],
+        "properties": {
+          "ig_user_id": {
+            "type": "string",
+            "title": "Ig User Id",
+            "description": "Instagram Business Account ID"
+          },
+          "creation_id": {
+            "type": "string",
+            "title": "Creation Id",
+            "description": "Draft ID returned from create actions"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_GET_CONVERSATION",
+      "description": "Get details about a specific Instagram DM conversation (participants, etc).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetConversationRequest",
+        "required": [
+          "conversation_id"
+        ],
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id",
+            "description": "Conversation ID"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_GET_POST_COMMENTS",
+      "description": "Get comments on an Instagram post.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPostCommentsRequest",
+        "required": [
+          "ig_post_id"
+        ],
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "nullable": true,
+            "description": "Cursor for pagination - get comments after this cursor"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Number of comments to return (max 100)"
+          },
+          "ig_post_id": {
+            "type": "string",
+            "title": "Ig Post Id",
+            "description": "Instagram Post ID"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_GET_POST_INSIGHTS",
+      "description": "Get Instagram post insights/analytics (impressions, reach, engagement, etc.).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPostInsightsRequest",
+        "required": [
+          "ig_post_id"
+        ],
+        "properties": {
+          "metric": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Metric",
+            "default": null,
+            "nullable": true,
+            "description": "Metrics to retrieve for the media. If not provided and metric_preset is not set, uses auto_safe preset. Allowed metrics vary by media_product_type: IMAGE/CAROUSEL: impressions, reach, likes, comments, saved, shares, engagement. VIDEO: reach, plays, likes, comments, saved, shares (impressions NOT supported). REELS: reach, plays, likes, comments, saved, shares, total_interactions, ig_reels_video_view_total_time, ig_reels_avg_watch_time. Stories: impressions, reach, replies, taps_forward, taps_back, exits. Common unsupported metrics: engagement on REELS (use total_interactions), impressions on VIDEO/Reels. If a metric is unsupported for the post type, API returns 400 error."
+          },
+          "ig_post_id": {
+            "type": "string",
+            "title": "Ig Post Id",
+            "description": "Instagram Post ID"
+          },
+          "metric_preset": {
+            "enum": [
+              "auto_safe",
+              "image_basic",
+              "video_basic",
+              "reel_basic",
+              "carousel_basic"
+            ],
+            "type": "string",
+            "title": "MetricPreset",
+            "default": "auto_safe",
+            "nullable": true,
+            "description": "Predefined metric sets for different media types to avoid API errors."
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_GET_POST_STATUS",
+      "description": "Check the processing status of a draft post container.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPostStatusRequest",
+        "required": [
+          "creation_id"
+        ],
+        "properties": {
+          "creation_id": {
+            "type": "string",
+            "title": "Creation Id",
+            "description": "Post container creation id"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_GET_USER_INFO",
+      "description": "Get Instagram user info including profile details and statistics.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUserInfoRequest",
+        "properties": {
+          "ig_user_id": {
+            "type": "string",
+            "title": "Ig User Id",
+            "default": null,
+            "nullable": true,
+            "description": "Instagram Business Account ID (optional, defaults to current user)"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_GET_USER_INSIGHTS",
+      "description": "Get Instagram account-level insights and analytics (profile views, reach, follower count, etc.). metric_type (time_series or total_value): When set to total_value, the API returns a total_value object instead of values. breakdown: Only applicable when metric_type=total_value and only for supported metrics. timeframe: Required for demographics-related metrics and overrides since/until for those metrics.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUserInsightsRequest",
+        "properties": {
+          "since": {
+            "type": "integer",
+            "title": "Since",
+            "default": null,
+            "nullable": true,
+            "description": "Start of time range (inclusive) as a Unix timestamp (seconds). Accepts date strings (YYYY-MM-DD) which will be converted to timestamps."
+          },
+          "until": {
+            "type": "integer",
+            "title": "Until",
+            "default": null,
+            "nullable": true,
+            "description": "End of time range (inclusive) as a Unix timestamp (seconds). Accepts date strings (YYYY-MM-DD) which will be converted to timestamps."
+          },
+          "metric": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "reach",
+                "follower_count",
+                "profile_views",
+                "website_clicks",
+                "accounts_engaged",
+                "total_interactions",
+                "get_directions_clicks",
+                "text_message_clicks",
+                "engaged_audience_demographics",
+                "reached_audience_demographics",
+                "follower_demographics",
+                "online_followers"
+              ],
+              "type": "string",
+              "title": "UserInsightMetric",
+              "properties": {},
+              "description": "Valid metrics for Instagram account-level insights."
+            },
+            "title": "Metric",
+            "nullable": true,
+            "description": "Metrics to retrieve for the user account. Allowed values: reach, follower_count, profile_views, website_clicks, accounts_engaged, total_interactions, get_directions_clicks, text_message_clicks, engaged_audience_demographics, reached_audience_demographics, follower_demographics, online_followers. Demographics metrics require timeframe parameter. If multiple metrics are provided, all must support the same period."
+          },
+          "period": {
+            "type": "string",
+            "title": "Period",
+            "default": "day",
+            "nullable": true,
+            "description": "Aggregation period for insights. Allowed values: day, week, days_28, lifetime. Allowed values depend on metric."
+          },
+          "breakdown": {
+            "type": "string",
+            "title": "Breakdown",
+            "default": null,
+            "nullable": true,
+            "description": "Breakdown to use when metric_type=total_value. Allowed values: contact_button_type, follow_type, media_product_type."
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe",
+            "default": null,
+            "nullable": true,
+            "description": "Timeframe for demographics-related metrics; overrides since/until for those metrics. Common values: last_14_days, last_30_days, last_90_days, prev_month, this_month, this_week."
+          },
+          "ig_user_id": {
+            "type": "string",
+            "title": "Ig User Id",
+            "default": null,
+            "nullable": true,
+            "description": "Instagram Business Account ID (optional, defaults to current user)"
+          },
+          "metric_type": {
+            "type": "string",
+            "title": "Metric Type",
+            "default": null,
+            "nullable": true,
+            "description": "Aggregation type for results. Allowed values: time_series, total_value."
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_GET_USER_MEDIA",
+      "description": "Get Instagram user's media (posts, photos, videos).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUserMediaRequest",
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "nullable": true,
+            "description": "Cursor for pagination - get media after this cursor"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Number of media items to return (max 100)"
+          },
+          "ig_user_id": {
+            "type": "string",
+            "title": "Ig User Id",
+            "default": null,
+            "nullable": true,
+            "description": "Instagram Business Account ID (optional, defaults to current user)"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_LIST_ALL_CONVERSATIONS",
+      "description": "List all Instagram DM conversations for the authenticated user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInstagramConversationsRequest",
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "nullable": true,
+            "description": "Cursor for pagination"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 200,
+            "minimum": 1,
+            "nullable": true
+          },
+          "ig_user_id": {
+            "type": "string",
+            "title": "Ig User Id",
+            "default": null,
+            "nullable": true,
+            "description": "Instagram Business Account ID (optional for /me/conversations)"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_LIST_ALL_MESSAGES",
+      "description": "List all messages from a specific Instagram DM conversation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInstagramMessagesRequest",
+        "required": [
+          "conversation_id"
+        ],
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "nullable": true,
+            "description": "Cursor for pagination"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 200,
+            "minimum": 1,
+            "nullable": true
+          },
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id",
+            "description": "Conversation ID"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_MARK_SEEN",
+      "description": "Mark Instagram DM messages as read/seen for a specific user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MarkSeenRequest",
+        "required": [
+          "recipient_id"
+        ],
+        "properties": {
+          "recipient_id": {
+            "type": "string",
+            "title": "Recipient Id",
+            "description": "Recipient PSID"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_REPLY_TO_COMMENT",
+      "description": "Reply to a comment on Instagram media.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReplyToCommentRequest",
+        "required": [
+          "ig_comment_id",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Reply message text"
+          },
+          "ig_comment_id": {
+            "type": "string",
+            "title": "Ig Comment Id",
+            "description": "Instagram Comment ID to reply to"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_SEND_IMAGE",
+      "description": "Send an image via Instagram DM to a specific user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SendImageRequest",
+        "required": [
+          "recipient_id",
+          "image_url"
+        ],
+        "properties": {
+          "caption": {
+            "type": "string",
+            "title": "Caption",
+            "default": null,
+            "nullable": true
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url",
+            "description": "Publicly accessible image URL"
+          },
+          "recipient_id": {
+            "type": "string",
+            "title": "Recipient Id",
+            "description": "Recipient PSID"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true
+          }
+        }
+      }
+    },
+    {
+      "name": "INSTAGRAM_SEND_TEXT_MESSAGE",
+      "description": "Send a text message to an Instagram user via DM.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SendInstagramMessageRequest",
+        "required": [
+          "recipient_id",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Message text to send"
+          },
+          "ig_user_id": {
+            "type": "string",
+            "title": "Ig User Id",
+            "default": null,
+            "nullable": true,
+            "description": "Instagram Business Account ID (optional when using /me/messages)"
+          },
+          "recipient_id": {
+            "type": "string",
+            "title": "Recipient Id",
+            "description": "Recipient PSID (Instagram-scoped ID)"
+          },
+          "graph_api_version": {
+            "type": "string",
+            "title": "Graph Api Version",
+            "default": "v21.0",
+            "nullable": true,
+            "description": "Instagram Graph API version"
+          },
+          "reply_to_message_id": {
+            "type": "string",
+            "title": "Reply To Message Id",
+            "default": null,
+            "nullable": true,
+            "description": "Optional message ID to reply to"
+          }
+        },
+        "description": "Send a message to an Instagram user via the Messenger API for Instagram.\n\nRequires a valid IG business account token with messaging permissions and the\nrecipient's PSID (Instagram scoped ID) obtained from prior interactions."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:30.681421+00:00",
+    "source": "smithery"
+  }
+}

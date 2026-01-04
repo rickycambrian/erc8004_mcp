@@ -1,0 +1,209 @@
+{
+  "qualifiedName": "@cristianoaredes/mcp-dadosbr",
+  "displayName": "DadosBR",
+  "description": "# MCP DadosBR\n\nServidor MCP focado em dados p\u00fablicos do Brasil. Oferece duas ferramentas simples e r\u00e1pidas para **consulta de CNPJ** e **consulta de CEP**, perfeitas para valida\u00e7\u00e3o de cadastros, preenchimento autom\u00e1tico de endere\u00e7os e enriquecimento de dados em agentes.\n\n## Por que usar\n\n* Lat\u00eancia baixa e alta disponibilidade em Cloudflare Workers\n* Interface MCP padronizada, pronta para agentes e IDEs compat\u00edveis\n* Design stateless por padr\u00e3o. Cache opcional com KV se desejar\n* Sem depend\u00eancia de servi\u00e7os propriet\u00e1rios do lado do cliente\n\n## Tools dispon\u00edveis\n\n* `cnpj_lookup`\n  **Entrada**: `{ \"cnpj\": \"string\" }` com ou sem m\u00e1scara\n  **Retorno**: dados cadastrais quando dispon\u00edveis, por exemplo raz\u00e3o social, nome fantasia, CNAE principal, natureza jur\u00eddica, situa\u00e7\u00e3o, endere\u00e7o\n\n* `cep_lookup`\n  **Entrada**: `{ \"cep\": \"string\" }` com ou sem m\u00e1scara\n  **Retorno**: logradouro, bairro, munic\u00edpio, UF, c\u00f3digo IBGE e campos correlatos quando dispon\u00edveis\n\n## Endpoints\n\n* HTTP JSON-RPC: `/mcp`\n* Server-Sent Events: `/sse`\n* Sa\u00fade: `/health`\n\nExemplo de chamada JSON-RPC:\n\n```json\n{\n  \"jsonrpc\": \"2.0\",\n  \"id\": \"1\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"cep_lookup\",\n    \"arguments\": { \"cep\": \"30130-010\" }\n  }\n}\n```\n\n## Integra\u00e7\u00e3o r\u00e1pida\n\n* **SSE**: aponte seu cliente MCP para `.../sse`\n* **HTTP**: aponte para `.../mcp` usando JSON-RPC 2.0\n  Funciona com agentes e IDEs compat\u00edveis com MCP. Exemplos de configura\u00e7\u00e3o est\u00e3o no reposit\u00f3rio.\n\n## Casos de uso\n\n* Autocomplete de endere\u00e7o a partir do CEP\n* Valida\u00e7\u00e3o de CNPJ em fluxos de onboarding e KYC\n* Enriquecimento de dados em CRMs, ERPs e chatbots\n* Auditoria c\u00edvica e aplica\u00e7\u00f5es gov-tech locais\n\n## Privacidade e limites\n\nO servidor n\u00e3o persiste PII por padr\u00e3o. Se o cache KV for habilitado, use pol\u00edticas de reten\u00e7\u00e3o m\u00ednimas. Respeite limites das fontes p\u00fablicas utilizadas. Planos e cotas do Cloudflare podem impactar throughput.\n\n## C\u00f3digo e docs\n\n* Reposit\u00f3rio e exemplos: [https://github.com/cristianoaredes/mcp-dadosbr](https://github.com/cristianoaredes/mcp-dadosbr)\n* Documenta\u00e7\u00e3o dos endpoints no README\n\n## Suporte\n\nAbra uma issue no GitHub para bugs, d\u00favidas e sugest\u00f5es. Roadmap inclui busca por empresa, normaliza\u00e7\u00e3o de formatos e retornos enriquecidos.\n\n\nBrasil, CNPJ, CEP, GovTech, Valida\u00e7\u00e3o, Endere\u00e7os, Cloudflare Workers, MCP\n",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/c815f2ff-8e62-4c4e-8081-5f5ac0f7cf26.jpeg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@cristianoaredes/mcp-dadosbr",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@cristianoaredes/mcp-dadosbr/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {
+          "cepBaseUrl": {
+            "type": "string",
+            "default": "https://opencep.com/v1",
+            "description": "Custom CEP API base URL (default: https://opencep.com/v1)"
+          },
+          "authHeaders": {
+            "type": "object",
+            "description": "Extra headers for API requests (optional)"
+          },
+          "cnpjBaseUrl": {
+            "type": "string",
+            "default": "https://opencnpj.org/api/v1",
+            "description": "Custom CNPJ API base URL (default: https://opencnpj.org/api/v1)"
+          }
+        },
+        "description": "Optional configuration - uses default Brazilian public APIs if not specified"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "cnpj_lookup",
+      "description": "Look up Brazilian company information by CNPJ number",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "cnpj"
+        ],
+        "properties": {
+          "cnpj": {
+            "type": "string",
+            "description": "Brazilian CNPJ number (with or without formatting)"
+          }
+        }
+      }
+    },
+    {
+      "name": "cep_lookup",
+      "description": "Look up Brazilian postal code information by CEP",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "cep"
+        ],
+        "properties": {
+          "cep": {
+            "type": "string",
+            "description": "Brazilian CEP postal code (with or without formatting)"
+          }
+        }
+      }
+    },
+    {
+      "name": "cnpj_search",
+      "description": "Search the web for information about Brazilian companies, CNPJ numbers, people, and more using DuckDuckGo.\n\nThis tool supports advanced search operators:\n- site:example.com - Search within a specific domain\n- intext:\"exact phrase\" - Find exact text in page body\n- intitle:keyword - Find keyword in page title\n- inurl:keyword - Find keyword in URL\n- filetype:pdf - Search for specific file types (pdf, xls, doc, etc.)\n- \"exact phrase\" - Search for exact phrase\n- keyword1 OR keyword2 - Search for either keyword\n- -exclude - Exclude a term from results\n\nCommon use cases:\n- Find company information: \"CNPJ site:gov.br\"\n- Search legal cases: \"razao social site:jusbrasil.com.br\"\n- Find documents: \"CNPJ filetype:pdf\"\n- Search social media: \"company name site:linkedin.com\"\n- Government records: \"CNPJ site:transparencia.gov.br\"\n\nExamples:\n- cnpj_search({ query: \"28526270000150 site:gov.br\", max_results: 10 })\n- cnpj_search({ query: \"\"CRISTIANO AREDES\" intext:CNPJ\" })\n- cnpj_search({ query: \"site:jusbrasil.com.br \"AC SOLUCOES\"\" })",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query (can include operators like site:, intext:, filetype:, etc.)"
+          },
+          "max_results": {
+            "type": "number",
+            "default": 5,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Maximum number of results to return (default: 5, max: 20)"
+          }
+        }
+      }
+    },
+    {
+      "name": "sequentialthinking",
+      "description": "A detailed tool for dynamic and reflective problem-solving through thoughts.\nThis tool helps analyze problems through a flexible thinking process that can adapt and evolve.\nEach thought can build on, question, or revise previous insights as understanding deepens.\n\nWhen to use this tool:\n- Breaking down complex problems into steps\n- Planning and design with room for revision\n- Analysis that might need course correction\n- Problems where the full scope might not be clear initially\n- Problems that require a multi-step solution\n- Tasks that need to maintain context over multiple steps\n- Situations where irrelevant information needs to be filtered out\n\nKey features:\n- You can adjust total_thoughts up or down as you progress\n- You can question or revise previous thoughts\n- You can add more thoughts even after reaching what seemed like the end\n- You can express uncertainty and explore alternative approaches\n- Not every thought needs to build linearly - you can branch or backtrack\n- Generates a solution hypothesis\n- Verifies the hypothesis based on the Chain of Thought steps\n- Repeats the process until satisfied\n- Provides a correct answer\n\nParameters explained:\n- thought: Your current thinking step, which can include:\n  * Regular analytical steps\n  * Revisions of previous thoughts\n  * Questions about previous decisions\n  * Realizations about needing more analysis\n  * Changes in approach\n  * Hypothesis generation\n  * Hypothesis verification\n- next_thought_needed: True if you need more thinking, even if at what seemed like the end\n- thought_number: Current number in sequence (can go beyond initial total if needed)\n- total_thoughts: Current estimate of thoughts needed (can be adjusted up/down)\n- is_revision: A boolean indicating if this thought revises previous thinking\n- revises_thought: If is_revision is true, which thought number is being reconsidered\n- branch_from_thought: If branching, which thought number is the branching point\n- branch_id: Identifier for the current branch (if any)\n- needs_more_thoughts: If reaching end but realizing more thoughts needed\n\nYou should:\n1. Start with an initial estimate of needed thoughts, but be ready to adjust\n2. Feel free to question or revise previous thoughts\n3. Don't hesitate to add more thoughts if needed, even at the \"end\"\n4. Express uncertainty when present\n5. Mark thoughts that revise previous thinking or branch into new paths\n6. Ignore information that is irrelevant to the current step\n7. Generate a solution hypothesis when appropriate\n8. Verify the hypothesis based on the Chain of Thought steps\n9. Repeat the process until satisfied with the solution\n10. Provide a single, ideally correct answer as the final output\n11. Only set next_thought_needed to false when truly done and a satisfactory answer is reached",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "thought",
+          "nextThoughtNeeded",
+          "thoughtNumber",
+          "totalThoughts"
+        ],
+        "properties": {
+          "thought": {
+            "type": "string",
+            "description": "Your current thinking step"
+          },
+          "branchId": {
+            "type": "string",
+            "description": "Branch identifier"
+          },
+          "isRevision": {
+            "type": "boolean",
+            "description": "Whether this revises previous thinking"
+          },
+          "thoughtNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Current thought number (numeric value, e.g., 1, 2, 3)"
+          },
+          "totalThoughts": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Estimated total thoughts needed (numeric value, e.g., 5, 10)"
+          },
+          "revisesThought": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Which thought is being reconsidered"
+          },
+          "branchFromThought": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Branching point thought number"
+          },
+          "needsMoreThoughts": {
+            "type": "boolean",
+            "description": "If more thoughts are needed"
+          },
+          "nextThoughtNeeded": {
+            "type": "boolean",
+            "description": "Whether another thought step is needed"
+          }
+        }
+      }
+    },
+    {
+      "name": "cnpj_intelligence",
+      "description": "Intelligent automatic search about a Brazilian company using CNPJ.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "cnpj"
+        ],
+        "properties": {
+          "cnpj": {
+            "type": "string",
+            "description": "Brazilian CNPJ number (with or without formatting)"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "Optional Tavily API key (if not provided, uses server configuration)"
+          },
+          "provider": {
+            "enum": [
+              "duckduckgo",
+              "tavily"
+            ],
+            "type": "string",
+            "default": "duckduckgo",
+            "description": "Search provider to use (default: duckduckgo with automatic fallback)"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "government",
+                "legal",
+                "news",
+                "documents",
+                "social",
+                "partners"
+              ],
+              "type": "string"
+            },
+            "description": "Search categories to include (default: all)"
+          },
+          "max_queries": {
+            "type": "number",
+            "default": 10,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Maximum number of search queries to execute (default: 10)"
+          },
+          "max_results_per_query": {
+            "type": "number",
+            "default": 5,
+            "maximum": 10,
+            "minimum": 1,
+            "description": "Maximum results per search query (default: 5)"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:12:29.130465+00:00",
+    "source": "smithery"
+  }
+}

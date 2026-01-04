@@ -1,0 +1,236 @@
+{
+  "qualifiedName": "@NOVA-3951/fastmail-calendar",
+  "displayName": "Fastmail Calendar",
+  "description": "Allow an AI to Create, Read, Modify, or Delete events in your Fastmail Calendar",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/fastmail.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@NOVA-3951/fastmail-calendar",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@NOVA-3951/fastmail-calendar/mcp",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "username",
+          "appPassword"
+        ],
+        "properties": {
+          "timezone": {
+            "type": "string",
+            "description": "Default timezone for events, e.g., 'America/New_York'"
+          },
+          "username": {
+            "type": "string",
+            "description": "Your Fastmail email address (e.g., user@fastmail.com). Use 'test' for demo mode."
+          },
+          "appPassword": {
+            "type": "string",
+            "description": "Fastmail app password (16+ characters). Create at Settings \u2192 Privacy & Security \u2192 Integrations \u2192 New app password. Use 'test' for demo mode."
+          },
+          "defaultCalendar": {
+            "type": "string",
+            "description": "Default calendar name to use when not specified"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "list_calendars",
+      "annotations": {
+        "title": "List Calendars",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "STEP 1 - ALWAYS CALL THIS FIRST. Lists all calendars in the user's Fastmail account. Returns an array of calendars with displayName (human-readable name like \"Work\", \"Personal\", \"Family\"), url (required for other operations), and timezone. You MUST call this before list_events, create_event, update_event, or delete_event to get the calendar URL. Look at the displayName to identify which calendar the user wants (e.g., \"Work\" for work schedule, \"Personal\" for personal events).",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "list_events",
+      "annotations": {
+        "title": "List Events",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "STEP 2 - Get events from a calendar. PREREQUISITE: You must first call list_calendars to get the calendarUrl. Returns events within the specified date range. Each event contains: url (needed for update/delete), etag (needed for delete), and data (iCalendar format with SUMMARY=title, DTSTART=start time, DTEND=end time, LOCATION, DESCRIPTION). Parse the iCalendar data to show event details to the user.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "calendarUrl",
+          "startDate",
+          "endDate"
+        ],
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "description": "REQUIRED. End of date range in ISO format. For a single day, use the next day. Example: '2024-12-02' or '2024-12-31T23:59:59Z'"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "REQUIRED. Start of date range in ISO format. For today: use current date. Example: '2024-12-01' or '2024-12-01T00:00:00Z'"
+          },
+          "calendarUrl": {
+            "type": "string",
+            "description": "REQUIRED. The calendar URL from list_calendars output. Example: 'https://caldav.fastmail.com/dav/calendars/user/example@fastmail.com/default/'"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_event_details",
+      "annotations": {
+        "title": "Get Event Details",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get parsed details of a specific event. PREREQUISITE: You must first call list_calendars, then list_events to get the eventUrl. Returns structured event data (title, start, end, location, description) instead of raw iCalendar format.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "eventUrl"
+        ],
+        "properties": {
+          "eventUrl": {
+            "type": "string",
+            "description": "REQUIRED. The event URL from list_events output."
+          }
+        }
+      }
+    },
+    {
+      "name": "create_event",
+      "annotations": {
+        "title": "Create Event",
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a new calendar event. PREREQUISITE: You must first call list_calendars to get the calendarUrl. Creates an event with the specified title, times, and optional description/location.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "calendarUrl",
+          "summary",
+          "startDate",
+          "endDate"
+        ],
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "description": "REQUIRED. Event end in ISO format. Must be after startDate. Example: '2024-12-15T11:00:00Z' for 11 AM UTC"
+          },
+          "summary": {
+            "type": "string",
+            "description": "REQUIRED. The event title. Example: 'Team Meeting', 'Doctor Appointment', 'Lunch with Sarah'"
+          },
+          "location": {
+            "type": "string",
+            "description": "Optional. Where the event takes place. Example: 'Conference Room A', 'https://zoom.us/j/123', '123 Main St'"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "REQUIRED. Event start in ISO format. Example: '2024-12-15T10:00:00Z' for 10 AM UTC"
+          },
+          "calendarUrl": {
+            "type": "string",
+            "description": "REQUIRED. The calendar URL from list_calendars output where the event will be created."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional. Detailed notes or agenda for the event."
+          }
+        }
+      }
+    },
+    {
+      "name": "update_event",
+      "annotations": {
+        "title": "Update Event",
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Modify an existing event. PREREQUISITE: You must first call list_calendars, then list_events to get the eventUrl. Only include fields you want to change; omitted fields stay the same.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "eventUrl"
+        ],
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "description": "Optional. New end time in ISO format."
+          },
+          "summary": {
+            "type": "string",
+            "description": "Optional. New title for the event."
+          },
+          "eventUrl": {
+            "type": "string",
+            "description": "REQUIRED. The event URL from list_events output. Example: 'https://caldav.fastmail.com/dav/calendars/user/.../event.ics'"
+          },
+          "location": {
+            "type": "string",
+            "description": "Optional. New location for the event."
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Optional. New start time in ISO format."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional. New description/notes for the event."
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_event",
+      "annotations": {
+        "title": "Delete Event",
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "PERMANENTLY DELETE an event. PREREQUISITE: You must first call list_calendars, then list_events to get both the eventUrl AND etag. WARNING: This cannot be undone. Always confirm with the user before deleting.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "eventUrl",
+          "etag"
+        ],
+        "properties": {
+          "etag": {
+            "type": "string",
+            "description": "REQUIRED. The etag from list_events output. This prevents accidentally deleting a modified event."
+          },
+          "eventUrl": {
+            "type": "string",
+            "description": "REQUIRED. The event URL from list_events output."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:17:02.938833+00:00",
+    "source": "smithery"
+  }
+}

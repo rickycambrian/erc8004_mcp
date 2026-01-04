@@ -175,7 +175,7 @@ def build_index(servers_dir: Path) -> dict:
             with open(filepath, "r") as f:
                 data = json.load(f)
 
-            tools = data.get("tools", [])
+            tools = data.get("tools") or []  # Handle None case
 
             index["servers"].append({
                 "qualified_name": data.get("qualifiedName"),
@@ -253,7 +253,7 @@ def pull_servers(
                     save_server(server_full, SERVERS_DIR)
                     servers_fetched += 1
 
-                    tool_count = len(server_full.get("tools", []))
+                    tool_count = len(server_full.get("tools") or [])
                     if servers_fetched % 50 == 0:
                         logger.info(f"Progress: {servers_fetched} servers saved")
 

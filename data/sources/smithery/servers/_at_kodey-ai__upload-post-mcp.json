@@ -1,0 +1,587 @@
+{
+  "qualifiedName": "@kodey-ai/upload-post-mcp",
+  "displayName": "Upload-Post",
+  "description": "Publish videos, photos, and text to all your social channels from one place. Schedule and manage posts at scale with background processing and easy status tracking. Track performance with unified analytics and streamline page and profile management.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@kodey-ai/upload-post-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@kodey-ai/upload-post-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "uploadPostApiKey"
+        ],
+        "properties": {
+          "uploadPostApiKey": {
+            "type": "string",
+            "description": "The API key for the Upload-Post service. Get your API key from https://upload-post.com/dashboard"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "upload_video",
+      "description": "\n    Upload a video to social media platforms (TikTok, Instagram, LinkedIn, YouTube, Facebook, X/Twitter, Threads, Pinterest).\n    Supports scheduling and async uploads.\n\n    Args:\n        user: User identifier\n        platforms: List of platforms (tiktok, instagram, linkedin, youtube, facebook, x, threads, pinterest)\n        video_url: URL of the video to upload\n        title: Default title for the video\n        description: Description/caption for the video\n        scheduled_date: ISO-8601 date for scheduling (optional)\n        async_upload: Process in background (default: false)\n        platform_specific: Platform-specific parameters (tiktok_title, instagram_title, etc.)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "upload_videoArguments",
+        "required": [
+          "user",
+          "platforms",
+          "video_url",
+          "title"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Platforms"
+          },
+          "video_url": {
+            "type": "string",
+            "title": "Video Url"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null
+          },
+          "async_upload": {
+            "type": "boolean",
+            "title": "Async Upload",
+            "default": false
+          },
+          "scheduled_date": {
+            "type": "string",
+            "title": "Scheduled Date",
+            "default": null
+          },
+          "platform_specific": {
+            "type": "object",
+            "title": "Platform Specific",
+            "default": null,
+            "additionalProperties": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "upload_videoOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "upload_photo",
+      "description": "\n    Upload photos to social media platforms (Instagram, TikTok, LinkedIn, Facebook, X/Twitter, Threads, Pinterest).\n    Supports multiple photos and scheduling.\n\n    Args:\n        user: User identifier\n        platforms: List of platforms (instagram, tiktok, linkedin, facebook, x, threads, pinterest)\n        photo_urls: List of photo URLs to upload\n        title: Default title for the photos\n        caption: Caption/description for the photos\n        scheduled_date: ISO-8601 date for scheduling (optional)\n        async_upload: Process in background (default: false)\n        platform_specific: Platform-specific parameters (facebook_page_id, pinterest_board_id, etc.)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "upload_photoArguments",
+        "required": [
+          "user",
+          "platforms",
+          "photo_urls",
+          "title"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "caption": {
+            "type": "string",
+            "title": "Caption",
+            "default": null
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Platforms"
+          },
+          "photo_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Photo Urls"
+          },
+          "async_upload": {
+            "type": "boolean",
+            "title": "Async Upload",
+            "default": false
+          },
+          "scheduled_date": {
+            "type": "string",
+            "title": "Scheduled Date",
+            "default": null
+          },
+          "platform_specific": {
+            "type": "object",
+            "title": "Platform Specific",
+            "default": null,
+            "additionalProperties": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "upload_photoOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "upload_text",
+      "description": "\n    Upload text-only posts to social media platforms (X/Twitter, LinkedIn, Facebook, Threads, Reddit).\n    Automatically creates threads for long text.\n\n    Args:\n        user: User identifier\n        platforms: List of platforms (x, linkedin, facebook, threads, reddit)\n        title: Text content for the post\n        scheduled_date: ISO-8601 date for scheduling (optional)\n        async_upload: Process in background (default: false)\n        platform_specific: Platform-specific parameters (facebook_page_id, subreddit, etc.)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "upload_textArguments",
+        "required": [
+          "user",
+          "platforms",
+          "title"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Platforms"
+          },
+          "async_upload": {
+            "type": "boolean",
+            "title": "Async Upload",
+            "default": false
+          },
+          "scheduled_date": {
+            "type": "string",
+            "title": "Scheduled Date",
+            "default": null
+          },
+          "platform_specific": {
+            "type": "object",
+            "title": "Platform Specific",
+            "default": null,
+            "additionalProperties": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "upload_textOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_upload_status",
+      "description": "\n    Check the status of an asynchronous upload using the request_id.\n\n    Args:\n        request_id: Request ID from async upload\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_upload_statusArguments",
+        "required": [
+          "request_id"
+        ],
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_upload_statusOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_upload_history",
+      "description": "\n    Retrieve paginated history of past uploads across all platforms.\n\n    Args:\n        page: Page number (default: 1)\n        limit: Page size: 10, 20, 50, or 100 (default: 10)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_upload_historyArguments",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 10
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_upload_historyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_analytics",
+      "description": "\n    Get analytics data for a user profile across social media platforms.\n\n    Args:\n        profile_username: Username of the profile\n        platforms: Comma-separated platforms (instagram,linkedin,facebook,x)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_analyticsArguments",
+        "required": [
+          "profile_username",
+          "platforms"
+        ],
+        "properties": {
+          "platforms": {
+            "type": "string",
+            "title": "Platforms"
+          },
+          "profile_username": {
+            "type": "string",
+            "title": "Profile Username"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_analyticsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_facebook_pages",
+      "description": "\n    Get list of Facebook pages accessible through connected accounts.\n\n    Args:\n        profile: Optional profile username to filter pages\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_facebook_pagesArguments",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "title": "Profile",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_facebook_pagesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_linkedin_pages",
+      "description": "\n    Get list of LinkedIn company pages associated with connected accounts.\n\n    Args:\n        profile: Optional profile username to filter pages\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_linkedin_pagesArguments",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "title": "Profile",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_linkedin_pagesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_pinterest_boards",
+      "description": "\n    Get list of Pinterest boards from connected accounts.\n\n    Args:\n        profile: Optional profile username to filter boards\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_pinterest_boardsArguments",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "title": "Profile",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_pinterest_boardsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_scheduled_posts",
+      "description": "List all scheduled posts for the authenticated user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_scheduled_postsArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "list_scheduled_postsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "cancel_scheduled_post",
+      "description": "\n    Cancel a scheduled post by its job ID.\n\n    Args:\n        job_id: Job ID of the scheduled post\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "cancel_scheduled_postArguments",
+        "required": [
+          "job_id"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "cancel_scheduled_postOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_user_profile",
+      "description": "\n    Create a new user profile for platform integration.\n\n    Args:\n        username: Unique identifier for the user\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "create_user_profileArguments",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "create_user_profileOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_user_profiles",
+      "description": "Get all user profiles created under your API key.",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_user_profilesArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_user_profilesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_user_profile",
+      "description": "\n    Delete a user profile and its associated data.\n\n    Args:\n        username: Username of the profile to delete\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "delete_user_profileArguments",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "delete_user_profileOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "generate_jwt",
+      "description": "\n    Generate a JWT URL for social account linking.\n\n    Args:\n        username: Username to generate JWT for\n        redirect_url: URL to redirect after linking (optional)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "generate_jwtArguments",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "redirect_url": {
+            "type": "string",
+            "title": "Redirect Url",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "generate_jwtOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:09:46.580111+00:00",
+    "source": "smithery"
+  }
+}

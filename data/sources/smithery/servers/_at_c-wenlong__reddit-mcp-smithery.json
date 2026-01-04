@@ -1,0 +1,372 @@
+{
+  "qualifiedName": "@c-wenlong/reddit-mcp-smithery",
+  "displayName": "reddit-mcp-smithery",
+  "description": "Create personalized greetings for people or groups in seconds. Toggle a playful pirate mode to change the tone. Explore the origin of 'Hello, World' for fun context.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/38bed9fb-c2e1-4148-b17e-faa9d15d34b0.webp",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@c-wenlong/reddit-mcp-smithery",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@c-wenlong/reddit-mcp-smithery/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "ConfigSchema",
+        "examples": [
+          {
+            "reddit_client_id": "abc123def456",
+            "reddit_user_agent": "MCP Startup Ideator/1.0",
+            "reddit_client_secret": "xyz789_secret_key"
+          }
+        ],
+        "properties": {
+          "reddit_client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reddit Client Id",
+            "default": null,
+            "examples": [
+              "abc123def456",
+              "RSCqbMxsdxCo7pX_NkNTlA"
+            ],
+            "description": "Your Reddit API client ID. Optional - can be set via REDDIT_CLIENT_ID environment variable. Get from https://www.reddit.com/prefs/apps. Type: string, Required: false"
+          },
+          "reddit_user_agent": {
+            "type": "string",
+            "title": "Reddit User Agent",
+            "default": "MCP Startup Ideator/1.0",
+            "examples": [
+              "MCP Startup Ideator/1.0",
+              "MyApp/1.0 by YourName"
+            ],
+            "description": "User agent string for Reddit API requests. Optional - defaults to 'MCP Startup Ideator/1.0'. Can also be set via REDDIT_USER_AGENT environment variable. Type: string, Required: false"
+          },
+          "reddit_client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reddit Client Secret",
+            "default": null,
+            "examples": [
+              "xyz789_secret_key",
+              "t2Xfr_T5v6hMloJyMlVLYR-rTgutAA"
+            ],
+            "description": "Your Reddit API client secret. Optional - can be set via REDDIT_CLIENT_SECRET environment variable. Get from https://www.reddit.com/prefs/apps (shown as 'secret' when you create the app). Type: string, Required: false"
+          }
+        },
+        "description": "Configuration schema for Reddit MCP Server. All fields are optional.",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_reddit_problems",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Search Reddit for posts that likely indicate problems or unmet needs. \n        Searches Reddit posts and returns results sorted by problem indicators.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_reddit_problemsArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "default": "relevance",
+            "description": "Sort order: 'relevance', 'hot', 'top', 'new', 'comments'"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 20,
+            "description": "Number of posts to return (default: 20, max: 100)"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "Search query to find problem-related posts on Reddit"
+          },
+          "subreddit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subreddit",
+            "default": null,
+            "description": "Optional: Limit search to a specific subreddit (without r/ prefix)"
+          },
+          "time_filter": {
+            "type": "string",
+            "title": "Time Filter",
+            "default": "week",
+            "description": "Time filter for 'top' sort: 'hour', 'day', 'week', 'month', 'year', 'all'"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "search_reddit_problemsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_subreddit_problems",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Analyze a subreddit to identify common problems, pain points, and unmet needs discussed by the community. \n        Returns aggregated insights.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "analyze_subreddit_problemsArguments",
+        "required": [
+          "subreddit"
+        ],
+        "properties": {
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "default": "top",
+            "description": "Sort order: 'hot', 'top', 'new', 'rising'"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50,
+            "description": "Number of posts to analyze (default: 50, max: 100)"
+          },
+          "subreddit": {
+            "type": "string",
+            "title": "Subreddit",
+            "description": "Name of the subreddit to analyze (without r/ prefix)"
+          },
+          "time_filter": {
+            "type": "string",
+            "title": "Time Filter",
+            "default": "week",
+            "description": "Time filter for analysis: 'hour', 'day', 'week', 'month', 'year', 'all'"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "analyze_subreddit_problemsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_trending_problems",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Get trending discussions across Reddit that indicate problems or pain points. \n        Focuses on posts with high engagement.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_trending_problemsArguments",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 30,
+            "description": "Number of posts to return (default: 30, max: 100)"
+          },
+          "min_score": {
+            "type": "integer",
+            "title": "Min Score",
+            "default": 10,
+            "description": "Minimum upvote score (default: 10)"
+          },
+          "subreddits": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subreddits",
+            "default": null,
+            "description": "Optional: List of subreddits to search (without r/). If empty, searches all of Reddit"
+          },
+          "min_comments": {
+            "type": "integer",
+            "title": "Min Comments",
+            "default": 5,
+            "description": "Minimum number of comments (default: 5)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_trending_problemsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_startup_ideas_from_post",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Analyze a specific Reddit post (by URL) to extract potential startup ideas and problem-solution opportunities.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_startup_ideas_from_postArguments",
+        "required": [
+          "post_url"
+        ],
+        "properties": {
+          "post_url": {
+            "type": "string",
+            "title": "Post Url",
+            "description": "Full URL or permalink to the Reddit post to analyze"
+          },
+          "comment_limit": {
+            "type": "integer",
+            "title": "Comment Limit",
+            "default": 20,
+            "description": "Number of top comments to analyze (default: 20)"
+          },
+          "include_comments": {
+            "type": "boolean",
+            "title": "Include Comments",
+            "default": true,
+            "description": "Include top comments in analysis (default: true)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_startup_ideas_from_postOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "discover_problem_patterns",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Discover recurring problem patterns across multiple subreddits or search queries. \n        Helps identify widespread problems that could be startup opportunities.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "discover_problem_patternsArguments",
+        "required": [
+          "queries"
+        ],
+        "properties": {
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Queries",
+            "description": "List of search queries to analyze for common problem patterns"
+          },
+          "subreddits": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subreddits",
+            "default": null,
+            "description": "Optional: List of subreddits to limit search to (without r/ prefix)"
+          },
+          "posts_per_query": {
+            "type": "integer",
+            "title": "Posts Per Query",
+            "default": 10,
+            "description": "Number of posts to analyze per query (default: 10)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "discover_problem_patternsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:09:00.897633+00:00",
+    "source": "smithery"
+  }
+}

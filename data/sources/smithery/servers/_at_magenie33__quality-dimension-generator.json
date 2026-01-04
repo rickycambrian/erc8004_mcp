@@ -1,0 +1,120 @@
+{
+  "qualifiedName": "@magenie33/quality-dimension-generator",
+  "displayName": "Quality Dimension Generator",
+  "description": "Generate tailored quality criteria and scoring guides from your task descriptions. Refine objectives, produce 6-8-10 benchmarks across configurable dimensions, and save both the refined task and the rubric for consistent evaluations. Streamline reviews with clear, reusable standards.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@magenie33/quality-dimension-generator",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@magenie33/quality-dimension-generator/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "properties": {
+          "debug": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable debug logging"
+          },
+          "enabledTools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of tools to enable"
+          },
+          "expectedScore": {
+            "type": "number",
+            "default": 8,
+            "description": "Expected target score for quality evaluation (0-10 scale, default: 8)"
+          },
+          "dimensionCount": {
+            "type": "number",
+            "default": 5,
+            "description": "Number of quality dimensions to generate (default: 5)"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "generate_task_analysis_prompt",
+      "description": "Generate task analysis prompt for LLM to analyze core tasks in user conversations",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "userMessage"
+        ],
+        "properties": {
+          "context": {
+            "type": "object",
+            "description": "Additional context information",
+            "additionalProperties": {}
+          },
+          "userMessage": {
+            "type": "string",
+            "description": "User message content"
+          },
+          "conversationHistory": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "role",
+                "content"
+              ],
+              "properties": {
+                "role": {
+                  "enum": [
+                    "user",
+                    "assistant"
+                  ],
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Conversation history records"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_quality_dimensions_prompt",
+      "description": "Generate quality dimensions prompt based on task analysis. Uses default target score from configuration or task complexity to determine evaluation strictness.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskAnalysisJson"
+        ],
+        "properties": {
+          "taskAnalysisJson": {
+            "type": "string",
+            "description": "Task analysis JSON result"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:13:47.939919+00:00",
+    "source": "smithery"
+  }
+}

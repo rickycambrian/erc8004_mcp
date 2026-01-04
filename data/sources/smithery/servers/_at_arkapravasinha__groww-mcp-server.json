@@ -1,0 +1,1425 @@
+{
+  "qualifiedName": "@arkapravasinha/groww-mcp-server",
+  "displayName": "Groww MCP Server",
+  "description": "Enable seamless integration of Groww platform data and tools with language models to enhance financial decision-making and automation. Provide access to Groww-specific resources, execute financial operations, and utilize predefined prompts for investment workflows. Simplify interaction with Groww services through a standardized protocol for LLM applications.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/groww.in.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@arkapravasinha/groww-mcp-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@arkapravasinha/groww-mcp-server/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "apiKey"
+        ],
+        "properties": {
+          "debug": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable debug logging"
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "API key for the Groww API"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-mcp-version": "1.0",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": {
+    "scanPassed": true
+  },
+  "tools": [
+    {
+      "name": "download_instruments_csv",
+      "description": "Download/refresh the complete instruments CSV file from Groww containing all tradeable instruments",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_instruments",
+      "description": "Search for instruments by name, trading symbol, groww symbol, or other criteria from the loaded instruments data",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query (name, trading symbol, groww symbol, etc.)"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO",
+              "ALL"
+            ],
+            "type": "string",
+            "default": "ALL",
+            "description": "Filter by segment"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE",
+              "ALL"
+            ],
+            "type": "string",
+            "default": "ALL",
+            "description": "Filter by exchange"
+          },
+          "instrument_type": {
+            "enum": [
+              "EQ",
+              "IDX",
+              "FUT",
+              "CE",
+              "PE",
+              "ALL"
+            ],
+            "type": "string",
+            "default": "ALL",
+            "description": "Filter by instrument type"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_instrument_details",
+      "description": "Get detailed information about a specific instrument by trading symbol",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol"
+        ],
+        "properties": {
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange (optional, will search both if not provided)"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol (e.g., 'RELIANCE', 'NIFTY')"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "place_order",
+      "description": "Place a new order in the market (stocks, F&O, etc.) - Official Groww API: POST /v1/order/create",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "quantity",
+          "exchange",
+          "segment",
+          "product",
+          "order_type",
+          "transaction_type"
+        ],
+        "properties": {
+          "price": {
+            "type": "number",
+            "description": "Price of the instrument in rupees for Limit order (decimal) - required for LIMIT and SL orders",
+            "exclusiveMinimum": 0
+          },
+          "product": {
+            "enum": [
+              "CNC",
+              "MIS",
+              "NRML"
+            ],
+            "type": "string",
+            "description": "Product type (required) - CNC, MIS, NRML"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Segment of the instrument such as CASH, FNO etc. (required)"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Stock exchange (required)"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Quantity of the instrument to order (required)",
+            "exclusiveMinimum": 0
+          },
+          "validity": {
+            "enum": [
+              "DAY"
+            ],
+            "type": "string",
+            "default": "DAY",
+            "description": "Validity of the order (required) - currently only DAY is supported"
+          },
+          "order_type": {
+            "enum": [
+              "MARKET",
+              "LIMIT",
+              "SL",
+              "SL_M"
+            ],
+            "type": "string",
+            "description": "Order type (required) - MARKET, LIMIT, SL, SL_M"
+          },
+          "trigger_price": {
+            "type": "number",
+            "description": "Trigger price in rupees for the order (decimal) - required for SL and SL_M orders",
+            "exclusiveMinimum": 0
+          },
+          "trading_symbol": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Trading Symbol of the instrument as defined by the exchange (required)"
+          },
+          "transaction_type": {
+            "enum": [
+              "BUY",
+              "SELL"
+            ],
+            "type": "string",
+            "description": "Transaction type of the trade (required) - BUY or SELL"
+          },
+          "order_reference_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9-]+$",
+            "maxLength": 20,
+            "minLength": 8,
+            "description": "User provided 8 to 20 length alphanumeric string with at most two hyphens (-)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "modify_order",
+      "description": "Modify an existing pending or open order",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "groww_order_id",
+          "segment"
+        ],
+        "properties": {
+          "price": {
+            "type": "number",
+            "description": "New price (in rupees)"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "New quantity",
+            "exclusiveMinimum": 0
+          },
+          "order_type": {
+            "enum": [
+              "MARKET",
+              "LIMIT",
+              "SL",
+              "SL_M"
+            ],
+            "type": "string",
+            "description": "New order type"
+          },
+          "trigger_price": {
+            "type": "number",
+            "description": "New trigger price (in rupees)"
+          },
+          "groww_order_id": {
+            "type": "string",
+            "description": "Groww order ID to modify"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "cancel_order",
+      "description": "Cancel an existing pending or open order",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "groww_order_id",
+          "segment"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "groww_order_id": {
+            "type": "string",
+            "description": "Groww order ID to cancel"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_order_status",
+      "description": "Get the status of an order by Groww order ID",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "groww_order_id",
+          "segment"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "groww_order_id": {
+            "type": "string",
+            "description": "Groww order ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_order_status_by_reference",
+      "description": "Get the status of an order by user reference ID",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "order_reference_id",
+          "segment"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "order_reference_id": {
+            "type": "string",
+            "description": "User-provided order reference ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_order_list",
+      "description": "Get list of all orders for the day",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "Page number"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment filter"
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 25,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Number of orders per page"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_order_details",
+      "description": "Get detailed information about a specific order",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "groww_order_id",
+          "segment"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "groww_order_id": {
+            "type": "string",
+            "description": "Groww order ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_order_trades",
+      "description": "Get all trades/executions for a specific order",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "groww_order_id",
+          "segment"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "Page number"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 50,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Number of trades per page"
+          },
+          "groww_order_id": {
+            "type": "string",
+            "description": "Groww order ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_holdings",
+      "description": "Get current stock holdings in DEMAT account",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_positions",
+      "description": "Get all trading positions for the user",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment filter"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_position_by_symbol",
+      "description": "Get position for a specific trading symbol",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_user_margin",
+      "description": "Get available margin details for the user",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_margin_requirement",
+      "description": "Calculate required margin for orders (single or basket)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "segment",
+          "orders"
+        ],
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "trading_symbol",
+                "transaction_type",
+                "quantity",
+                "order_type",
+                "product",
+                "exchange"
+              ],
+              "properties": {
+                "price": {
+                  "type": "number",
+                  "description": "Price for limit orders"
+                },
+                "product": {
+                  "enum": [
+                    "CNC",
+                    "MIS",
+                    "NRML"
+                  ],
+                  "type": "string",
+                  "description": "Product type"
+                },
+                "exchange": {
+                  "enum": [
+                    "NSE",
+                    "BSE"
+                  ],
+                  "type": "string",
+                  "description": "Exchange"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "description": "Quantity",
+                  "exclusiveMinimum": 0
+                },
+                "order_type": {
+                  "enum": [
+                    "MARKET",
+                    "LIMIT",
+                    "SL",
+                    "SL_M"
+                  ],
+                  "type": "string",
+                  "description": "Order type"
+                },
+                "trading_symbol": {
+                  "type": "string",
+                  "description": "Trading symbol"
+                },
+                "transaction_type": {
+                  "enum": [
+                    "BUY",
+                    "SELL"
+                  ],
+                  "type": "string",
+                  "description": "Transaction type"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of order objects to calculate margin for"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_live_quote",
+      "description": "Get complete live market data for an instrument",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol (e.g., 'RELIANCE', 'NIFTY')"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_ltp",
+      "description": "Get Last Traded Price for multiple instruments (up to 50)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "segment",
+          "exchange_symbols"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "exchange_symbols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "description": "Array of exchange_symbol pairs like ['NSE_RELIANCE', 'BSE_SENSEX']"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_ohlc",
+      "description": "Get OHLC data for multiple instruments (up to 50)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "segment",
+          "exchange_symbols"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "exchange_symbols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "description": "Array of exchange_symbol pairs like ['NSE_RELIANCE', 'BSE_SENSEX']"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_current_date",
+      "description": "Get current date and time information for reference in historical data requests",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_historical_data",
+      "description": "Get historical candle data for an instrument. CONSTRAINTS: 1min(3days,3mo), 5min(15days,3mo), 10min(30days,3mo), 1hr(150days,3mo), 4hr(365days,3mo), daily(1080days,unlimited), weekly(unlimited,unlimited)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format or epoch milliseconds"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format or epoch milliseconds"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 5,
+            "description": "Candle interval in minutes (1, 5, 10, 60, 240, 1440, 10080)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_moving_averages",
+      "description": "Calculate Simple Moving Average (SMA) and Exponential Moving Average (EMA) for historical data",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "periods": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "default": [
+              5,
+              10,
+              20,
+              50
+            ],
+            "description": "Periods for moving averages (e.g., [5, 10, 20, 50])"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 5,
+            "description": "Candle interval in minutes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_rsi",
+      "description": "Calculate Relative Strength Index (RSI) for technical analysis",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "period": {
+            "type": "integer",
+            "default": 14,
+            "description": "RSI period (default: 14)"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 5,
+            "description": "Candle interval in minutes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_bollinger_bands",
+      "description": "Calculate Bollinger Bands for volatility analysis",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "period": {
+            "type": "integer",
+            "default": 20,
+            "description": "Moving average period (default: 20)"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "std_dev": {
+            "type": "number",
+            "default": 2,
+            "description": "Standard deviation multiplier (default: 2)"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 5,
+            "description": "Candle interval in minutes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_support_resistance",
+      "description": "Identify support and resistance levels from historical price data",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "min_touches": {
+            "type": "integer",
+            "default": 2,
+            "description": "Minimum times a level should be touched (default: 2)"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 60,
+            "description": "Candle interval in minutes (use longer intervals for better levels)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_volatility_metrics",
+      "description": "Calculate various volatility metrics for risk assessment",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 1440,
+            "description": "Candle interval in minutes (default: 1440 for daily)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_macd",
+      "description": "Calculate MACD (Moving Average Convergence Divergence) for trend and momentum analysis",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "fast_period": {
+            "type": "integer",
+            "default": 12,
+            "description": "Fast EMA period (default: 12)"
+          },
+          "slow_period": {
+            "type": "integer",
+            "default": 26,
+            "description": "Slow EMA period (default: 26)"
+          },
+          "signal_period": {
+            "type": "integer",
+            "default": 9,
+            "description": "Signal line EMA period (default: 9)"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 5,
+            "description": "Candle interval in minutes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_stochastic",
+      "description": "Calculate Stochastic Oscillator for momentum analysis",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "d_period": {
+            "type": "integer",
+            "default": 3,
+            "description": "%D period (default: 3)"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "k_period": {
+            "type": "integer",
+            "default": 14,
+            "description": "%K period (default: 14)"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 5,
+            "description": "Candle interval in minutes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_williams_r",
+      "description": "Calculate Williams %R for momentum analysis",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "period": {
+            "type": "integer",
+            "default": 14,
+            "description": "Williams %R period (default: 14)"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 5,
+            "description": "Candle interval in minutes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_adx",
+      "description": "Calculate ADX (Average Directional Index) for trend strength analysis",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "period": {
+            "type": "integer",
+            "default": 14,
+            "description": "ADX period (default: 14)"
+          },
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 5,
+            "description": "Candle interval in minutes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_fibonacci_levels",
+      "description": "Calculate Fibonacci retracement and extension levels for support/resistance analysis",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "trend_direction": {
+            "enum": [
+              "UP",
+              "DOWN",
+              "AUTO"
+            ],
+            "type": "string",
+            "default": "AUTO",
+            "description": "Trend direction for Fibonacci calculation"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 60,
+            "description": "Candle interval in minutes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_candlestick_patterns",
+      "description": "Identify common candlestick patterns for reversal and continuation signals",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "trading_symbol",
+          "exchange",
+          "segment",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "segment": {
+            "enum": [
+              "CASH",
+              "FNO"
+            ],
+            "type": "string",
+            "description": "Market segment"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "End time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "exchange": {
+            "enum": [
+              "NSE",
+              "BSE"
+            ],
+            "type": "string",
+            "description": "Exchange"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Start time in 'YYYY-MM-DD HH:mm:ss' format"
+          },
+          "trading_symbol": {
+            "type": "string",
+            "description": "Trading symbol"
+          },
+          "lookback_candles": {
+            "type": "integer",
+            "default": 5,
+            "description": "Number of recent candles to analyze (default: 5)"
+          },
+          "interval_in_minutes": {
+            "type": "integer",
+            "default": 60,
+            "description": "Candle interval in minutes"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:15:13.930487+00:00",
+    "source": "smithery"
+  }
+}

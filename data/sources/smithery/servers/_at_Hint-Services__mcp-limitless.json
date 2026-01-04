@@ -1,0 +1,162 @@
+{
+  "qualifiedName": "@Hint-Services/mcp-limitless",
+  "displayName": "Limitless AI Lifelog Access",
+  "description": "Enable AI assistants to seamlessly access and analyze your personal lifelog data recorded by Limitless AI. Retrieve, search, and understand your daily conversations and activities to enhance productivity, decision-making, and content creation. Integrate your lifelog with AI for context-aware assistance and intelligent insights.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/www.limitless.ai.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@Hint-Services/mcp-limitless",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@Hint-Services/mcp-limitless/mcp",
+      "configSchema": {
+        "type": "object",
+        "default": {},
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Limitless API token. If not provided, will use LIMITLESS_API_KEY environment variable."
+          },
+          "baseUrl": {
+            "type": "string",
+            "default": "https://api.limitless.ai",
+            "description": "Base URL for Limitless API. Defaults to https://api.limitless.ai"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "getLifelogs",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve lifelog entries from your Limitless AI pendant. Access your recorded conversations, thoughts, and daily activities with flexible filtering options.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Filter entries by specific date in YYYY-MM-DD format (e.g., '2025-11-05'). If not specified, returns recent entries from the past 7 days."
+          },
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "maximum": 10,
+            "minimum": 1,
+            "description": "Maximum number of lifelog entries to return per request (min: 1, max: 10). Defaults to 10. Use cursor parameter for additional pages."
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor from previous response's meta.lifelogs.next_cursor field. Use this to retrieve the next page of results."
+          },
+          "end_time": {
+            "type": "string",
+            "description": "Filter entries ending before this time (ISO 8601 format: '2025-11-05T18:00:00Z'). Use with start_time for precise time range queries."
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone for date filtering (e.g., 'America/Los_Angeles', 'Europe/London', 'Asia/Tokyo'). Defaults to UTC if not specified."
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Filter entries starting from this time (ISO 8601 format: '2025-11-05T14:30:00Z'). Use with end_time for precise time range queries."
+          },
+          "sort_direction": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "description": "Sort order for results: 'asc' for oldest first (chronological), 'desc' for newest first (reverse chronological). Defaults to 'desc'."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getLifelogEntry",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve a specific lifelog entry by its ID. Get detailed information about a particular recorded moment from your Limitless AI pendant.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "lifelog_id"
+        ],
+        "properties": {
+          "lifelog_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The unique identifier of the lifelog entry to retrieve (e.g., 'lifelog_abc123xyz'). This ID is returned in the results from getLifelogs or searchLifelogs tools."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "searchLifelogs",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search through your lifelog entries from Limitless AI. Find specific conversations, topics, or moments by searching through the content and summaries of your recorded activities.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "maximum": 10,
+            "minimum": 1,
+            "description": "Maximum number of matching entries to return (minimum: 1, maximum: 10). Defaults to 10. For more results, use the cursor parameter with subsequent requests."
+          },
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Search query text to find in lifelog titles, summaries, and conversation content. Supports keywords, names, topics (e.g., 'project meeting', 'John Smith', 'budget discussion'). Search is case-insensitive."
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor from previous search response. Use this to load more results beyond the limit. Found in meta.lifelogs.next_cursor of the previous response."
+          },
+          "date_to": {
+            "type": "string",
+            "description": "End date to limit search range in YYYY-MM-DD format (e.g., '2025-11-05'). Only entries up to this date will be searched. If omitted, searches up to present day."
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone for date range filtering (e.g., 'America/Los_Angeles', 'Europe/Paris', 'Asia/Singapore'). Affects interpretation of date_from and date_to. Defaults to UTC."
+          },
+          "date_from": {
+            "type": "string",
+            "description": "Start date to limit search range in YYYY-MM-DD format (e.g., '2025-11-01'). Only entries from this date onwards will be searched. If omitted, searches all historical entries."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:15:09.447124+00:00",
+    "source": "smithery"
+  }
+}

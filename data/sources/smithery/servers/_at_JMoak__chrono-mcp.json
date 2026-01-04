@@ -1,0 +1,301 @@
+{
+  "qualifiedName": "@JMoak/chrono-mcp",
+  "displayName": "Chrono",
+  "description": "Convert and compare dates and times across any timezone with flexible, locale-aware formatting. Add or subtract durations, compute differences, and break down intervals for precise scheduling and analysis. Sort timestamps, analyze time series, and get multi-format outputs in one step.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@JMoak/chrono-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@JMoak/chrono-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [],
+        "properties": {},
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "GET TIME",
+      "description": "Get current time or convert times across timezones with flexible formatting. Defaults to current time in system timezone when no parameters provided. Use timezones array to get multiple zones, formats array for multiple output formats.",
+      "inputSchema": {
+        "type": "object",
+        "examples": [
+          {
+            "value": {},
+            "description": "Get current time (no parameters)"
+          },
+          {
+            "value": {
+              "timezones": [
+                "America/New_York",
+                "Asia/Tokyo",
+                "Europe/London"
+              ]
+            },
+            "description": "Get time in multiple timezones"
+          },
+          {
+            "value": {
+              "formats": [
+                "iso",
+                "localeString"
+              ],
+              "datetime": "2024-12-25T15:00:00",
+              "timezones": [
+                "America/Los_Angeles",
+                "Asia/Tokyo"
+              ],
+              "includeOffsets": true
+            },
+            "description": "Convert specific time with multiple formats"
+          }
+        ],
+        "properties": {
+          "locale": {
+            "type": "string",
+            "description": "Locale for formatting (e.g., 'en-US', 'fr-FR', 'ja-JP'). Affects localeString and relative formats."
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "iso",
+                "rfc2822",
+                "sql",
+                "local",
+                "localeString",
+                "short",
+                "medium",
+                "long",
+                "full"
+              ],
+              "type": "string"
+            },
+            "description": "Output formats for the base datetime only (not applied to individual timezones). Creates separate entries for each format."
+          },
+          "datetime": {
+            "type": "string",
+            "description": "Optional. ISO datetime string (e.g., '2024-12-25T15:00:00'). If not provided, current time is used."
+          },
+          "timezones": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of timezone names to include in output. Examples: ['America/New_York', 'Asia/Tokyo', 'Europe/London']"
+          },
+          "includeOffsets": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include UTC offsets like +09:00, -04:00 in output"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "TIME CALCULATOR",
+      "description": "Perform time arithmetic operations including duration calculations, date math, interval operations, statistical analysis, and sorting. Use for adding/subtracting time periods, calculating differences between dates, analyzing time-based datasets, or sorting arrays of timestamps.",
+      "inputSchema": {
+        "type": "object",
+        "examples": [
+          {
+            "value": {
+              "days": 5,
+              "hours": 3,
+              "base_time": "2024-12-25T10:00:00Z",
+              "operation": "add"
+            },
+            "description": "Add 5 days and 3 hours to a specific time"
+          },
+          {
+            "value": {
+              "base_time": "2024-01-01T00:00:00Z",
+              "operation": "diff",
+              "compare_time": "2024-12-25T15:30:00Z"
+            },
+            "description": "Calculate difference between two dates"
+          },
+          {
+            "value": {
+              "timezone": "America/New_York",
+              "base_time": "2024-12-25T09:00:00",
+              "operation": "duration_between",
+              "compare_time": "2024-12-25T18:00:00",
+              "compare_time_timezone": "Europe/London"
+            },
+            "description": "Multi-timezone duration calculation"
+          },
+          {
+            "value": {
+              "months": 2,
+              "timezone": "America/New_York",
+              "operation": "subtract"
+            },
+            "description": "Subtract 2 months from current time"
+          },
+          {
+            "value": {
+              "base_time": "2024-01-01T00:00:00Z",
+              "operation": "diff",
+              "compare_time": [
+                "2024-01-15T12:00:00Z",
+                "2024-02-01T08:30:00Z",
+                "2024-03-01T16:45:00Z"
+              ]
+            },
+            "description": "Compare one base time to multiple compare times"
+          },
+          {
+            "value": {
+              "base_time": [
+                "2024-01-01T09:00:00Z",
+                "2024-02-01T10:00:00Z"
+              ],
+              "operation": "duration_between",
+              "compare_time": [
+                "2024-01-01T17:30:00Z",
+                "2024-02-01T18:45:00Z"
+              ],
+              "interaction_mode": "pairwise"
+            },
+            "description": "Pairwise comparison of time arrays"
+          },
+          {
+            "value": {
+              "base_time": [
+                "2024-01-01T08:00:00Z",
+                "2024-01-02T09:15:00Z",
+                "2024-01-03T07:45:00Z",
+                "2024-01-04T08:30:00Z"
+              ],
+              "operation": "stats",
+              "compare_time": [
+                "2024-01-01T17:00:00Z",
+                "2024-01-02T18:30:00Z",
+                "2024-01-03T16:15:00Z",
+                "2024-01-04T17:45:00Z"
+              ]
+            },
+            "description": "Statistical analysis of time intervals"
+          },
+          {
+            "value": {
+              "base_time": [
+                "2024-03-15T10:30:00Z",
+                "2024-01-01T08:00:00Z",
+                "2024-02-14T14:45:00Z",
+                "2024-01-15T09:30:00Z"
+              ],
+              "operation": "sort"
+            },
+            "description": "Sort array of timestamps chronologically"
+          }
+        ],
+        "required": [
+          "operation"
+        ],
+        "properties": {
+          "days": {
+            "type": "number",
+            "description": "Days to add/subtract"
+          },
+          "hours": {
+            "type": "number",
+            "description": "Hours to add/subtract"
+          },
+          "years": {
+            "type": "number",
+            "description": "Years to add/subtract"
+          },
+          "months": {
+            "type": "number",
+            "description": "Months to add/subtract"
+          },
+          "minutes": {
+            "type": "number",
+            "description": "Minutes to add/subtract"
+          },
+          "seconds": {
+            "type": "number",
+            "description": "Seconds to add/subtract"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Timezone for base_time (e.g., 'America/New_York')"
+          },
+          "base_time": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              }
+            ],
+            "description": "Base ISO datetime(s). Single string or array. Defaults to current time if not provided"
+          },
+          "operation": {
+            "enum": [
+              "add",
+              "subtract",
+              "diff",
+              "duration_between",
+              "stats",
+              "sort"
+            ],
+            "type": "string",
+            "description": "Type of calculation to perform"
+          },
+          "compare_time": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              }
+            ],
+            "description": "Compare ISO datetime(s) for diff/duration_between operations. Single string or array"
+          },
+          "interaction_mode": {
+            "enum": [
+              "auto_detect",
+              "single_to_many",
+              "many_to_single",
+              "pairwise",
+              "cross_product",
+              "aggregate"
+            ],
+            "type": "string",
+            "description": "How base_time and compare_time arrays interact. 'auto_detect' handles single-to-single, single-to-many, many-to-single automatically. Defaults to 'auto_detect'"
+          },
+          "compare_time_timezone": {
+            "type": "string",
+            "description": "Timezone for compare_time. If not provided, base_time timezone is used"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:13:49.362013+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "qualifiedName": "@tfscharff/doi-mcp",
+  "displayName": "DOI Citation Verifier",
+  "description": "A Model Context Protocol (MCP) server that prevents citation hallucination by verifying academic citations against multiple authoritative databases. This server enables AI assistants to verify every citation against real publications in CrossRef, OpenAlex, and PubMed before citing them.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/889dcf99-351c-4563-a6db-e6e6f8566659.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@tfscharff/doi-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@tfscharff/doi-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {},
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "verifyCitation",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "CRITICAL: Use this to verify ANY academic citation before mentioning it. Checks multiple databases (CrossRef, OpenAlex, PubMed, zbMATH, ERIC, HAL, INSPIRE-HEP, Semantic Scholar, DBLP) if a paper exists. Returns null if not found.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "doi": {
+            "type": "string",
+            "description": "DOI if known"
+          },
+          "year": {
+            "type": "number",
+            "description": "Publication year"
+          },
+          "title": {
+            "type": "string",
+            "description": "Paper title (partial matches accepted)"
+          },
+          "authors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Author names (last names sufficient)"
+          },
+          "journal": {
+            "type": "string",
+            "description": "Journal name"
+          }
+        }
+      }
+    },
+    {
+      "name": "findVerifiedPapers",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search multiple academic databases (CrossRef, OpenAlex, PubMed, zbMATH, ERIC, HAL, INSPIRE-HEP, Semantic Scholar, DBLP) for papers and return only verified, real citations with DOIs.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 5,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Number of results per source"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query (topic, keywords, author names)"
+          },
+          "source": {
+            "enum": [
+              "all",
+              "crossref",
+              "openalex",
+              "pubmed",
+              "zbmath",
+              "eric",
+              "hal",
+              "inspirehep",
+              "semanticscholar",
+              "dblp"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Which source to search"
+          },
+          "yearTo": {
+            "type": "number",
+            "description": "Maximum publication year"
+          },
+          "yearFrom": {
+            "type": "number",
+            "description": "Minimum publication year"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:07:05.642484+00:00",
+    "source": "smithery"
+  }
+}

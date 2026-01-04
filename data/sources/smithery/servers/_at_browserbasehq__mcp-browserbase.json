@@ -1,0 +1,248 @@
+{
+  "qualifiedName": "@browserbasehq/mcp-browserbase",
+  "displayName": "Browserbase",
+  "description": "Provides cloud browser automation capabilities using Stagehand and Browserbase, enabling LLMs to interact with web pages, take screenshots, and run parallel sessions in a cloud browser environment.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/www.browserbase.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@browserbasehq/mcp-browserbase",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@browserbasehq/mcp-browserbase/mcp",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "browserbaseApiKey",
+          "browserbaseProjectId"
+        ],
+        "properties": {
+          "server": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string",
+                "description": "The host to bind the server to. Default is localhost. Use 0.0.0.0 to bind to all interfaces"
+              },
+              "port": {
+                "type": "number",
+                "description": "The port to listen on for SHTTP or MCP transport"
+              }
+            }
+          },
+          "context": {
+            "type": "object",
+            "properties": {
+              "persist": {
+                "type": "boolean",
+                "description": "Whether or not to persist the context"
+              },
+              "contextId": {
+                "type": "string",
+                "description": "The ID of the context to use"
+              }
+            }
+          },
+          "proxies": {
+            "type": "boolean",
+            "description": "Whether or not to use Browserbase proxies"
+          },
+          "viewPort": {
+            "type": "object",
+            "properties": {
+              "browserWidth": {
+                "type": "number",
+                "description": "The width of the browser"
+              },
+              "browserHeight": {
+                "type": "number",
+                "description": "The height of the browser"
+              }
+            }
+          },
+          "keepAlive": {
+            "type": "boolean",
+            "description": "Whether or not to keep the Browserbase session alive"
+          },
+          "modelName": {
+            "type": "string",
+            "description": "The model to use for Stagehand (default: gemini-2.0-flash)"
+          },
+          "modelApiKey": {
+            "type": "string",
+            "description": "API key for the custom model provider. Required when using a model other than the default gemini-2.0-flash"
+          },
+          "experimental": {
+            "type": "boolean",
+            "description": "Enable experimental Stagehand features"
+          },
+          "advancedStealth": {
+            "type": "boolean",
+            "description": "Use advanced stealth mode. Only available to Browserbase Scale Plan users"
+          },
+          "browserbaseApiKey": {
+            "type": "string",
+            "description": "The Browserbase API Key to use"
+          },
+          "browserbaseProjectId": {
+            "type": "string",
+            "description": "The Browserbase Project ID to use"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "browserbase_session_create",
+      "description": "Create or reuse a Browserbase browser session and set it as active.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Optional session ID to use/reuse. If not provided or invalid, a new session is created."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browserbase_session_close",
+      "description": "Close the current Browserbase session and reset the active context.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browserbase_stagehand_navigate",
+      "description": "Navigate to a URL in the browser. Only use this tool with URLs you're confident will work and be up to date. \n    Otherwise, use https://google.com as the starting point",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL to navigate to"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browserbase_stagehand_act",
+      "description": "Perform a single action on the page (e.g., click, type).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "The action to perform. Should be as atomic and specific as possible,\n      i.e. 'Click the sign in button' or 'Type 'hello' into the search input'."
+          },
+          "variables": {
+            "type": "object",
+            "properties": {},
+            "description": "Variables used in the action template. ONLY use variables if you're dealing\n      with sensitive data or dynamic content. When using variables, you MUST have the variable\n      key in the action template. ie: {\"action\": \"Fill in the password\", \"variables\": {\"password\": \"123456\"}}",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browserbase_stagehand_extract",
+      "description": "Extract structured data or text from the current page using an instruction.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "instruction"
+        ],
+        "properties": {
+          "instruction": {
+            "type": "string",
+            "description": "The specific instruction for what information to extract from the current page.\n    Be as detailed and specific as possible about what you want to extract. For example:\n    'Extract all product names and prices from the listing page'.The more specific your instruction,\n    the better the extraction results will be."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browserbase_stagehand_observe",
+      "description": "Find interactive elements on the page from an instruction; optionally return an action.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "instruction"
+        ],
+        "properties": {
+          "instruction": {
+            "type": "string",
+            "description": "Detailed instruction for what specific elements or components to observe on the web page.\n        This instruction must be extremely specific and descriptive. For example: 'Find the red login button\n        in the top right corner', 'Locate the search input field with placeholder text', or 'Identify all\n        clickable product cards on the page'. The more specific and detailed your instruction, the better\n        the observation results will be. Avoid generic instructions like 'find buttons' or 'see elements'.\n        Instead, describe the visual characteristics, location, text content, or functionality of the elements\n        you want to observe. This tool is designed to help you identify interactive elements that you can\n        later use with the act tool for performing actions like clicking, typing, or form submission."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browserbase_screenshot",
+      "description": "Capture a full-page screenshot and return it (and save as a resource).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the screenshot"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browserbase_stagehand_get_url",
+      "description": "Return the current page URL (full URL with query/fragment).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browserbase_stagehand_agent",
+      "description": "Execute a task autonomously using Gemini Computer Use agent. The agent will navigate and interact with web pages to complete the given task.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "The task prompt describing what you want the sub-agent to accomplish.\n    Be clear and specific about the goal. For example:\n    'Go to Hacker News and find the most controversial post from today, then summarize the top 3 comments'.\n    The agent will autonomously navigate and interact with web pages to complete this task."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:49.375468+00:00",
+    "source": "smithery"
+  }
+}

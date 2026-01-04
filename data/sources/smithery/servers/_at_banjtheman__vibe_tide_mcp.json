@@ -1,0 +1,538 @@
+{
+  "qualifiedName": "@banjtheman/vibe_tide_mcp",
+  "displayName": "VibeTide Levels",
+  "description": "Design, edit, and preview VibeTide levels in seconds. Import from shared links, tweak tiles and metadata, or regenerate full layouts to your specs. Export ready-to-play levels with shareable visuals.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@banjtheman/vibe_tide_mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@banjtheman/vibe_tide_mcp/mcp",
+      "configSchema": {
+        "title": "MCP Session Configuration",
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "view_level",
+      "description": "View a VibeTide level with visual representation.\n\n    Args:\n        encoded_level: An encoded level string from a URL or sharing link\n\n    Returns a visual representation of the level.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "view_levelArguments",
+        "required": [
+          "encoded_level"
+        ],
+        "properties": {
+          "encoded_level": {
+            "type": "string",
+            "title": "Encoded Level"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "view_levelOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "view_level_image",
+      "description": "View a VibeTide level as a beautiful PNG image with proper colors.\n\n    This generates a much better visual representation than the ASCII version,\n    using the same colors as the web builder. The image is saved to a temporary\n    file and the file path is returned for MCP clients to display.\n\n    Args:\n        encoded_level: An encoded level string from a URL or sharing link\n        tile_size: Size of each tile in pixels (default 16, will auto-adjust for wide levels)\n        max_width: Maximum image width in pixels (default 1200)\n\n    Returns:\n        The file path to the generated PNG image\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "view_level_imageArguments",
+        "required": [
+          "encoded_level"
+        ],
+        "properties": {
+          "max_width": {
+            "type": "integer",
+            "title": "Max Width",
+            "default": 1200
+          },
+          "tile_size": {
+            "type": "integer",
+            "title": "Tile Size",
+            "default": 16
+          },
+          "encoded_level": {
+            "type": "string",
+            "title": "Encoded Level"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "view_level_imageOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "edit_level_metadata",
+      "description": "Edit only the metadata of a VibeTide level without changing the tile layout.\n\n    This is much more efficient than edit_entire_level when you only want to change\n    game parameters like enemy count, spawn rates, name, or description.\n\n    Args:\n        encoded_level: The encoded level string to modify\n        new_name: New name for the level (optional)\n        new_description: New description for the level (optional)\n        max_enemies: Maximum enemies parameter (0-10, optional)\n        enemy_spawn_chance: Enemy spawn chance percentage (0-100, optional)\n        coin_spawn_chance: Coin spawn chance percentage (0-100, optional)\n\n    Returns:\n        The modified level data with new encoded string\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "edit_level_metadataArguments",
+        "required": [
+          "encoded_level"
+        ],
+        "properties": {
+          "new_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Name",
+            "default": null
+          },
+          "max_enemies": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Enemies",
+            "default": null
+          },
+          "encoded_level": {
+            "type": "string",
+            "title": "Encoded Level"
+          },
+          "new_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Description",
+            "default": null
+          },
+          "coin_spawn_chance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coin Spawn Chance",
+            "default": null
+          },
+          "enemy_spawn_chance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enemy Spawn Chance",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "edit_level_metadataOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "play_level",
+      "description": "Get the URL to play a VibeTide level in the web player.\n\n    Args:\n        encoded_level: An encoded level string for playing\n\n    Returns a URL to play the level.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "play_levelArguments",
+        "required": [
+          "encoded_level"
+        ],
+        "properties": {
+          "encoded_level": {
+            "type": "string",
+            "title": "Encoded Level"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "play_levelOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "edit_level_tile",
+      "description": "Edit a single tile in a VibeTide level.\n\n    Args:\n        encoded_level: An encoded level string from a URL or sharing link\n        row: Row index (0-based, from top)\n        col: Column index (0-based, from left)\n        new_tile_type: New tile type (0-7, see tile legend)\n\n    Returns the modified level data with the single tile changed.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "edit_level_tileArguments",
+        "required": [
+          "encoded_level",
+          "row",
+          "col",
+          "new_tile_type"
+        ],
+        "properties": {
+          "col": {
+            "type": "integer",
+            "title": "Col"
+          },
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "encoded_level": {
+            "type": "string",
+            "title": "Encoded Level"
+          },
+          "new_tile_type": {
+            "type": "integer",
+            "title": "New Tile Type"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "edit_level_tileOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "edit_level_row",
+      "description": "Edit an entire row in a VibeTide level.\n\n    Args:\n        encoded_level: An encoded level string from a URL or sharing link\n        row: Row index to replace (0-based, from top)\n        new_row_tiles: Array of tile types for the new row (each 0-7)\n\n    Returns the modified level data with the entire row replaced.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "edit_level_rowArguments",
+        "required": [
+          "encoded_level",
+          "row",
+          "new_row_tiles"
+        ],
+        "properties": {
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "encoded_level": {
+            "type": "string",
+            "title": "Encoded Level"
+          },
+          "new_row_tiles": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "title": "New Row Tiles"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "edit_level_rowOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "edit_entire_level",
+      "description": "Edit an entire VibeTide level, replacing all tiles and optionally metadata.\n\n    Args:\n        level_data: The original level data (for reference)\n        new_tiles: 2D array of tile types (each 0-7)\n        new_name: New name for the level (optional)\n        new_description: New description for the level (optional)\n        max_enemies: Maximum enemies parameter (1-10, optional)\n        enemy_spawn_chance: Enemy spawn chance percentage (0-100, optional)\n        coin_spawn_chance: Coin spawn chance percentage (0-100, optional)\n\n    Returns the completely modified level data.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "edit_entire_levelArguments",
+        "required": [
+          "level_data",
+          "new_tiles"
+        ],
+        "properties": {
+          "new_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Name",
+            "default": null
+          },
+          "new_tiles": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "title": "New Tiles"
+          },
+          "level_data": {
+            "type": "object",
+            "title": "Level Data",
+            "additionalProperties": true
+          },
+          "max_enemies": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Enemies",
+            "default": null
+          },
+          "new_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Description",
+            "default": null
+          },
+          "coin_spawn_chance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coin Spawn Chance",
+            "default": null
+          },
+          "enemy_spawn_chance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enemy Spawn Chance",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "edit_entire_levelOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "create_level",
+      "description": "You are an AI assistant tasked with creating fast, fun, and playable levels for the VibeTide 2D platformer game. Your role is to design levels that are engaging and balanced while adhering to specific rules and guidelines.\n\n    Here are the critical rules you must follow:\n    1. Create levels that are EXACTLY target_width tiles wide and target_height tiles tall (default 50\u00d722).\n    2. The player must spawn at the LEFTMOST solid platform in the bottom half of the level.\n    3. Leave 3-4 empty rows above the starting platform for jumping.\n    4. Design the level as a LEFT-TO-RIGHT platformer, not a maze.\n\n    Use the following tile types in your level design:\n    0 = Empty\n    1 = Grass\n    2 = Rock\n    3 = Yellow\n    4 = Ice\n    5 = Red\n    6 = Spikes\n    7 = Water\n\n    Follow these level design guidelines:\n    - Bottom half: Focus on main platforms and gameplay elements\n    - Top half: Keep mostly empty for air and jumping\n    - Create jumpable gaps (maximum 3-4 tiles apart)\n    - Ensure a clear left-to-right progression\n\n    For difficulty parameters:\n    - Easy levels: maxEnemies=2-3, enemySpawnChance=5-10, coinSpawnChance=20-30\n    - Medium levels: maxEnemies=4-6, enemySpawnChance=10-15, coinSpawnChance=15-20\n    - Hard levels: maxEnemies=7-10, enemySpawnChance=15-25, coinSpawnChance=10-15\n\n\n    Ensure that your level is exactly the specified dimensions and follows all the design rules for playability.\n\n    Args:\n        level_name: The name of the level\n        description: A brief description of the level\n        tiles: A 2D array of tile types\n        width: The width of the level\n        height: The height of the level\n        maxEnemies: The maximum number of enemies in the level\n        enemySpawnChance: The chance of an enemy spawning\n        coinSpawnChance: The chance of a coin spawning\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "create_levelArguments",
+        "required": [
+          "level_name",
+          "description",
+          "tiles"
+        ],
+        "properties": {
+          "tiles": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "title": "Tiles"
+          },
+          "width": {
+            "type": "integer",
+            "title": "Width",
+            "default": 50
+          },
+          "height": {
+            "type": "integer",
+            "title": "Height",
+            "default": 22
+          },
+          "level_name": {
+            "type": "string",
+            "title": "Level Name"
+          },
+          "maxEnemies": {
+            "type": "integer",
+            "title": "Maxenemies",
+            "default": 5
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "coinSpawnChance": {
+            "type": "number",
+            "title": "Coinspawnchance",
+            "default": 15
+          },
+          "enemySpawnChance": {
+            "type": "number",
+            "title": "Enemyspawnchance",
+            "default": 10
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "create_levelOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "decode_level_from_url",
+      "description": "Decode a VibeTide level from an encoded URL string.\n\n    Args:\n        encoded_level: The encoded level string from a URL or sharing link\n\n    Returns the decoded level data with visualization.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "decode_level_from_urlArguments",
+        "required": [
+          "encoded_level"
+        ],
+        "properties": {
+          "encoded_level": {
+            "type": "string",
+            "title": "Encoded Level"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "decode_level_from_urlOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "get_tile_reference",
+      "description": "Get the reference guide for VibeTide tile types.\n\n    Returns information about all available tile types and their properties.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_tile_referenceArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_tile_referenceOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:11:38.617347+00:00",
+    "source": "smithery"
+  }
+}

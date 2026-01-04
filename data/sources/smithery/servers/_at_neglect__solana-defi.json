@@ -1,0 +1,946 @@
+{
+  "qualifiedName": "@neglect/solana-defi",
+  "displayName": "Solana DeFi MCP Server",
+  "description": "Billions of Solana DeFi TXNs, Decoded at Scale & accessible via LLM\n\nDirect, structured access to the entire Solana DeFi universe. Every launchpad, every token, every trade, every wallet interaction \u2014 all decoded and normalized with detail.\n\nFeatures\n\n- Full coverage of Solana launchpads\n- Billions of decoded on-chain events, available in real time\n- Secure bearer authentication for controlled access\n- High-volume, low-latency performance\n\nAvailable Data (& Growing)\n\n- Market and token data\n- Wallet and portfolio lookups\n- Historical transaction ranges\n- Advanced search across DeFi protocols",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/cc671585-c0ae-4f02-8a16-86db6d2226f2.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@neglect/solana-defi",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@neglect/solana-defi/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "tools": [
+          {
+            "name": "get-token-metadata",
+            "description": "Get metadata for a token address (name, symbol, supply, socials, dev wallet, etc.)",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "tokenAddress"
+              ],
+              "properties": {
+                "tokenAddress": {
+                  "type": "string",
+                  "description": "Token's address (Solana address)"
+                }
+              }
+            }
+          },
+          {
+            "name": "get-token-marketdata",
+            "description": "Fetch market-level metrics (price, mcap, txns, holders, buy/sell activity)",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "tokenAddress"
+              ],
+              "properties": {
+                "interval": {
+                  "enum": [
+                    "24h"
+                  ],
+                  "type": "string",
+                  "default": "24h"
+                },
+                "tokenAddress": {
+                  "type": "string",
+                  "description": "Token address"
+                }
+              }
+            }
+          },
+          {
+            "name": "get-token-holders",
+            "description": "Get top token holders and percentage ownership",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "tokenAddress"
+              ],
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "description": "Limit of holders to return"
+                },
+                "tokenAddress": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "get-trending-tokens",
+            "description": "List trending tokens ordered by transaction count",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "interval": {
+                  "enum": [
+                    "1m",
+                    "5m",
+                    "30m",
+                    "1h"
+                  ],
+                  "type": "string",
+                  "default": "5m"
+                }
+              }
+            }
+          },
+          {
+            "name": "search-tokens",
+            "description": "Search tokens by name, symbol, or address",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "default": 10,
+                  "maximum": 25,
+                  "minimum": 1
+                },
+                "sortBy": {
+                  "enum": [
+                    "createdAt",
+                    "graduatedAt",
+                    "mcap"
+                  ],
+                  "type": "string",
+                  "default": "mcap"
+                },
+                "sortOrder": {
+                  "enum": [
+                    "asc",
+                    "desc"
+                  ],
+                  "type": "string",
+                  "default": "desc"
+                },
+                "symbolOnly": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "searchQuery": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "get-latest-graduated-tokens",
+            "description": "Fetch recently graduated tokens",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "default": 25,
+                  "maximum": 100,
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          {
+            "name": "get-token-ath",
+            "description": "Fetch all-time high market cap for a token",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "tokenAddress"
+              ],
+              "properties": {
+                "tokenAddress": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "get-tokens-by-deployer",
+            "description": "List tokens deployed by a given wallet (devWallet)",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "walletAddress"
+              ],
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "default": 10,
+                  "maximum": 100,
+                  "minimum": 1
+                },
+                "walletAddress": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "get-token-history",
+            "description": "Fetch historical metrics (price, mcap, liquidity) snapshots for a token",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "token"
+              ],
+              "properties": {
+                "token": {
+                  "type": "string"
+                },
+                "metrics": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "price",
+                      "mcap",
+                      "liquidity"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "get-token-by-pool",
+            "description": "Get token metadata by pool/market address",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "poolAddress"
+              ],
+              "properties": {
+                "poolAddress": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "get-token-performance",
+            "description": "Return percentage performance change over time windows",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "token"
+              ],
+              "properties": {
+                "token": {
+                  "type": "string"
+                },
+                "metrics": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "price",
+                      "mcap",
+                      "liquidity"
+                    ],
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "get-token-price",
+            "description": "Get latest price, market cap, and liquidity for a token",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "tokenAddress"
+              ],
+              "properties": {
+                "tokenAddress": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "get-wallet-holdings",
+            "description": "Get holdings of a wallet (balances, tokens, % owned)",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "walletAddress"
+              ],
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "default": 10,
+                  "maximum": 100,
+                  "minimum": 1
+                },
+                "walletAddress": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "get-wallet-token-pnl",
+            "description": "Calculate realized and unrealized PnL for a wallet and token",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "walletAddress",
+                "tokenAddress"
+              ],
+              "properties": {
+                "tokenAddress": {
+                  "type": "string"
+                },
+                "walletAddress": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "get-token-history-range",
+            "description": "Return lowest and highest metric values within a time range for a token",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "tokenAddress",
+                "time_from",
+                "time_to"
+              ],
+              "properties": {
+                "mode": {
+                  "enum": [
+                    "clamp",
+                    "error"
+                  ],
+                  "type": "string",
+                  "default": "clamp"
+                },
+                "metrics": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "price",
+                      "mcap",
+                      "liquidity"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "time_to": {
+                  "type": "number"
+                },
+                "time_from": {
+                  "type": "number"
+                },
+                "tokenAddress": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "required": [
+          "apiKey"
+        ],
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "title": "API Key",
+            "description": "Your service API key for authentication. Passed as a query parameter (?apiKey=YOUR_API_KEY)."
+          }
+        },
+        "description": "Configuration for connecting to this MCP server",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "get-token-metadata",
+      "description": "Returns the metadata for a given token address stored in the database.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "pathParams"
+        ],
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "required": [
+              "tokenAddress"
+            ],
+            "properties": {
+              "tokenAddress": {
+                "type": "string",
+                "description": "The token's address (e.g., a Solana address)"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-token-marketdata",
+      "description": "Returns current market-level metrics like price, mcap, txns, holder count, and buy/sell activity. Supports optional time window via 'interval'.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "queryParams",
+          "pathParams"
+        ],
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "required": [
+              "tokenAddress"
+            ],
+            "properties": {
+              "tokenAddress": {
+                "type": "string",
+                "description": "The token's address (e.g., a Solana address)"
+              }
+            },
+            "additionalProperties": false
+          },
+          "queryParams": {
+            "type": "object",
+            "required": [],
+            "properties": {
+              "interval": {
+                "enum": [
+                  "24h"
+                ],
+                "default": "24h",
+                "description": "Optional time window for stats (currently only '24h' is supported)."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-token-holders",
+      "description": "Returns holder wallet addresses and percentage ownership for a given token address.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "tokenAddress"
+            ],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "description": "Optional limit on number of holders returned (default: 25, max: 100)"
+              },
+              "tokenAddress": {
+                "type": "string",
+                "description": "The token's address (e.g., a Solana address)"
+              }
+            },
+            "additionalProperties": {}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-trending-tokens",
+      "description": "Returns a list of trending tokens ordered by transaction count for a given interval.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "queryParams"
+        ],
+        "properties": {
+          "queryParams": {
+            "type": "object",
+            "required": [],
+            "properties": {
+              "interval": {
+                "enum": [
+                  "1m",
+                  "5m",
+                  "30m",
+                  "1h"
+                ],
+                "default": "5m",
+                "examples": [
+                  "5m",
+                  "1m",
+                  "30m",
+                  "1h"
+                ],
+                "description": "Time interval window for counting transactions (default: 5m)"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search-tokens",
+      "description": "Performs a flexible search for tokens by name, symbol, or address, with optional filters, sorting, and symbol-only mode.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "default": 10,
+                "maximum": 25,
+                "minimum": 1,
+                "description": "Number of results to return (1\u201325)"
+              },
+              "sortBy": {
+                "enum": [
+                  "createdAt",
+                  "graduatedAt",
+                  "mcap"
+                ],
+                "default": "mcap",
+                "description": "Field to sort results by"
+              },
+              "sortOrder": {
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
+                "default": "desc",
+                "description": "Sort order direction"
+              },
+              "symbolOnly": {
+                "type": "boolean",
+                "default": false,
+                "description": "If true, only searches the symbol field"
+              },
+              "searchQuery": {
+                "type": "string",
+                "description": "Query text to search for in name, symbol, or address"
+              }
+            },
+            "additionalProperties": {}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-latest-graduated-tokens",
+      "description": "Fetches the most recently graduated tokens, ordered by graduation time (descending).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "queryParams"
+        ],
+        "properties": {
+          "queryParams": {
+            "type": "object",
+            "required": [],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "default": 25,
+                "maximum": 100,
+                "minimum": 1,
+                "description": "Number of results to return (1\u2013100). Defaults to 25."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-token-ath",
+      "description": "Fetches the all-time high (ATH) market cap for a token, starting from its graduation time.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "pathParams"
+        ],
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "required": [
+              "tokenAddress"
+            ],
+            "properties": {
+              "tokenAddress": {
+                "type": "string",
+                "description": "The token's address (e.g., a Solana address)"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-tokens-by-deployer",
+      "description": "Returns a list of tokens where the specified wallet address is the developer (devWallet).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "queryParams",
+          "pathParams"
+        ],
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "required": [
+              "walletAddress"
+            ],
+            "properties": {
+              "walletAddress": {
+                "type": "string",
+                "description": "The wallet address of the deployer (devWallet)"
+              }
+            },
+            "additionalProperties": false
+          },
+          "queryParams": {
+            "type": "object",
+            "required": [],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "default": 10,
+                "maximum": 100,
+                "minimum": 1,
+                "description": "Maximum number of tokens to return (default: 10, min: 1, max: 100)"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-token-history",
+      "description": "Fetches historical price, market cap, or liquidity snapshots for a token across multiple time windows.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "token"
+            ],
+            "properties": {
+              "token": {
+                "type": "string",
+                "description": "The token's address"
+              },
+              "metrics": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "price",
+                    "mcap",
+                    "liquidity"
+                  ]
+                },
+                "description": "List of metrics to fetch (default: [\"price\"])"
+              }
+            },
+            "additionalProperties": {}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-token-by-pool",
+      "description": "Fetches token metadata for a given pool (market) address.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "pathParams"
+        ],
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "required": [
+              "poolAddress"
+            ],
+            "properties": {
+              "poolAddress": {
+                "type": "string",
+                "description": "The pool (market) address linked to the token"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-token-performance",
+      "description": "Returns percentage performance change for selected metrics over multiple time windows compared to the current value.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "token"
+            ],
+            "properties": {
+              "token": {
+                "type": "string",
+                "description": "Token address to fetch performance data for"
+              },
+              "metrics": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "price",
+                    "mcap",
+                    "liquidity"
+                  ]
+                },
+                "default": [
+                  "price"
+                ],
+                "description": "List of metrics to evaluate. Supported values: `price`, `mcap`, `liquidity`."
+              }
+            },
+            "additionalProperties": {}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-token-price",
+      "description": "Returns the latest price, market cap, and liquidity for a specific token address.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "pathParams"
+        ],
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "required": [
+              "tokenAddress"
+            ],
+            "properties": {
+              "tokenAddress": {
+                "type": "string",
+                "description": "The token's contract address"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-wallet-holdings",
+      "description": "Retrieve the token holdings of a given wallet address, including balances and percentage ownership per token.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "queryParams",
+          "pathParams"
+        ],
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "required": [
+              "walletAddress"
+            ],
+            "properties": {
+              "walletAddress": {
+                "type": "string",
+                "description": "The wallet address to fetch holdings for"
+              }
+            },
+            "additionalProperties": false
+          },
+          "queryParams": {
+            "type": "object",
+            "required": [],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "default": 10,
+                "maximum": 100,
+                "minimum": 1,
+                "description": "Maximum number of tokens to return (default 10, max 100)"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-wallet-token-pnl",
+      "description": "Calculate realized and unrealized profit and loss (PnL) for a wallet on a specific token.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "pathParams"
+        ],
+        "properties": {
+          "pathParams": {
+            "type": "object",
+            "required": [
+              "walletAddress",
+              "tokenAddress"
+            ],
+            "properties": {
+              "tokenAddress": {
+                "type": "string",
+                "description": "The token contract address"
+              },
+              "walletAddress": {
+                "type": "string",
+                "description": "The wallet address to calculate PnL for"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-token-history-range",
+      "description": "Returns the lowest and highest values of selected metrics (price, market cap, liquidity) within a specified time range for a token.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "required": [
+          "body",
+          "pathParams"
+        ],
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "time_from",
+              "time_to"
+            ],
+            "properties": {
+              "mode": {
+                "enum": [
+                  "clamp",
+                  "error"
+                ],
+                "default": "clamp",
+                "description": "Behavior when requested range falls outside token lifespan"
+              },
+              "metrics": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "price",
+                    "mcap",
+                    "liquidity"
+                  ]
+                },
+                "default": [
+                  "price"
+                ],
+                "description": "Which metrics to return (price, mcap, liquidity)"
+              },
+              "time_to": {
+                "type": "number",
+                "description": "Unix timestamp (seconds) for range end"
+              },
+              "time_from": {
+                "type": "number",
+                "description": "Unix timestamp (seconds) for range start"
+              }
+            },
+            "additionalProperties": {}
+          },
+          "pathParams": {
+            "type": "object",
+            "required": [
+              "tokenAddress"
+            ],
+            "properties": {
+              "tokenAddress": {
+                "type": "string",
+                "description": "The token's contract address"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-mcp-config",
+      "description": "Exposes MCP discovery schema for Smithery and other MCP clients.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:07:38.890388+00:00",
+    "source": "smithery"
+  }
+}

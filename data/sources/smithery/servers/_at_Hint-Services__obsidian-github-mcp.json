@@ -1,0 +1,200 @@
+{
+  "qualifiedName": "@Hint-Services/obsidian-github-mcp",
+  "displayName": "Obsidian GitHub",
+  "description": "Connect AI assistants to your GitHub-hosted Obsidian vault to seamlessly access, search, and analyze your knowledge base. Enable intelligent retrieval of notes, track the evolution of your ideas, and integrate project management workflows. Enhance productivity for knowledge workers, developers, and academics by bridging your Obsidian notes with AI capabilities.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/hint.services.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@Hint-Services/obsidian-github-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@Hint-Services/obsidian-github-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "githubToken",
+          "owner",
+          "repo"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string",
+            "description": "GitHub repository name"
+          },
+          "owner": {
+            "type": "string",
+            "description": "GitHub repository owner"
+          },
+          "githubToken": {
+            "type": "string",
+            "description": "GitHub API token"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "getFileContents",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve the contents of a specific note, document, or file from your Obsidian vault stored in GitHub (hoffination/Ben-Personal). Perfect for accessing your knowledge base content.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "filePath"
+        ],
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Path to the file within the repository."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "searchFiles",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search for notes, documents, and files within your Obsidian vault on GitHub (hoffination/Ben-Personal). Find specific knowledge base content using GitHub's powerful search syntax. Supports searching in filenames, paths, and content.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "page": {
+            "type": "number",
+            "default": 0,
+            "description": "Page number to retrieve (0-indexed)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query - can be a simple term or use GitHub search qualifiers"
+          },
+          "perPage": {
+            "type": "number",
+            "default": 100,
+            "description": "Number of results per page"
+          },
+          "searchIn": {
+            "enum": [
+              "filename",
+              "path",
+              "content",
+              "all"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Where to search: 'filename' (exact filename match), 'path' (anywhere in file path), 'content' (file contents), or 'all' (comprehensive search)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "searchIssues",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search for issues and discussions in your Obsidian vault repository (hoffination/Ben-Personal). Great for tracking tasks, project management, and collaborative knowledge work.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query (uses GitHub Issue Search syntax)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getCommitHistory",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Track the evolution of your Obsidian vault knowledge base by retrieving commit history from GitHub (hoffination/Ben-Personal). See how your notes and ideas have developed over time with detailed diffs.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "days"
+        ],
+        "properties": {
+          "days": {
+            "type": "number",
+            "maximum": 365,
+            "minimum": 1,
+            "description": "Number of days to look back for commits"
+          },
+          "page": {
+            "type": "number",
+            "default": 0,
+            "description": "Page number for pagination (0-indexed)"
+          },
+          "author": {
+            "type": "string",
+            "description": "Filter commits by author username"
+          },
+          "maxCommits": {
+            "type": "number",
+            "default": 25,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of commits to return"
+          },
+          "includeDiffs": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to include actual file changes/diffs (default: true)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "diagnoseSearch",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Diagnose search functionality and repository configuration for your Obsidian vault on GitHub (hoffination/Ben-Personal). Verifies repository connectivity, search capabilities, and checks if repository size is within GitHub's indexing limits.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:14:02.362490+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,1274 @@
+{
+  "qualifiedName": "@infranodus/mcp-server-infranodus",
+  "displayName": "InfraNodus Knowledge Graphs & Text Analysis",
+  "description": "Map text into knowledge graphs to create a structured representation of conceptual relations and topical clusters in your documents. Detect content gaps between the topical clusters and generate research questions to drive research and content creation using the powerful Graph RAG technology underpinning InfraNodus. Get additional insights about texts: main topics, keywords, and underlying themes. Connect to your existing InfraNodus graphs or create new ones to enrich analysis and outputs.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/049714b3-36a4-4069-9193-470ff6247af6.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@infranodus/mcp-server-infranodus",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@infranodus/mcp-server-infranodus/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Your InfraNodus API key"
+          },
+          "apiBase": {
+            "type": "string",
+            "default": "https://infranodus.com/api/v1",
+            "description": "InfraNodus API base URL"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "generate_knowledge_graph",
+      "title": "Generate Knowledge Graph from Text",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze text and generate a knowledge graph with main topics, topical clusters, concepts, concepts relations and structural gaps. Only use when explicitly asked to analyze a text or generate a knowledge graph. Do not use for short clarifying questions that you already have an answer to from the context of the conversation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to analyze. Use new lines to separate separate statements or paragrams in each text (but not the sentences). Use [[wikilinks]] to mark entities (if required for social / knowledge graphs, ontology, or entity detection)."
+          },
+          "includeGraph": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include full graph structure in response (true only if explicitly needed or requested)"
+          },
+          "addNodesAndEdges": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include nodes and edges in response (true only if explicitly needed, not recommended for longer texts)"
+          },
+          "includeStatements": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include processed statements in response (true only if explicitly needed or requested)"
+          },
+          "modifyAnalyzedText": {
+            "enum": [
+              "none",
+              "detectEntities",
+              "extractEntitiesOnly"
+            ],
+            "type": "string",
+            "default": "none",
+            "description": "Text processing setting to use: none (for text, gap, and topical analysis), detectEntities (mix entities and words), extractEntitiesOnly (detect entities only - use for ontology and knowledge graph generation and entity extraction)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_knowledge_graph",
+      "title": "Create a Knowledge Graph in InfraNodus from Text",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a knowledge graph in InfraNodus from text, save it, and provide its name and a link to it for future use. ",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "graphName",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to analyze. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+          },
+          "graphName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the graph to create in InfraNodus"
+          },
+          "includeGraph": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include full graph structure in response (add only if explicitly needed)"
+          },
+          "addNodesAndEdges": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include nodes and edges in response (add only if explicitly needed, not recommended for longer texts)"
+          },
+          "includeStatements": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include processed statements in response (add only if explicitly needed)"
+          },
+          "modifyAnalyzedText": {
+            "enum": [
+              "none",
+              "detectEntities",
+              "extractEntitiesOnly"
+            ],
+            "type": "string",
+            "default": "none",
+            "description": "Entity detection: none (normal), detectEntities (mix entities and words), extractEntitiesOnly (detect entities only - use for ontology and knowledge graph creation and entity extraction)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_add_relations",
+      "title": "Add Relations to the InfraNodus Memory",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Add relations to the InfraNodus memory from text, save it, and provide its name and a link to it for future use. ",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "graphName",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to analyze. Use new lines to separate separate statements, relations, and paragraphs in each text (but not the sentences). Detect the entities in every statement and use [[wikilinks]] syntax to mark them, unless the user explicitly requests automatic entity detection. Every statement should have at least two entities marked."
+          },
+          "graphName": {
+            "type": "string",
+            "maxLength": 28,
+            "minLength": 1,
+            "description": "Name of the graph to add the memory to in InfraNodus - lowercase, dashes for spaces, no special characters. Auto-generate from the context of the conversation (if previously available) or use the nanme of the LLM client or project, or use the name the user explicitly provided or requested."
+          },
+          "includeGraph": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include full graph structure in response (add only if needed for further analysis)"
+          },
+          "addNodesAndEdges": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include nodes and edges in response (add only if needed for further analysis, not recommended for longer texts)"
+          },
+          "includeStatements": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include processed statements in response (add only if needed for further analysis)"
+          },
+          "modifyAnalyzedText": {
+            "enum": [
+              "none",
+              "detectEntities",
+              "extractEntitiesOnly"
+            ],
+            "type": "string",
+            "default": "none",
+            "description": "Entity detection: none (normal, by default), extractEntitiesOnly (automatic entity extraction - use if explicitly requested by the user)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_get_relations",
+      "title": "Get Relations from the InfraNodus Memory",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Provide a list of relations from the InfraNodus memory for a given concept or entity",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "entityName": {
+            "type": "string",
+            "default": "",
+            "description": "Name of the entity to get relations for from the InfraNodus memory, use [[wikilinks]] syntax to mark the entity, replace spaces with underscores. Leave if contextMemoryName is provided."
+          },
+          "memoryContextName": {
+            "type": "string",
+            "default": "",
+            "description": "Name of the existing InfraNodus memory graph to search in if requested or needed from the context (can be left empty to search in all memory graphs)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_existing_graph_by_name",
+      "title": "Analyze or Extract an Existing InfraNodus Graph",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Extract and analyze an existing graph from your InfraNodus account",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "graphName"
+        ],
+        "properties": {
+          "graphName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the existing InfraNodus graph in your account to retrieve"
+          },
+          "includeGraph": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include full graph structure in response (add only if explicitly needed)"
+          },
+          "addNodesAndEdges": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include nodes and edges in response (add only if explicitly needed, not recommended for longer texts)"
+          },
+          "includeStatements": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include processed statements in response (add only if explicitly needed)"
+          },
+          "modifyAnalyzedText": {
+            "enum": [
+              "none",
+              "detectEntities",
+              "extractEntitiesOnly"
+            ],
+            "type": "string",
+            "default": "none",
+            "description": "Entity detection: none (normal), detectEntities (mix entities and words), extractEntitiesOnly (detect entities only - use for ontology and knowledge graph creation and entity extraction)"
+          },
+          "includeGraphSummary": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include AI-generated graph summary for RAG prompt augmentation"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_content_gaps",
+      "title": "Generate Content Gaps",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Generate content gaps from text using knowledge graph analysis",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to retrieve content gaps from. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_topical_clusters",
+      "title": "Generate Topical Clusters",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Generate topics and clusters of keywords from text using knowledge graph analysis",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to retrieve topics and topical clusters from. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_research_questions",
+      "title": "Generate Research Questions from Text",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze text and generate innovative research questions based on the content gaps identified between the topical clusters inside the text that can be used to improve the text and the discourse it relates to",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to generate research questions from. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+          },
+          "gapDepth": {
+            "type": "number",
+            "default": 0,
+            "description": "Depth of content gaps to generate questions for"
+          },
+          "modelToUse": {
+            "enum": [
+              "claude-opus-4.1",
+              "claude-sonnet-4",
+              "gemini-2.5-flash",
+              "gemini-2.5-flash-lite",
+              "gpt-4o",
+              "gpt-4o-mini",
+              "gpt-5",
+              "gpt-5-mini"
+            ],
+            "type": "string",
+            "default": "gpt-4o",
+            "description": "AI model to use for generating research questions: claude-opus-4.1, claude-sonnet-4, gemini-2.5-flash, gemini-2.5-flash-lite, gpt-4o, gpt-4o-mini, gpt-5, gpt-5-mini"
+          },
+          "useSeveralGaps": {
+            "type": "boolean",
+            "default": false,
+            "description": "Generate questions for several content gaps found in text"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_research_ideas",
+      "title": "Generate Research Ideas from Text",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze text and generate innovative research ideas based on the content gaps identified between the topical clusters inside the text that can be used to improve the text and the discourse it relates to",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to generate research ideas from. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+          },
+          "gapDepth": {
+            "type": "number",
+            "default": 0,
+            "description": "Depth of content gaps to generate ideas for"
+          },
+          "modelToUse": {
+            "enum": [
+              "claude-opus-4.1",
+              "claude-sonnet-4",
+              "gemini-2.5-flash",
+              "gemini-2.5-flash-lite",
+              "gpt-4o",
+              "gpt-4o-mini",
+              "gpt-5",
+              "gpt-5-mini"
+            ],
+            "type": "string",
+            "default": "gpt-4o",
+            "description": "AI model to use for generating research questions: claude-opus-4.1, claude-sonnet-4, gemini-2.5-flash, gemini-2.5-flash-lite, gpt-4o, gpt-4o-mini, gpt-5, gpt-5-mini"
+          },
+          "useSeveralGaps": {
+            "type": "boolean",
+            "default": false,
+            "description": "Generate ideas for several content gaps found in text"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "research_questions_from_graph",
+      "title": "Generate Research Questions from an Existing InfraNodus Graph",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve an existing InfraNodus knowledge graph and generate research questions based on the content gaps identified between the topical clusters inside the graph that can be used to improve the text and the discourse it relates to",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "graphName"
+        ],
+        "properties": {
+          "gapDepth": {
+            "type": "number",
+            "default": 0,
+            "description": "Depth of content gaps to generate questions for"
+          },
+          "graphName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the existing InfraNodus graph in your account to retrieve"
+          },
+          "modelToUse": {
+            "enum": [
+              "claude-opus-4.1",
+              "claude-sonnet-4",
+              "gemini-2.5-flash",
+              "gemini-2.5-flash-lite",
+              "gpt-4o",
+              "gpt-4o-mini",
+              "gpt-5",
+              "gpt-5-mini"
+            ],
+            "type": "string",
+            "default": "gpt-4o",
+            "description": "AI model to use for generating research questions: claude-opus-4.1, claude-sonnet-4, gemini-2.5-flash, gemini-2.5-flash-lite, gpt-4o, gpt-4o-mini, gpt-5, gpt-5-mini"
+          },
+          "useSeveralGaps": {
+            "type": "boolean",
+            "default": false,
+            "description": "Generate questions for several content gaps found in text"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_responses_from_graph",
+      "title": "Generate Responses and Expert Advice from an InfraNodus Graph",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve an existing InfraNodus knowledge graph and use the relations extracted to generate responses and expert advice based on a prompt provided",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "graphName",
+          "prompt"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Prompt to generate responses to from the graph"
+          },
+          "graphName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the existing InfraNodus graph in your account to retrieve"
+          },
+          "modelToUse": {
+            "enum": [
+              "claude-opus-4.1",
+              "claude-sonnet-4",
+              "gemini-2.5-flash",
+              "gemini-2.5-flash-lite",
+              "gpt-4o",
+              "gpt-4o-mini",
+              "gpt-5",
+              "gpt-5-mini"
+            ],
+            "type": "string",
+            "default": "gpt-4o",
+            "description": "AI model to use for generating research questions: claude-opus-4.1, claude-sonnet-4, gemini-2.5-flash, gemini-2.5-flash-lite, gpt-4o, gpt-4o-mini, gpt-5, gpt-5-mini"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "develop_conceptual_bridges",
+      "title": "Develop Conceptual Bridges in Text",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze text and get ideas on how to develop conceptual bridges in this text to link it to a broader discourse",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to develop based on the latent concepts that connect this text to a broader discourse. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+          },
+          "modelToUse": {
+            "enum": [
+              "claude-opus-4.1",
+              "claude-sonnet-4",
+              "gemini-2.5-flash",
+              "gemini-2.5-flash-lite",
+              "gpt-4o",
+              "gpt-4o-mini",
+              "gpt-5",
+              "gpt-5-mini"
+            ],
+            "type": "string",
+            "default": "gpt-4o",
+            "description": "AI model to use for generating research questions: claude-opus-4.1, claude-sonnet-4, gemini-2.5-flash, gemini-2.5-flash-lite, gpt-4o, gpt-4o-mini, gpt-5, gpt-5-mini"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "develop_latent_topics",
+      "title": "Develop Latent Topics in Text",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze text, extract underdeveloped topics and get an idea on how to develop them",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to develop based on the latent concepts that connect this text to a broader discourse. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+          },
+          "modelToUse": {
+            "enum": [
+              "claude-opus-4.1",
+              "claude-sonnet-4",
+              "gemini-2.5-flash",
+              "gemini-2.5-flash-lite",
+              "gpt-4o",
+              "gpt-4o-mini",
+              "gpt-5",
+              "gpt-5-mini"
+            ],
+            "type": "string",
+            "default": "gpt-4o",
+            "description": "AI model to use for generating research questions: claude-opus-4.1, claude-sonnet-4, gemini-2.5-flash, gemini-2.5-flash-lite, gpt-4o, gpt-4o-mini, gpt-5, gpt-5-mini"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "develop_text_tool",
+      "title": "Develop a Text Based on Content Gaps and ",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze text to extract research questions, develop latent topics, and identify content gaps in a single workflow with progress tracking",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to think about and analyze. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+          },
+          "gapDepth": {
+            "type": "number",
+            "default": 0,
+            "description": "Depth of content gaps to generate questions for"
+          },
+          "modelToUse": {
+            "enum": [
+              "claude-opus-4.1",
+              "claude-sonnet-4",
+              "gemini-2.5-flash",
+              "gemini-2.5-flash-lite",
+              "gpt-4o",
+              "gpt-4o-mini",
+              "gpt-5",
+              "gpt-5-mini"
+            ],
+            "type": "string",
+            "default": "gpt-4o",
+            "description": "AI model to use for generating insights: claude-opus-4.1, claude-sonnet-4, gemini-2.5-flash, gemini-2.5-flash-lite, gpt-4o, gpt-4o-mini, gpt-5, gpt-5-mini"
+          },
+          "useSeveralGaps": {
+            "type": "boolean",
+            "default": false,
+            "description": "Generate questions for several content gaps found in text"
+          },
+          "extendedIdeationMode": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use extended ideation mode to generate ideas instead of questions. Only run if explicitly requested or if the previous run with of this tool did not provide sufficient results"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_contextual_hint",
+      "title": "Generate Contextual Hint for a Text",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Generate information about the main topics and concepts in a text to augment RAG retrieval and text analysis",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Text that you'd like to get an overview of. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "overlap_between_texts",
+      "title": "Generate Overlap Knowledge Graph from Texts",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Extract the common relationships and similarities between texts and generate an overlap graph",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "contexts"
+        ],
+        "properties": {
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Text that you'd like to analyze. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+                },
+                "modifyAnalyzedText": {
+                  "enum": [
+                    "none",
+                    "detectEntities",
+                    "extractEntitiesOnly"
+                  ],
+                  "type": "string",
+                  "default": "none",
+                  "description": "Entity detection: none (normal), detectEntities (mix entities and words), extractEntitiesOnly (detect entities only - use for ontology and knowledge graph creation and entity extraction)"
+                }
+              },
+              "additionalProperties": false
+            },
+            "minItems": 2,
+            "description": "Array of the texts to analyze and find overlaps for. Example: [text1, text2, ...]"
+          },
+          "includeGraph": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include full graph structure in response (add only if explicitly needed)"
+          },
+          "addNodesAndEdges": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include nodes and edges in response (add only if explicitly needed, not recommended for longer texts)"
+          },
+          "includeStatements": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include processed statements in response (add only if explicitly needed)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "difference_between_texts",
+      "title": "Generate Difference Knowledge Graph from Texts",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Extract the conceptial relations that are not present in the first text but are in the other texts",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "contexts"
+        ],
+        "properties": {
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Text content - First element is the target text to analyze for missing parts, subsequent elements are reference texts to identify what's missing. Use new lines to separate separate statements in each text (but not the sentences)."
+                },
+                "modifyAnalyzedText": {
+                  "enum": [
+                    "none",
+                    "detectEntities",
+                    "extractEntitiesOnly"
+                  ],
+                  "type": "string",
+                  "default": "none",
+                  "description": "Entity detection: none (normal), detectEntities (mix entities and words), extractEntitiesOnly (detect entities only - use for ontology and knowledge graph creation and entity extraction)"
+                }
+              },
+              "additionalProperties": false
+            },
+            "minItems": 2,
+            "description": "Array of texts where the FIRST text is analyzed for missing parts compared to the REMAINING reference texts. Example: [targetText, referenceText1, referenceText2, ...]"
+          },
+          "includeGraph": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include full graph structure in response (add only if explicitly needed)"
+          },
+          "addNodesAndEdges": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include nodes and edges in response (add only if explicitly needed, not recommended for longer texts)"
+          },
+          "includeStatements": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include processed statements in response (add only if explicitly needed)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_google_search_results",
+      "title": "Analyze the Main Topics in Google Search Results ",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Generate a knowledge graph and topical clusters from Google search results for provided search queries",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "queries"
+        ],
+        "properties": {
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Queries that you'd like to get Google search results for, can be comma-separated for multiple queries"
+          },
+          "importCountry": {
+            "enum": [
+              "AR",
+              "AU",
+              "BR",
+              "CA",
+              "CH",
+              "CN",
+              "DE",
+              "ES",
+              "FR",
+              "GB",
+              "HK",
+              "IN",
+              "IT",
+              "JP",
+              "MX",
+              "NL",
+              "NO",
+              "NZ",
+              "PT",
+              "RU",
+              "SV",
+              "TW",
+              "US"
+            ],
+            "type": "string",
+            "default": "US",
+            "description": "Country of the search queries, default is United States (US).Use the country most suitable for the language selected."
+          },
+          "showGraphOnly": {
+            "type": "boolean",
+            "default": true,
+            "description": "Only include the graph structure and keywords in the response (do not include the search results)"
+          },
+          "importLanguage": {
+            "enum": [
+              "EN",
+              "DE",
+              "FR",
+              "ES",
+              "IT",
+              "PT",
+              "RU",
+              "CN",
+              "JP",
+              "NL",
+              "TW"
+            ],
+            "type": "string",
+            "default": "EN",
+            "description": "Language of the search queries, default is English (EN), use the language of the conversation or requested by user."
+          },
+          "showExtendedGraphInfo": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include extended graph information in the response (add only if explicitly needed)"
+          },
+          "includeSearchResultsOnly": {
+            "type": "boolean",
+            "default": false,
+            "description": "Only include search results in the response (do not include the knowledge graph and keywords)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_related_search_queries",
+      "title": "Analyze Google Search Intent Related to Given Queries",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Generate a knowledge graph and identifymain topical clusters in the search requests related to the search queries provided",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "queries"
+        ],
+        "properties": {
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Queries that you'd like to get Google related queries for, can be comma-separated for multiple queries"
+          },
+          "importCountry": {
+            "enum": [
+              "AR",
+              "AU",
+              "BR",
+              "CA",
+              "CH",
+              "CN",
+              "DE",
+              "ES",
+              "FR",
+              "GB",
+              "HK",
+              "IN",
+              "IT",
+              "JP",
+              "MX",
+              "NL",
+              "NO",
+              "NZ",
+              "PT",
+              "RU",
+              "SV",
+              "TW",
+              "US"
+            ],
+            "type": "string",
+            "default": "US",
+            "description": "Country of the search queries, default is United States (US). Use the country most suitable for the language selected."
+          },
+          "showGraphOnly": {
+            "type": "boolean",
+            "default": true,
+            "description": "Only include the graph structure and keywords in the response (do not include the search queries)"
+          },
+          "importLanguage": {
+            "enum": [
+              "EN",
+              "DE",
+              "FR",
+              "ES",
+              "IT",
+              "PT",
+              "RU",
+              "CN",
+              "JP",
+              "NL",
+              "TW"
+            ],
+            "type": "string",
+            "default": "EN",
+            "description": "Language of the search queries, default is English (EN), use the language of the conversation or requested by user."
+          },
+          "keywordsSource": {
+            "enum": [
+              "related",
+              "adwords"
+            ],
+            "type": "string",
+            "default": "related",
+            "description": "Source of keywords to use for the graph: related (Google suggestions) or adwords (Google Ads suggestions - broader range)"
+          },
+          "showExtendedGraphInfo": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include extended graph information in the response (add only if explicitly needed)"
+          },
+          "includeSearchQueriesOnly": {
+            "type": "boolean",
+            "default": false,
+            "description": "Only include search queries in the response (do not include the knowledge graph and keywords)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_queries_vs_search_results",
+      "title": "Generate a Knowledge Graph of Search Queries vs Search Results",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Find the combinations of keywords and topics people search for that don't appear in the search results for the same queries",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "queries"
+        ],
+        "properties": {
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Queries for which you'd like to find the difference between what people find and what people are looking for"
+          },
+          "importCountry": {
+            "enum": [
+              "AR",
+              "AU",
+              "BR",
+              "CA",
+              "CH",
+              "CN",
+              "DE",
+              "ES",
+              "FR",
+              "GB",
+              "HK",
+              "IN",
+              "IT",
+              "JP",
+              "MX",
+              "NL",
+              "NO",
+              "NZ",
+              "PT",
+              "RU",
+              "SV",
+              "TW",
+              "US"
+            ],
+            "type": "string",
+            "default": "US",
+            "description": "Country of the search queries, default is United States (US). Use the country most suitable for the language selected."
+          },
+          "showGraphOnly": {
+            "type": "boolean",
+            "default": true,
+            "description": "Only include the graph structure and keywords in the response (do not include the search results)"
+          },
+          "importLanguage": {
+            "enum": [
+              "EN",
+              "DE",
+              "FR",
+              "ES",
+              "IT",
+              "PT",
+              "RU",
+              "CN",
+              "JP",
+              "NL",
+              "TW"
+            ],
+            "type": "string",
+            "default": "EN",
+            "description": "Language of the search queries, default is English (EN), use the language of the conversation or requested by user."
+          },
+          "showExtendedGraphInfo": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include extended graph information in the response (add only if explicitly needed)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_seo_report",
+      "title": "Generate SEO Analysis Report",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze content for SEO optimization by comparing its knowledge graph with the graphs of Google search results and search queries to identify content gaps and opportunities based on the differences",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Content that you'd like to optimize for SEO. Use new lines to separate separate statements or paragrams in each text (but not the sentences)."
+          },
+          "importCountry": {
+            "enum": [
+              "AR",
+              "AU",
+              "BR",
+              "CA",
+              "CH",
+              "CN",
+              "DE",
+              "ES",
+              "FR",
+              "GB",
+              "HK",
+              "IN",
+              "IT",
+              "JP",
+              "MX",
+              "NL",
+              "NO",
+              "NZ",
+              "PT",
+              "RU",
+              "SV",
+              "TW",
+              "US"
+            ],
+            "type": "string",
+            "default": "US",
+            "description": "Country for the search analysis, default is United States (US). Use the country most suitable for the language selected."
+          },
+          "importLanguage": {
+            "enum": [
+              "EN",
+              "DE",
+              "FR",
+              "ES",
+              "IT",
+              "PT",
+              "RU",
+              "CN",
+              "JP",
+              "NL",
+              "TW"
+            ],
+            "type": "string",
+            "default": "EN",
+            "description": "Language of the content and search queries, default is English (EN), use the language of the conversation or requested by user."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "retrieve_from_knowledge_base",
+      "title": "Retrieve Context for a Prompt from an Existing InfraNodus Graph",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve the statements and general overview of an existing InfraNodus knowledge graph based on the user's prompt for GraphRAG based retrieval.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "graphName",
+          "prompt"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Prompt to retrieve context for from the graph"
+          },
+          "graphName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the existing InfraNodus graph in your account to retrieve"
+          },
+          "includeGraph": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include graph in the response to provide underlying knowledge graph structure"
+          },
+          "compactStatements": {
+            "type": "boolean",
+            "default": false,
+            "description": "Make statements compact by removing categories and other metadata"
+          },
+          "includeGraphSummary": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include graph summary string in the response to provide additional context"
+          },
+          "extendedGraphSummary": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include extended graph summary object in the response for additional detailed context"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search",
+      "title": "Search through Existing InfraNodus Graphs",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Find the concepts and terms in existing InfraNodus graphs",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Query to search for in existing InfraNodus graphs"
+          },
+          "contextNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Names of the existing InfraNodus graphs to search in (comma-separated list, empty for all)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "fetch",
+      "title": "Fetch a Search Result",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Fetch a specific search result for an InfraNodus knowledge graph",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ID of the search result to retrieve (username:graph_name:search_query"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:56.510442+00:00",
+    "source": "smithery"
+  }
+}

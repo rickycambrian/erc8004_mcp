@@ -1,0 +1,111 @@
+{
+  "qualifiedName": "@byronwade/memoria",
+  "displayName": "memoria",
+  "description": "Prevents your AI from breaking code by revealing hidden file dependencies through git forensics.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@byronwade/memoria",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@byronwade/memoria/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {
+          "driftDays": {
+            "type": "number",
+            "default": 7,
+            "description": "Days before a coupled file is considered stale"
+          },
+          "analysisWindow": {
+            "type": "number",
+            "default": 50,
+            "description": "Number of commits to analyze for coupling"
+          },
+          "couplingPercent": {
+            "type": "number",
+            "default": 15,
+            "description": "Minimum coupling percentage to report (0-100)"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "analyze_file",
+      "annotations": {
+        "title": "Analyze File",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true
+      },
+      "description": "Returns forensic history, hidden dependencies, and risk assessment. USE THIS before modifying files.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The ABSOLUTE path to the file (e.g. C:/dev/project/src/file.ts)"
+          }
+        }
+      }
+    },
+    {
+      "name": "ask_history",
+      "annotations": {
+        "title": "Search Git History",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true
+      },
+      "description": "Search git history for WHY code was written. IMPORTANT: Use SHORT, SPECIFIC KEYWORDS (e.g., 'serialization', 'race condition', 'timeout'). Do NOT use full sentences or long descriptions - they will return 0 results. Use when asking 'why does this exist?' or before removing code.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Optional: ABSOLUTE path to scope search to a specific file or directory"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return (default: 20)"
+          },
+          "query": {
+            "type": "string",
+            "description": "A single keyword or short phrase (1-3 words max). Examples: 'serialization', 'race condition', 'Safari fix'. Do NOT use full sentences - git grep requires exact matches."
+          },
+          "endLine": {
+            "type": "number",
+            "description": "End line for line-range search (requires path). Used with startLine to trace history of a code block."
+          },
+          "startLine": {
+            "type": "number",
+            "description": "Start line for line-range search (requires path). Shows history of specific lines using git log -L."
+          },
+          "searchType": {
+            "enum": [
+              "message",
+              "diff",
+              "both"
+            ],
+            "type": "string",
+            "description": "Where to search: 'message' (commit messages only), 'diff' (code changes only), 'both' (default)"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:14:12.740802+00:00",
+    "source": "smithery"
+  }
+}

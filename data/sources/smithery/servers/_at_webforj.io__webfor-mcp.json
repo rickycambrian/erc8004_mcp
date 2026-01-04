@@ -1,0 +1,185 @@
+{
+  "qualifiedName": "@webforj.io/webfor-mcp",
+  "displayName": "webforj-mcp",
+  "description": "The official Model Context Protocol server for webforJ - providing AI assistants with Java web development tools, project generation, and comprehensive documentation access. Works with Claude, VS Code, Cursor, and all MCP-enabled environments.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/5df99b97-0565-4561-aa12-6f76fd9666b8.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@webforj.io/webfor-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@webforj.io/webfor-mcp/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "webforj-create-project",
+      "annotations": {
+        "title": "webforJ Project Generator",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\nGenerate webforJ application setup using official Maven archetypes. Supports multiple\nproject templates including hello-world, blank, tabs, and sidemenu layouts.\n\nCreates Maven project structure with proper dependencies, configuration files, and\nstarter code. Returns setup instructions for both startforJ UI tool and Maven\ncommand-line approaches.\n\nAvailable archetypes:\n- hello-world: Basic application with sample components\n- blank: Minimal project structure\n- tabs: Tabbed interface layout\n- sidemenu: Side navigation menu layout\n\nAvailable flavors:\n- webforj: Standard webforJ application\n- webforj-spring: webforJ with Spring Boot (default, requires webforJ 25.02+)\n",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "appName"
+        ],
+        "properties": {
+          "flavor": {
+            "enum": [
+              "webforj",
+              "webforj-spring"
+            ],
+            "type": "string",
+            "description": "Project flavor: webforj (standard) or webforj-spring (Spring Boot). Default: webforj-spring"
+          },
+          "appName": {
+            "type": "string",
+            "description": "webforj application name"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Maven group ID for the webforj project (default: derived from appName, e.g. com.myapp)"
+          },
+          "version": {
+            "type": "string",
+            "default": "1.0-SNAPSHOT",
+            "description": "webforj project version (default: 1.0-SNAPSHOT)"
+          },
+          "archetype": {
+            "enum": [
+              "blank",
+              "hello-world",
+              "tabs",
+              "sidemenu"
+            ],
+            "type": "string",
+            "description": "webforj archetype template (default: hello-world)"
+          },
+          "artifactId": {
+            "type": "string",
+            "description": "Maven artifact ID (default: derived from appName in lowercase with hyphens)"
+          },
+          "showOptions": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include both startforJ GUI and Maven CLI setup instructions in the response."
+          },
+          "archetypeVersion": {
+            "type": "string",
+            "default": "LATEST",
+            "description": "webforj archetype version (default: LATEST)"
+          }
+        }
+      }
+    },
+    {
+      "name": "webforj-knowledge-base",
+      "annotations": {
+        "title": "webforJ Knowledge Base Search",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\nSearch the webforJ knowledge base using semantic vector similarity to find relevant documentation,\ncode examples, and API information. Returns structured JSON data with search results, relevance\nscores, and confidence metrics for result quality assessment.\n\nSupports natural language queries across webforJ documentation, JavaDoc API references, and\nreal-world code samples. Results include metadata for filtering and confidence indicators\nfor quality evaluation.\n\nQuery examples:\n- \"Button component creation and styling\"\n- \"Form validation with data binding patterns\"\n- \"@Route annotation and navigation setup\"\n- \"FlexLayout container and responsive design\"\n- \"ElementComposite web component integration\"\n",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 25,
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of search results to return. Higher values provide more comprehensive coverage but increased response size."
+          },
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Natural language query to search the webforJ knowledge base. Examples: \"how to create buttons\", \"form validation\", \"data binding\", \"routing with @Route annotation\""
+          }
+        }
+      }
+    },
+    {
+      "name": "webforj-create-theme",
+      "annotations": {
+        "title": "webforJ Theme Generator",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\nGenerate comprehensive webforJ application themes using color theory algorithms. Creates\ncomplete color palettes with proper contrast ratios and accessibility compliance.\n\nProduces CSS custom properties for primary, secondary, success, warning, danger, and\nneutral color variants. Each color includes light, base, dark, and alternative shades\noptimized for UI components and readability.\n\nOutput includes @AppTheme annotation code and App.setTheme() integration examples.\nSupports named themes for multi-theme applications or global CSS overrides for\nsingle-theme setups.\n\nInput format: HSL color values [hue (0-360), saturation (0-100), lightness (0-100)]\n",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "primaryColor"
+        ],
+        "properties": {
+          "step": {
+            "type": "number",
+            "default": 5,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Step size for contrast calculations (default: 5)"
+          },
+          "themeName": {
+            "type": "string",
+            "description": "Optional theme name for multi-theme applications. Omit for global CSS overrides."
+          },
+          "infoDegree": {
+            "type": "number",
+            "default": 180,
+            "maximum": 360,
+            "minimum": 0,
+            "description": "Degree offset for info/secondary color (default: 180)"
+          },
+          "primaryColor": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "description": "Primary color in HSL format: [hue (0-360), saturation (0-100), lightness (0-100)]. Example: [220, 70, 50] for blue."
+          },
+          "tintScaleFactor": {
+            "type": "number",
+            "default": 0,
+            "description": "Scale factor for tint generation (default: 0)"
+          },
+          "tintBaseSaturation": {
+            "type": "number",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 0,
+            "description": "Base saturation for neutral grey tints (default: 10)"
+          },
+          "contrastSensitiveLightness": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use contrast-sensitive lightness calculations (default: false)"
+          },
+          "detectPrimaryColorCategory": {
+            "type": "boolean",
+            "default": true,
+            "description": "Auto-detect color category for optimization (default: true)"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:15:10.871482+00:00",
+    "source": "smithery"
+  }
+}

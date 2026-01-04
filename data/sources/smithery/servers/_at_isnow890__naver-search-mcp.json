@@ -1,0 +1,944 @@
+{
+  "qualifiedName": "@isnow890/naver-search-mcp",
+  "displayName": "Naver Search",
+  "description": "\nA MCP server based on Naver Search API. Enables searching various content types (news, cafe, blogs, shopping, web search, etc.) and analyzing search/shopping trends via DataLab API. Shopping analytics provide consumer behavior patterns by category, device, gender, and age group.\n\n\n\ub124\uc774\ubc84 \uac80\uc0c9 API \uae30\ubc18 MCP \uc11c\ubc84\uc785\ub2c8\ub2e4. \ub274\uc2a4, \uce74\ud398, \ube14\ub85c\uadf8, \uc1fc\ud551, \uc6f9 \uac80\uc0c9 \ub4f1 \ub2e4\uc591\ud55c \ucf58\ud150\uce20 \uac80\uc0c9\uacfc \ud568\uaed8 \ub370\uc774\ud130\ub7a9 API\ub85c \uac80\uc0c9\uc5b4/\uc1fc\ud551 \ud2b8\ub80c\ub4dc \ubd84\uc11d\uc774 \uac00\ub2a5\ud569\ub2c8\ub2e4. \uc1fc\ud551 \ubd84\uc11d\uc740 \uce74\ud14c\uace0\ub9ac, \uae30\uae30, \uc131\ubcc4, \uc5f0\ub839\ub300\ubcc4 \uc18c\ube44\uc790 \ud589\ub3d9 \ud328\ud134\uc744 \uc81c\uacf5\ud569\ub2c8\ub2e4.\n\n\n\n  \u2022 \uc2a4\ub9c8\ud2b8 \uce74\ud14c\uace0\ub9ac \uac80\uc0c9 - \uac80\uc0c9 \ud2b8\ub80c\ub4dc/\uc1fc\ud551\uc778\uc0ac\uc774\ud2b8 \uac80\uc0c9\uc2dc \uce74\ud14c\uace0\ub9ac \ucf54\ub4dc\ub97c ai\uac00 \uc790\ub3d9\uc73c\ub85c \ucc3e\uc544\uc11c \ud2b8\ub80c\ub4dc \uac80\uc0c9\ud574\uc918\uc694.\n  \u2022 \ud55c\uad6d \uc2dc\uac04 \ucee8\ud14d\uc2a4\ud2b8 - \uc624\ub298 \uae30\ubc18\uc73c\ub85c \uc815\ud655\ud788 \uac80\uc0c9\ud560\uc218 \uc788\uac8c \ud569\ub2c8\ub2e4,\n\n\n\n",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/347d01cc-d8ed-4ec0-be82-a7ae353dbd38.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@isnow890/naver-search-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@isnow890/naver-search-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "NAVER_CLIENT_ID",
+          "NAVER_CLIENT_SECRET"
+        ],
+        "properties": {
+          "NAVER_CLIENT_ID": {
+            "type": "string",
+            "description": "Naver API Client ID"
+          },
+          "NAVER_CLIENT_SECRET": {
+            "type": "string",
+            "description": "Naver API Client Secret"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": {
+    "scanPassed": true
+  },
+  "tools": [
+    {
+      "name": "search_webkr",
+      "description": "\ud83c\udf10 Search Korean web documents and general content. Comprehensive search across Korean websites and online content. Find articles, information, and documents from various Korean sources. For recent content or 'today's results', use get_current_korean_time first. (\ub124\uc774\ubc84 \uc6f9\ubb38\uc11c \uac80\uc0c9 - \ud55c\uad6d \uc6f9\uc0ac\uc774\ud2b8 \uc885\ud569 \uac80\uc0c9, \ucd5c\uadfc \ucf58\ud150\uce20\ub098 \uc624\ub298 \uacb0\uacfc\ub97c \ucc3e\uc744 \ub54c\ub294 \uba3c\uc800 get_current_korean_time\uc73c\ub85c \ud604\uc7ac \uc2dc\uac04\uc744 \ud655\uc778\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "sim",
+              "date"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (sim: \uc720\uc0ac\ub3c4, date: \ub0a0\uc9dc\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\uae30\ubcf8 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\uae30\ubcf8 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_news",
+      "description": "\ud83d\udcf0 Search latest Korean news articles from major outlets. Perfect for current events, breaking news, and recent developments. Covers politics, economy, society, and international news. For today's news or current events, use get_current_korean_time first to understand what 'today' means. (\ub124\uc774\ubc84 \ub274\uc2a4 \uac80\uc0c9 - \ucd5c\uc2e0 \ub274\uc2a4\uc640 \uc2dc\uc0ac \uc815\ubcf4, \uc624\ub298 \ub274\uc2a4\ub97c \ucc3e\uc744 \ub54c\ub294 \uba3c\uc800 get_current_korean_time\uc73c\ub85c \ud604\uc7ac \uc2dc\uac04\uc744 \ud655\uc778\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "sim",
+              "date"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (sim: \uc720\uc0ac\ub3c4, date: \ub0a0\uc9dc\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\uae30\ubcf8 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\uae30\ubcf8 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_blog",
+      "description": "\u270d\ufe0f Search personal blogs and reviews for authentic user experiences. Great for product reviews, personal stories, detailed tutorials, and real user opinions. Find genuine Korean perspectives. For recent posts or 'today's content', use get_current_korean_time first. (\ub124\uc774\ubc84 \ube14\ub85c\uadf8 \uac80\uc0c9 - \uc2e4\uc81c \uc0ac\uc6a9\uc790 \ud6c4\uae30\uc640 \uac1c\uc778\uc801 \uacbd\ud5d8, \ucd5c\uadfc \uae00\uc774\ub098 \uc624\ub298 \ub0b4\uc6a9\uc744 \ucc3e\uc744 \ub54c\ub294 \uba3c\uc800 get_current_korean_time\uc73c\ub85c \ud604\uc7ac \uc2dc\uac04\uc744 \ud655\uc778\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "sim",
+              "date"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (sim: \uc720\uc0ac\ub3c4, date: \ub0a0\uc9dc\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\uae30\ubcf8 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\uae30\ubcf8 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_shop",
+      "description": "\ud83d\uded2 Search Naver Shopping for products, prices, and shopping deals. Compare prices across vendors, find product specifications, and discover shopping trends in Korea. For current deals or today's specials, use get_current_korean_time first. (\ub124\uc774\ubc84 \uc1fc\ud551 \uac80\uc0c9 - \uc0c1\ud488 \uc815\ubcf4\uc640 \uac00\uaca9 \ube44\uad50, \ud604\uc7ac \ud560\uc778\uc774\ub098 \uc624\ub298 \ud2b9\uac00\ub97c \ucc3e\uc744 \ub54c\ub294 \uba3c\uc800 get_current_korean_time\uc73c\ub85c \ud604\uc7ac \uc2dc\uac04\uc744 \ud655\uc778\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "sim",
+              "date"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (sim: \uc720\uc0ac\ub3c4, date: \ub0a0\uc9dc\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\uae30\ubcf8 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\uae30\ubcf8 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_image",
+      "description": "\ud83d\uddbc\ufe0f Search for images with Korean context and relevance. Find visual content, infographics, charts, and photos related to your search terms. Great for visual research and content discovery. For recent images or current visual content, use get_current_korean_time first. (\ub124\uc774\ubc84 \uc774\ubbf8\uc9c0 \uac80\uc0c9 - \uc2dc\uac01\uc801 \ucee8\ud150\uce20 \ubc1c\uacac, \ucd5c\uadfc \uc774\ubbf8\uc9c0\ub098 \ud604\uc7ac \uc2dc\uac01 \uc790\ub8cc\ub97c \ucc3e\uc744 \ub54c\ub294 \uba3c\uc800 get_current_korean_time\uc73c\ub85c \ud604\uc7ac \uc2dc\uac04\uc744 \ud655\uc778\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "sim",
+              "date"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (sim: \uc720\uc0ac\ub3c4, date: \ub0a0\uc9dc\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\uae30\ubcf8 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\uae30\ubcf8 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_kin",
+      "description": "\u2753 Search Naver KnowledgeiN for Q&A and community-driven answers. Find solutions to problems, get expert advice, and discover community insights on various topics. For recent questions or current discussions, use get_current_korean_time first. (\ub124\uc774\ubc84 \uc9c0\uc2ddiN \uac80\uc0c9 - \uc9c8\ubb38\uacfc \ub2f5\ubcc0, \ucee4\ubba4\ub2c8\ud2f0 \uc9c0\uc2dd, \ucd5c\uadfc \uc9c8\ubb38\uc774\ub098 \ud604\uc7ac \ud1a0\ub860\uc744 \ucc3e\uc744 \ub54c\ub294 \uba3c\uc800 get_current_korean_time\uc73c\ub85c \ud604\uc7ac \uc2dc\uac04\uc744 \ud655\uc778\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "sim",
+              "date"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (sim: \uc720\uc0ac\ub3c4, date: \ub0a0\uc9dc\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\uae30\ubcf8 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\uae30\ubcf8 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_book",
+      "description": "\ud83d\udcda Search for books, publications, and literary content. Find book reviews, author information, publication details, and reading recommendations in Korean literature and translated works. For new releases or current bestsellers, use get_current_korean_time first. (\ub124\uc774\ubc84 \ucc45 \uac80\uc0c9 - \ub3c4\uc11c \uc815\ubcf4\uc640 \uc11c\ud3c9, \uc2e0\uac04\ub3c4\uc11c\ub098 \ud604\uc7ac \ubca0\uc2a4\ud2b8\uc140\ub7ec\ub97c \ucc3e\uc744 \ub54c\ub294 \uba3c\uc800 get_current_korean_time\uc73c\ub85c \ud604\uc7ac \uc2dc\uac04\uc744 \ud655\uc778\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "sim",
+              "date"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (sim: \uc720\uc0ac\ub3c4, date: \ub0a0\uc9dc\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\uae30\ubcf8 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\uae30\ubcf8 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_encyc",
+      "description": "\ud83d\udcd6 Search Naver Encyclopedia for authoritative knowledge and definitions. Best for academic research, getting reliable information, and understanding Korean concepts and terminology. For current definitions or recent updates, use get_current_korean_time for context. (\ub124\uc774\ubc84 \uc9c0\uc2dd\ubc31\uacfc \uac80\uc0c9 - \uc2e0\ub8b0\ud560 \uc218 \uc788\ub294 \uc815\ubcf4\uc640 \uc815\uc758, \ud604\uc7ac \uc815\uc758\ub098 \ucd5c\uadfc \uc5c5\ub370\uc774\ud2b8\ub97c \ucc3e\uc744 \ub54c\ub294 get_current_korean_time\uc73c\ub85c \uc0c1\ud669\uc744 \ud30c\uc545\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "sim",
+              "date"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (sim: \uc720\uc0ac\ub3c4, date: \ub0a0\uc9dc\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\uae30\ubcf8 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\uae30\ubcf8 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_academic",
+      "description": "\ud83c\udf93 Search academic papers, research documents, and scholarly content. Access Korean academic resources, research papers, theses, and professional publications. For recent publications or current research, use get_current_korean_time first. (\ub124\uc774\ubc84 \uc804\ubb38\uc790\ub8cc \uac80\uc0c9 - \ud559\uc220 \ub17c\ubb38\uacfc \uc804\ubb38 \uc790\ub8cc, \ucd5c\uadfc \ubc1c\ud45c\ub098 \ud604\uc7ac \uc5f0\uad6c\ub97c \ucc3e\uc744 \ub54c\ub294 \uba3c\uc800 get_current_korean_time\uc73c\ub85c \ud604\uc7ac \uc2dc\uac04\uc744 \ud655\uc778\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "sim",
+              "date"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (sim: \uc720\uc0ac\ub3c4, date: \ub0a0\uc9dc\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\uae30\ubcf8 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\uae30\ubcf8 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_local",
+      "description": "\ud83d\udccd Search for local businesses, restaurants, and places in Korea. Find location information, reviews, contact details, and business hours for Korean establishments. For current business hours or today's availability, use get_current_korean_time first. (\ub124\uc774\ubc84 \uc9c0\uc5ed \uac80\uc0c9 - \uc9c0\uc5ed \uc5c5\uccb4\uc640 \uc7a5\uc18c \uc815\ubcf4, \ud604\uc7ac \uc601\uc5c5\uc2dc\uac04\uc774\ub098 \uc624\ub298 \uc774\uc6a9 \uac00\ub2a5 \uc5ec\ubd80\ub97c \ud655\uc778\ud560 \ub54c\ub294 \uba3c\uc800 get_current_korean_time\uc73c\ub85c \ud604\uc7ac \uc2dc\uac04\uc744 \ud655\uc778\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "random",
+              "comment"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (random: \uc815\ud655\ub3c4\uc21c, comment: \ub9ac\ubdf0 \ub9ce\uc740\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\ucd5c\ub300 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\ucd5c\ub300 5)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_cafearticle",
+      "description": "\u2615 Search Naver Cafe articles for community discussions and specialized content. Find niche communities, hobby groups, and specialized discussions on various topics. For recent discussions or current community topics, use get_current_korean_time first. (\ub124\uc774\ubc84 \uce74\ud398\uae00 \uac80\uc0c9 - \ucee4\ubba4\ub2c8\ud2f0 \ud1a0\ub860\uacfc \uc804\ubb38 \uc815\ubcf4, \ucd5c\uadfc \ub17c\uc758\ub098 \ud604\uc7ac \ucee4\ubba4\ub2c8\ud2f0 \uc8fc\uc81c\ub97c \ucc3e\uc744 \ub54c\ub294 \uba3c\uc800 get_current_korean_time\uc73c\ub85c \ud604\uc7ac \uc2dc\uac04\uc744 \ud655\uc778\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "sim",
+              "date"
+            ],
+            "type": "string",
+            "description": "\uc815\ub82c \ubc29\uc2dd (sim: \uc720\uc0ac\ub3c4, date: \ub0a0\uc9dc\uc21c)"
+          },
+          "query": {
+            "type": "string",
+            "description": "\uac80\uc0c9\uc5b4"
+          },
+          "start": {
+            "type": "number",
+            "description": "\uac80\uc0c9 \uc2dc\uc791 \uc704\uce58 (\uae30\ubcf8 1)"
+          },
+          "display": {
+            "type": "number",
+            "description": "\ud55c \ubc88\uc5d0 \uac00\uc838\uc62c \uacb0\uacfc \uc218 (\uae30\ubcf8 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "datalab_search",
+      "description": "\ud83d\udcca Analyze search keyword trends over time using Naver DataLab. Track popularity changes, seasonal patterns, and compare multiple keywords. Perfect for market research and trend analysis. For current trend analysis or 'recent trends', use get_current_korean_time to determine proper date ranges. (\ub124\uc774\ubc84 \ub370\uc774\ud130\ub7a9 \uac80\uc0c9\uc5b4 \ud2b8\ub80c\ub4dc \ubd84\uc11d, \ud604\uc7ac \ud2b8\ub80c\ub4dc\ub098 \ucd5c\uadfc \ub3d9\ud5a5 \ubd84\uc11d \uc2dc get_current_korean_time\uc73c\ub85c \uc801\uc808\ud55c \ub0a0\uc9dc \ubc94\uc704\ub97c \uc124\uc815\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "startDate",
+          "endDate",
+          "timeUnit",
+          "keywordGroups"
+        ],
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "timeUnit": {
+            "enum": [
+              "date",
+              "week",
+              "month"
+            ],
+            "type": "string",
+            "description": "Time unit"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          },
+          "keywordGroups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "groupName",
+                "keywords"
+              ],
+              "properties": {
+                "keywords": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of keywords"
+                },
+                "groupName": {
+                  "type": "string",
+                  "description": "Group name"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Keyword groups"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "datalab_shopping_category",
+      "description": "\ud83d\udecd\ufe0f STEP 2: Analyze shopping category trends over time. Use find_category first to get category codes. BUSINESS CASES: Market size analysis, seasonal trend identification, category performance comparison. EXAMPLE: Compare '\ud328\uc158\uc758\ub958' vs '\ud654\uc7a5\ud488' trends over 6 months. For current period analysis, use get_current_korean_time to set proper date ranges. (\ub124\uc774\ubc84 \uc1fc\ud551 \uce74\ud14c\uace0\ub9ac\ubcc4 \ud2b8\ub80c\ub4dc \ubd84\uc11d - \uba3c\uc800 find_category \ub3c4\uad6c\ub85c \uce74\ud14c\uace0\ub9ac \ucf54\ub4dc\ub97c \ucc3e\uace0, \ud604\uc7ac \uae30\uac04 \ubd84\uc11d\uc2dc get_current_korean_time\uc73c\ub85c \uc801\uc808\ud55c \ub0a0\uc9dc \ubc94\uc704 \uc124\uc815)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "startDate",
+          "endDate",
+          "timeUnit",
+          "category"
+        ],
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "category": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "param"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Category name"
+                },
+                "param": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Category codes"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of category name and code pairs"
+          },
+          "timeUnit": {
+            "enum": [
+              "date",
+              "week",
+              "month"
+            ],
+            "type": "string",
+            "description": "Time unit"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "datalab_shopping_by_device",
+      "description": "\ud83d\udcf1 Analyze shopping trends by device (PC vs Mobile). Use find_category first. BUSINESS CASES: Mobile commerce strategy, responsive design priority, device-specific campaigns. EXAMPLE: 'PC \uc0ac\uc6a9\uc790\uac00 \ub354 \ub9ce\uc774 \uad6c\ub9e4\ud558\ub294 \uce74\ud14c\uace0\ub9ac\ub294?' For current device trends, use get_current_korean_time to set proper analysis period. (\uae30\uae30\ubcc4 \uc1fc\ud551 \ud2b8\ub80c\ub4dc \ubd84\uc11d - \uba3c\uc800 find_category \ub3c4\uad6c\ub85c \uce74\ud14c\uace0\ub9ac \ucf54\ub4dc\ub97c \ucc3e\uace0, \ud604\uc7ac \uae30\uae30 \ud2b8\ub80c\ub4dc \ubd84\uc11d\uc2dc get_current_korean_time\uc73c\ub85c \uc801\uc808\ud55c \ubd84\uc11d \uae30\uac04 \uc124\uc815)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "startDate",
+          "endDate",
+          "timeUnit",
+          "category",
+          "device"
+        ],
+        "properties": {
+          "device": {
+            "enum": [
+              "pc",
+              "mo"
+            ],
+            "type": "string",
+            "description": "Device type"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category code"
+          },
+          "timeUnit": {
+            "enum": [
+              "date",
+              "week",
+              "month"
+            ],
+            "type": "string",
+            "description": "Time unit"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "datalab_shopping_by_gender",
+      "description": "\ud83d\udc65 Analyze shopping trends by gender (Male vs Female). Use find_category first. BUSINESS CASES: Gender-targeted marketing, product positioning, demographic analysis. EXAMPLE: '\ud654\uc7a5\ud488 \uc1fc\ud551\uc5d0\uc11c \ub0a8\ub140 \ube44\uc728\uc740?' For current gender trends, use get_current_korean_time to set proper analysis period. (\uc131\ubcc4 \uc1fc\ud551 \ud2b8\ub80c\ub4dc \ubd84\uc11d - \uba3c\uc800 find_category \ub3c4\uad6c\ub85c \uce74\ud14c\uace0\ub9ac \ucf54\ub4dc\ub97c \ucc3e\uace0, \ud604\uc7ac \uc131\ubcc4 \ud2b8\ub80c\ub4dc \ubd84\uc11d\uc2dc get_current_korean_time\uc73c\ub85c \uc801\uc808\ud55c \ubd84\uc11d \uae30\uac04 \uc124\uc815)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "startDate",
+          "endDate",
+          "timeUnit",
+          "category",
+          "gender"
+        ],
+        "properties": {
+          "gender": {
+            "enum": [
+              "f",
+              "m"
+            ],
+            "type": "string",
+            "description": "Gender"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category code"
+          },
+          "timeUnit": {
+            "enum": [
+              "date",
+              "week",
+              "month"
+            ],
+            "type": "string",
+            "description": "Time unit"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "datalab_shopping_by_age",
+      "description": "\ud83d\udc76\ud83d\udc66\ud83d\udc68\ud83d\udc74 Analyze shopping trends by age groups (10s, 20s, 30s, 40s, 50s, 60s+). Use find_category first. BUSINESS CASES: Age-targeted products, generational preferences, lifecycle marketing. EXAMPLE: '\uac1c\ubc1c \ub3c4\uad6c\ub294 \uc5b4\ub290 \uc5f0\ub839\ub300\uac00 \ub9ce\uc774 \uad6c\ub9e4\ud558\ub098?' For current age trends, use get_current_korean_time to set proper analysis period. (\uc5f0\ub839\ubcc4 \uc1fc\ud551 \ud2b8\ub80c\ub4dc - \uba3c\uc800 find_category \ub3c4\uad6c\ub85c \uce74\ud14c\uace0\ub9ac \ucf54\ub4dc\ub97c \ucc3e\uace0, \ud604\uc7ac \uc5f0\ub839 \ud2b8\ub80c\ub4dc \ubd84\uc11d\uc2dc get_current_korean_time\uc73c\ub85c \uc801\uc808\ud55c \ubd84\uc11d \uae30\uac04 \uc124\uc815)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "startDate",
+          "endDate",
+          "timeUnit",
+          "category",
+          "ages"
+        ],
+        "properties": {
+          "ages": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "10",
+                "20",
+                "30",
+                "40",
+                "50",
+                "60"
+              ],
+              "type": "string"
+            },
+            "description": "Age groups"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category code"
+          },
+          "timeUnit": {
+            "enum": [
+              "date",
+              "week",
+              "month"
+            ],
+            "type": "string",
+            "description": "Time unit"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "datalab_shopping_keywords",
+      "description": "\ud83d\udd0d Compare specific keywords within a shopping category. Use find_category first. BUSINESS CASES: Product keyword optimization, competitor analysis, search trend identification. EXAMPLE: Within '\ud328\uc158' category, compare '\uc6d0\ud53c\uc2a4' vs '\uc790\ucf13' vs '\ub4dc\ub808\uc2a4' trends. For current keyword trends, use get_current_korean_time to set proper analysis period. (\uce74\ud14c\uace0\ub9ac \ub0b4 \ud0a4\uc6cc\ub4dc \ube44\uad50 - \uba3c\uc800 find_category \ub3c4\uad6c\ub85c \uce74\ud14c\uace0\ub9ac \ucf54\ub4dc\ub97c \ucc3e\uace0, \ud604\uc7ac \ud0a4\uc6cc\ub4dc \ud2b8\ub80c\ub4dc \ubd84\uc11d\uc2dc get_current_korean_time\uc73c\ub85c \uc801\uc808\ud55c \ubd84\uc11d \uae30\uac04 \uc124\uc815)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "startDate",
+          "endDate",
+          "timeUnit",
+          "category",
+          "keyword"
+        ],
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "keyword": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "param"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Keyword name"
+                },
+                "param": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Keyword values"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of keyword name and value pairs"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category code"
+          },
+          "timeUnit": {
+            "enum": [
+              "date",
+              "week",
+              "month"
+            ],
+            "type": "string",
+            "description": "Time unit"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "datalab_shopping_keyword_by_device",
+      "description": "\ud83d\udcf1\ud83d\udd0d Analyze keyword performance by device within shopping categories. Use find_category first to get category codes. Perfect for understanding mobile vs desktop shopping behavior for specific products. (\uc1fc\ud551 \ud0a4\uc6cc\ub4dc \uae30\uae30\ubcc4 \ud2b8\ub80c\ub4dc - \uba3c\uc800 find_category \ub3c4\uad6c\ub85c \uce74\ud14c\uace0\ub9ac \ucf54\ub4dc\ub97c \ucc3e\uc73c\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "startDate",
+          "endDate",
+          "timeUnit",
+          "category",
+          "keyword",
+          "device"
+        ],
+        "properties": {
+          "device": {
+            "enum": [
+              "pc",
+              "mo"
+            ],
+            "type": "string",
+            "description": "Device type"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "Search keyword"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category code"
+          },
+          "timeUnit": {
+            "enum": [
+              "date",
+              "week",
+              "month"
+            ],
+            "type": "string",
+            "description": "Time unit"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "datalab_shopping_keyword_by_gender",
+      "description": "\ud83d\udc65\ud83d\udd0d Analyze keyword performance by gender within shopping categories. Use find_category first to get category codes. Essential for gender-targeted marketing and product positioning strategies. (\uc1fc\ud551 \ud0a4\uc6cc\ub4dc \uc131\ubcc4 \ud2b8\ub80c\ub4dc - \uba3c\uc800 find_category \ub3c4\uad6c\ub85c \uce74\ud14c\uace0\ub9ac \ucf54\ub4dc\ub97c \ucc3e\uc73c\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "startDate",
+          "endDate",
+          "timeUnit",
+          "category",
+          "keyword",
+          "gender"
+        ],
+        "properties": {
+          "gender": {
+            "enum": [
+              "f",
+              "m"
+            ],
+            "type": "string",
+            "description": "Gender"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "Search keyword"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category code"
+          },
+          "timeUnit": {
+            "enum": [
+              "date",
+              "week",
+              "month"
+            ],
+            "type": "string",
+            "description": "Time unit"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "datalab_shopping_keyword_by_age",
+      "description": "\ud83d\udc76\ud83d\udc66\ud83d\udc68\ud83d\udc74\ud83d\udd0d Analyze keyword performance by age groups within shopping categories. Use find_category first to get category codes. Perfect for age-targeted marketing and understanding generational shopping preferences. (\uc1fc\ud551 \ud0a4\uc6cc\ub4dc \uc5f0\ub839\ubcc4 \ud2b8\ub80c\ub4dc - \uba3c\uc800 find_category \ub3c4\uad6c\ub85c \uce74\ud14c\uace0\ub9ac \ucf54\ub4dc\ub97c \ucc3e\uc73c\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "startDate",
+          "endDate",
+          "timeUnit",
+          "category",
+          "keyword",
+          "ages"
+        ],
+        "properties": {
+          "ages": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "10",
+                "20",
+                "30",
+                "40",
+                "50",
+                "60"
+              ],
+              "type": "string"
+            },
+            "description": "Age groups"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "Search keyword"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category code"
+          },
+          "timeUnit": {
+            "enum": [
+              "date",
+              "week",
+              "month"
+            ],
+            "type": "string",
+            "description": "Time unit"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_current_korean_time",
+      "description": "\ud83d\udd50 Get current Korean time (KST) with date and time information. Use this tool whenever you need to know 'today', 'now', 'current time', or any time-related queries. Essential for understanding what 'today' means in Korean context. Always use this tool when users mention 'today' or 'current' to provide accurate time context. (\ud604\uc7ac \ud55c\uad6d \uc2dc\uac04 \uc870\ud68c - '\uc624\ub298', '\ud604\uc7ac', '\uc9c0\uae08' \ub4f1\uc758 \uc2dc\uac04 \uc815\ubcf4\uac00 \ud544\uc694\ud560 \ub54c \ud56d\uc0c1 \uc0ac\uc6a9\ud558\uc138\uc694)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "find_category",
+      "description": "\ud83d\ude80 STEP 1: Find shopping categories with Korean search terms. Search in KOREAN (\ud328\uc158, \ud654\uc7a5\ud488, \uac00\uc804\uc81c\ud488, etc.) to find category codes needed for datalab tools. Smart fuzzy matching finds similar categories even with partial matches. (\uce74\ud14c\uace0\ub9ac \uac80\uc0c9: \ud55c\uad6d\uc5b4\ub85c \uac80\uc0c9\ud558\uc5ec \ub370\uc774\ud130\ub7a9 \ubd84\uc11d\uc5d0 \ud544\uc694\ud55c \uce74\ud14c\uace0\ub9ac \ucf54\ub4dc\ub97c \ucc3e\uc544\uc8fc\ub294 \ud544\uc218 \ub3c4\uad6c)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Korean category search query (\ud55c\uad6d\uc5b4 \uce74\ud14c\uace0\ub9ac \uac80\uc0c9\uc5b4, \uc608: '\ud328\uc158', '\ud654\uc7a5\ud488', '\uac00\uad6c', '\uc2a4\ub9c8\ud2b8\ud3f0'). Supports exact match and fuzzy search with level-based priority"
+          },
+          "max_results": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum number of results to return (\ubc18\ud658\ud560 \ucd5c\ub300 \uacb0\uacfc \uc218, \uae30\ubcf8\uac12: 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:50.249911+00:00",
+    "source": "smithery"
+  }
+}

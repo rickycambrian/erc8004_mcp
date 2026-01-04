@@ -1,0 +1,390 @@
+{
+  "qualifiedName": "@maxbeech/linkedin-mcp",
+  "displayName": "LinkedIn MCP",
+  "description": "Publish posts to LinkedIn with images and visibility controls. React to posts and add, edit, or delete comments to drive conversation. Retrieve content details to inform and track your interactions.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/57be910b-6d0f-44a1-835b-7fdf4ff8f69d.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@maxbeech/linkedin-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@maxbeech/linkedin-mcp/mcp",
+      "configSchema": {
+        "url": "https://linkedin-mcp-rho.vercel.app",
+        "name": "linkedin-mcp-server",
+        "type": "external",
+        "version": "1.0.0",
+        "transport": "shttp",
+        "capabilities": {
+          "tools": true,
+          "prompts": false,
+          "sampling": false,
+          "resources": false
+        },
+        "authentication": {
+          "type": "oauth2",
+          "scopes": [
+            "linkedin"
+          ],
+          "tokenUrl": "https://linkedin-mcp-rho.vercel.app/auth/callback",
+          "authorizationUrl": "https://linkedin-mcp-rho.vercel.app/auth/start"
+        }
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "linkedin.post.create",
+      "title": "Create LinkedIn Post",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a new post on LinkedIn with optional images and visibility settings",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text",
+          "apiVersion"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 3000,
+            "minLength": 1,
+            "description": "Post text content (max 3000 characters)"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "maxItems": 20,
+            "description": "Array of image URLs (max 20)"
+          },
+          "apiVersion": {
+            "type": "string",
+            "description": "LinkedIn API version"
+          },
+          "tokenStore": {
+            "description": "User token store"
+          },
+          "visibility": {
+            "enum": [
+              "PUBLIC",
+              "CONNECTIONS",
+              "LOGGED_IN"
+            ],
+            "type": "string",
+            "description": "Post visibility setting (default: PUBLIC)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urn",
+          "status"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "urn": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "linkedin.react",
+      "title": "React to LinkedIn Content",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Add a reaction to a LinkedIn post or comment",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urn",
+          "reactionType",
+          "apiVersion"
+        ],
+        "properties": {
+          "urn": {
+            "type": "string",
+            "description": "URN of the content to react to"
+          },
+          "apiVersion": {
+            "type": "string",
+            "description": "LinkedIn API version"
+          },
+          "tokenStore": {
+            "description": "User token store"
+          },
+          "reactionType": {
+            "enum": [
+              "LIKE",
+              "PRAISE",
+              "EMPATHY",
+              "INTEREST",
+              "APPRECIATION",
+              "ENTERTAINMENT"
+            ],
+            "type": "string",
+            "description": "Type of reaction"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "reactionUrn": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "linkedin.comment.create",
+      "title": "Create LinkedIn Comment",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Add a comment to a LinkedIn post",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "postUrn",
+          "text",
+          "apiVersion"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 1250,
+            "minLength": 1,
+            "description": "Comment text (max 1250 characters)"
+          },
+          "postUrn": {
+            "type": "string",
+            "description": "URN of the post to comment on"
+          },
+          "apiVersion": {
+            "type": "string",
+            "description": "LinkedIn API version"
+          },
+          "tokenStore": {
+            "description": "User token store"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "commentUrn",
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "commentUrn": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "linkedin.comment.edit",
+      "title": "Edit LinkedIn Comment",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Edit an existing LinkedIn comment",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "commentUrn",
+          "text",
+          "apiVersion"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 1250,
+            "minLength": 1,
+            "description": "New comment text (max 1250 characters)"
+          },
+          "apiVersion": {
+            "type": "string",
+            "description": "LinkedIn API version"
+          },
+          "commentUrn": {
+            "type": "string",
+            "description": "URN of the comment to edit"
+          },
+          "tokenStore": {
+            "description": "User token store"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "linkedin.comment.delete",
+      "title": "Delete LinkedIn Comment",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete a LinkedIn comment",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "commentUrn",
+          "apiVersion"
+        ],
+        "properties": {
+          "apiVersion": {
+            "type": "string",
+            "description": "LinkedIn API version"
+          },
+          "commentUrn": {
+            "type": "string",
+            "description": "URN of the comment to delete"
+          },
+          "tokenStore": {
+            "description": "User token store"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "linkedin.content.get",
+      "title": "Get LinkedIn Content",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Retrieve details of LinkedIn content by URN",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urns",
+          "apiVersion"
+        ],
+        "properties": {
+          "urns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "description": "Array of content URNs to retrieve (max 50)"
+          },
+          "apiVersion": {
+            "type": "string",
+            "description": "LinkedIn API version"
+          },
+          "tokenStore": {
+            "description": "User token store"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "content",
+          "count"
+        ],
+        "properties": {
+          "count": {
+            "type": "number"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:13:54.464023+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,337 @@
+{
+  "qualifiedName": "@hwruchan/smus",
+  "displayName": "SMU Campus Hub",
+  "description": "Find SMU cafeteria menus, campus notices, and exam details in seconds. Manage your schedule by adding or removing events with quick commands. Stay on track with local Korea time and streamlined campus searches.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@hwruchan/smus",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@hwruchan/smus/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "DB_PASSWORD"
+        ],
+        "properties": {
+          "DB_HOST": {
+            "type": "string",
+            "default": "oneteam-db.chigywqq0qt3.ap-northeast-2.rds.amazonaws.com",
+            "description": "MySQL database host"
+          },
+          "DB_NAME": {
+            "type": "string",
+            "default": "oneteam_DB",
+            "description": "MySQL database name"
+          },
+          "DB_PORT": {
+            "type": "string",
+            "default": "3306",
+            "description": "MySQL database port"
+          },
+          "DB_USER": {
+            "type": "string",
+            "default": "admin",
+            "description": "MySQL database user"
+          },
+          "DB_PASSWORD": {
+            "type": "string",
+            "description": "MySQL database password (required)"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "now_kr",
+      "description": "Return current date/time info in Asia/Seoul (KST, UTC+9).",
+      "inputSchema": {
+        "type": "object",
+        "title": "now_krArguments",
+        "properties": {}
+      }
+    },
+    {
+      "name": "query_smu_meals_by_date_category",
+      "description": "\n    YYYY-MM-DD \ub0a0\uc9dc\uc640 \uce74\ud14c\uace0\ub9ac\ub85c smu_meals\ub97c \uc870\ud68c\ud55c\ub2e4.\n    Args:\n        date_iso: '2025-08-27' \uac19\uc740 ISO \ub0a0\uc9dc \ubb38\uc790\uc5f4\n        category: 'breakfast' | 'lunch' | 'dinner'\n    Returns:\n        dict: \ub808\ucf54\ub4dc \ub9ac\uc2a4\ud2b8\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "query_smu_meals_by_date_categoryArguments",
+        "required": [
+          "date_iso"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "default": "lunch"
+          },
+          "date_iso": {
+            "type": "string",
+            "title": "Date Iso"
+          }
+        }
+      }
+    },
+    {
+      "name": "query_smu_meals_by_keyword",
+      "description": "\n    'meal' \ud14d\uc2a4\ud2b8 \ub4f1\uc5d0\uc11c \ud0a4\uc6cc\ub4dc \uac80\uc0c9 (\ubcf4\uc870 \uc6a9\ub3c4)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "query_smu_meals_by_keywordArguments",
+        "required": [
+          "keyword"
+        ],
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "title": "Keyword"
+          }
+        }
+      }
+    },
+    {
+      "name": "query_smu_notices_by_keyword",
+      "description": "\n    'smu_notices' \ud14c\uc774\ube14\uc5d0\uc11c 'title' \uceec\ub7fc\uc5d0 \ud2b9\uc815 \ud0a4\uc6cc\ub4dc\ub97c \ud3ec\ud568\ud558\ub294 \ud589\uc744 \uc870\ud68c\ud558\uc5ec \uacb0\uacfc\ub97c \ubc18\ud658\ud558\ub294 \ub3c4\uad6c.\n    \n    Args:\n        keyword (str): 'title' \uceec\ub7fc\uc5d0\uc11c \ucc3e\uc744 \ud0a4\uc6cc\ub4dc.\n        \n        dict: \ud0a4\uc6cc\ub4dc\uac00 \ud3ec\ud568\ub41c 'title' \uceec\ub7fc\uc744 \uac00\uc9c4 \ud589\ub4e4 \ubc18\ud658.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "query_smu_notices_by_keywordArguments",
+        "required": [
+          "keyword"
+        ],
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "title": "Keyword"
+          }
+        }
+      }
+    },
+    {
+      "name": "query_smu_exam",
+      "description": "\n    smu_exam \ud14c\uc774\ube14\uc5d0\uc11c subject_name, professor \uc870\uac74\uc744 \uc870\ud569\ud574 \uac80\uc0c9.\n    - professor \uc778\uc790\uac00 \uc8fc\uc5b4\uc9c0\uba74 AND \uc870\uac74\uc73c\ub85c subject_name + professor \uac80\uc0c9\n    - professor\uac00 \uc5c6\uc73c\uba74 subject_name\ub9cc \uac80\uc0c9\n    - \ubc18\ud658: list[dict]\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "query_smu_examArguments",
+        "required": [
+          "keyword"
+        ],
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "title": "Keyword"
+          },
+          "professor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Professor",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "query_smu_examOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "query_smu_schedule_by_keyword",
+      "description": "\n    'smu_schedule' \ud14c\uc774\ube14\uc5d0\uc11c 'content' \uceec\ub7fc\uc5d0 \ud2b9\uc815 \ud0a4\uc6cc\ub4dc\ub97c \ud3ec\ud568\ud558\ub294 \ud589\uc744 \uc870\ud68c\ud558\uc5ec \uacb0\uacfc\ub97c \ubc18\ud658\ud558\ub294 \ub3c4\uad6c.\n    type\uc5d0 \ub530\ub77c \ud544\ud130\ub9c1: 'common'\uc740 \ubaa8\ub4e0 \uc0ac\uc6a9\uc790\uc5d0\uac8c, 'personal'\uc740 \ud574\ub2f9 user_id\uc5d0\uac8c\ub9cc \uc81c\uacf5.\n    \n    Args:\n        keyword (str): 'content' \uceec\ub7fc\uc5d0\uc11c \ucc3e\uc744 \ud0a4\uc6cc\ub4dc.\n        user_id (str, optional): student ID (\ud559\ubc88). \uc81c\uacf5\ub418\uba74 \ud574\ub2f9 \uc0ac\uc6a9\uc790\uc758 \uac1c\uc778 \uc77c\uc815\ub3c4 \ud3ec\ud568.\n        \n    Returns:\n        list[dict]: \ud0a4\uc6cc\ub4dc\uac00 \ud3ec\ud568\ub41c \uc77c\uc815\ub4e4 (type='common' + user_id\uac00 \uc77c\uce58\ud558\ub294 type='personal')\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "query_smu_schedule_by_keywordArguments",
+        "required": [
+          "keyword"
+        ],
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "title": "Keyword"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "query_smu_schedule_by_keywordOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "query_smu_schedule_by_date",
+      "description": "\n    'smu_schedule' \ud14c\uc774\ube14\uc5d0\uc11c \ub0a0\uc9dc\ub97c \ud0a4\uc6cc\ub4dc\ub85c \ucc3e\uc544 \ud574\ub2f9\ud558\ub294 content\ub97c \ubc18\ud658\ud558\ub294 \ub3c4\uad6c.\n    start_date \ub610\ub294 end_date \uceec\ub7fc\uc5d0\uc11c \ub0a0\uc9dc\ub97c \uac80\uc0c9\ud558\uc5ec \uc77c\uce58\ud558\ub294 \uc2a4\ucf00\uc904\uc758 content\ub97c \ubc18\ud658\ud569\ub2c8\ub2e4.\n    type\uc5d0 \ub530\ub77c \ud544\ud130\ub9c1: 'common'\uc740 \ubaa8\ub4e0 \uc0ac\uc6a9\uc790\uc5d0\uac8c, 'personal'\uc740 \ud574\ub2f9 user_id\uc5d0\uac8c\ub9cc \uc81c\uacf5.\n    \n    Args:\n        date_keyword (str): \uac80\uc0c9\ud560 \ub0a0\uc9dc \ud0a4\uc6cc\ub4dc (\uc608: '2025-10-21', '10-21', '10\uc6d4 21\uc77c' \ub4f1)\n        user_id (str, optional): student ID (\ud559\ubc88). \uc81c\uacf5\ub418\uba74 \ud574\ub2f9 \uc0ac\uc6a9\uc790\uc758 \uac1c\uc778 \uc77c\uc815\ub3c4 \ud3ec\ud568.\n        \n    Returns:\n        list[dict]: \ub0a0\uc9dc\uc640 \uc77c\uce58\ud558\ub294 \uc2a4\ucf00\uc904\ub4e4 (type='common' + user_id\uac00 \uc77c\uce58\ud558\ub294 type='personal')\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "query_smu_schedule_by_dateArguments",
+        "required": [
+          "date_keyword"
+        ],
+        "properties": {
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "default": null
+          },
+          "date_keyword": {
+            "type": "string",
+            "title": "Date Keyword"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "query_smu_schedule_by_dateOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "query_special_keywords",
+      "description": "\n    \ud2b9\uc815 \ud0a4\uc6cc\ub4dc\uc5d0 \ub300\ud574 \ubbf8\ub9ac \uc815\uc758\ub41c \uc751\ub2f5\uc744 \ubc18\ud658\ud558\ub294 \ub3c4\uad6c.\n    \n    Args:\n        keyword (str): \uc0ac\uc6a9\uc790\uac00 \uc785\ub825\ud55c \ud0a4\uc6cc\ub4dc.\n    \n    Returns:\n        dict: \ubbf8\ub9ac \uc815\uc758\ub41c \uc751\ub2f5.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "query_special_keywordsArguments",
+        "required": [
+          "keyword"
+        ],
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "title": "Keyword"
+          }
+        }
+      }
+    },
+    {
+      "name": "add_smu_schedule_structured",
+      "description": "\n    Insert a schedule row into `smu_schedule` with structured inputs.\n\n    Args:\n        start_datetime (str): e.g., '2025-10-21', '2025-10-21 13:30', or ISO-like.\n        content (str): schedule text/content.\n        user_id (str): student ID (\ud559\ubc88). Required parameter.\n        end_datetime (str, optional): same formats as start. If omitted, equals start.\n\n    Returns:\n        dict: { ok, id, start_date_iso, end_date_iso, content, type, user_id, created_at_iso }\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "add_smu_schedule_structuredArguments",
+        "required": [
+          "start_datetime",
+          "content",
+          "user_id"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "end_datetime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Datetime",
+            "default": null
+          },
+          "start_datetime": {
+            "type": "string",
+            "title": "Start Datetime"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_smu_schedule_by_content",
+      "description": "\n    \ub0b4\uc6a9 \ud0a4\uc6cc\ub4dc\ub85c \uac1c\uc778 \uc77c\uc815\uc744 \uc0ad\uc81c\ud558\ub294 \ub3c4\uad6c. (type='personal'\uc778 \uc77c\uc815\ub9cc \uc0ad\uc81c \uac00\ub2a5)\n    \n    Args:\n        content_keyword (str): \uc0ad\uc81c\ud560 \uc77c\uc815\uc758 \ub0b4\uc6a9\uc5d0 \ud3ec\ud568\ub41c \ud0a4\uc6cc\ub4dc\n        user_id (str): student ID (\ud559\ubc88). \ud574\ub2f9 \uc0ac\uc6a9\uc790\uc758 \uac1c\uc778 \uc77c\uc815\ub9cc \uc0ad\uc81c \uac00\ub2a5\n        \n    Returns:\n        dict: { ok, deleted_count, deleted_ids, message }\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "delete_smu_schedule_by_contentArguments",
+        "required": [
+          "content_keyword",
+          "user_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "content_keyword": {
+            "type": "string",
+            "title": "Content Keyword"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:16:19.584019+00:00",
+    "source": "smithery"
+  }
+}

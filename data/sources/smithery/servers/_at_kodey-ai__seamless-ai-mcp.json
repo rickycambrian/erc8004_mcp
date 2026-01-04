@@ -1,0 +1,592 @@
+{
+  "qualifiedName": "@kodey-ai/seamless-ai-mcp",
+  "displayName": "Seamless Prospecting",
+  "description": "Find and enrich B2B contacts and companies for prospecting and outreach. Uncover verified emails, phone numbers, and firmographic insights. Review your organization's saved leads and track research progress and credit usage.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@kodey-ai/seamless-ai-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@kodey-ai/seamless-ai-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Your Seamless.AI API key"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-mcp-version": "1.0",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_contacts",
+      "description": "Search for contacts with advanced filtering options including company, location, job title, seniority, and job changes",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Number of results per page (default: 50, max: 50)"
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Seamless.AI API key. If not provided, will use environment variable or MCP config"
+          },
+          "fullname": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Full names to search for (max 10)"
+          },
+          "industry": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Industries to search in (max 5)"
+          },
+          "jobTitle": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Job titles to search for (max 10)"
+          },
+          "nextToken": {
+            "type": "string",
+            "description": "Token for pagination"
+          },
+          "seniority": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "C-Level",
+                "VP",
+                "Director",
+                "Manager",
+                "Senior",
+                "Entry Level",
+                "Mid-Level",
+                "Other"
+              ],
+              "type": "string"
+            },
+            "description": "Seniority levels to search for (max 5)"
+          },
+          "department": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "Sales",
+                "Marketing",
+                "Engineering",
+                "Human Resources",
+                "Finance",
+                "IT",
+                "Operations",
+                "Support",
+                "Legal",
+                "Project Management",
+                "Other"
+              ],
+              "type": "string"
+            },
+            "description": "Departments to search in (max 5)"
+          },
+          "companyName": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Company names to search for (max 100)"
+          },
+          "contactState": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "States to search in (max 10)"
+          },
+          "locationType": {
+            "enum": [
+              "bothOR",
+              "bothAND",
+              "company",
+              "contact"
+            ],
+            "type": "string",
+            "description": "Location search type"
+          },
+          "companyDomain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Company domains to search for (max 100)"
+          },
+          "jobChangeType": {
+            "enum": [
+              "New Company",
+              "New Title",
+              "New Company and Job Title"
+            ],
+            "type": "string",
+            "description": "Type of job change to search for (requires Job Changes license)"
+          },
+          "contactCountry": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Countries to search in (max 10)"
+          },
+          "contactKeyword": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keywords to search for in contacts (max 10)"
+          },
+          "contactZipCode": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Zip codes to search in (max 10)"
+          },
+          "companyFoundedOn": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "0-1",
+                "1-3",
+                "4-10",
+                "10+"
+              ],
+              "type": "string"
+            },
+            "description": "Years since company was founded"
+          },
+          "jobChangeDayRange": {
+            "enum": [
+              "Last 30 Days",
+              "Last 90 Days",
+              "Last 150 Days",
+              "Last 365 Days"
+            ],
+            "type": "string",
+            "description": "Time range for job changes (requires Job Changes license)"
+          },
+          "companyNameSearchType": {
+            "enum": [
+              "default",
+              "related",
+              "exact"
+            ],
+            "type": "string",
+            "description": "Type of company name search"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_companies",
+      "description": "Search for companies with filters including name, location, size, revenue, technologies, and founding date",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Number of results per page (default: 50, max: 50)"
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Seamless.AI API key. If not provided, will use environment variable or MCP config"
+          },
+          "industry": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Industries to search in (max 5)"
+          },
+          "foundedOn": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "0-1",
+                "1-3",
+                "4-10",
+                "10+"
+              ],
+              "type": "string"
+            },
+            "description": "Years since company was founded"
+          },
+          "nextToken": {
+            "type": "string",
+            "description": "Token for pagination"
+          },
+          "companyName": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Company names to search for (max 100)"
+          },
+          "companySize": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "0 - 1 (Self-employed)",
+                "2 - 10",
+                "11 - 50",
+                "51 - 200",
+                "201 - 500",
+                "501 - 1,000",
+                "1,001 - 5,000",
+                "5,001 - 10,000",
+                "10,001+"
+              ],
+              "type": "string"
+            },
+            "description": "Company size ranges (max 10)"
+          },
+          "companyState": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "States to search in (max 10)"
+          },
+          "technologies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Technologies used by companies (max 10)"
+          },
+          "companyDomain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Company domains to search for (max 100)"
+          },
+          "companyStreet": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Street addresses to search for (max 10)"
+          },
+          "companyCountry": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Countries to search in (max 10)"
+          },
+          "companyKeyword": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keywords to search for in companies (max 10)"
+          },
+          "companyRevenue": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "$0 - $100K",
+                "$100K - $1M",
+                "$1M - $5M",
+                "$5M - $20M",
+                "$20M - $50M",
+                "$50M - $100M",
+                "$100M - $500M",
+                "$500M - $1B",
+                "$1B+"
+              ],
+              "type": "string"
+            },
+            "description": "Company revenue ranges (max 10)"
+          },
+          "companyZipCode": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Zip codes to search in (max 10)"
+          },
+          "companyNameSearchType": {
+            "enum": [
+              "default",
+              "related",
+              "exact"
+            ],
+            "type": "string",
+            "description": "Type of company name search"
+          }
+        }
+      }
+    },
+    {
+      "name": "research_contacts",
+      "description": "Research/enrich contact information. Can use search result IDs or provide partial contact info for enrichment",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Seamless.AI API key. If not provided, will use environment variable or MCP config"
+          },
+          "contacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "description": "Email address"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Job title (for job change research)"
+                },
+                "domain": {
+                  "type": "string",
+                  "description": "Company domain"
+                },
+                "companyName": {
+                  "type": "string",
+                  "description": "Company name"
+                },
+                "contactName": {
+                  "type": "string",
+                  "description": "Contact name"
+                },
+                "liProfileUrl": {
+                  "type": "string",
+                  "description": "LinkedIn profile URL"
+                },
+                "liSalesNavUrl": {
+                  "type": "string",
+                  "description": "LinkedIn Sales Navigator URL"
+                },
+                "liRecruiterUrl": {
+                  "type": "string",
+                  "description": "LinkedIn Recruiter URL"
+                }
+              }
+            },
+            "description": "Contacts to enrich with partial information (max 100)"
+          },
+          "isJobChange": {
+            "type": "boolean",
+            "description": "Set to true for job change research"
+          },
+          "maxWaitTime": {
+            "type": "number",
+            "description": "Maximum time to wait for results in milliseconds (default: 120000)"
+          },
+          "waitForResults": {
+            "type": "boolean",
+            "description": "Wait for research to complete before returning (default: false)"
+          },
+          "searchResultIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Search result IDs from contact search (max 100)"
+          }
+        }
+      }
+    },
+    {
+      "name": "research_companies",
+      "description": "Research/enrich company information. Can use search result IDs or provide partial company info",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Seamless.AI API key. If not provided, will use environment variable or MCP config"
+          },
+          "companies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "type": "string",
+                  "description": "Company domain"
+                },
+                "companyName": {
+                  "type": "string",
+                  "description": "Company name"
+                }
+              }
+            },
+            "description": "Companies to enrich with partial information (max 100)"
+          },
+          "maxWaitTime": {
+            "type": "number",
+            "description": "Maximum time to wait for results in milliseconds (default: 120000)"
+          },
+          "waitForResults": {
+            "type": "boolean",
+            "description": "Wait for research to complete before returning (default: false)"
+          },
+          "searchResultIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Search result IDs from company search (max 100)"
+          }
+        }
+      }
+    },
+    {
+      "name": "poll_contact_research",
+      "description": "Poll the status and results of contact research requests",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "requestIds"
+        ],
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Seamless.AI API key. If not provided, will use environment variable or MCP config"
+          },
+          "requestIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Request IDs to poll (max 100)"
+          }
+        }
+      }
+    },
+    {
+      "name": "poll_company_research",
+      "description": "Poll the status and results of company research requests",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "requestIds"
+        ],
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Seamless.AI API key. If not provided, will use environment variable or MCP config"
+          },
+          "requestIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Request IDs to poll (max 100)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_org_contacts",
+      "description": "Get contacts from your organization within a date range",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number (default: 1)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Results per page (default: 500, max: 500)"
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Seamless.AI API key. If not provided, will use environment variable or MCP config"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "ISO8601 date string for end of range (e.g., 2024-01-31T23:59:59Z)"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "ISO8601 date string for start of range (e.g., 2024-01-01T00:00:00Z)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_org_companies",
+      "description": "Get companies from your organization within a date range",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number (default: 1)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Results per page (default: 500, max: 500)"
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Seamless.AI API key. If not provided, will use environment variable or MCP config"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "ISO8601 date string for end of range (e.g., 2024-01-31T23:59:59Z)"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "ISO8601 date string for start of range (e.g., 2024-01-01T00:00:00Z)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_rate_limit_info",
+      "description": "Get current rate limit and credit information",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Seamless.AI API key. If not provided, will use environment variable or MCP config"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:17:29.968789+00:00",
+    "source": "smithery"
+  }
+}

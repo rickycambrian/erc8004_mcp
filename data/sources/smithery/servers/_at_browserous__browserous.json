@@ -1,0 +1,797 @@
+{
+  "qualifiedName": "@browserous/browserous",
+  "displayName": "Browserous - Instant Browser for Your Agent",
+  "description": "Zero-configuration on-demand cloud browser for your agent. Navigate web pages, fill forms, and capture screenshots effortlessly with pay-as-you-go pricing at just $0.10 per hour. Exposes Chrome Devtools MCP interface.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/6a550ddf-f106-47bd-9667-ebf174cf1e73.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@browserous/browserous",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@browserous/browserous/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "Browserous MCP Session Configuration",
+        "required": [
+          "brApiKey"
+        ],
+        "properties": {
+          "brApiKey": {
+            "type": "string",
+            "pattern": "^bmc_[a-f0-9]{64}$",
+            "description": "API key for authentication (format: bmc_...)",
+            "x-sensitive": true
+          }
+        },
+        "description": "Configuration parameters for connecting to Browserous - a browser MCP server for AI agents",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "click",
+      "annotations": {
+        "category": "input",
+        "readOnlyHint": false
+      },
+      "description": "Clicks on the provided element",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "uid"
+        ],
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "The uid of an element on the page from the page content snapshot"
+          },
+          "dblClick": {
+            "type": "boolean",
+            "description": "Set to true for double clicks. Default is false."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "close_page",
+      "annotations": {
+        "category": "navigation",
+        "readOnlyHint": false
+      },
+      "description": "Closes the page by its index. The last open page cannot be closed.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pageIdx"
+        ],
+        "properties": {
+          "pageIdx": {
+            "type": "number",
+            "description": "The index of the page to close. Call list_pages to list pages."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "drag",
+      "annotations": {
+        "category": "input",
+        "readOnlyHint": false
+      },
+      "description": "Drag an element onto another element",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "from_uid",
+          "to_uid"
+        ],
+        "properties": {
+          "to_uid": {
+            "type": "string",
+            "description": "The uid of the element to drop into"
+          },
+          "from_uid": {
+            "type": "string",
+            "description": "The uid of the element to drag"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "emulate",
+      "annotations": {
+        "category": "emulation",
+        "readOnlyHint": false
+      },
+      "description": "Emulates various features on the selected page.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "cpuThrottlingRate": {
+            "type": "number",
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Represents the CPU slowdown factor. Set the rate to 1 to disable throttling. If omitted, throttling remains unchanged."
+          },
+          "networkConditions": {
+            "enum": [
+              "No emulation",
+              "Offline",
+              "Slow 3G",
+              "Fast 3G",
+              "Slow 4G",
+              "Fast 4G"
+            ],
+            "type": "string",
+            "description": "Throttle network. Set to \"No emulation\" to disable. If omitted, conditions remain unchanged."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "evaluate_script",
+      "annotations": {
+        "category": "debugging",
+        "readOnlyHint": false
+      },
+      "description": "Evaluate a JavaScript function inside the currently selected page. Returns the response as JSON\nso returned values have to JSON-serializable.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "function"
+        ],
+        "properties": {
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "uid"
+              ],
+              "properties": {
+                "uid": {
+                  "type": "string",
+                  "description": "The uid of an element on the page from the page content snapshot"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "An optional list of arguments to pass to the function."
+          },
+          "function": {
+            "type": "string",
+            "description": "A JavaScript function declaration to be executed by the tool in the currently selected page.\nExample without arguments: `() => {\n  return document.title\n}` or `async () => {\n  return await fetch(\"example.com\")\n}`.\nExample with arguments: `(el) => {\n  return el.innerText;\n}`\n"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "fill",
+      "annotations": {
+        "category": "input",
+        "readOnlyHint": false
+      },
+      "description": "Type text into a input, text area or select an option from a <select> element.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "uid",
+          "value"
+        ],
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "The uid of an element on the page from the page content snapshot"
+          },
+          "value": {
+            "type": "string",
+            "description": "The value to fill in"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "fill_form",
+      "annotations": {
+        "category": "input",
+        "readOnlyHint": false
+      },
+      "description": "Fill out multiple form elements at once",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "elements"
+        ],
+        "properties": {
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "uid",
+                "value"
+              ],
+              "properties": {
+                "uid": {
+                  "type": "string",
+                  "description": "The uid of the element to fill out"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the element"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Elements from snapshot to fill out."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_console_message",
+      "annotations": {
+        "category": "debugging",
+        "readOnlyHint": true
+      },
+      "description": "Gets a console message by its ID. You can get all messages by calling list_console_messages.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "msgid"
+        ],
+        "properties": {
+          "msgid": {
+            "type": "number",
+            "description": "The msgid of a console message on the page from the listed console messages"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_network_request",
+      "annotations": {
+        "category": "network",
+        "readOnlyHint": true
+      },
+      "description": "Gets a network request by an optional reqid, if omitted returns the currently selected request in the DevTools Network panel.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "reqid": {
+            "type": "number",
+            "description": "The reqid of the network request. If omitted returns the currently selected request in the DevTools Network panel."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "handle_dialog",
+      "annotations": {
+        "category": "input",
+        "readOnlyHint": false
+      },
+      "description": "If a browser dialog was opened, use this command to handle it",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "action": {
+            "enum": [
+              "accept",
+              "dismiss"
+            ],
+            "type": "string",
+            "description": "Whether to dismiss or accept the dialog"
+          },
+          "promptText": {
+            "type": "string",
+            "description": "Optional prompt text to enter into the dialog."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "hover",
+      "annotations": {
+        "category": "input",
+        "readOnlyHint": false
+      },
+      "description": "Hover over the provided element",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "uid"
+        ],
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "The uid of an element on the page from the page content snapshot"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_console_messages",
+      "annotations": {
+        "category": "debugging",
+        "readOnlyHint": true
+      },
+      "description": "List all console messages for the currently selected page since the last navigation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "types": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "log",
+                "debug",
+                "info",
+                "error",
+                "warn",
+                "dir",
+                "dirxml",
+                "table",
+                "trace",
+                "clear",
+                "startGroup",
+                "startGroupCollapsed",
+                "endGroup",
+                "assert",
+                "profile",
+                "profileEnd",
+                "count",
+                "timeEnd",
+                "verbose"
+              ],
+              "type": "string"
+            },
+            "description": "Filter messages to only return messages of the specified resource types. When omitted or empty, returns all messages."
+          },
+          "pageIdx": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Page number to return (0-based). When omitted, returns the first page."
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Maximum number of messages to return. When omitted, returns all requests.",
+            "exclusiveMinimum": 0
+          },
+          "includePreservedMessages": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set to true to return the preserved messages over the last 3 navigations."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_network_requests",
+      "annotations": {
+        "category": "network",
+        "readOnlyHint": true
+      },
+      "description": "List all requests for the currently selected page since the last navigation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "pageIdx": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Page number to return (0-based). When omitted, returns the first page."
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Maximum number of requests to return. When omitted, returns all requests.",
+            "exclusiveMinimum": 0
+          },
+          "resourceTypes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "document",
+                "stylesheet",
+                "image",
+                "media",
+                "font",
+                "script",
+                "texttrack",
+                "xhr",
+                "fetch",
+                "prefetch",
+                "eventsource",
+                "websocket",
+                "manifest",
+                "signedexchange",
+                "ping",
+                "cspviolationreport",
+                "preflight",
+                "fedcm",
+                "other"
+              ],
+              "type": "string"
+            },
+            "description": "Filter requests to only return requests of the specified resource types. When omitted or empty, returns all requests."
+          },
+          "includePreservedRequests": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set to true to return the preserved requests over the last 3 navigations."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_pages",
+      "annotations": {
+        "category": "navigation",
+        "readOnlyHint": true
+      },
+      "description": "Get a list of pages open in the browser.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "navigate_page",
+      "annotations": {
+        "category": "navigation",
+        "readOnlyHint": false
+      },
+      "description": "Navigates the currently selected page to a URL.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Target URL (only type=url)"
+          },
+          "type": {
+            "enum": [
+              "url",
+              "back",
+              "forward",
+              "reload"
+            ],
+            "type": "string",
+            "description": "Navigate the page by URL, back or forward in history, or reload."
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Maximum wait time in milliseconds. If set to 0, the default timeout will be used."
+          },
+          "ignoreCache": {
+            "type": "boolean",
+            "description": "Whether to ignore cache on reload."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "new_page",
+      "annotations": {
+        "category": "navigation",
+        "readOnlyHint": false
+      },
+      "description": "Creates a new page",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL to load in a new page."
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Maximum wait time in milliseconds. If set to 0, the default timeout will be used."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "performance_analyze_insight",
+      "annotations": {
+        "category": "performance",
+        "readOnlyHint": true
+      },
+      "description": "Provides more detailed information on a specific Performance Insight of an insight set that was highlighted in the results of a trace recording.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "insightSetId",
+          "insightName"
+        ],
+        "properties": {
+          "insightName": {
+            "type": "string",
+            "description": "The name of the Insight you want more information on. For example: \"DocumentLatency\" or \"LCPBreakdown\""
+          },
+          "insightSetId": {
+            "type": "string",
+            "description": "The id for the specific insight set. Only use the ids given in the \"Available insight sets\" list."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "performance_start_trace",
+      "annotations": {
+        "category": "performance",
+        "readOnlyHint": true
+      },
+      "description": "Starts a performance trace recording on the selected page. This can be used to look for performance problems and insights to improve the performance of the page. It will also report Core Web Vital (CWV) scores for the page.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "reload",
+          "autoStop"
+        ],
+        "properties": {
+          "reload": {
+            "type": "boolean",
+            "description": "Determines if, once tracing has started, the page should be automatically reloaded."
+          },
+          "autoStop": {
+            "type": "boolean",
+            "description": "Determines if the trace recording should be automatically stopped."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "performance_stop_trace",
+      "annotations": {
+        "category": "performance",
+        "readOnlyHint": true
+      },
+      "description": "Stops the active performance trace recording on the selected page.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "press_key",
+      "annotations": {
+        "category": "input",
+        "readOnlyHint": false
+      },
+      "description": "Press a key or key combination. Use this when other input methods like fill() cannot be used (e.g., keyboard shortcuts, navigation keys, or special key combinations).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "A key or a combination (e.g., \"Enter\", \"Control+A\", \"Control++\", \"Control+Shift+R\"). Modifiers: Control, Shift, Alt, Meta"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "resize_page",
+      "annotations": {
+        "category": "emulation",
+        "readOnlyHint": false
+      },
+      "description": "Resizes the selected page's window so that the page has specified dimension",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "width",
+          "height"
+        ],
+        "properties": {
+          "width": {
+            "type": "number",
+            "description": "Page width"
+          },
+          "height": {
+            "type": "number",
+            "description": "Page height"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "select_page",
+      "annotations": {
+        "category": "navigation",
+        "readOnlyHint": true
+      },
+      "description": "Select a page as a context for future tool calls.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pageIdx"
+        ],
+        "properties": {
+          "pageIdx": {
+            "type": "number",
+            "description": "The index of the page to select. Call list_pages to list pages."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "take_screenshot",
+      "annotations": {
+        "category": "debugging",
+        "readOnlyHint": false
+      },
+      "description": "Take a screenshot of the page or element.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "The uid of an element on the page from the page content snapshot. If omitted takes a pages screenshot."
+          },
+          "format": {
+            "enum": [
+              "png",
+              "jpeg",
+              "webp"
+            ],
+            "type": "string",
+            "default": "png",
+            "description": "Type of format to save the screenshot as. Default is \"png\""
+          },
+          "quality": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 0,
+            "description": "Compression quality for JPEG and WebP formats (0-100). Higher values mean better quality but larger file sizes. Ignored for PNG format."
+          },
+          "filePath": {
+            "type": "string",
+            "description": "The absolute path, or a path relative to the current working directory, to save the screenshot to instead of attaching it to the response."
+          },
+          "fullPage": {
+            "type": "boolean",
+            "description": "If set to true takes a screenshot of the full page instead of the currently visible viewport. Incompatible with uid."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "take_snapshot",
+      "annotations": {
+        "category": "debugging",
+        "readOnlyHint": false
+      },
+      "description": "Take a text snapshot of the currently selected page based on the a11y tree. The snapshot lists page elements along with a unique\nidentifier (uid). Always use the latest snapshot. Prefer taking a snapshot over taking a screenshot. The snapshot indicates the element selected\nin the DevTools Elements panel (if any).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "verbose": {
+            "type": "boolean",
+            "description": "Whether to include all possible information available in the full a11y tree. Default is false."
+          },
+          "filePath": {
+            "type": "string",
+            "description": "The absolute path, or a path relative to the current working directory, to save the snapshot to instead of attaching it to the response."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "upload_file",
+      "annotations": {
+        "category": "input",
+        "readOnlyHint": false
+      },
+      "description": "Upload a file through a provided element.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "uid",
+          "filePath"
+        ],
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "The uid of the file input element or an element that will open file chooser on the page from the page content snapshot"
+          },
+          "filePath": {
+            "type": "string",
+            "description": "The local path of the file to upload"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "wait_for",
+      "annotations": {
+        "category": "navigation",
+        "readOnlyHint": true
+      },
+      "description": "Wait for the specified text to appear on the selected page.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text to appear on the page"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Maximum wait time in milliseconds. If set to 0, the default timeout will be used."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:14:06.642652+00:00",
+    "source": "smithery"
+  }
+}

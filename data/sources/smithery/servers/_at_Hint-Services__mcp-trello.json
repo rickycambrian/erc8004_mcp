@@ -1,0 +1,355 @@
+{
+  "qualifiedName": "@Hint-Services/mcp-trello",
+  "displayName": "Trello",
+  "description": "Covers main interactions with Trello boards. Managing and moving cards, list interactions, and board activities.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/8bb1367f-db00-48ac-b0b1-6826102c2eae.jpeg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@Hint-Services/mcp-trello",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@Hint-Services/mcp-trello/mcp",
+      "configSchema": {
+        "type": "object",
+        "default": {},
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Trello token generated using your API key (falls back to TRELLO_TOKEN env var)"
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Trello API key from https://trello.com/app-key (falls back to TRELLO_API_KEY env var)"
+          },
+          "boardId": {
+            "type": "string",
+            "description": "ID of the Trello board to interact with (falls back to TRELLO_BOARD_ID env var). Optional for user-specific operations."
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": {
+    "scanPassed": true
+  },
+  "tools": [
+    {
+      "name": "getMyBoards",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get all boards for the authenticated user (useful for finding board IDs)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getCardsByList",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get cards by list ID",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "listId"
+        ],
+        "properties": {
+          "listId": {
+            "type": "string",
+            "description": "The ID of the Trello list to get cards from"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getLists",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get all lists from the configured board",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getRecentActivity",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get recent activity from the configured board",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of activity items to return (default: 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "addCard",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Add a new card to a list",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "listId",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name/title of the card"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of label IDs to add to the card"
+          },
+          "listId": {
+            "type": "string",
+            "description": "The ID of the list to add the card to"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "Due date in ISO 8601 format (e.g., 2024-12-31T23:59:59Z)"
+          },
+          "description": {
+            "type": "string",
+            "description": "The description/details of the card (optional)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "updateCard",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update an existing card",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "cardId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New name/title for the card"
+          },
+          "cardId": {
+            "type": "string",
+            "description": "The ID of the card to update"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of label IDs to set on the card"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "New due date in ISO 8601 format"
+          },
+          "position": {
+            "type": "string",
+            "description": "New position: 'top', 'bottom', or a positive number"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "New start date in ISO 8601 format"
+          },
+          "description": {
+            "type": "string",
+            "description": "New description/details for the card"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "moveCard",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Move a card to a different list",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "cardId",
+          "listId"
+        ],
+        "properties": {
+          "cardId": {
+            "type": "string",
+            "description": "The ID of the card to move"
+          },
+          "listId": {
+            "type": "string",
+            "description": "The ID of the destination list"
+          },
+          "boardId": {
+            "type": "string",
+            "description": "The ID of the destination board (if moving to a different board)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "changeCardMembers",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Change the members of a card",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "cardId",
+          "members"
+        ],
+        "properties": {
+          "cardId": {
+            "type": "string",
+            "description": "The ID of the card to modify"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of member IDs to assign to the card"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "archiveCard",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Archive a card",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "cardId"
+        ],
+        "properties": {
+          "cardId": {
+            "type": "string",
+            "description": "The ID of the card to archive"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "addList",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Add a new list to the configured board",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the new list"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "archiveList",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Archive a list",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "listId"
+        ],
+        "properties": {
+          "listId": {
+            "type": "string",
+            "description": "The ID of the list to archive"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getMyCards",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get cards assigned to the authenticated user",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:10:07.148546+00:00",
+    "source": "smithery"
+  }
+}

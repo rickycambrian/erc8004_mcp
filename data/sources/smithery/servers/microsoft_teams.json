@@ -1,0 +1,1596 @@
+{
+  "qualifiedName": "microsoft_teams",
+  "displayName": "Microsoft teams",
+  "description": "Microsoft Teams integrates chat, video meetings, and file storage within Microsoft 365, providing virtual collaboration and communication for distributed teams",
+  "iconUrl": "https://logos.composio.dev/api/microsoft_teams",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/microsoft_teams",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/microsoft_teams/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "MICROSOFT_TEAMS_ADD_MEMBER_TO_TEAM",
+      "description": "Tool to add a user to a Microsoft Teams team. Use when granting or updating membership for a user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddMemberToTeamRequest",
+        "required": [
+          "team_id",
+          "user_id"
+        ],
+        "properties": {
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "const": "owner",
+              "properties": {}
+            },
+            "title": "Roles",
+            "examples": [
+              [
+                "owner"
+              ]
+            ],
+            "description": "Roles to assign to the member. Only 'owner' is supported. Omit or leave empty to add as a standard member."
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "ee0f5ae2-8bc6-4ae5-8466-7daeebbfa062"
+            ],
+            "description": "The unique ID (GUID) of the Microsoft Team to which the member will be added."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "examples": [
+              "8b081ef6-4792-4def-b2c9-c363a1bf41d5",
+              "user@contoso.com"
+            ],
+            "description": "The user's Graph ID (GUID) or userPrincipalName (email) to add to the team."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_ARCHIVE_TEAM",
+      "description": "Tool to archive a Microsoft Teams team. Use after confirming the team ID; returns 202 if accepted.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ArchiveTeamRequest",
+        "required": [
+          "team_id"
+        ],
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+            ],
+            "description": "The Microsoft Teams team GUID to archive."
+          },
+          "should_set_spo_site_read_only_for_members": {
+            "type": "boolean",
+            "title": "Should Set Spo Site Read Only For Members",
+            "default": false,
+            "examples": [
+              true
+            ],
+            "description": "If true, sets the SharePoint site to read-only for team members when archiving."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_CHATS_GET_ALL_CHATS",
+      "description": "Retrieves all Microsoft Teams chats a specified user is part of, supporting filtering, property selection, and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAllChatsRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 50,
+            "maximum": 50,
+            "minimum": 1,
+            "examples": [
+              "25",
+              "50"
+            ],
+            "description": "The maximum number of chats to retrieve in a single API call, used for pagination. Default is 50. Microsoft Graph enforces a maximum limit of 50 per request."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": "",
+            "examples": [
+              "topic eq 'Engineering Team'",
+              "chatType eq 'oneOnOne' and contains(topic, 'Review')"
+            ],
+            "description": "An OData filter query string to apply to the chat list (e.g., \"topic eq 'Project Updates'\"). Do not include '$filter=' in the string. This enables retrieving chats that match specific criteria."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": [],
+            "examples": [
+              [
+                "id",
+                "topic",
+                "lastMessagePreview"
+              ],
+              [
+                "webUrl",
+                "chatType"
+              ]
+            ],
+            "description": "A list of specific Microsoft Graph chat resource properties to retrieve (e.g., 'id', 'topic'). If omitted or empty, a default set of properties is returned. Each string in the list should be a valid property name."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "The ID or user principal name (UPN) of the user whose chats are to be retrieved. Use 'me' to specify the currently authenticated user."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_CHATS_GET_ALL_MESSAGES",
+      "description": "Retrieves all messages from a specified Microsoft Teams chat using the Microsoft Graph API, automatically handling pagination; ensure `chat_id` is valid and OData expressions in `filter` or `select` are correct.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAllMessagesRequest",
+        "required": [
+          "chat_id"
+        ],
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 50,
+            "maximum": 50,
+            "minimum": 1,
+            "examples": [
+              "50"
+            ],
+            "description": "Maximum number of messages to retrieve per page. Used for pagination. Microsoft Graph enforces a maximum limit of 50 per request."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": "",
+            "examples": [
+              "from/emailAddress/address eq 'user@example.com'"
+            ],
+            "description": "OData v4.0 filter query string for messages. If empty, no filtering is applied."
+          },
+          "chat_id": {
+            "type": "string",
+            "title": "Chat Id",
+            "examples": [
+              "chat-id-123"
+            ],
+            "description": "Unique identifier of the Microsoft Teams chat."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_CREATE_MEETING",
+      "description": "Use to schedule a new standalone Microsoft Teams online meeting, i.e., one not linked to any calendar event.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateMeetingRequest",
+        "required": [
+          "start_date_time",
+          "end_date_time",
+          "subject"
+        ],
+        "properties": {
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "examples": [
+              "Project Sync-Up"
+            ],
+            "description": "The subject or title for the online meeting."
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "OnlineMeetingParticipant",
+              "required": [
+                "user_id"
+              ],
+              "properties": {
+                "role": {
+                  "enum": [
+                    "attendee",
+                    "presenter",
+                    "coorganizer"
+                  ],
+                  "type": "string",
+                  "title": "Role",
+                  "default": "attendee",
+                  "description": "Specifies the role of the participant in the meeting. Defaults to 'attendee'. Allowed values are 'attendee', 'presenter', or 'coorganizer'."
+                },
+                "user_id": {
+                  "type": "string",
+                  "title": "User Id",
+                  "description": "The unique identifier (GUID) of the Microsoft Teams user to be added as a participant."
+                }
+              },
+              "description": "Specifies a participant's identity (user ID) and role for a Microsoft Teams online meeting."
+            },
+            "title": "Participants",
+            "default": null,
+            "nullable": true,
+            "description": "An optional list of participants to invite to the meeting. Each participant is defined by their user ID and role."
+          },
+          "end_date_time": {
+            "type": "string",
+            "title": "End Date Time",
+            "format": "date-time",
+            "examples": [
+              "2024-08-15T11:00:00Z"
+            ],
+            "description": "The end date and time of the meeting, specified in ISO 8601 format (e.g., '2024-08-15T11:00:00Z'). Must be after start_date_time."
+          },
+          "start_date_time": {
+            "type": "string",
+            "title": "Start Date Time",
+            "format": "date-time",
+            "examples": [
+              "2024-08-15T10:00:00Z"
+            ],
+            "description": "The start date and time of the meeting, specified in ISO 8601 format (e.g., '2024-08-15T10:00:00Z')."
+          },
+          "is_passcode_required": {
+            "type": "boolean",
+            "title": "Is Passcode Required",
+            "default": null,
+            "nullable": true,
+            "description": "An optional boolean indicating whether a passcode should be required to join this meeting. If not specified, the organization's default policy applies."
+          }
+        },
+        "description": "Request schema for creating a new Microsoft Teams online meeting."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_CREATE_TEAM",
+      "description": "Tool to create a new Microsoft Teams team. Use when you need to provision a team with optional template, channels, and members.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateTeamRequest",
+        "required": [
+          "displayName"
+        ],
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "Member",
+              "required": [
+                "odata_type",
+                "roles",
+                "user_odata_bind"
+              ],
+              "properties": {
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "owner",
+                      "member"
+                    ],
+                    "type": "string",
+                    "properties": {}
+                  },
+                  "title": "Roles"
+                },
+                "odata_type": {
+                  "type": "string",
+                  "const": "#microsoft.graph.aadUserConversationMember",
+                  "title": "Odata Type",
+                  "description": "Resource type for conversation member; must be '#microsoft.graph.aadUserConversationMember'."
+                },
+                "user_odata_bind": {
+                  "type": "string",
+                  "title": "User Odata Bind",
+                  "description": "URL to the user resource, e.g. https://graph.microsoft.com/v1.0/users('{id}')."
+                }
+              },
+              "description": "Defines a conversation member to add to the new team."
+            },
+            "title": "Members",
+            "default": null,
+            "examples": [
+              [
+                {
+                  "roles": [
+                    "owner"
+                  ],
+                  "odata_type": "#microsoft.graph.aadUserConversationMember",
+                  "user_odata_bind": "https://graph.microsoft.com/v1.0/users('user-id')"
+                }
+              ]
+            ],
+            "nullable": true,
+            "description": "List of initial team members. At least one member with 'owner' role is recommended. If not provided, the authenticated user will be added as owner. Each member must specify '@odata.type', roles, and 'user@odata.bind'."
+          },
+          "visibility": {
+            "enum": [
+              "private",
+              "public"
+            ],
+            "type": "string",
+            "title": "Visibility",
+            "default": "public",
+            "examples": [
+              "private",
+              "public"
+            ],
+            "nullable": true,
+            "description": "Team visibility setting. 'private': Only owners can add members. 'public': Anyone in the organization can join. Default is 'public'."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "examples": [
+              "Team for Q4 planning",
+              "Customer support team for EMEA region"
+            ],
+            "nullable": true,
+            "description": "Brief description of the team's purpose. Maximum 1024 characters. Note: Known template IDs for team creation: 'standard' (default), 'educationClass', 'educationStaff', 'educationProfessionalLearningCommunity'."
+          },
+          "displayName": {
+            "type": "string",
+            "title": "Display Name",
+            "examples": [
+              "My Sample Team",
+              "Engineering Team",
+              "Marketing Department"
+            ],
+            "description": "Display name of the team as it will appear in Microsoft Teams. Must be unique within the organization."
+          },
+          "firstChannelName": {
+            "type": "string",
+            "title": "First Channel Name",
+            "default": null,
+            "nullable": true,
+            "description": "Name of the first channel created; defaults to 'General' if omitted."
+          },
+          "template_odata_bind": {
+            "type": "string",
+            "title": "Template Odata Bind",
+            "default": "https://graph.microsoft.com/v1.0/teamsTemplates('standard')",
+            "examples": [
+              "https://graph.microsoft.com/v1.0/teamsTemplates('standard')",
+              "https://graph.microsoft.com/v1.0/teamsTemplates('educationClass')"
+            ],
+            "nullable": true,
+            "description": "URL reference to the team template. Common templates: 'standard' (default), 'educationClass', 'educationStaff', 'educationProfessionalLearningCommunity'. Format: https://graph.microsoft.com/v1.0/teamsTemplates('template-id')"
+          }
+        },
+        "description": "Request payload to create a new Microsoft Teams team."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_DELETE_TEAM",
+      "description": "Tool to delete a Microsoft Teams team. Use after confirming the target team ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTeamRequest",
+        "required": [
+          "team_id"
+        ],
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b"
+            ],
+            "description": "The unique identifier (GUID) of the Microsoft Teams team to delete."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_GET_CHANNEL",
+      "description": "Tool to get a specific channel in a team. Use after obtaining valid team and channel IDs to fetch channel details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetChannelRequest",
+        "required": [
+          "team_id",
+          "channel_id"
+        ],
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "1234-5678-9012-3456"
+            ],
+            "description": "The unique identifier of the Microsoft Teams team."
+          },
+          "channel_id": {
+            "type": "string",
+            "title": "Channel Id",
+            "examples": [
+              "19:general@thread.v2"
+            ],
+            "description": "The unique identifier of the channel within the specified team."
+          }
+        },
+        "description": "Parameters for retrieving a specific channel in a team."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_GET_CHAT_MESSAGE",
+      "description": "Tool to get a specific chat message. Use after confirming chat_id and message_id.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetChatMessageRequest",
+        "required": [
+          "chat_id",
+          "message_id"
+        ],
+        "properties": {
+          "chat_id": {
+            "type": "string",
+            "title": "Chat Id",
+            "examples": [
+              "19:abc123def456ghi789@thread.v2"
+            ],
+            "description": "Unique identifier of the Microsoft Teams chat that contains the message."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "1598231234_42"
+            ],
+            "description": "Unique identifier of the chat message to retrieve."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_GET_TEAM",
+      "description": "Tool to get a specific team. Use when full details of one team by ID are needed.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTeamRequest",
+        "required": [
+          "team_id"
+        ],
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "GUID of the Microsoft Teams team to retrieve."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_LIST_MESSAGE_REPLIES",
+      "description": "Tool to list replies to a channel message. Use after obtaining team, channel, and message IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListMessageRepliesRequest",
+        "required": [
+          "team_id",
+          "channel_id",
+          "message_id"
+        ],
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 50,
+            "maximum": 50,
+            "minimum": 1,
+            "examples": [
+              10
+            ],
+            "description": "Maximum number of replies to return per page (1-50)."
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b"
+            ],
+            "description": "Unique identifier (GUID) of the Microsoft Teams team."
+          },
+          "channel_id": {
+            "type": "string",
+            "title": "Channel Id",
+            "examples": [
+              "19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2"
+            ],
+            "description": "Unique identifier of the channel within the team."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "1616989510408"
+            ],
+            "description": "Unique identifier of the channel message whose replies are to be listed."
+          }
+        },
+        "description": "Request schema for listing replies to a channel message."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_LIST_TEAM_MEMBERS",
+      "description": "Tool to list members of a Microsoft Teams team. Use when you need to retrieve the members of a specific team, for auditing or notifications.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTeamMembersRequest",
+        "required": [
+          "team_id"
+        ],
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "maximum": 999,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Optional maximum number of members to return (1\u2013999)."
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "GUID of the Microsoft Teams team to retrieve members from."
+          }
+        },
+        "description": "Request schema for listing members of a Microsoft Teams team."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_LIST_TEAMS_TEMPLATES",
+      "description": "Tool to list available Microsoft Teams templates. Use when retrieving templates for team creation or customization workflows.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTeamsTemplatesRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "maximum": 999,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Maximum number of templates to return (1\u2013999)."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              10
+            ],
+            "nullable": true,
+            "description": "Number of templates to skip for pagination."
+          },
+          "count": {
+            "type": "boolean",
+            "title": "Count",
+            "default": false,
+            "description": "If true, include a count of total matching templates in the response."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": "",
+            "examples": [
+              "startsWith(displayName,'Template')"
+            ],
+            "description": "OData filter expression to filter the templates (e.g., \"startsWith(displayName,'Template')\")."
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": "",
+            "examples": [
+              "id,displayName"
+            ],
+            "description": "Comma-separated template properties to include in the response (e.g., 'id,displayName,description'). If empty, default properties are returned."
+          },
+          "orderby": {
+            "type": "string",
+            "title": "Orderby",
+            "default": "",
+            "examples": [
+              "displayName desc"
+            ],
+            "description": "Comma-separated properties and directions to order the results by (e.g., 'displayName desc')."
+          }
+        },
+        "description": "Request schema for listing available Microsoft Teams templates using OData query parameters."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_LIST_USERS",
+      "description": "Tool to list all users in the organization. Use when you need to retrieve directory users with filtering, pagination, and field selection.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListUsersRequest",
+        "properties": {
+          "$top": {
+            "type": "integer",
+            "title": "$Top",
+            "default": null,
+            "maximum": 999,
+            "minimum": 1,
+            "examples": [
+              50,
+              200
+            ],
+            "nullable": true,
+            "description": "Maximum number of users to return per page (1-999)."
+          },
+          "$skip": {
+            "type": "integer",
+            "title": "$Skip",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0,
+              100
+            ],
+            "nullable": true,
+            "description": "Number of users to skip for pagination."
+          },
+          "$expand": {
+            "type": "string",
+            "title": "$Expand",
+            "default": null,
+            "examples": [
+              "manager"
+            ],
+            "nullable": true,
+            "description": "OData expand related entities (e.g., `manager`)."
+          },
+          "$filter": {
+            "type": "string",
+            "title": "$Filter",
+            "default": null,
+            "examples": [
+              "startswith(displayName,'John')"
+            ],
+            "nullable": true,
+            "description": "OData filter to refine results by property values (e.g., `startswith(displayName,'A')`)."
+          },
+          "$select": {
+            "type": "string",
+            "title": "$Select",
+            "default": null,
+            "examples": [
+              "id,displayName,mail"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of user properties to include (e.g., `id,displayName,mail`)."
+          },
+          "$orderby": {
+            "type": "string",
+            "title": "$Orderby",
+            "default": null,
+            "examples": [
+              "displayName asc",
+              "mail desc"
+            ],
+            "nullable": true,
+            "description": "OData orderby clause to sort results (e.g., `displayName desc`)."
+          },
+          "consistencyLevel": {
+            "type": "string",
+            "title": "Consistency Level",
+            "default": null,
+            "examples": [
+              "eventual"
+            ],
+            "nullable": true,
+            "description": "Set to 'eventual' when using advanced queries with $count."
+          }
+        },
+        "description": "Request schema for listing users in the organization via Microsoft Graph API."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_SEARCH_FILES",
+      "description": "Search files in Microsoft Teams using KQL syntax. Find files by name, type, content, author, and modification date across all Teams and channels. Supports boolean logic and date ranges. Examples: 'filetype:pdf AND lastmodifiedtime>=2024-10-01', 'contract AND budget', 'filename:report AND author:user@example.com'",
+      "inputSchema": {
+        "type": "object",
+        "title": "SearchTeamsFilesRequest",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "default": 25,
+            "description": "The maximum number of file results to return per page. Use with from_index for pagination."
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "examples": [
+              "contract",
+              "filetype:pdf AND lastmodifiedtime>=2024-10-01",
+              "(budget OR financial) AND filetype:xlsx",
+              "filename:report AND author:manager@example.com",
+              "lastmodifiedtime>today-30 AND filetype:docx"
+            ],
+            "description": "Search query for files in Teams. Supports keywords, filenames, and content search.\n\n**Basic Syntax:**\n- Keywords: 'budget contract'\n- Exact phrases: '\"project timeline\"'\n- Filenames: 'report.pdf' or 'filename:contract'\n- File types: 'filetype:pdf' or 'filetype:docx'\n- Boolean: 'contract AND budget' or 'report OR summary'\n\n**Property Filters:**\n- filename: File name - 'filename:contract'\n- filetype: File extension - 'filetype:pdf', 'filetype:docx', 'filetype:xlsx'\n- author: Creator - 'author:user@example.com'\n- lastmodifiedtime: Modified date - 'lastmodifiedtime>=2024-10-01'\n\n**Date Filters:**\n- Exact: 'lastmodifiedtime:2024-10-01'\n- Greater/equal: 'lastmodifiedtime>=2024-10-01'\n- Range: 'lastmodifiedtime:2024-10-01..2024-10-31'\n- Relative: 'lastmodifiedtime>today-30'\n\n**Complex Queries:**\n- 'contract AND filetype:pdf AND lastmodifiedtime>=2024-10-01'\n- '(budget OR financial) AND filetype:xlsx'\n- 'filename:report AND lastmodifiedtime>today-7'"
+          },
+          "from_index": {
+            "type": "integer",
+            "title": "From Index",
+            "default": 0,
+            "description": "The 0-based starting index for pagination. To paginate: check response['value'][0]['hitsContainers'][0]['moreResultsAvailable']. If true, call again with from_index += size (e.g., 0 \u2192 25 \u2192 50)."
+          },
+          "enable_top_results": {
+            "type": "boolean",
+            "title": "Enable Top Results",
+            "default": false,
+            "description": "If `true`, sorts results by relevance; otherwise, sorts by date modified in descending order (newest first)."
+          }
+        },
+        "description": "Searches files in Microsoft Teams using the Microsoft Search API."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_SEARCH_MESSAGES",
+      "description": "Search Microsoft Teams messages using powerful KQL syntax. Supports sender (from:), date filters (sent:), attachments, and boolean logic. Works across all Teams chats and channels the user has access to. Examples: 'from:user@example.com AND sent>=2024-10-01', 'punchlist OR termination', 'sent>today-30 AND hasattachment:yes'",
+      "inputSchema": {
+        "type": "object",
+        "title": "SearchTeamsMessagesRequest",
+        "properties": {
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "default": 25,
+            "description": "The maximum number of search results to return per page. Use with from_index for pagination."
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "default": "",
+            "examples": [
+              "project update",
+              "from:manager@example.com AND sent>=2024-10-01",
+              "(punchlist OR termination) AND sent:2024-10",
+              "sent>today-30 AND hasattachment:yes",
+              "contract AND sent:2024-10-01..2024-10-31"
+            ],
+            "description": "KQL (Keyword Query Language) search query string. Supports advanced syntax for precise searches.\n\n**Basic Syntax:**\n- Simple keywords: 'budget report'\n- Exact phrases: '\"quarterly review\"'\n- Boolean operators: 'urgent AND deadline' or 'invoice OR receipt'\n\n**Property Filters (prefix:value):**\n- from: Sender - 'from:user@example.com' or 'from:example.com'\n- sent: Date sent - 'sent:2024-10-01' or 'sent>=2024-10-01'\n- hasattachment: Has files - 'hasattachment:yes' or 'hasattachment:no'\n\n**Date Operators:**\n- Exact: 'sent:2024-10-01'\n- Greater/equal: 'sent>=2024-10-01'\n- Less/equal: 'sent<=2024-10-31'\n- Range: 'sent:2024-10-01..2024-10-31'\n- Relative: 'sent>today-7' (last 7 days)\n\n**Combining Filters:**\n- AND: 'from:user@example.com AND subject:budget'\n- OR: 'punchlist OR termination'\n- Complex: '(punchlist OR termination) AND sent>=2024-10-01'\n\nNote: Can be empty to return recent messages."
+          },
+          "from_index": {
+            "type": "integer",
+            "title": "From Index",
+            "default": 0,
+            "description": "The 0-based starting index for pagination. To paginate: check response['value'][0]['hitsContainers'][0]['moreResultsAvailable']. If true, call again with from_index += size (e.g., 0 \u2192 25 \u2192 50). Message ID is in hits[]['hitId'], not hits[]['resource']['id']."
+          },
+          "enable_top_results": {
+            "type": "boolean",
+            "title": "Enable Top Results",
+            "default": false,
+            "description": "If `true`, sorts results by relevance; otherwise, sorts by date in descending order (newest first)."
+          }
+        },
+        "description": "Searches Microsoft Teams messages using the Microsoft Search API."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_TEAMS_CREATE_CHANNEL",
+      "description": "Creates a new 'standard', 'private', or 'shared' channel within a specified Microsoft Teams team.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateChannelRequest",
+        "required": [
+          "team_id",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Project Alpha Discussion",
+              "Q4 Planning"
+            ],
+            "description": "The display name for the new channel. Maximum length is 50 characters. Cannot contain characters ~ # % & * { } + / \\ : < > ? | ' \" or start with an underscore or period, or end with a period."
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "pattern": "^[0-9a-fA-F\\-]{36}$",
+            "examples": [
+              "e4e57af8-cff8-4557-af89-a43a6f961f32"
+            ],
+            "description": "The GUID of the existing Microsoft Teams team where the new channel will be created."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": "",
+            "examples": [
+              "Channel for all discussions related to Project Alpha.",
+              "Strategic planning for the fourth quarter."
+            ],
+            "description": "An optional, user-friendly description of the channel's purpose. Maximum length is 1024 characters."
+          },
+          "membership_type": {
+            "type": "string",
+            "title": "Membership Type",
+            "default": "standard",
+            "examples": [
+              "standard",
+              "private",
+              "shared"
+            ],
+            "description": "Membership type determining channel accessibility: 'standard' is accessible to all team members, 'private' is only accessible to a specific subset of team members, and 'shared' can be shared with people outside the team or organization (requires appropriate policies)."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_TEAMS_CREATE_CHAT",
+      "description": "Creates a new chat; if a 'oneOnOne' chat with the specified members already exists, its details are returned, while 'group' chats are always newly created.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateChatRequest",
+        "required": [
+          "chatType",
+          "topic",
+          "members"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic",
+            "description": "Subject or title for the chat. REQUIRED for group chats. For 'oneOnOne' chats, this field is ignored and should be omitted."
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "AADUserConversationMemberRequest",
+              "required": [
+                "displayName",
+                "user_odata_bind",
+                "roles"
+              ],
+              "properties": {
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "properties": {}
+                  },
+                  "title": "Roles",
+                  "examples": [
+                    "['owner']",
+                    "['guest']"
+                  ],
+                  "description": "Roles for this member. Group chats require at least one 'owner'."
+                },
+                "tenantId": {
+                  "type": "string",
+                  "title": "Tenant Id",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Azure AD tenant ID of the user, required if the user is an external guest."
+                },
+                "odata_type": {
+                  "type": "string",
+                  "title": "Odata Type",
+                  "default": "#microsoft.graph.aadUserConversationMember",
+                  "description": "Identifies the object as an Azure AD user conversation member."
+                },
+                "displayName": {
+                  "type": "string",
+                  "title": "Display Name",
+                  "description": "Display name of the conversation member, shown in the Teams UI."
+                },
+                "user_odata_bind": {
+                  "type": "string",
+                  "title": "User Odata Bind",
+                  "examples": [
+                    "https://graph.microsoft.com/v1.0/users/b9673e16-4a3c-487a-99a2-8fb8105921b9",
+                    "https://graph.microsoft.com/v1.0/users/adelev@contoso.com"
+                  ],
+                  "description": "Binding URL for the user resource in Microsoft Graph. This field is automatically mapped to 'user@odata.bind' format required by the API."
+                },
+                "visibleHistoryStartDateTime": {
+                  "type": "string",
+                  "title": "Visible History Start Date Time",
+                  "format": "date-time",
+                  "default": null,
+                  "nullable": true,
+                  "description": "ISO 8601 timestamp determining how far back the member can view chat history; defaults to when they were added."
+                }
+              },
+              "description": "Specifies an Azure AD user to be added as a member to a chat."
+            },
+            "title": "Members",
+            "description": "List of members. For 'oneOnOne' chats, exactly two members are required. For 'group' chats, at least two members are required and at least one member must have the 'owner' role."
+          },
+          "chatType": {
+            "type": "string",
+            "title": "Chat Type",
+            "examples": [
+              "oneOnOne",
+              "group"
+            ],
+            "description": "Type of chat. If 'oneOnOne' for members with an existing chat, that chat's details are returned."
+          }
+        },
+        "description": "Request payload for creating a new Microsoft Teams chat."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_TEAMS_GET_MESSAGE",
+      "description": "Retrieves a specific message from a Microsoft Teams channel using its Team, Channel, and Message IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMessageRequest",
+        "required": [
+          "team_id",
+          "channel_id",
+          "message_id"
+        ],
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "19:meeting_MGQ4OGJkZTgtYzE0Mi00YjM2LTg5NTctM2Q5ZjEyYjhhYjM2@thread.v2"
+            ],
+            "description": "ID of the Team containing the channel where the message is located."
+          },
+          "channel_id": {
+            "type": "string",
+            "title": "Channel Id",
+            "examples": [
+              "19:channel_MGQ4OGJkZTgtYzE0Mi00YjM2LTg5NTctM2Q5ZjEyYjhhYjM2@thread.v2"
+            ],
+            "description": "ID of the Channel within the specified Team that contains the message."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "1234567890"
+            ],
+            "description": "ID of the message to retrieve from the channel."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_TEAMS_LIST",
+      "description": "Retrieves Microsoft Teams accessible by the authenticated user, allowing filtering, property selection, and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTeamsRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 100,
+            "examples": [
+              "50",
+              "200"
+            ],
+            "description": "Maximum number of teams to return per page (1-999). Used for pagination; see `next_link` in response."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": "",
+            "examples": [
+              "startsWith(displayName,'Project')"
+            ],
+            "description": "OData v4.0 filter string to refine results based on team properties (e.g., `startsWith(displayName,'A')`). Consult OData v4.0 documentation for syntax."
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": "",
+            "examples": [
+              "id,displayName",
+              "description,visibility"
+            ],
+            "description": "Comma-separated team properties to retrieve (e.g., 'id,displayName,description'). If empty or omitted, standard properties are returned. Supported properties include `id`, `displayName`, `description`, `visibility`."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_TEAMS_LIST_CHANNELS",
+      "description": "Retrieves channels for a specified Microsoft Teams team ID (must be valid and for an existing team), with options to include shared channels, filter results, and select properties.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListChannelsRequest",
+        "required": [
+          "team_id"
+        ],
+        "properties": {
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": "",
+            "examples": [
+              "startswith(displayName,'Sales')",
+              "membershipType eq 'private'"
+            ],
+            "description": "OData v4 query string to filter channels (e.g., `startswith(displayName,'Sales')` or `membershipType eq 'private'`)."
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": "",
+            "examples": [
+              "id,displayName,description"
+            ],
+            "description": "Comma-separated channel properties to return (e.g., 'id,displayName,description'); empty for default properties. Common: `id`, `displayName`, `description`, `email`, `membershipType`, `webUrl`."
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "1234-5678-9012-3456"
+            ],
+            "description": "Unique identifier (ID) of the Microsoft Teams team."
+          },
+          "include_shared_channels": {
+            "type": "boolean",
+            "title": "Include Shared Channels",
+            "default": false,
+            "description": "If true, include channels shared with the team."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_TEAMS_LIST_CHAT_MESSAGES",
+      "description": "Retrieves messages (newest first) from an existing and accessible Microsoft Teams one-on-one chat, group chat, or channel thread, specified by `chat_id`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListChatMessagesRequest",
+        "required": [
+          "chat_id"
+        ],
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 50,
+            "maximum": 50,
+            "minimum": 1,
+            "examples": [
+              "50"
+            ],
+            "description": "Maximum number of messages to retrieve. Microsoft Graph enforces a maximum limit of 50 per request."
+          },
+          "chat_id": {
+            "type": "string",
+            "title": "Chat Id",
+            "examples": [
+              "19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
+              "19:meeting_MGQ4OGJkZTgtYzE0Mi00YjM2LTg5NTctM2Q5ZjEyYjhhYjM2@thread.v2"
+            ],
+            "description": "Unique Microsoft Graph chat identifier (GUID format). This is the chat ID returned by Graph API, not a channel thread ID. Use the Get All Chats action to retrieve valid chat IDs."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_TEAMS_LIST_PEOPLE",
+      "description": "Retrieves a list of people relevant to a specified user from Microsoft Graph, noting the `search` parameter is only effective if `user_id` is 'me'.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPeopleRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "examples": [
+              "10",
+              "25",
+              "50"
+            ],
+            "nullable": true,
+            "description": "Maximum number of items per page for pagination. Actual count may be less. Service default if unspecified."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "default": null,
+            "examples": [
+              "0",
+              "10",
+              "20"
+            ],
+            "nullable": true,
+            "description": "Number of items to skip for pagination."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "startsWith(displayName,'J')",
+              "jobTitle eq 'Software Engineer'",
+              "personType/class eq 'Person' and personType/subclass eq 'OrganizationUser'"
+            ],
+            "nullable": true,
+            "description": "OData $filter query to limit results (e.g., `\"startsWith(displayName,'A')\"`)."
+          },
+          "search": {
+            "type": "string",
+            "title": "Search",
+            "default": null,
+            "examples": [
+              "John Doe",
+              "topic:Sales",
+              "johndoe@example.com",
+              "\"Maria Rossi\""
+            ],
+            "nullable": true,
+            "description": "Fuzzy search query (name, email, or topic like 'topic:marketing'). Effective only when `user_id` is 'me'."
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": null,
+            "examples": [
+              "id,displayName",
+              "givenName,surname,scoredEmailAddresses",
+              "id,displayName,scoredEmailAddresses,jobTitle"
+            ],
+            "nullable": true,
+            "description": "Comma-separated OData property names to include for each person (e.g., 'id,displayName'). If unspecified, a default set is returned. Note: 'emailAddresses' is not a valid property for microsoft.graph.person; use 'scoredEmailAddresses' instead."
+          },
+          "orderby": {
+            "type": "string",
+            "title": "Orderby",
+            "default": null,
+            "examples": [
+              "displayName asc",
+              "surname desc",
+              "relevanceScore desc"
+            ],
+            "nullable": true,
+            "description": "OData $orderby expression to sort results (e.g., 'displayName asc, relevanceScore desc')."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "adelev@contoso.com",
+              "00000000-0000-0000-0000-000000000000"
+            ],
+            "description": "Identifier of the user (e.g., 'me', 'adelev@contoso.com', or GUID) whose relevant people are to be retrieved."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_TEAMS_POST_CHANNEL_MESSAGE",
+      "description": "Posts a new text or HTML message to a specified channel in a Microsoft Teams team.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PostChannelMessageRequest",
+        "required": [
+          "team_id",
+          "channel_id",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "The content of the message to be sent. Can be plain text or HTML, determined by `content_type`."
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "description": "The unique identifier of the Microsoft Teams team containing the channel."
+          },
+          "channel_id": {
+            "type": "string",
+            "title": "Channel Id",
+            "description": "The unique identifier of the channel within the specified team where the message will be posted."
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type",
+            "default": "text",
+            "examples": [
+              "text",
+              "html"
+            ],
+            "description": "The format of the message content. Supported values: 'text' (plain text) or 'html' (HTML content). Defaults to 'text'."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_TEAMS_POST_CHAT_MESSAGE",
+      "description": "Sends a non-empty message (text or HTML) to a specified, existing Microsoft Teams chat; content must be valid HTML if `content_type` is 'html'.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PostChatMessageRequest",
+        "required": [
+          "chat_id",
+          "content"
+        ],
+        "properties": {
+          "chat_id": {
+            "type": "string",
+            "title": "Chat Id",
+            "examples": [
+              "19:meeting_NTg0NTQ2YjctMDJkNi00M2U3LWFkNmQtN2U4MDVmYjE0MDc5@thread.v2"
+            ],
+            "description": "Unique identifier for the Microsoft Teams chat to receive the message."
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "Hello world!",
+              "<h1>Hello</h1><p>This is a test message with HTML.</p>"
+            ],
+            "description": "Message content, either plain text or HTML (see `content_type`)."
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type",
+            "default": "text",
+            "examples": [
+              "text",
+              "html"
+            ],
+            "description": "Content format: 'text' (plain) or 'html'."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_TEAMS_POST_MESSAGE_REPLY",
+      "description": "Sends a reply to an existing message, identified by `message_id`, within a specific `channel_id` of a given `team_id` in Microsoft Teams.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PostMessageReplyRequest",
+        "required": [
+          "team_id",
+          "channel_id",
+          "message_id",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "Acknowledged.",
+              "Sure, I will look into this.",
+              "<p>Thank you for the update!</p>"
+            ],
+            "description": "The body of the reply message. This can be plain text or HTML, as specified by the `content_type` field."
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b"
+            ],
+            "description": "The unique identifier (GUID) of the Microsoft Teams team that contains the channel where the message to be replied to exists."
+          },
+          "channel_id": {
+            "type": "string",
+            "title": "Channel Id",
+            "examples": [
+              "19:general@thread.tacv2",
+              "19:c2fd609a5db440179d7400e0a8ac9ac2@thread.tacv2"
+            ],
+            "description": "The unique identifier of the channel within the specified team. This channel contains the message to which the reply will be posted. Channel IDs typically follow a format like '19:{alphanumeric_string}@thread.tacv2'."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "1611900000000",
+              "AAMkAGI2NDkxZjRjLTFkYjEtNGZkYy04YjU0LTQ2Mjk0ZTk1YjJjZQBGAAAAAAD0kR8xYjRKVp8SMVFlz36QBwBfsGR1cASTRI8xY238WZJ3AAAAAAEMAABfsGR1cASTRI8xY238WZJ3AAAAAAEkAAA="
+            ],
+            "description": "The unique identifier of the specific message within the channel to which this reply is directed."
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type",
+            "default": "text",
+            "examples": [
+              "text",
+              "html"
+            ],
+            "description": "Specifies the format of the `content` field. Accepted values are 'text' for plain text content and 'html' for content with HTML formatting. Defaults to 'text' if not provided."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_UNARCHIVE_TEAM",
+      "description": "Tool to unarchive a Microsoft Teams team. Use when you need to restore an archived team to active state.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UnarchiveTeamRequest",
+        "required": [
+          "team_id"
+        ],
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+            ],
+            "description": "The unique identifier (GUID) of the team to unarchive."
+          }
+        },
+        "description": "Request schema to unarchive a Microsoft Teams team."
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_UPDATE_CHANNEL_MESSAGE",
+      "description": "Tool to update a message in a channel. Use when you need to modify an existing channel message after confirming channel and message IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateChannelMessageRequest",
+        "required": [
+          "team_id",
+          "channel_id",
+          "message_id",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "Updated project details."
+            ],
+            "description": "Updated message content, either plain text or HTML."
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "12345678-90ab-cdef-1234-567890abcdef"
+            ],
+            "description": "Unique identifier of the Microsoft Teams team."
+          },
+          "channel_id": {
+            "type": "string",
+            "title": "Channel Id",
+            "examples": [
+              "19:abcdef1234567890@thread.tacv2"
+            ],
+            "description": "Unique identifier of the channel within the team."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "1593478509446"
+            ],
+            "description": "Unique identifier of the channel message to update."
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type",
+            "default": "text",
+            "examples": [
+              "text",
+              "html"
+            ],
+            "description": "Format of the message content: 'text' or 'html'."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_UPDATE_CHAT_MESSAGE",
+      "description": "Tool to update a specific message in a chat. Use when you need to correct or modify a sent chat message.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateChatMessageRequest",
+        "required": [
+          "chat_id",
+          "message_id",
+          "content"
+        ],
+        "properties": {
+          "chat_id": {
+            "type": "string",
+            "title": "Chat Id",
+            "examples": [
+              "19:meeting_NTg0NTQ2YjctMDJkNi00M2U3LWFkNmQtN2U4MDVmYjE0MDc5@thread.v2"
+            ],
+            "description": "Unique identifier of the Microsoft Teams chat."
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "Updated the details of the meeting."
+            ],
+            "description": "Updated message content, either plain text or HTML."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "1593478509446"
+            ],
+            "description": "Unique identifier of the chat message to update."
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type",
+            "default": "text",
+            "examples": [
+              "text",
+              "html"
+            ],
+            "description": "Format of the message content: 'text' or 'html'."
+          }
+        }
+      }
+    },
+    {
+      "name": "MICROSOFT_TEAMS_UPDATE_TEAM",
+      "description": "Tool to update the properties of a team. Use when you need to modify team settings such as member, messaging, or fun settings.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateTeamRequest",
+        "required": [
+          "team_id"
+        ],
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+            ],
+            "description": "The unique identifier (GUID) of the team to update."
+          },
+          "funSettings": {
+            "type": "object",
+            "title": "TeamFunSettings",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "allowGiphy",
+              "giphyContentRating"
+            ],
+            "properties": {
+              "allowGiphy": {
+                "type": "boolean",
+                "title": "Allow Giphy",
+                "description": "Whether Giphy is allowed."
+              },
+              "giphyContentRating": {
+                "enum": [
+                  "strict",
+                  "moderate"
+                ],
+                "type": "string",
+                "title": "Giphy Content Rating",
+                "description": "The content rating for Giphy: 'strict' or 'moderate'."
+              }
+            },
+            "description": "Settings that control fun features in the team.",
+            "additionalProperties": false
+          },
+          "memberSettings": {
+            "type": "object",
+            "title": "TeamMemberSettings",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "allowCreateUpdateChannels"
+            ],
+            "properties": {
+              "allowCreateUpdateChannels": {
+                "type": "boolean",
+                "title": "Allow Create Update Channels",
+                "description": "Whether members are allowed to create and update channels in the team."
+              }
+            },
+            "description": "Settings that control what members can do in the team.",
+            "additionalProperties": false
+          },
+          "messagingSettings": {
+            "type": "object",
+            "title": "TeamMessagingSettings",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "allowUserEditMessages",
+              "allowUserDeleteMessages"
+            ],
+            "properties": {
+              "allowUserEditMessages": {
+                "type": "boolean",
+                "title": "Allow User Edit Messages",
+                "description": "Whether users are allowed to edit their messages."
+              },
+              "allowUserDeleteMessages": {
+                "type": "boolean",
+                "title": "Allow User Delete Messages",
+                "description": "Whether users are allowed to delete their messages."
+              }
+            },
+            "description": "Settings that control messaging capabilities in the team.",
+            "additionalProperties": false
+          }
+        },
+        "description": "Request payload to update properties of a Microsoft Teams team."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:40.097281+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,591 @@
+{
+  "qualifiedName": "@mem0ai/mem0-memory-mcp",
+  "displayName": "Memory Tool",
+  "description": "Save, search, and manage long-term memories across users and apps. Quickly recall facts, preferences, and past conversations with semantic search and structured filters. Update or delete specific entries, or bulk-clear a scope to keep context accurate and tidy.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/app.mem0.ai.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@mem0ai/mem0-memory-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@mem0ai/mem0-memory-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "mem0_api_key"
+        ],
+        "properties": {
+          "mem0_api_key": {
+            "type": "string",
+            "description": "Mem0 API key (required)"
+          },
+          "default_user_id": {
+            "default": null,
+            "description": "Default user_id injected into filters when unspecified."
+          },
+          "enable_graph_default": {
+            "default": null,
+            "description": "Default enable_graph toggle when clients omit the flag."
+          }
+        },
+        "description": "Session-level overrides used when hosting via Smithery or HTTP."
+      }
+    }
+  ],
+  "security": {
+    "scanPassed": true
+  },
+  "tools": [
+    {
+      "name": "add_memory",
+      "description": "Store a new preference, fact, or conversation snippet. Requires at least one: user_id, agent_id, or run_id.",
+      "inputSchema": {
+        "type": "object",
+        "title": "add_memoryArguments",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Plain sentence summarizing what to store. Required even if `messages` is provided."
+          },
+          "app_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Id",
+            "default": null,
+            "description": "Optional app identifier."
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id",
+            "default": null,
+            "description": "Optional run identifier."
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "default": null,
+            "description": "Override the default user scope for this write."
+          },
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id",
+            "default": null,
+            "description": "Optional agent identifier."
+          },
+          "messages": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Messages",
+            "default": null,
+            "description": "Structured conversation history with `role`/`content`. Use when you have multiple turns."
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "default": null,
+            "description": "Attach arbitrary metadata JSON to the memory."
+          },
+          "enable_graph": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enable Graph",
+            "default": null,
+            "description": "Set true only if the caller explicitly wants Mem0 graph memory."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "add_memoryOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_memories",
+      "description": "Run a semantic search over existing memories.\n\n        Use filters to narrow results. Common filter patterns:\n        - Single user: {\"AND\": [{\"user_id\": \"john\"}]}\n        - Agent memories: {\"AND\": [{\"agent_id\": \"agent_name\"}]}\n        - Recent memories: {\"AND\": [{\"user_id\": \"john\"}, {\"created_at\": {\"gte\": \"2024-01-01\"}}]}\n        - Multiple users: {\"AND\": [{\"user_id\": {\"in\": [\"john\", \"jane\"]}}]}\n        - Cross-entity: {\"OR\": [{\"user_id\": \"john\"}, {\"agent_id\": \"agent_name\"}]}\n\n        user_id is automatically added to filters if not provided.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_memoriesArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Limit",
+            "default": null,
+            "description": "Maximum number of results to return."
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "Natural language description of what to find."
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filters",
+            "default": null,
+            "description": "Additional filter clauses (user_id injected automatically)."
+          },
+          "enable_graph": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enable Graph",
+            "default": null,
+            "description": "Set true only when the user explicitly wants graph-derived memories."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "search_memoriesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_memories",
+      "description": "Page through memories using filters instead of search.\n\n        Use filters to list specific memories. Common filter patterns:\n        - Single user: {\"AND\": [{\"user_id\": \"john\"}]}\n        - Agent memories: {\"AND\": [{\"agent_id\": \"agent_name\"}]}\n        - Recent memories: {\"AND\": [{\"user_id\": \"john\"}, {\"created_at\": {\"gte\": \"2024-01-01\"}}]}\n        - Multiple users: {\"AND\": [{\"user_id\": {\"in\": [\"john\", \"jane\"]}}]}\n\n        Pagination: Use page (1-indexed) and page_size for browsing results.\n        user_id is automatically added to filters if not provided.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_memoriesArguments",
+        "properties": {
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page",
+            "default": null,
+            "description": "1-indexed page number when paginating."
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filters",
+            "default": null,
+            "description": "Structured filters; user_id injected automatically."
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size",
+            "default": null,
+            "description": "Number of memories per page (default 10)."
+          },
+          "enable_graph": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enable Graph",
+            "default": null,
+            "description": "Set true only if the caller explicitly wants graph-derived memories."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_memoriesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_all_memories",
+      "description": "Delete every memory in the given user/agent/app/run but keep the entity.",
+      "inputSchema": {
+        "type": "object",
+        "title": "delete_all_memoriesArguments",
+        "properties": {
+          "app_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Id",
+            "default": null,
+            "description": "Optional app scope to delete."
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id",
+            "default": null,
+            "description": "Optional run scope to delete."
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "default": null,
+            "description": "User scope to delete; defaults to server user."
+          },
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id",
+            "default": null,
+            "description": "Optional agent scope to delete."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "delete_all_memoriesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_entities",
+      "description": "List which users/agents/apps/runs currently hold memories.",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_entitiesArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "list_entitiesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_memory",
+      "description": "Fetch a single memory once you know its memory_id.",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_memoryArguments",
+        "required": [
+          "memory_id"
+        ],
+        "properties": {
+          "memory_id": {
+            "type": "string",
+            "title": "Memory Id",
+            "description": "Exact memory_id to fetch."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_memoryOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_memory",
+      "description": "Overwrite an existing memory\u2019s text.",
+      "inputSchema": {
+        "type": "object",
+        "title": "update_memoryArguments",
+        "required": [
+          "memory_id",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Replacement text for the memory."
+          },
+          "memory_id": {
+            "type": "string",
+            "title": "Memory Id",
+            "description": "Exact memory_id to overwrite."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "update_memoryOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_memory",
+      "description": "Delete one memory after the user confirms its memory_id.",
+      "inputSchema": {
+        "type": "object",
+        "title": "delete_memoryArguments",
+        "required": [
+          "memory_id"
+        ],
+        "properties": {
+          "memory_id": {
+            "type": "string",
+            "title": "Memory Id",
+            "description": "Exact memory_id to delete."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "delete_memoryOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_entities",
+      "description": "Remove a user/agent/app/run record entirely (and cascade-delete its memories).",
+      "inputSchema": {
+        "type": "object",
+        "title": "delete_entitiesArguments",
+        "properties": {
+          "app_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Id",
+            "default": null,
+            "description": "Delete this app and its memories."
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id",
+            "default": null,
+            "description": "Delete this run and its memories."
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "default": null,
+            "description": "Delete this user and its memories."
+          },
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id",
+            "default": null,
+            "description": "Delete this agent and its memories."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "delete_entitiesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:41.863765+00:00",
+    "source": "smithery"
+  }
+}

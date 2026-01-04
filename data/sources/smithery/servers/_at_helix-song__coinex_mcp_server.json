@@ -1,0 +1,834 @@
+{
+  "qualifiedName": "@helix-song/coinex_mcp_server",
+  "displayName": "coinex_mcp_server",
+  "description": "# CoinEx MCP Server\n\nA Model Context Protocol (MCP) server that enables AI agents to interact seamlessly with the CoinEx cryptocurrency exchange. This server provides comprehensive access to market data, trading operations, and account management through a standardized MCP interface.\n\n## Key Features\n\n- **Market Data Access**: Retrieve real-time tickers, order books, K-lines, and recent trades for both spot and futures markets\n- **Futures Analytics**: Access funding rates, premium indices, basis history, position tiers, and liquidation data\n- **Account Management**: Query account balances and manage trading positions\n- **Order Operations**: Place, cancel, and track orders with full history access\n- **Flexible Deployment**: Supports multiple transport protocols (stdio, HTTP, SSE) for various integration scenarios\n\n## Quick Start\n\n### Installation via http (Recommended)\njust add this url `https://mcp.coinex.com/mcp`  to your mcp configuration in agent. for example, use this command to add it to your claude code: \n```\nclaude mcp add --transport http coinex-mcp-server https://mcp.coinex.com/mcp\n```\n\n### Installation via uvx (Support get balance / place order by API key)\n\nConfigure your MCP client (e.g., Claude Desktop) with the following JSON:\n\n```json\n{\n  \"mcpServers\": {\n    \"coinex\": {\n      \"command\": \"uvx\",\n      \"args\": [\"coinex-mcp-server\"],\n      \"env\": {\n        \"COINEX_ACCESS_ID\": \"your_access_id_here\",\n        \"COINEX_SECRET_KEY\": \"your_secret_key_here\"\n      }\n    }\n  }\n}\n```\n\n### HTTP Mode Deployment by source code\n* install \n`pip install coinex-mcp-server`\n\n* start the server in HTTP mode:\n```bash\npython -m coinex_mcp_server.main --transport http --host 127.0.0.1 --port 8000 --path /mcp --enable-http-auth\n```\nPass credentials via HTTP headers:\n- `X-CoinEx-Access-Id: <your_access_id>`\n- `X-CoinEx-Secret-Key: <your_secret_key>`\n\n## Usage Examples\n\n- **Get Market Tickers**: `list_markets(market_type=\"spot\")` or `get_tickers(symbol=\"BTCUSDT\")`\n- **Query Order Book**: `get_orderbook(symbol=\"BTCUSDT\", limit=20)`\n- **Check Account Balance**: `get_account_balance()`\n- **Place Order**: `place_order(symbol=\"BTCUSDT\", side=\"buy\", type=\"limit\", amount=\"0.01\", price=\"50000\")`\n\n## Security Notes\n\n\u26a0\ufe0f **Important**: \n- Never expose HTTP authentication in public services\n- Deploy with HTTPS/TLS in production environments\n",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/5e37a6cd-1de5-4144-923b-3de450b4eae7.svg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@helix-song/coinex_mcp_server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@helix-song/coinex_mcp_server/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "get_ticker",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get trading pair's recent price, 24h price and volume information (spot).\n\nParameters:\n- base: Optional, base currency like \"BTC\", \"ETH\". When not provided, returns top 5 entries.\n- quote: Optional, quote currency, default \"USDT\".\n\nReturns: {code, message, data}; when base is not provided, only returns top 5 items.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "MarketType": {
+            "enum": [
+              "spot",
+              "margin",
+              "futures"
+            ],
+            "type": "string"
+          }
+        },
+        "properties": {
+          "base": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Base currency, e.g. BTC, ETH; returns top 5 when empty"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          },
+          "market_type": {
+            "$ref": "#/$defs/MarketType",
+            "default": "spot",
+            "description": "Market type: spot|futures|margin; default spot"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_orderbook",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get order book (depth) information (supports spot/futures).\n\nParameters:\n- base: Required, base currency. Example: \"BTC\", \"ETH\".\n- quote: Optional, quote currency, default \"USDT\".\n- limit: Optional, number of price levels to return, default 20; valid values: [5, 10, 20, 50].\n- market_type: Optional, market type, default \"spot\"; valid values: \"spot\" | \"futures\".\n- interval: Optional, merge granularity, default \"0\"; valid values include \"0\", \"0.00000001\", ..., \"1\", \"10\", \"100\", \"1000\" (according to official documentation).\n\nReturns: {code, message, data}.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "MarketType": {
+            "enum": [
+              "spot",
+              "margin",
+              "futures"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "base"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "description": "Required, base currency, e.g. BTC, ETH"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 20,
+            "description": "Number of price levels to return, options: 5/10/20/50; default 20"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          },
+          "interval": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "0",
+            "description": "Merge granularity, default 0; values according to official documentation"
+          },
+          "market_type": {
+            "$ref": "#/$defs/MarketType",
+            "default": "spot",
+            "description": "Market type: spot|futures|margin; default spot"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_kline",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get K-line data (supports spot/futures).\n\nParameters:\n- base: Required, base currency. Example: \"BTC\", \"ETH\".\n- quote: Optional, quote currency, default \"USDT\".\n- period: Optional, K-line period, default \"1hour\";\n  - Spot/futures common period whitelist: \"1min\",\"5min\",\"15min\",\"30min\",\"1hour\",\"4hour\",\"1day\",\"1week\".\n- limit: Optional, number of records, default 100.\n- market_type: Optional, market type, default \"spot\"; options: \"spot\" | \"futures\".\n\nError: When period is not in whitelist, returns {code:-1, message:\"Unsupported time period\"}.\nReturns: {code, message, data}.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "MarketType": {
+            "enum": [
+              "spot",
+              "margin",
+              "futures"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "base"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "description": "Required, base currency, e.g. BTC, ETH"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 100,
+            "description": "Number of records to return; default 100"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          },
+          "period": {
+            "enum": [
+              "1min",
+              "5min",
+              "15min",
+              "30min",
+              "1hour",
+              "4hour",
+              "1day",
+              "1week"
+            ],
+            "type": "string",
+            "default": "1hour",
+            "description": "K-line period; default 1hour; supports 1min/5min/15min/30min/1hour/4hour/1day/1week"
+          },
+          "market_type": {
+            "$ref": "#/$defs/MarketType",
+            "default": "spot",
+            "description": "Market type: spot|futures|margin; default spot"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "list_markets",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "List market status (spot/futures).\n\nParameters:\n- market_type: Optional, default \"spot\"; options: \"spot\" | \"futures\".\n- base: Optional, base currency to filter.\n- quote: Optional, quote currency, default \"USDT\".\n\nReturns: {code, message, data} (list).",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "MarketType": {
+            "enum": [
+              "spot",
+              "margin",
+              "futures"
+            ],
+            "type": "string"
+          }
+        },
+        "properties": {
+          "base": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional; base currency to filter"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          },
+          "market_type": {
+            "$ref": "#/$defs/MarketType",
+            "default": "spot",
+            "description": "Market type: spot|futures|margin; default spot"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_deals",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get recent trades (deals).\n\nParameters:\n- base: Required, base currency.\n- quote: Optional, quote currency, default \"USDT\".\n- market_type: Optional, default \"spot\"; options: \"spot\" | \"futures\".\n- limit: Optional, return quantity, default 100, max 1000 (per official documentation).\n\nReturns: {code, message, data} (list).",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "MarketType": {
+            "enum": [
+              "spot",
+              "margin",
+              "futures"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "base"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "description": "Required, base currency, e.g. BTC, ETH"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 100,
+            "description": "Return quantity, default 100, max 1000 (per official docs)"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          },
+          "market_type": {
+            "$ref": "#/$defs/MarketType",
+            "default": "spot",
+            "description": "Market type: spot|futures|margin; default spot"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_index_price",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get market index price (spot/futures). Supports batch; returns top N entries when base not provided.\n\nParameters:\n- market_type: Optional, default \"spot\"; options: \"spot\" | \"futures\".\n- base: Optional, base currency; returns multi-market index when not provided.\n- quote: Optional, quote currency, default \"USDT\".\n- top_n: Optional, only effective when base not provided; default 5.\n\nReturns: {code, message, data}.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "MarketType": {
+            "enum": [
+              "spot",
+              "margin",
+              "futures"
+            ],
+            "type": "string"
+          }
+        },
+        "properties": {
+          "base": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional; base currency, returns multi-market index if not provided"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          },
+          "top_n": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 5,
+            "description": "Return top N entries when base not provided; default 5"
+          },
+          "market_type": {
+            "$ref": "#/$defs/MarketType",
+            "default": "spot",
+            "description": "Market type: spot|futures|margin; default spot"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_funding_rate",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get current funding rate (futures only).\n\nParameters:\n- base: Required, futures base currency, e.g. \"BTC\", \"ETH\".\n- quote: Optional, quote currency, default \"USDT\".\n\nReturns: {code, message, data}.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "base"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "description": "Required, futures base currency, e.g. BTC, ETH"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_funding_rate_history",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get funding rate history (futures only).\n\nParameters:\n- base: Required, futures base currency.\n- quote: Optional, quote currency, default \"USDT\".\n- start_time: Optional, start timestamp (milliseconds).\n- end_time: Optional, end timestamp (milliseconds).\n- page: Optional, default 1.\n- limit: Optional, default 100.\n\nReturns: {code, message, data}.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "base"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "description": "Required, futures base currency, e.g. BTC, ETH"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 1,
+            "description": "Page number; default 1"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 100,
+            "description": "Number of records; default 100"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "End timestamp (milliseconds)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Start timestamp (milliseconds)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_premium_index_history",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get premium index history (futures only).\n\nParameters:\n- base: Required, futures base currency.\n- quote: Optional, quote currency, default \"USDT\".\n- start_time: Optional, start timestamp (milliseconds).\n- end_time: Optional, end timestamp (milliseconds).\n- page: Optional, default 1.\n- limit: Optional, default 100.\n\nReturns: {code, message, data}.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "base"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "description": "Required, futures base currency"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 1,
+            "description": "Page number; default 1"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 100,
+            "description": "Number of records; default 100"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "End timestamp (milliseconds)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Start timestamp (milliseconds)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_basis_history",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get basis history (futures only).\n\nParameters:\n- base: Required, futures base currency.\n- quote: Optional, quote currency, default \"USDT\".\n- start_time: Optional, start timestamp (milliseconds).\n- end_time: Optional, end timestamp (milliseconds).\n- page: Optional, placeholder parameter (currently unused by client).\n- limit: Optional, placeholder parameter (currently unused by client).\n\nReturns: {code, message, data}.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "base"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "description": "Required, futures base currency"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 1,
+            "description": "Placeholder parameter (currently unused)"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 100,
+            "description": "Placeholder parameter (currently unused)"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "End timestamp (milliseconds)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Start timestamp (milliseconds)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_margin_tiers",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get margin tiers/ position levels (futures only).\n\nParameters:\n- base: Required, futures base currency.\n- quote: Optional, quote currency, default \"USDT\".\n\nReturns: {code, message, data}.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "base"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "description": "Required, futures base currency"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_liquidation_history",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "public"
+          ]
+        }
+      },
+      "description": "Get liquidation history (futures only).\n\nParameters:\n- base: Required, futures base currency.\n- quote: Optional, quote currency, default \"USDT\".\n- start_time: Optional, start timestamp (milliseconds).\n- end_time: Optional, end timestamp (milliseconds).\n- page: Optional, page number, default 1.\n- limit: Optional, number of records, default 100.\n\nReturns: {code, message, data}.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "base"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "description": "Required, futures base currency, e.g. BTC, ETH"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 1,
+            "description": "Page number; default 1"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 100,
+            "description": "Number of records; default 100"
+          },
+          "quote": {
+            "type": "string",
+            "default": "USDT",
+            "description": "Quote currency, default USDT"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "End timestamp (milliseconds)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Start timestamp (milliseconds)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:09:56.964634+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,1719 @@
+{
+  "qualifiedName": "facebook",
+  "displayName": "Facebook",
+  "description": "Facebook is a social media and advertising platform used by individuals and businesses to connect, share content, and promote products or services. Only supports Facebook Pages, not Facebook Personal accounts.",
+  "iconUrl": "https://logos.composio.dev/api/facebook",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/facebook",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/facebook/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "FACEBOOK_ADD_PHOTOS_TO_ALBUM",
+      "description": "Adds photos to an existing Facebook album. Note: Currently adds one photo at a time. For true batch upload, use Facebook's batch API endpoint directly.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddPhotosToAlbumRequest",
+        "required": [
+          "album_id"
+        ],
+        "properties": {
+          "photos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "FileUploadable",
+              "required": [
+                "name",
+                "mimetype",
+                "s3key"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "examples": [
+                    "document.pdf",
+                    "image.jpg",
+                    "report.docx"
+                  ],
+                  "description": "The filename that will be used when uploading the file to the destination service"
+                },
+                "s3key": {
+                  "type": "string",
+                  "title": "S3Key",
+                  "examples": [
+                    "47563/gmail/GET_ATTACHMENT/response/12345"
+                  ],
+                  "description": "The S3 key of a publicly accessible file, typically returned from a previous download action that stored the file in S3. This key references an existing file that can be uploaded to another service."
+                },
+                "mimetype": {
+                  "type": "string",
+                  "title": "Mimetype",
+                  "examples": [
+                    "application/pdf",
+                    "image/jpeg",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ],
+                  "description": "The MIME type of the file"
+                }
+              },
+              "file_uploadable": true
+            },
+            "title": "Photos",
+            "default": null,
+            "nullable": true,
+            "description": "List of local photo files to add (alternative to 'photo_urls')"
+          },
+          "album_id": {
+            "type": "string",
+            "title": "Album Id",
+            "description": "The ID of the album to add photos to"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "default": true,
+            "description": "Whether to publish the photos immediately"
+          },
+          "photo_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Photo Urls",
+            "default": null,
+            "nullable": true,
+            "description": "List of photo URLs to add to the album (alternative to 'photos')"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_ADD_REACTION",
+      "description": "Adds a reaction to a Facebook post or comment. Note: Due to API limitations, only LIKE reactions can be added programmatically.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddReactionRequest",
+        "required": [
+          "object_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": "LIKE",
+            "description": "Reaction type: Currently only LIKE is supported via API. Other reactions (LOVE, WOW, HAHA, SAD, ANGRY, THANKFUL) cannot be added programmatically"
+          },
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "description": "The ID of the post or comment to react to"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_ASSIGN_PAGE_TASK",
+      "description": "Assigns tasks/roles to a user for a specific Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AssignPageTaskRequest",
+        "required": [
+          "page_id",
+          "user",
+          "tasks"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User",
+            "description": "The ID or username of the user to assign tasks to"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Tasks",
+            "description": "List of tasks to assign (e.g., ['MANAGE', 'CREATE_CONTENT', 'MODERATE'])"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_CREATE_COMMENT",
+      "description": "Creates a comment on a Facebook post or replies to an existing comment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateCommentRequest",
+        "required": [
+          "object_id",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "The text content of the comment"
+          },
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "description": "The ID of the post or comment to comment on"
+          },
+          "attachment_id": {
+            "type": "string",
+            "title": "Attachment Id",
+            "default": null,
+            "nullable": true,
+            "description": "ID of an unpublished photo to attach to the comment"
+          },
+          "attachment_url": {
+            "type": "string",
+            "title": "Attachment Url",
+            "default": null,
+            "nullable": true,
+            "description": "URL of a photo to attach to the comment"
+          },
+          "attachment_share_url": {
+            "type": "string",
+            "title": "Attachment Share Url",
+            "default": null,
+            "nullable": true,
+            "description": "URL of a GIF to attach to the comment"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_CREATE_PHOTO_ALBUM",
+      "description": "Creates a new photo album on a Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreatePhotoAlbumRequest",
+        "required": [
+          "page_id",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Name of the photo album"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": null,
+            "nullable": true,
+            "description": "Description of the album"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          },
+          "privacy": {
+            "type": "object",
+            "title": "Privacy",
+            "default": null,
+            "nullable": true,
+            "description": "Privacy settings for the album",
+            "additionalProperties": true
+          },
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "default": null,
+            "nullable": true,
+            "description": "Location associated with the album"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_CREATE_PHOTO_POST",
+      "description": "Creates a photo post on a Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreatePhotoPostRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "default": null,
+            "nullable": true,
+            "description": "URL of the photo to upload (alternative to 'photo')"
+          },
+          "photo": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "Local photo file to upload (alternative to 'url')",
+            "file_uploadable": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": null,
+            "nullable": true,
+            "description": "Caption text for the photo"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page to post to"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "default": true,
+            "description": "Set to true to publish immediately, false to save as unpublished"
+          },
+          "backdated_time": {
+            "type": "integer",
+            "title": "Backdated Time",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp to backdate the post"
+          },
+          "scheduled_publish_time": {
+            "type": "integer",
+            "title": "Scheduled Publish Time",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp for scheduled posts (required if published=false)"
+          },
+          "backdated_time_granularity": {
+            "type": "string",
+            "title": "Backdated Time Granularity",
+            "default": null,
+            "nullable": true,
+            "description": "Granularity of backdated time: year, month, day, hour, or min"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_CREATE_POST",
+      "description": "Creates a new post on a Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreatePostRequest",
+        "required": [
+          "page_id",
+          "message"
+        ],
+        "properties": {
+          "link": {
+            "type": "string",
+            "title": "Link",
+            "default": null,
+            "nullable": true,
+            "description": "URL to include in the post"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "The text content of the post"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page to post to"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "default": true,
+            "description": "Set to true to publish immediately, false to save as draft or schedule"
+          },
+          "targeting": {
+            "type": "object",
+            "title": "Targeting",
+            "default": null,
+            "nullable": true,
+            "description": "Audience targeting specifications",
+            "additionalProperties": true
+          },
+          "scheduled_publish_time": {
+            "type": "integer",
+            "title": "Scheduled Publish Time",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp for scheduled posts (required if published=false)"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_CREATE_VIDEO_POST",
+      "description": "Creates a video post on a Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateVideoPostRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "nullable": true,
+            "description": "Title of the video"
+          },
+          "video": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "Local video file to upload (alternative to 'file_url')",
+            "file_uploadable": true
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          },
+          "file_url": {
+            "type": "string",
+            "title": "File Url",
+            "default": null,
+            "nullable": true,
+            "description": "URL of the video file to upload (alternative to 'video')"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "default": true,
+            "description": "Whether to publish immediately"
+          },
+          "targeting": {
+            "type": "object",
+            "title": "Targeting",
+            "default": null,
+            "nullable": true,
+            "description": "Audience targeting specifications",
+            "additionalProperties": true
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "nullable": true,
+            "description": "Description of the video"
+          },
+          "scheduled_publish_time": {
+            "type": "integer",
+            "title": "Scheduled Publish Time",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp to schedule the video post"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_DELETE_COMMENT",
+      "description": "Deletes a Facebook comment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteCommentRequest",
+        "required": [
+          "comment_id"
+        ],
+        "properties": {
+          "comment_id": {
+            "type": "string",
+            "title": "Comment Id",
+            "description": "The ID of the comment to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_DELETE_POST",
+      "description": "Deletes a Facebook Page post.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeletePostRequest",
+        "required": [
+          "post_id"
+        ],
+        "properties": {
+          "post_id": {
+            "type": "string",
+            "title": "Post Id",
+            "description": "The ID of the post to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_COMMENT",
+      "description": "Retrieves details of a specific Facebook comment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCommentRequest",
+        "required": [
+          "comment_id"
+        ],
+        "properties": {
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,message,created_time,from,attachment,comment_count,like_count,is_hidden,parent",
+            "description": "Comma-separated list of fields to return"
+          },
+          "comment_id": {
+            "type": "string",
+            "title": "Comment Id",
+            "description": "The ID of the comment to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_COMMENTS",
+      "description": "Retrieves comments from a Facebook post or comment (for replies).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCommentsRequest",
+        "required": [
+          "object_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of comments to return (max 100)"
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Order of comments: chronological (oldest first) or reverse_chronological (newest first)"
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,message,created_time,from,attachment,comment_count,like_count,is_hidden",
+            "description": "Comma-separated list of fields to return for each comment"
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "nullable": true,
+            "description": "Filter comments by type: stream (default) or toplevel"
+          },
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "description": "The ID of the post or comment to get comments from"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_CONVERSATION_MESSAGES",
+      "description": "Retrieves messages from a specific conversation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetConversationMessagesRequest",
+        "required": [
+          "conversation_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 25,
+            "minimum": 1,
+            "description": "Number of messages to return (max 25)"
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "messages{id,created_time,from,to,message}",
+            "description": "Fields to return for messages in the conversation"
+          },
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id",
+            "description": "The ID of the conversation"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_CURRENT_USER",
+      "description": "Validates the access token and retrieves the current user's profile via /me.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCurrentUserRequest",
+        "properties": {
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,name,email",
+            "description": "Comma-separated list of fields to return for the current user"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_MESSAGE_DETAILS",
+      "description": "Retrieves details of a specific message sent or received by the Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMessageDetailsRequest",
+        "required": [
+          "message_id"
+        ],
+        "properties": {
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,created_time,from,to,message",
+            "description": "Comma-separated list of fields to return"
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "description": "The ID of the message to retrieve details for"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_PAGE_CONVERSATIONS",
+      "description": "Retrieves a list of conversations between users and the Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPageConversationsRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 25,
+            "minimum": 1,
+            "description": "Number of conversations to return (max 25)"
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "participants,updated_time,id",
+            "description": "Comma-separated list of fields to return for each conversation"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_PAGE_DETAILS",
+      "description": "Fetches details about a specific Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPageDetailsRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,name,about,category,description,fan_count,followers_count,website",
+            "description": "Comma-separated list of fields to return"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page to get details for"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_PAGE_INSIGHTS",
+      "description": "Retrieves analytics and insights for a Facebook Page. Returns metrics like impressions, page views, fan counts, and engagement data.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPageInsightsRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "since": {
+            "type": "string",
+            "title": "Since",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp or strtotime date for the start of the range"
+          },
+          "until": {
+            "type": "string",
+            "title": "Until",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp or strtotime date for the end of the range"
+          },
+          "period": {
+            "type": "string",
+            "title": "Period",
+            "default": "day",
+            "nullable": true,
+            "description": "Period for the metrics: day, week, days_28, month, lifetime"
+          },
+          "metrics": {
+            "type": "string",
+            "title": "Metrics",
+            "default": "page_impressions,page_impressions_unique,page_fans,page_fan_adds,page_views_total,page_post_engagements,page_total_actions",
+            "description": "Comma-separated list of metrics to retrieve. Common metrics: page_impressions, page_impressions_unique, page_fans, page_fan_adds, page_views_total, page_post_engagements, page_total_actions"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_PAGE_PHOTOS",
+      "description": "Retrieves photos from a Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPagePhotosRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by photo type: uploaded, tagged"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of photos to return (max 100)"
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,created_time,name,picture,source,album,height,width,link",
+            "description": "Comma-separated list of fields to return for each photo"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_PAGE_POSTS",
+      "description": "Retrieves posts from a Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPagePostsRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of posts to return (max 100)"
+          },
+          "since": {
+            "type": "string",
+            "title": "Since",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp or strtotime data value to filter posts created after this time"
+          },
+          "until": {
+            "type": "string",
+            "title": "Until",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp or strtotime data value to filter posts created before this time"
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,message,created_time,updated_time,permalink_url,attachments",
+            "description": "Comma-separated list of fields to return for each post"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_PAGE_ROLES",
+      "description": "Retrieves a list of people and their tasks/roles on a Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPageRolesRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_PAGE_VIDEOS",
+      "description": "Retrieves videos from a Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPageVideosRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by video type: uploaded, tagged"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of videos to return (max 100)"
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,created_time,description,title,length,source,picture,views,likes.summary(true)",
+            "description": "Comma-separated list of fields to return for each video"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_POST",
+      "description": "Retrieves details of a specific Facebook post.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPostRequest",
+        "required": [
+          "post_id"
+        ],
+        "properties": {
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,message,created_time,updated_time,permalink_url,from,attachments,likes.summary(true),shares",
+            "description": "Comma-separated list of fields to return"
+          },
+          "post_id": {
+            "type": "string",
+            "title": "Post Id",
+            "description": "The ID of the post to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_POST_INSIGHTS",
+      "description": "Retrieves analytics and insights for a specific Facebook post. Returns metrics like impressions, clicks, and engagement data.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPostInsightsRequest",
+        "required": [
+          "post_id"
+        ],
+        "properties": {
+          "period": {
+            "type": "string",
+            "title": "Period",
+            "default": null,
+            "nullable": true,
+            "description": "Period for the metrics (only applicable for some metrics): lifetime"
+          },
+          "metrics": {
+            "type": "string",
+            "title": "Metrics",
+            "default": "post_impressions,post_impressions_unique,post_clicks,post_engagements",
+            "description": "Comma-separated list of metrics to retrieve. Common metrics: post_impressions, post_impressions_unique, post_clicks, post_engagements"
+          },
+          "post_id": {
+            "type": "string",
+            "title": "Post Id",
+            "description": "The ID of the post to get insights for"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_POST_REACTIONS",
+      "description": "Retrieves reactions (like, love, wow, etc.) for a Facebook post.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPostReactionsRequest",
+        "required": [
+          "post_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by reaction type: LIKE, LOVE, WOW, HAHA, SAD, ANGRY, THANKFUL"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of reactions to return (max 100)"
+          },
+          "post_id": {
+            "type": "string",
+            "title": "Post Id",
+            "description": "The ID of the post to get reactions for"
+          },
+          "summary": {
+            "type": "boolean",
+            "title": "Summary",
+            "default": true,
+            "description": "Include summary with total count per reaction type"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_SCHEDULED_POSTS",
+      "description": "Retrieves scheduled and unpublished posts for a Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetScheduledPostsRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of posts to return (max 100)"
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,message,created_time,scheduled_publish_time,is_published",
+            "description": "Comma-separated list of fields to return for each post"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_GET_USER_PAGES",
+      "description": "Retrieves a list of Pages the user manages, including tasks and access tokens.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUserPagesRequest",
+        "properties": {
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,name,access_token,tasks",
+            "description": "Comma-separated list of fields to return for each page."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "description": "The ID of the user whose pages to retrieve. Defaults to 'me' for current user."
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_LIKE_POST_OR_COMMENT",
+      "description": "Likes a Facebook post or comment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "LikePostOrCommentRequest",
+        "required": [
+          "object_id"
+        ],
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "description": "The ID of the post or comment to like"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_LIST_MANAGED_PAGES",
+      "description": "Retrieves a list of Facebook Pages that the user manages, including page details, access tokens, and tasks.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListManagedPagesRequest",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25,
+            "description": "Maximum number of pages to retrieve per request."
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,name,access_token,category,tasks,about,link,picture",
+            "description": "Comma-separated list of fields to return for each managed page."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "description": "The ID of the user whose managed pages to retrieve. Defaults to 'me' for current user."
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_MARK_MESSAGE_SEEN",
+      "description": "Marks a user's message as seen by the Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MarkMessageSeenRequest",
+        "required": [
+          "page_id",
+          "recipient_id"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          },
+          "recipient_id": {
+            "type": "string",
+            "title": "Recipient Id",
+            "description": "The ID of the user whose message to mark as seen"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_PUBLISH_SCHEDULED_POST",
+      "description": "Publishes a previously scheduled or unpublished Facebook post immediately.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PublishScheduledPostRequest",
+        "required": [
+          "post_id"
+        ],
+        "properties": {
+          "post_id": {
+            "type": "string",
+            "title": "Post Id",
+            "description": "The ID of the scheduled/unpublished post to publish"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_REMOVE_PAGE_TASK",
+      "description": "Removes a user's tasks/access from a specific Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RemovePageTaskRequest",
+        "required": [
+          "page_id",
+          "user"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User",
+            "description": "The ID or username of the user to remove"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_RESCHEDULE_POST",
+      "description": "Changes the scheduled publish time of an unpublished Facebook post.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReschedulePostRequest",
+        "required": [
+          "post_id",
+          "scheduled_publish_time"
+        ],
+        "properties": {
+          "post_id": {
+            "type": "string",
+            "title": "Post Id",
+            "description": "The ID of the scheduled post to reschedule"
+          },
+          "scheduled_publish_time": {
+            "type": "integer",
+            "title": "Scheduled Publish Time",
+            "description": "New Unix timestamp for when to publish the post"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_SEARCH_PAGES",
+      "description": "Searches for Facebook Pages based on a query string. Returns pages matching the search criteria with requested fields. IMPORTANT: This endpoint requires App Review approval for one of: - 'Page Public Content Access' feature - 'Page Public Metadata Access' feature Without App Review approval, this endpoint will return Error #10. To search pages, submit your app for review with the required feature.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SearchPagesRequest",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 10,
+            "nullable": true,
+            "description": "Maximum number of results to return (max 100)"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "Search query for finding pages (e.g., business name, topic, etc.)"
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "id,name,category,link,picture,fan_count,is_verified",
+            "nullable": true,
+            "description": "Comma-separated list of fields to retrieve for each page"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_SEND_MEDIA_MESSAGE",
+      "description": "Sends a media message (image, video, audio, or file) from the Page to a user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SendMediaMessageRequest",
+        "required": [
+          "page_id",
+          "recipient_id",
+          "media_type",
+          "media_url"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page sending the message"
+          },
+          "media_url": {
+            "type": "string",
+            "title": "Media Url",
+            "description": "URL of the media to send"
+          },
+          "media_type": {
+            "type": "string",
+            "title": "Media Type",
+            "description": "Type of media: image, video, audio, or file"
+          },
+          "is_reusable": {
+            "type": "boolean",
+            "title": "Is Reusable",
+            "default": false,
+            "description": "Whether the attachment is reusable"
+          },
+          "recipient_id": {
+            "type": "string",
+            "title": "Recipient Id",
+            "description": "The ID of the message recipient (user ID or PSID)"
+          },
+          "messaging_type": {
+            "type": "string",
+            "title": "Messaging Type",
+            "default": "RESPONSE",
+            "description": "The messaging type - RESPONSE, UPDATE, or MESSAGE_TAG"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_SEND_MESSAGE",
+      "description": "Sends a text message from the Page to a user via Messenger.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SendMessageRequest",
+        "required": [
+          "page_id",
+          "recipient_id",
+          "message_text"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page sending the message"
+          },
+          "message_text": {
+            "type": "string",
+            "title": "Message Text",
+            "description": "The text content of the message to send"
+          },
+          "recipient_id": {
+            "type": "string",
+            "title": "Recipient Id",
+            "description": "The ID of the message recipient (user ID or PSID)"
+          },
+          "messaging_type": {
+            "type": "string",
+            "title": "Messaging Type",
+            "default": "RESPONSE",
+            "description": "The messaging type - RESPONSE, UPDATE, or MESSAGE_TAG"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_TOGGLE_TYPING_INDICATOR",
+      "description": "Shows or hides the typing indicator for a user in Messenger.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ToggleTypingIndicatorRequest",
+        "required": [
+          "page_id",
+          "recipient_id",
+          "typing_on"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          },
+          "typing_on": {
+            "type": "boolean",
+            "title": "Typing On",
+            "description": "True to show typing indicator, False to hide it"
+          },
+          "recipient_id": {
+            "type": "string",
+            "title": "Recipient Id",
+            "description": "The ID of the user to show/hide typing indicator for"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_UNLIKE_POST_OR_COMMENT",
+      "description": "Removes a like from a Facebook post or comment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UnlikePostOrCommentRequest",
+        "required": [
+          "object_id"
+        ],
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "description": "The ID of the post or comment to unlike"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_UPDATE_COMMENT",
+      "description": "Updates an existing Facebook comment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateCommentRequest",
+        "required": [
+          "comment_id",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "The new text content of the comment"
+          },
+          "is_hidden": {
+            "type": "boolean",
+            "title": "Is Hidden",
+            "default": null,
+            "nullable": true,
+            "description": "Whether to hide or unhide the comment"
+          },
+          "comment_id": {
+            "type": "string",
+            "title": "Comment Id",
+            "description": "The ID of the comment to update"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_UPDATE_PAGE_SETTINGS",
+      "description": "Updates settings for a specific Facebook Page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdatePageSettingsRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "about": {
+            "type": "string",
+            "title": "About",
+            "default": null,
+            "nullable": true,
+            "description": "Updated about section for the page"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Phone",
+            "default": null,
+            "nullable": true,
+            "description": "Updated phone number"
+          },
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Emails",
+            "default": null,
+            "nullable": true,
+            "description": "Updated email addresses"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page to update"
+          },
+          "website": {
+            "type": "string",
+            "title": "Website",
+            "default": null,
+            "nullable": true,
+            "description": "Updated website URL"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "nullable": true,
+            "description": "Updated description for the page"
+          },
+          "general_info": {
+            "type": "string",
+            "title": "General Info",
+            "default": null,
+            "nullable": true,
+            "description": "Updated general information"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_UPDATE_POST",
+      "description": "Updates an existing Facebook Page post.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdatePostRequest",
+        "required": [
+          "post_id"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": null,
+            "nullable": true,
+            "description": "Updated text content of the post"
+          },
+          "post_id": {
+            "type": "string",
+            "title": "Post Id",
+            "description": "The ID of the post to update"
+          },
+          "og_phrase": {
+            "type": "string",
+            "title": "Og Phrase",
+            "default": null,
+            "nullable": true,
+            "description": "Open Graph phrase"
+          },
+          "og_icon_id": {
+            "type": "string",
+            "title": "Og Icon Id",
+            "default": null,
+            "nullable": true,
+            "description": "Open Graph icon ID"
+          },
+          "og_object_id": {
+            "type": "string",
+            "title": "Og Object Id",
+            "default": null,
+            "nullable": true,
+            "description": "Open Graph object ID"
+          },
+          "og_action_type_id": {
+            "type": "string",
+            "title": "Og Action Type Id",
+            "default": null,
+            "nullable": true,
+            "description": "Open Graph action type ID"
+          },
+          "og_suggestion_mechanism": {
+            "type": "string",
+            "title": "Og Suggestion Mechanism",
+            "default": null,
+            "nullable": true,
+            "description": "Open Graph suggestion mechanism"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_UPLOAD_PHOTO",
+      "description": "Uploads a photo file directly to a Facebook Page. Supports local file upload up to 10MB.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UploadPhotoRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "default": null,
+            "nullable": true,
+            "description": "Public URL of the photo. Alternative to 'photo'"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Tags",
+            "default": null,
+            "nullable": true,
+            "description": "List of user tags with format [{'tag_uid': 'USER_ID', 'x': 50, 'y': 50}]"
+          },
+          "photo": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "Photo file to upload (max 10MB). Alternative to 'url'",
+            "file_uploadable": true
+          },
+          "caption": {
+            "type": "string",
+            "title": "Caption",
+            "default": null,
+            "nullable": true,
+            "description": "Caption for the photo"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "default": true,
+            "description": "Whether to publish the photo immediately"
+          },
+          "targeting": {
+            "type": "object",
+            "title": "Targeting",
+            "default": null,
+            "nullable": true,
+            "description": "Audience targeting specifications",
+            "additionalProperties": true
+          },
+          "scheduled_publish_time": {
+            "type": "integer",
+            "title": "Scheduled Publish Time",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp to schedule the post"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_UPLOAD_PHOTOS_BATCH",
+      "description": "Uploads multiple photo files in batch to a Facebook Page or Album. Uses Facebook's batch API for efficient multi-photo upload. Maximum 50 photos per batch.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UploadPhotosBatchRequest",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "photos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "FileUploadable",
+              "required": [
+                "name",
+                "mimetype",
+                "s3key"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "examples": [
+                    "document.pdf",
+                    "image.jpg",
+                    "report.docx"
+                  ],
+                  "description": "The filename that will be used when uploading the file to the destination service"
+                },
+                "s3key": {
+                  "type": "string",
+                  "title": "S3Key",
+                  "examples": [
+                    "47563/gmail/GET_ATTACHMENT/response/12345"
+                  ],
+                  "description": "The S3 key of a publicly accessible file, typically returned from a previous download action that stored the file in S3. This key references an existing file that can be uploaded to another service."
+                },
+                "mimetype": {
+                  "type": "string",
+                  "title": "Mimetype",
+                  "examples": [
+                    "application/pdf",
+                    "image/jpeg",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ],
+                  "description": "The MIME type of the file"
+                }
+              },
+              "file_uploadable": true
+            },
+            "title": "Photos",
+            "default": null,
+            "examples": [
+              [
+                "photo1.jpg",
+                "photo2.png",
+                "photo3.jpeg"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of photo files to upload (max 50 photos)"
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          },
+          "album_id": {
+            "type": "string",
+            "title": "Album Id",
+            "default": null,
+            "nullable": true,
+            "description": "ID of album to add photos to. If not provided, photos will be uploaded to timeline"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "default": true,
+            "description": "Whether to publish the photos immediately"
+          },
+          "photo_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Photo Urls",
+            "default": null,
+            "examples": [
+              [
+                "https://.../a.jpg",
+                "https://.../b.png"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of photo URLs to upload (alternative to 'photos')"
+          }
+        }
+      }
+    },
+    {
+      "name": "FACEBOOK_UPLOAD_VIDEO",
+      "description": "Uploads a video file directly to a Facebook Page. Supports local file upload. For large videos (>100MB), uses resumable upload.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UploadVideoRequest",
+        "required": [
+          "page_id",
+          "video"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "nullable": true,
+            "description": "Title of the video"
+          },
+          "video": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "Video file to upload (max 10GB, recommended under 1GB)",
+            "file_uploadable": true
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "description": "The ID of the Facebook Page"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "default": true,
+            "description": "Whether to publish immediately"
+          },
+          "targeting": {
+            "type": "object",
+            "title": "Targeting",
+            "default": null,
+            "nullable": true,
+            "description": "Audience targeting specifications",
+            "additionalProperties": true
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "nullable": true,
+            "description": "Description of the video"
+          },
+          "content_tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Content Tags",
+            "default": null,
+            "nullable": true,
+            "description": "List of content tags"
+          },
+          "custom_labels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Custom Labels",
+            "default": null,
+            "nullable": true,
+            "description": "Custom labels for the video"
+          },
+          "scheduled_publish_time": {
+            "type": "integer",
+            "title": "Scheduled Publish Time",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp to schedule the video post"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:31.114340+00:00",
+    "source": "smithery"
+  }
+}

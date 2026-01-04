@@ -1,0 +1,282 @@
+{
+  "qualifiedName": "@aryankeluskar/polymarket-mcp",
+  "displayName": "Polymarket",
+  "description": "Discover and filter Polymarket prediction markets and events by tags, volume, liquidity, and activity. Analyze individual markets with probabilities, market health, and recent trade insights to inform decisions. Track trends across categories to spot opportunities and compare sentiment over time.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/192923f3-9667-4150-8254-7f5c0139e448.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@aryankeluskar/polymarket-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@aryankeluskar/polymarket-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {
+          "debug": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable debug logging"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_markets",
+      "title": "Search Markets",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search Polymarket prediction markets with filters. Find active markets, filter by tags, volume, liquidity, and more. Perfect for market discovery and analysis.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Number of results (max 100)"
+          },
+          "order": {
+            "type": "string",
+            "description": "Field to order by (e.g., 'volume', 'liquidity', 'volume24hr')"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query to filter markets by question text (e.g., 'Bitcoin $100k', 'Trump wins')"
+          },
+          "closed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Filter by closed status (false = only active markets, true = include closed)"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Pagination offset"
+          },
+          "tag_id": {
+            "type": "number",
+            "description": "Filter by tag ID (use list_tags to discover)"
+          },
+          "ascending": {
+            "type": "boolean",
+            "description": "Sort direction (true = ascending, false = descending)"
+          },
+          "volume_min": {
+            "type": "number",
+            "description": "Minimum volume in USD"
+          },
+          "liquidity_min": {
+            "type": "number",
+            "description": "Minimum liquidity in USD"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_market",
+      "title": "Get Market Details",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get detailed information about a specific market by slug. Returns probabilities, volume, liquidity, outcomes, and full market data.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Market slug (from URL or search results)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_events",
+      "title": "Search Events",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search Polymarket events. Events group related markets together (e.g., 'Presidential Election 2024' contains multiple markets). Great for discovering market clusters.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Number of results (max 100)"
+          },
+          "order": {
+            "type": "string",
+            "description": "Field to order by"
+          },
+          "closed": {
+            "type": "boolean",
+            "description": "Filter by closed status"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Pagination offset"
+          },
+          "tag_id": {
+            "type": "number",
+            "description": "Filter by tag ID"
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Show only featured events"
+          },
+          "ascending": {
+            "type": "boolean",
+            "description": "Sort direction"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_event",
+      "title": "Get Event Details",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get detailed information about a specific event by slug, including all related markets.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Event slug (from URL or search results)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_tags",
+      "title": "List Tags",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List all available tags/categories for filtering markets and events. Use tag IDs with search_markets or search_events.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 50,
+            "description": "Number of tags to return"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Pagination offset"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_trades",
+      "title": "Get Recent Trades",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get recent trade activity from Polymarket's Data API. Analyze trading patterns, volume, and market sentiment.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "side": {
+            "enum": [
+              "BUY",
+              "SELL"
+            ],
+            "type": "string",
+            "description": "Filter by trade side"
+          },
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "description": "Number of trades to fetch (max 100)"
+          },
+          "market": {
+            "type": "string",
+            "description": "Filter by market condition ID"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Pagination offset"
+          },
+          "eventId": {
+            "type": "string",
+            "description": "Filter by event ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_market",
+      "title": "Analyze Market",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get comprehensive market analysis including probabilities, trading activity, and AI-friendly insights. Combines market data with recent trades.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Market slug to analyze"
+          },
+          "include_trades": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include recent trading activity"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:03:52.447553+00:00",
+    "source": "smithery"
+  }
+}

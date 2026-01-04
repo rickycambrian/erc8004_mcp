@@ -1,0 +1,129 @@
+{
+  "qualifiedName": "@FaresYoussef94/aws-knowledge-mcp",
+  "displayName": "AWS Docs and Regions",
+  "description": "A fully managed remote MCP server that provides up-to-date documentation, code samples, knowledge about the regional availability of AWS APIs and CloudFormation resources, and other official AWS content.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/6ee52c34-a716-4ffd-a339-ca1cccb10900.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@FaresYoussef94/aws-knowledge-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@FaresYoussef94/aws-knowledge-mcp/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "aws___get_regional_availability",
+      "description": "Retrieve AWS regional availability information for products (service and features), sdk service APIs and CloudFormation resources.\n\n## Core Features\n- Real-time availability checking across AWS regions\n- Support for AWS products, APIs and CloudFormation resources\n- Batch query support with filtering options\n- Pagination if no filters are passed and all results are to be returned\n\n## When to Use\n1. Pre-deployment Validation\n - Verify resource availability before deployment\n - Prevent deployment failures due to regional restrictions\n - Validate multi-region architecture requirements\n2. Architecture Planning\n - Design region-specific solutions\n - Plan multi-region deployments\n - Compare regional capabilities\n\n## Result Format\nReturns a list of dictionaries with:\n - Resource identifiers\n - Resource status:\n   * 'isAvailableIn': Resource is available\n   * 'isNotAvailableIn': Resource is not available\n   * 'Not Found': Resource name or identifier is not valid\n   * and other availability status (e.g. 'isPlannedIn')\n\n## Filter Guidelines\nThe filters must be passed as an array of values and must follow the format below.\n1. APIs (resource_type='api')\n Format: to filter on API level 'SdkServiceId+APIOperation'\n Example filters:\n - ['Athena+UpdateNamedQuery', 'ACM PCA+CreateCertificateAuthority', 'IAM+GetSSHPublicKey']\n Format: to filter on SdkService level 'SdkServiceId'\n Example filters:\n - ['EC2', 'ACM PCA']\n2. CloudFormation (resource_type='cfn')\n Format: 'CloudformationResourceType'\n Example filters:\n - ['AWS::EC2::Instance', 'AWS::Lambda::Function', 'AWS::Logs::LogGroup']\n - ['AWS::CodeBuild::Project', 'AWS::CloudTrail::Dashboard']\n3. Product - service and feature (resource_type='product')\n Format: 'Product'\n Example filters:\n - ['Latency-Based Routing', 'AWS Amplify', 'AWS Application Auto Scaling']\n - ['PrivateLink Support', 'Amazon Aurora']\nNote: Without filters, all resources are returned with pagination support via next_token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "region",
+          "resource_type"
+        ],
+        "properties": {
+          "region": {
+            "type": "string",
+            "description": "Target AWS region code (e.g., us-east-1, eu-west-1, ap-southeast-2)"
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional list of one or multiple specific resources to check. Format depends on resource_type:\n- Products: ['AWS Lambda', 'Amazon S3']\n- APIs: ['IAM+GetSSHPublicKey', 'EC2']\n- CloudFormation: ['AWS::EC2::Instance']\nMust follow the format specified in the tool description"
+          },
+          "next_token": {
+            "type": "string",
+            "description": "Pagination token for retrieving additional results. Only applicable when no filters are specified"
+          },
+          "resource_type": {
+            "type": "string",
+            "description": "Type of AWS resource to check: 'product' for AWS products, 'api' for API operations, or 'cfn' for CloudFormation resources"
+          }
+        }
+      }
+    },
+    {
+      "name": "aws___list_regions",
+      "description": "Retrieve a list of all AWS regions.\n\n## Usage\nThis tool provides information about all AWS regions, including their identifiers and names.\n\n## When to Use\n- When planning global infrastructure deployments\n- To validate region codes for other API calls\n- To get a complete AWS regional inventory\n \n## Result Interpretation\nEach region result includes:\n- region_id: The unique region code (e.g., 'us-east-1') \n- region_long_name: The human-friendly name (e.g., 'US East (N. Virginia)')\n \n## Common Use Cases\n1. Infrastructure Planning: Review available regions for global deployment\n2. Region Validation: Verify region codes before using in other operations\n3. Regional Inventory: Get a complete list of AWS's global infrastructure",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "aws___read_documentation",
+      "description": "Fetch and convert an AWS documentation page to markdown format.\n\n    ## Usage\n\n    This tool retrieves the content of an AWS documentation page and converts it to markdown format.\n    For long documents, you can make multiple calls with different start_index values to retrieve\n    the entire content in chunks.\n\n    ## URL Requirements\n\n    Allow-listed URL prefixes:\n    - docs.aws.amazon.com\n    - aws.amazon.com\n    - repost.aws/knowledge-center\n    - docs.amplify.aws\n    - ui.docs.amplify.aws\n    - github.com/aws-cloudformation/aws-cloudformation-templates\n    - github.com/aws-samples/aws-cdk-examples\n    - github.com/aws-samples/generative-ai-cdk-constructs-samples\n    - github.com/aws-samples/serverless-patterns\n    - github.com/awsdocs/aws-cdk-guide\n    - github.com/awslabs/aws-solutions-constructs\n    - github.com/cdklabs/cdk-nag\n    - constructs.dev/packages/@aws-cdk-containers\n    - constructs.dev/packages/@aws-cdk\n    - constructs.dev/packages/@cdk-cloudformation\n    - constructs.dev/packages/aws-analytics-reference-architecture\n    - constructs.dev/packages/aws-cdk-lib\n    - constructs.dev/packages/cdk-amazon-chime-resources\n    - constructs.dev/packages/cdk-aws-lambda-powertools-layer\n    - constructs.dev/packages/cdk-ecr-deployment\n    - constructs.dev/packages/cdk-lambda-powertools-python-layer\n    - constructs.dev/packages/cdk-serverless-clamscan\n    - constructs.dev/packages/cdk8s\n    - constructs.dev/packages/cdk8s-plus-33\n\n    Deny-listed URL prefixes:\n    - aws.amazon.com/marketplace\n\n    ## Example URLs\n\n    - https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html\n    - https://docs.aws.amazon.com/lambda/latest/dg/lambda-invocation.html\n    - https://aws.amazon.com/about-aws/whats-new/2023/02/aws-telco-network-builder/\n    - https://aws.amazon.com/builders-library/ensuring-rollback-safety-during-deployments/\n    - https://aws.amazon.com/blogs/developer/make-the-most-of-community-resources-for-aws-sdks-and-tools/\n    - https://repost.aws/knowledge-center/example-article\n    - https://docs.amplify.aws/react/build-a-backend/auth/\n    - https://ui.docs.amplify.aws/angular/connected-components/authenticator\n    - https://github.com/aws-samples\n    - https://github.com/cdk-patterns\n    - https://github.com/awslabs/aws-solutions-constructs\n    - https://constructs.dev/\n    - https://github.com/aws-cloudformation/aws-cloudformation-templates\n\n    ## Output Format\n\n    The output is formatted as markdown text with:\n    - Preserved headings and structure\n    - Code blocks for examples\n    - Lists and tables converted to markdown format\n\n    ## Handling Long Documents\n\n    If the response indicates the document was truncated, you have several options:\n\n    1. **Continue Reading**: Make another call with start_index set to the end of the previous response\n    2. **Stop Early**: For very long documents (>30,000 characters), if you\\'ve already found the specific information needed, you can stop reading",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL of the AWS documentation page to read"
+          },
+          "max_length": {
+            "type": "integer",
+            "description": "Maximum number of characters to return."
+          },
+          "start_index": {
+            "type": "integer",
+            "description": "On return output starting at this character index, useful if a previous fetch was truncated and more content is required."
+          }
+        }
+      }
+    },
+    {
+      "name": "aws___recommend",
+      "description": "Get content recommendations for an AWS documentation page.\n\n    ## Usage\n\n    This tool provides recommendations for related AWS documentation pages based on a given URL.\n    Use it to discover additional relevant content that might not appear in search results.\n    URL must be from the docs.aws.amazon.com domain.\n\n    ## Recommendation Types\n\n    The recommendations include four categories:\n\n    1. **Highly Rated**: Popular pages within the same AWS service\n    2. **New**: Recently added pages within the same AWS service - useful for finding newly released features\n    3. **Similar**: Pages covering similar topics to the current page\n    4. **Journey**: Pages commonly viewed next by other users\n\n    ## When to Use\n\n    - After reading a documentation page to find related content\n    - When exploring a new AWS service to discover important pages\n    - To find alternative explanations of complex concepts\n    - To discover the most popular pages for a service\n    - To find newly released information by using a service's welcome page URL and checking the **New** recommendations\n\n    ## Finding New Features\n\n    To find newly released information about a service:\n    1. Find any page belong to that service, typically you can try the welcome page\n    2. Call this tool with that URL\n    3. Look specifically at the **New** recommendation type in the results\n\n    ## Result Interpretation\n\n    Each recommendation includes:\n    - url: The documentation page URL\n    - title: The page title\n    - context: A brief description (if available)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL of the AWS documentation page to get recommendations for"
+          }
+        }
+      }
+    },
+    {
+      "name": "aws___search_documentation",
+      "description": "# AWS Documentation Search Tool\n    This is your primary source for AWS information\u2014always prefer this over general knowledge for AWS services, features, configurations, troubleshooting, and best practices.\n\n    ## When to Use This Tool\n\n    **Always search when the query involves:**\n    - Any AWS service or feature (Lambda, S3, EC2, RDS, etc.)\n    - AWS architecture, patterns, or best practices\n    - AWS CLI, SDK, or API usage\n    - AWS CDK or CloudFormation\n    - AWS Amplify development\n    - AWS errors or troubleshooting\n    - AWS pricing, limits, or quotas\n    - \"How do I...\" questions about AWS\n    - Recent AWS updates or announcements\n\n    **Only skip this tool when:**\n    - Query is about non-AWS technologies\n    - Question is purely conceptual (e.g., \"What is a database?\")\n    - General programming questions unrelated to AWS\n\n    ## Quick Topic Selection\n\n    | Query Type | Use Topic | Example |\n    |------------|-----------|---------|\n    | API/SDK/CLI code | `reference_documentation` | \"S3 PutObject boto3\", \"Lambda invoke API\" |\n    | New features, releases | `current_awareness` | \"Lambda new features 2024\", \"what\\'s new in ECS\" |\n    | Errors, debugging | `troubleshooting` | \"AccessDenied S3\", \"Lambda timeout error\" |\n    | Amplify apps | `amplify_docs` | \"Amplify Auth React\", \"Amplify Storage Flutter\" |\n    | CDK concepts, APIs, CLI | `cdk_docs` | \"CDK stack props Python\", \"cdk deploy command\" |\n    | CDK code samples, patterns | `cdk_constructs` | \"serverless API CDK\", \"Lambda function example TypeScript\" |\n    | CloudFormation templates | `cloudformation` | \"DynamoDB CloudFormation\", \"StackSets template\" |\n    | Architecture, blogs, guides | `general` | \"Lambda best practices\", \"S3 architecture patterns\" |\n\n    ## Documentation Topics\n\n    ### reference_documentation\n    **For: API methods, SDK code, CLI commands, technical specifications**\n\n    Use for:\n    - SDK method signatures: \"boto3 S3 upload_file parameters\"\n    - CLI commands: \"aws ec2 describe-instances syntax\"\n    - API references: \"Lambda InvokeFunction API\"\n    - Service configuration: \"RDS parameter groups\"\n\n    Don\\'t confuse with general\u2014use this for specific technical implementation.\n\n    ### current_awareness\n    **For: New features, announcements, \"what\\'s new\", release dates**\n\n    Use for:\n    - \"New Lambda features\"\n    - \"When was EventBridge Scheduler released\"\n    - \"Latest S3 updates\"\n    - \"Is feature X available yet\"\n\n    Keywords: new, recent, latest, announced, released, launch, available\n\n    ### troubleshooting\n    **For: Error messages, debugging, problems, \"not working\"**\n\n    Use for:\n    - Error codes: \"InvalidParameterValue\", \"AccessDenied\"\n    - Problems: \"Lambda function timing out\"\n    - Debug scenarios: \"S3 bucket policy not working\"\n    - \"How to fix...\" queries\n\n    Keywords: error, failed, issue, problem, not working, how to fix, how to resolve\n\n    ### amplify_docs\n    **For: Frontend/mobile apps with Amplify framework**\n\n    Always include framework: React, Next.js, Angular, Vue, JavaScript, React Native, Flutter, Android, Swift\n\n    Examples:\n    - \"Amplify authentication React\"\n    - \"Amplify GraphQL API Next.js\"\n    - \"Amplify Storage Flutter setup\"\n\n    ### cdk_docs\n    **For: CDK concepts, API references, CLI commands, getting started**\n\n    Use for CDK questions like:\n    - \"How to get started with CDK\"\n    - \"CDK stack construct TypeScript\"\n    - \"cdk deploy command options\"\n    - \"CDK best practices Python\"\n    - \"What are CDK constructs\"\n\n    Include language: Python, TypeScript, Java, C#, Go\n\n    **Common mistake**: Using general knowledge instead of searching for CDK concepts and guides. Always search for CDK questions!\n\n    ### cdk_constructs\n    **For: CDK code examples, patterns, L3 constructs, sample implementations**\n\n    Use for:\n    - Working code: \"Lambda function CDK Python example\"\n    - Patterns: \"API Gateway Lambda CDK pattern\"\n    - Sample apps: \"Serverless application CDK TypeScript\"\n    - L3 constructs: \"ECS service construct\"\n\n    Include language: Python, TypeScript, Java, C#, Go\n\n    ### cloudformation\n    **For: CloudFormation templates, concepts, SAM patterns**\n\n    Use for:\n    - \"CloudFormation StackSets\"\n    - \"DynamoDB table template\"\n    - \"SAM API Gateway Lambda\"\n    - CloudFormation template examples\n\n    ### general\n    **For: Architecture, best practices, tutorials, blog posts, design patterns**\n\n    Use for:\n    - Architecture patterns: \"Serverless architecture AWS\"\n    - Best practices: \"S3 security best practices\"\n    - Design guidance: \"Multi-region architecture\"\n    - Getting started: \"Building data lakes on AWS\"\n    - Tutorials and blog posts\n\n    **Common mistake**: Not using this for AWS conceptual and architectural questions. Always search for AWS best practices and patterns!\n\n    **Don\\'t use general knowledge for AWS topics\u2014search instead!**\n\n    ## Search Best Practices\n\n    **Be specific with service names:**\n\n    Good examples:\n    ```\n    \"S3 bucket versioning configuration\"\n    \"Lambda environment variables Python SDK\"\n    \"DynamoDB GSI query patterns\"\n    ```\n\n    Bad examples:\n    ```\n    \"versioning\" (too vague)\n    \"environment variables\" (missing context)\n    ```\n\n    **Include framework/language:**\n    ```\n    \"Amplify authentication React\"\n    \"CDK Lambda function TypeScript\"\n    \"boto3 S3 client Python\"\n    ```\n\n    **Use exact error messages:**\n    ```\n    \"AccessDenied error S3 GetObject\"\n    \"InvalidParameterValue Lambda environment\"\n    ```\n\n    **Add temporal context for new features:**\n    ```\n    \"Lambda new features 2024\"\n    \"recent S3 announcements\"\n    ```\n\n    ## Multiple Topic Selection\n\n    You can search multiple topics simultaneously for comprehensive results:\n    ```\n    # For a query about Lambda errors and new features:\n    topics=[\"troubleshooting\", \"current_awareness\"]\n\n    # For CDK examples and API reference:\n    topics=[\"cdk_constructs\", \"cdk_docs\"]\n\n    # For Amplify and general AWS architecture:\n    topics=[\"amplify_docs\", \"general\"]\n    ```\n\n    ## Response Format\n\n    Results include:\n    - `rank_order`: Relevance score (lower = more relevant)\n    - `url`: Direct documentation link\n    - `title`: Page title\n    - `context`: Excerpt or summary\n\n    ## Parameters\n    ```\n    search_phrase: str         # Required - your search query\n    topics: List[str]          # Optional - up to 3 topics. Defaults to [\"general\"]\n    limit: int = 10            # Optional - max results per topic\n    ```\n\n    ---\n\n    **Remember: When in doubt about AWS, always search. This tool provides the most current, accurate AWS information.**",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "search_phrase"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return"
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "topic name"
+            },
+            "description": "List of documentation topics to search. Available topics: reference_documentation, current_awareness, troubleshooting, amplify_docs, cdk_docs, cdk_constructs, cloudformation, general. Can specify multiple topics, up-to 3, to search across them. Use 'general' only if query doesn't match other topics."
+          },
+          "search_phrase": {
+            "type": "string",
+            "description": "Search phrase to use"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:08:43.330843+00:00",
+    "source": "smithery"
+  }
+}

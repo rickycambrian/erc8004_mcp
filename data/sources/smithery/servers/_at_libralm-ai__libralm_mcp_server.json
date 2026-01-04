@@ -1,0 +1,416 @@
+{
+  "qualifiedName": "@libralm-ai/libralm_mcp_server",
+  "displayName": "LibraLM Book Summaries",
+  "description": "Search a growing library of professionally summarized books. Read comprehensive summaries, chapter-by-chapter breakdowns, tables of contents, and distilled key insights. Find titles by author, title, or ISBN and fetch specific chapter summaries when you need them.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@libralm-ai/libralm_mcp_server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@libralm-ai/libralm_mcp_server/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "apiKey"
+        ],
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Your LibraLM API key"
+          },
+          "apiUrl": {
+            "type": "string",
+            "default": "https://yjv5auah93.execute-api.us-east-1.amazonaws.com/prod",
+            "description": "Optional base URL for the LibraLM API service"
+          }
+        },
+        "description": "Configuration for LibraLM MCP Server",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "list_books",
+      "description": "List all available books with their basic information",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_booksArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "BookInfo": {
+            "type": "object",
+            "title": "BookInfo",
+            "required": [
+              "book_id",
+              "title",
+              "has_summary",
+              "has_chapter_summaries",
+              "has_table_of_contents"
+            ],
+            "properties": {
+              "tier": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Tier",
+                "default": null
+              },
+              "title": {
+                "type": "string",
+                "title": "Title"
+              },
+              "author": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Author",
+                "default": null
+              },
+              "length": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Length",
+                "default": null
+              },
+              "book_id": {
+                "type": "string",
+                "title": "Book Id"
+              },
+              "summary": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Summary",
+                "default": null
+              },
+              "category": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Category",
+                "default": null
+              },
+              "subtitle": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Subtitle",
+                "default": null
+              },
+              "has_summary": {
+                "type": "boolean",
+                "title": "Has Summary"
+              },
+              "release_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Release Date",
+                "default": null
+              },
+              "has_chapter_summaries": {
+                "type": "boolean",
+                "title": "Has Chapter Summaries"
+              },
+              "has_table_of_contents": {
+                "type": "boolean",
+                "title": "Has Table Of Contents"
+              }
+            },
+            "description": "Book information structure"
+          }
+        },
+        "title": "list_booksOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/BookInfo"
+            },
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_book_summary",
+      "description": "Get the main summary for a book",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_book_summaryArguments",
+        "required": [
+          "book_id"
+        ],
+        "properties": {
+          "book_id": {
+            "type": "string",
+            "title": "Book Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_book_summaryOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_book_details",
+      "description": "Get detailed information about a specific book",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_book_detailsArguments",
+        "required": [
+          "book_id"
+        ],
+        "properties": {
+          "book_id": {
+            "type": "string",
+            "title": "Book Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "BookInfo",
+        "required": [
+          "book_id",
+          "title",
+          "has_summary",
+          "has_chapter_summaries",
+          "has_table_of_contents"
+        ],
+        "properties": {
+          "tier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tier",
+            "default": null
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author",
+            "default": null
+          },
+          "length": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Length",
+            "default": null
+          },
+          "book_id": {
+            "type": "string",
+            "title": "Book Id"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary",
+            "default": null
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category",
+            "default": null
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle",
+            "default": null
+          },
+          "has_summary": {
+            "type": "boolean",
+            "title": "Has Summary"
+          },
+          "release_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Date",
+            "default": null
+          },
+          "has_chapter_summaries": {
+            "type": "boolean",
+            "title": "Has Chapter Summaries"
+          },
+          "has_table_of_contents": {
+            "type": "boolean",
+            "title": "Has Table Of Contents"
+          }
+        },
+        "description": "Book information structure"
+      }
+    },
+    {
+      "name": "get_table_of_contents",
+      "description": "Get the table of contents for a book with chapter descriptions",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_table_of_contentsArguments",
+        "required": [
+          "book_id"
+        ],
+        "properties": {
+          "book_id": {
+            "type": "string",
+            "title": "Book Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_table_of_contentsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_chapter_summary",
+      "description": "Get the summary for a specific chapter of a book",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_chapter_summaryArguments",
+        "required": [
+          "book_id",
+          "chapter_number"
+        ],
+        "properties": {
+          "book_id": {
+            "type": "string",
+            "title": "Book Id"
+          },
+          "chapter_number": {
+            "type": "integer",
+            "title": "Chapter Number"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_chapter_summaryOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:15:02.233770+00:00",
+    "source": "smithery"
+  }
+}

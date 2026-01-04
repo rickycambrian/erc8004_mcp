@@ -1,0 +1,255 @@
+{
+  "qualifiedName": "@punitarani/fli",
+  "displayName": "Search Google Flights",
+  "description": "Search for Flights on Google Flights.\n\nYou can search for the cheapest days to fly and also the specific flight information.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/03781df6-7619-4ef5-8f87-e3c77da9ea93.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@punitarani/fli",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@punitarani/fli/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_flights",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Search for flights with flexible filtering options.\n\nThis tool searches for flights between two airports on a specific date\nwith various filtering options like time ranges, airlines, seat class, etc.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "FlightSearchRequest": {
+            "type": "object",
+            "title": "FlightSearchRequest",
+            "required": [
+              "from_airport",
+              "to_airport",
+              "date"
+            ],
+            "properties": {
+              "date": {
+                "type": "string",
+                "title": "Date",
+                "description": "Travel date in YYYY-MM-DD format"
+              },
+              "stops": {
+                "type": "string",
+                "title": "Stops",
+                "default": "ANY",
+                "description": "Maximum stops: ANY, NON_STOP, ONE_STOP, TWO_PLUS_STOPS"
+              },
+              "sort_by": {
+                "type": "string",
+                "title": "Sort By",
+                "default": "CHEAPEST",
+                "description": "Sort by: CHEAPEST, DURATION, DEPARTURE_TIME, ARRIVAL_TIME"
+              },
+              "airlines": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Airlines",
+                "default": null,
+                "description": "List of airline codes (e.g., ['BA', 'KL'])"
+              },
+              "seat_class": {
+                "type": "string",
+                "title": "Seat Class",
+                "default": "ECONOMY",
+                "description": "Seat type: ECONOMY, PREMIUM_ECONOMY, BUSINESS, FIRST"
+              },
+              "time_range": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Time Range",
+                "default": null,
+                "description": "Time range in 24h format (e.g., '6-20')"
+              },
+              "to_airport": {
+                "type": "string",
+                "title": "To Airport",
+                "description": "Arrival airport code (e.g., 'LHR')"
+              },
+              "return_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Return Date",
+                "default": null,
+                "description": "Return date in YYYY-MM-DD format for round trips"
+              },
+              "from_airport": {
+                "type": "string",
+                "title": "From Airport",
+                "description": "Departure airport code (e.g., 'JFK')"
+              }
+            },
+            "description": "Search for flights between two airports on a specific date."
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "properties": {
+          "request": {
+            "$ref": "#/$defs/FlightSearchRequest",
+            "title": "Request"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "search_cheap_flights",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Find the cheapest dates to fly between two airports over a date range.\n\nThis tool searches for the cheapest flights across a flexible date range,\nperfect for finding the best deals when your travel dates are flexible.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "CheapFlightSearchRequest": {
+            "type": "object",
+            "title": "CheapFlightSearchRequest",
+            "required": [
+              "from_airport",
+              "to_airport",
+              "from_date",
+              "to_date"
+            ],
+            "properties": {
+              "stops": {
+                "type": "string",
+                "title": "Stops",
+                "default": "ANY",
+                "description": "Maximum stops: ANY, NON_STOP, ONE_STOP, TWO_PLUS_STOPS"
+              },
+              "to_date": {
+                "type": "string",
+                "title": "To Date",
+                "description": "End date for search range in YYYY-MM-DD format"
+              },
+              "airlines": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Airlines",
+                "default": null,
+                "description": "List of airline codes (e.g., ['BA', 'KL'])"
+              },
+              "duration": {
+                "type": "integer",
+                "title": "Duration",
+                "default": 3,
+                "description": "Duration of trip in days for round trips"
+              },
+              "from_date": {
+                "type": "string",
+                "title": "From Date",
+                "description": "Start date for search range in YYYY-MM-DD format"
+              },
+              "round_trip": {
+                "type": "boolean",
+                "title": "Round Trip",
+                "default": false,
+                "description": "Whether to search for round-trip flights"
+              },
+              "seat_class": {
+                "type": "string",
+                "title": "Seat Class",
+                "default": "ECONOMY",
+                "description": "Seat type: ECONOMY, PREMIUM_ECONOMY, BUSINESS, FIRST"
+              },
+              "time_range": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Time Range",
+                "default": null,
+                "description": "Time range in 24h format (e.g., '6-20')"
+              },
+              "to_airport": {
+                "type": "string",
+                "title": "To Airport",
+                "description": "Arrival airport code (e.g., 'LHR')"
+              },
+              "from_airport": {
+                "type": "string",
+                "title": "From Airport",
+                "description": "Departure airport code (e.g., 'JFK')"
+              },
+              "sort_by_price": {
+                "type": "boolean",
+                "title": "Sort By Price",
+                "default": false,
+                "description": "Sort results by price (lowest to highest)"
+              }
+            },
+            "description": "Search for the cheapest flights between two airports over a date range."
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "properties": {
+          "request": {
+            "$ref": "#/$defs/CheapFlightSearchRequest",
+            "title": "Request"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:10:55.979421+00:00",
+    "source": "smithery"
+  }
+}

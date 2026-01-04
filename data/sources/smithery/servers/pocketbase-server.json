@@ -1,0 +1,645 @@
+{
+  "qualifiedName": "pocketbase-server",
+  "displayName": "Advanced PocketBase Server",
+  "description": "(Tools Fixed July 28th includes Stripe integration for full SAAS support) An MCP server for interacting with PocketBase databases, offering advanced database operations and schema management.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/pocketbase.io.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/pocketbase-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/pocketbase-server/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "pocketbaseUrl"
+        ],
+        "properties": {
+          "debug": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable debug logging for troubleshooting"
+          },
+          "smtpHost": {
+            "type": "string",
+            "description": "SMTP host for email sending"
+          },
+          "smtpPass": {
+            "type": "string",
+            "description": "SMTP password for email sending"
+          },
+          "smtpPort": {
+            "type": "number",
+            "description": "SMTP port for email sending"
+          },
+          "smtpUser": {
+            "type": "string",
+            "description": "SMTP username for email sending"
+          },
+          "adminEmail": {
+            "type": "string",
+            "description": "Admin email for elevated operations (enables super admin authentication)"
+          },
+          "adminPassword": {
+            "type": "string",
+            "description": "Admin password for elevated operations"
+          },
+          "pocketbaseUrl": {
+            "type": "string",
+            "minLength": 1,
+            "description": "PocketBase instance URL (e.g., https://your-pb.com)"
+          },
+          "sendgridApiKey": {
+            "type": "string",
+            "description": "SendGrid API key for advanced email features"
+          },
+          "stripeSecretKey": {
+            "type": "string",
+            "description": "Stripe secret key for payment processing"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-mcp-version": "1.0",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "health_check",
+      "annotations": {
+        "type": "object",
+        "properties": {}
+      },
+      "description": "Simple health check endpoint",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_server_status",
+      "annotations": {
+        "type": "object",
+        "properties": {}
+      },
+      "description": "Get comprehensive server status and configuration",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "pocketbase_list_collections",
+      "annotations": {
+        "type": "object",
+        "properties": {}
+      },
+      "description": "List all PocketBase collections",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "pocketbase_get_collection",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "collectionId"
+        ],
+        "properties": {
+          "collectionId": {
+            "type": "string",
+            "description": "Collection ID or name"
+          }
+        }
+      },
+      "description": "Get details for a specific PocketBase collection",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "pocketbase_create_collection",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Collection name"
+          },
+          "type": {
+            "enum": [
+              "base",
+              "auth",
+              "view"
+            ],
+            "type": "string",
+            "description": "Collection type"
+          },
+          "schema": {
+            "type": "array",
+            "description": "Collection schema fields"
+          }
+        }
+      },
+      "description": "Create a new PocketBase collection",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "pocketbase_list_records",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "collection"
+        ],
+        "properties": {
+          "page": {
+            "type": "number",
+            "default": 1,
+            "description": "Page number"
+          },
+          "sort": {
+            "type": "string",
+            "description": "Sort expression"
+          },
+          "filter": {
+            "type": "string",
+            "description": "Filter expression"
+          },
+          "perPage": {
+            "type": "number",
+            "default": 30,
+            "description": "Records per page"
+          },
+          "collection": {
+            "type": "string",
+            "description": "Collection name"
+          }
+        }
+      },
+      "description": "List records from a PocketBase collection",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "pocketbase_get_record",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "collection",
+          "recordId"
+        ],
+        "properties": {
+          "recordId": {
+            "type": "string",
+            "description": "Record ID"
+          },
+          "collection": {
+            "type": "string",
+            "description": "Collection name"
+          }
+        }
+      },
+      "description": "Get a specific record from a PocketBase collection",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "pocketbase_create_record",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "collection",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "Record data"
+          },
+          "collection": {
+            "type": "string",
+            "description": "Collection name"
+          }
+        }
+      },
+      "description": "Create a new record in a PocketBase collection",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "pocketbase_update_record",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "collection",
+          "recordId",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "Updated record data"
+          },
+          "recordId": {
+            "type": "string",
+            "description": "Record ID"
+          },
+          "collection": {
+            "type": "string",
+            "description": "Collection name"
+          }
+        }
+      },
+      "description": "Update a record in a PocketBase collection",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "pocketbase_delete_record",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "collection",
+          "recordId"
+        ],
+        "properties": {
+          "recordId": {
+            "type": "string",
+            "description": "Record ID"
+          },
+          "collection": {
+            "type": "string",
+            "description": "Collection name"
+          }
+        }
+      },
+      "description": "Delete a record from a PocketBase collection",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "pocketbase_auth_with_password",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "identity",
+          "password"
+        ],
+        "properties": {
+          "identity": {
+            "type": "string",
+            "description": "User email or username"
+          },
+          "password": {
+            "type": "string",
+            "description": "User password"
+          },
+          "collection": {
+            "type": "string",
+            "default": "users",
+            "description": "Auth collection name (usually \"users\")"
+          }
+        }
+      },
+      "description": "Authenticate a user with email and password",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "pocketbase_register_user",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "passwordConfirm"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User email"
+          },
+          "password": {
+            "type": "string",
+            "description": "User password"
+          },
+          "userData": {
+            "type": "object",
+            "description": "Additional user data"
+          },
+          "collection": {
+            "type": "string",
+            "default": "users",
+            "description": "Auth collection name (usually \"users\")"
+          },
+          "passwordConfirm": {
+            "type": "string",
+            "description": "Password confirmation"
+          }
+        }
+      },
+      "description": "Register a new user",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "stripe_create_customer",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Customer name"
+          },
+          "email": {
+            "type": "string",
+            "description": "Customer email"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Additional metadata"
+          }
+        }
+      },
+      "description": "Create a new Stripe customer",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "stripe_create_payment_intent",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "amount"
+        ],
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Payment amount in cents"
+          },
+          "currency": {
+            "type": "string",
+            "default": "usd",
+            "description": "Currency code"
+          },
+          "customerId": {
+            "type": "string",
+            "description": "Customer ID"
+          },
+          "description": {
+            "type": "string",
+            "description": "Payment description"
+          }
+        }
+      },
+      "description": "Create a payment intent for processing payments",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "stripe_create_product",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "name",
+          "price"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Product name"
+          },
+          "price": {
+            "type": "number",
+            "description": "Product price in cents"
+          },
+          "currency": {
+            "type": "string",
+            "default": "usd",
+            "description": "Currency code"
+          },
+          "interval": {
+            "enum": [
+              "month",
+              "year",
+              "week",
+              "day"
+            ],
+            "type": "string",
+            "description": "Billing interval"
+          },
+          "recurring": {
+            "type": "boolean",
+            "description": "Is this a recurring product"
+          },
+          "description": {
+            "type": "string",
+            "description": "Product description"
+          }
+        }
+      },
+      "description": "Create a new Stripe product",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "stripe_create_checkout_session",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "priceId",
+          "successUrl",
+          "cancelUrl"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "payment",
+              "subscription",
+              "setup"
+            ],
+            "type": "string",
+            "default": "payment",
+            "description": "Checkout mode"
+          },
+          "priceId": {
+            "type": "string",
+            "description": "Price ID"
+          },
+          "cancelUrl": {
+            "type": "string",
+            "description": "Cancel redirect URL"
+          },
+          "customerId": {
+            "type": "string",
+            "description": "Customer ID"
+          },
+          "successUrl": {
+            "type": "string",
+            "description": "Success redirect URL"
+          },
+          "customerEmail": {
+            "type": "string",
+            "description": "Customer email"
+          }
+        }
+      },
+      "description": "Create a Stripe Checkout session",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "email_send_simple",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "to",
+          "subject",
+          "body"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient email"
+          },
+          "body": {
+            "type": "string",
+            "description": "Email body"
+          },
+          "from": {
+            "type": "string",
+            "description": "Sender email (optional)"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Email subject"
+          }
+        }
+      },
+      "description": "Send a simple email",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "email_create_template",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "name",
+          "subject",
+          "htmlContent"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Template name"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Email subject template"
+          },
+          "variables": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Template variables"
+          },
+          "htmlContent": {
+            "type": "string",
+            "description": "HTML content template"
+          },
+          "textContent": {
+            "type": "string",
+            "description": "Text content template"
+          }
+        }
+      },
+      "description": "Create an email template",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "email_send_templated",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "template",
+          "to"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient email"
+          },
+          "from": {
+            "type": "string",
+            "description": "Sender email (optional)"
+          },
+          "template": {
+            "type": "string",
+            "description": "Template name"
+          },
+          "variables": {
+            "type": "object",
+            "description": "Template variables"
+          }
+        }
+      },
+      "description": "Send an email using a template",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "email_test_connection",
+      "annotations": {
+        "type": "object",
+        "properties": {}
+      },
+      "description": "Test email service connection",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_all_tools",
+      "annotations": {
+        "type": "object",
+        "properties": {}
+      },
+      "description": "List all available tools in this server",
+      "inputSchema": {
+        "type": "object"
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:12:53.098805+00:00",
+    "source": "smithery"
+  }
+}

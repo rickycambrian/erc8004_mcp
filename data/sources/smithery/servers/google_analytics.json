@@ -1,0 +1,1327 @@
+{
+  "qualifiedName": "google_analytics",
+  "displayName": "Google Analytics",
+  "description": "Google Analytics tracks and reports website traffic, user behavior, and conversion data, enabling marketers to optimize online performance and customer journeys",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/googleanalytics.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/google_analytics",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/google_analytics/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "GOOGLE_ANALYTICS_BATCH_RUN_REPORTS",
+      "description": "Tool to return multiple analytics data reports in a batch. Use when you need to fetch multiple reports for one GA4 property in a single request.",
+      "inputSchema": {
+        "type": "object",
+        "title": "BatchRunReportsRequest",
+        "required": [
+          "property",
+          "requests"
+        ],
+        "properties": {
+          "property": {
+            "type": "string",
+            "title": "Property",
+            "examples": [
+              "properties/123456789"
+            ],
+            "description": "Required. The property resource name. Format: properties/{property_id}"
+          },
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Requests",
+            "description": "Required. Up to 5 individual RunReportRequest objects."
+          }
+        },
+        "description": "Request model for executing multiple report requests in a batch."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_CHECK_COMPATIBILITY",
+      "description": "Tool to list dimensions and metrics compatible with a GA4 report request. Use when you need to validate compatibility of chosen dimensions or metrics before running a report.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CheckCompatibilityRequest",
+        "required": [
+          "property"
+        ],
+        "properties": {
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "Metric",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "description": "The API name of the metric, e.g., 'activeUsers'."
+                }
+              },
+              "description": "Model for a metric in a compatibility check request."
+            },
+            "title": "Metrics",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. List of metrics to check compatibility for."
+          },
+          "property": {
+            "type": "string",
+            "title": "Property",
+            "pattern": "^properties/[^/]+$",
+            "examples": [
+              "properties/1234"
+            ],
+            "description": "Required. GA4 property resource name. Format: properties/{property_id}."
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "Dimension",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "description": "The API name of the dimension, e.g., 'country'."
+                }
+              },
+              "description": "Model for a dimension in a compatibility check request."
+            },
+            "title": "Dimensions",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. List of dimensions to check compatibility for."
+          },
+          "metricFilter": {
+            "type": "object",
+            "title": "Metric Filter",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. A FilterExpression for metrics; must follow GA4 FilterExpression JSON schema.",
+            "additionalProperties": true
+          },
+          "dimensionFilter": {
+            "type": "object",
+            "title": "Dimension Filter",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. A FilterExpression for dimensions; must follow GA4 FilterExpression JSON schema.",
+            "additionalProperties": true
+          },
+          "compatibilityFilter": {
+            "enum": [
+              "COMPATIBILITY_UNSPECIFIED",
+              "COMPATIBLE",
+              "INCOMPATIBLE"
+            ],
+            "type": "string",
+            "title": "CompatibilityEnum",
+            "default": null,
+            "nullable": true,
+            "description": "Compatibility status for dimensions or metrics."
+          }
+        },
+        "description": "Request model for the checkCompatibility method."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_CREATE_AUDIENCE_EXPORT",
+      "description": "Tool to create an audience export. Use after configuring the audience and dimensions to produce a long-running Operation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateAudienceExportRequest",
+        "required": [
+          "parent",
+          "audience",
+          "dimensions"
+        ],
+        "properties": {
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "pattern": "^properties/[^/]+$",
+            "examples": [
+              "properties/1234"
+            ],
+            "description": "Parent resource name. Format: properties/{property_id}."
+          },
+          "audience": {
+            "type": "string",
+            "title": "Audience",
+            "pattern": "^properties/[^/]+/audiences/[^/]+$",
+            "examples": [
+              "properties/1234/audiences/5678"
+            ],
+            "description": "Audience resource name to export. Format: properties/{property_id}/audiences/{audience_id}."
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "AudienceDimension",
+              "properties": {
+                "dimensionName": {
+                  "type": "string",
+                  "title": "Dimension Name",
+                  "default": null,
+                  "nullable": true,
+                  "description": "API name of the dimension to include."
+                }
+              },
+              "description": "Dimension to include in the audience export."
+            },
+            "title": "Dimensions",
+            "description": "List of dimensions to include in the export."
+          }
+        },
+        "description": "Request model for creating an AudienceExport."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_CREATE_AUDIENCE_LIST",
+      "description": "Tool to create an audience list. Use when you need to define and asynchronously populate a new AudienceList resource under a GA4 property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateAudienceListRequest",
+        "required": [
+          "parent",
+          "audience",
+          "dimensions"
+        ],
+        "properties": {
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "pattern": "^properties/[^/]+$",
+            "examples": [
+              "properties/1234"
+            ],
+            "description": "Parent property resource name. Format: properties/{property_id}."
+          },
+          "audience": {
+            "type": "string",
+            "title": "Audience",
+            "pattern": "^properties/[^/]+/audiences/[^/]+$",
+            "examples": [
+              "properties/1234/audiences/5678"
+            ],
+            "description": "Audience resource name. Format: properties/{property_id}/audiences/{audience_id}."
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "AudienceDimension",
+              "required": [
+                "dimensionName"
+              ],
+              "properties": {
+                "dimensionName": {
+                  "type": "string",
+                  "title": "Dimension Name",
+                  "description": "API name of the supported audience-export dimension."
+                }
+              },
+              "description": "Model for an audience-export dimension."
+            },
+            "title": "Dimensions",
+            "description": "List of dimensions to include in the audience list output."
+          },
+          "webhookNotification": {
+            "type": "object",
+            "title": "WebhookNotification",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "uri"
+            ],
+            "properties": {
+              "uri": {
+                "type": "string",
+                "title": "Uri",
+                "description": "HTTPS endpoint URL to receive POST notifications."
+              },
+              "channelToken": {
+                "type": "string",
+                "title": "Channel Token",
+                "default": null,
+                "nullable": true,
+                "description": "Optional token echoed in X-Goog-Channel-Token header."
+              }
+            },
+            "description": "Configuration for receiving webhook notifications about operation status.",
+            "additionalProperties": false
+          }
+        },
+        "description": "Request model for creating an AudienceList under a GA4 property."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_CREATE_EXPANDED_DATA_SET",
+      "description": "Tool to create an expanded data set for a property. Use when you need to combine specific dimensions and metrics into a custom dataset after property creation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateExpandedDataSetRequest",
+        "required": [
+          "parent",
+          "expandedDataSet"
+        ],
+        "properties": {
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "pattern": "^properties/\\\\d+$",
+            "examples": [
+              "properties/123456789"
+            ],
+            "description": "Parent property resource name. Format: properties/{propertyId}"
+          },
+          "expandedDataSet": {
+            "type": "object",
+            "title": "Expanded Data Set",
+            "required": [
+              "displayName",
+              "dimensionNames",
+              "metricNames"
+            ],
+            "properties": {
+              "description": {
+                "type": "string",
+                "title": "Description",
+                "default": null,
+                "nullable": true,
+                "description": "Optional. Description of the expanded data set."
+              },
+              "displayName": {
+                "type": "string",
+                "title": "Display Name",
+                "examples": [
+                  "Monthly_Region_Metrics"
+                ],
+                "description": "Required. Human-readable display name for the expanded data set."
+              },
+              "metricNames": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Metric Names",
+                "examples": [
+                  "sessions",
+                  "purchaseEvents"
+                ],
+                "description": "Required. List of metric names to include in the expanded data set."
+              },
+              "dimensionNames": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Dimension Names",
+                "examples": [
+                  "date",
+                  "region"
+                ],
+                "description": "Required. List of dimension names to include in the expanded data set."
+              }
+            },
+            "description": "Definition of the ExpandedDataSet to create.",
+            "additionalProperties": false
+          }
+        },
+        "description": "Request model for creating an ExpandedDataSet."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_CREATE_ROLLUP_PROPERTY",
+      "description": "Tool to create a GA4 Roll-up Property and optionally initial source links.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateRollupPropertyRequest",
+        "required": [
+          "account",
+          "displayName",
+          "timeZone"
+        ],
+        "properties": {
+          "account": {
+            "type": "string",
+            "title": "Account",
+            "pattern": "^accounts/[^/]+$",
+            "description": "Required. Parent account resource. Format: accounts/{account_id}"
+          },
+          "timeZone": {
+            "type": "string",
+            "title": "Time Zone",
+            "description": "Required. IANA time zone for the roll-up property."
+          },
+          "displayName": {
+            "type": "string",
+            "title": "Display Name",
+            "description": "Required. Display name for the roll-up property."
+          },
+          "sourceProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^properties/[^/]+$",
+              "properties": {}
+            },
+            "title": "Source Properties",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. List of source property resource names to link. Format: properties/{property_id}."
+          }
+        },
+        "description": "Request model for creating a GA4 Roll-up Property using properties.createRollupProperty."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_GET_ACCOUNT",
+      "description": "Tool to retrieve a single Account by its resource name. Use when you need detailed account info after confirming the account resource name (e.g., accounts/100).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAccountRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "pattern": "^accounts/[^/]+$",
+            "examples": [
+              "accounts/100"
+            ],
+            "description": "Required. The resource name of the Account to retrieve. Format: accounts/{account_id}, e.g., 'accounts/100'."
+          }
+        },
+        "description": "Request model for retrieving a single Account."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_GET_AUDIENCE_EXPORT",
+      "description": "Tool to get configuration metadata for an Audience Export. Use after creating an Audience Export to retrieve its status and details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAudienceExportRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "pattern": "^properties/[^/]+/audienceExports/[^/]+$",
+            "examples": [
+              "properties/1234/audienceExports/5678"
+            ],
+            "description": "Required. The resource name of the Audience Export to retrieve. Format: properties/{property}/audienceExports/{audienceExport}."
+          }
+        },
+        "description": "Request model for retrieving a specific Audience Export."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_GET_AUDIENCE_LIST",
+      "description": "Tool to get configuration metadata about a specific audience list. Use after confirming the audience list resource name.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAudienceListRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "pattern": "^properties/[^/]+/audienceLists/[^/]+$",
+            "examples": [
+              "properties/1234/audienceLists/5678"
+            ],
+            "description": "Required. The resource name of the Audience List to retrieve. Format: properties/{property}/audienceLists/{audienceList}."
+          }
+        },
+        "description": "Request model for retrieving a specific Audience List."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_GET_KEY_EVENT",
+      "description": "Tool to retrieve a Key Event. Use after confirming the key event resource name.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetKeyEventRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "pattern": "^properties/[^/]+/keyEvents/[^/]+$",
+            "examples": [
+              "properties/123/keyEvents/456"
+            ],
+            "description": "Required. Resource name of the Key Event to retrieve. Format: properties/{property}/keyEvents/{keyEvent}."
+          }
+        },
+        "description": "Request model for retrieving a Key Event in a Google Analytics 4 property."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_GET_METADATA",
+      "description": "Tool to get metadata for dimensions, metrics, and comparisons for a GA4 property. Use when you need to discover available fields before building a report.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMetadataRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "properties/123456789/metadata"
+            ],
+            "description": "Resource name of the metadata to retrieve. Format: properties/{property_id}/metadata. Use property_id=0 to return only universal (non-custom) metadata."
+          }
+        },
+        "description": "Request model for retrieving metadata of dimensions, metrics, and comparisons for a GA4 property."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_GET_PROPERTY_QUOTAS_SNAPSHOT",
+      "description": "Tool to retrieve all property quotas organized by category for a given property. Use when you need to check current quota usage for a GA4 property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPropertyQuotasSnapshotRequest",
+        "required": [
+          "property"
+        ],
+        "properties": {
+          "property": {
+            "type": "string",
+            "title": "Property",
+            "examples": [
+              "properties/1234"
+            ],
+            "description": "Required. The property resource. Format: properties/{property_id}."
+          }
+        },
+        "description": "Request model for retrieving a property quotas snapshot."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_LIST_ACCOUNTS",
+      "description": "Tool to list all Accounts accessible by the caller. Use when you need to enumerate all Google Analytics accounts your credentials can access.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAccountsRequest",
+        "properties": {
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Optional. Maximum number of accounts to return. Must be \u22651."
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "examples": [
+              "token123"
+            ],
+            "nullable": true,
+            "description": "Optional. Token for retrieving the next page of results."
+          },
+          "showDeleted": {
+            "type": "boolean",
+            "title": "Show Deleted",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. Whether to include soft-deleted (trashed) Accounts."
+          }
+        },
+        "description": "Request model for listing Accounts."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_LIST_AUDIENCE_EXPORTS",
+      "description": "Tool to list all audience exports for a GA4 property. Use when you need to fetch its export history after initiating exports.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAudienceExportsRequest",
+        "required": [
+          "parent"
+        ],
+        "properties": {
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "pattern": "^properties/[^/]+$",
+            "examples": [
+              "properties/1234"
+            ],
+            "description": "Required. Resource name of the parent property. Format: properties/{property_id}"
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "maximum": 1000,
+            "minimum": 1,
+            "examples": [
+              200
+            ],
+            "nullable": true,
+            "description": "Optional. Maximum number of results to return. Defaults to 200; larger values are coerced to 1000."
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "examples": [
+              "token123"
+            ],
+            "nullable": true,
+            "description": "Optional. Token for retrieving the next page of results; other parameters must match original call when paginating."
+          }
+        },
+        "description": "Request model for listing AudienceExports under a GA4 property."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_LIST_AUDIENCE_LISTS",
+      "description": "Tool to list all audience lists for a GA4 property. Use when you need to retrieve a property's configured audience lists after confirming the property ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAudienceListsRequest",
+        "required": [
+          "parent"
+        ],
+        "properties": {
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "pattern": "^properties/[^/]+$",
+            "examples": [
+              "properties/1234"
+            ],
+            "description": "Required. Resource name of the parent property. Format: properties/{property_id}"
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "maximum": 1000,
+            "minimum": 1,
+            "examples": [
+              200
+            ],
+            "nullable": true,
+            "description": "Optional. Maximum number of audience lists to return. Defaults to 200; maximum is 1000."
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "examples": [
+              "token123"
+            ],
+            "nullable": true,
+            "description": "Optional. Token for retrieving the next page of results."
+          }
+        },
+        "description": "Request model for listing AudienceLists under a GA4 property."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_LIST_AUDIENCES",
+      "description": "Tool to list all audiences on a property. Use when you need to fetch all audiences for a GA4 property after confirming its existence.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAudiencesRequest",
+        "required": [
+          "parent"
+        ],
+        "properties": {
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "examples": [
+              "properties/1234",
+              "1234"
+            ],
+            "description": "Required. Property ID or full resource name. Accepts: '123456789' or 'properties/123456789'"
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Optional. Maximum number of Audiences to return."
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "examples": [
+              "token123"
+            ],
+            "nullable": true,
+            "description": "Optional. Token for retrieving the next page of results."
+          }
+        },
+        "description": "Request model for listing Audiences under a property."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_LIST_KEY_EVENTS",
+      "description": "Tool to list Key Events. Use when you need to retrieve all key event definitions for a given property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListKeyEventsRequest",
+        "required": [
+          "parent"
+        ],
+        "properties": {
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "examples": [
+              "properties/123"
+            ],
+            "description": "Required. Resource name of the parent property. Format: properties/{property_id}."
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "maximum": 200,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Optional. Maximum number of results to return. Must be between 1 and 200."
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "examples": [
+              "token123"
+            ],
+            "nullable": true,
+            "description": "Optional. Token for retrieving the next page of results."
+          }
+        },
+        "description": "Request model for listing Key Events under a specified parent property."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_LIST_PROPERTIES",
+      "description": "Tool to list GA4 properties under a specific account. Use after obtaining an account ID; supports pagination and including soft-deleted properties.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPropertiesRequest",
+        "required": [
+          "account"
+        ],
+        "properties": {
+          "account": {
+            "type": "string",
+            "title": "Account",
+            "pattern": "^accounts/[^/]+$",
+            "examples": [
+              "accounts/123456789"
+            ],
+            "description": "Required. The account resource name. Format: accounts/{account_id}"
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "maximum": 200,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Optional. Maximum number of properties to return; must be between 1 and 200."
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "examples": [
+              "token123"
+            ],
+            "nullable": true,
+            "description": "Optional. Token returned from a previous call to retrieve the next page of results."
+          },
+          "showDeleted": {
+            "type": "boolean",
+            "title": "Show Deleted",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. Whether to include soft-deleted (trashed) properties."
+          }
+        },
+        "description": "Request model for listing GA4 properties under an account."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_LIST_REPORTING_DATA_ANNOTATIONS",
+      "description": "Tool to list all Reporting Data Annotations on a property. Use when you need to retrieve or inspect annotations for a GA4 property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListReportingDataAnnotationsRequest",
+        "required": [
+          "parent"
+        ],
+        "properties": {
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "color = RED AND annotationDate = 2023-01-01"
+            ],
+            "nullable": true,
+            "description": "Restricts which annotations are listed. Supported fields: name, title, description, annotationDate, annotationDateRange, color; operations: =, !=, <, >, <=, >=, :, =~, !~, NOT, AND, OR; helper functions: annotation_duration(), is_annotation_in_range(startDate,endDate)."
+          },
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "examples": [
+              "properties/123456789"
+            ],
+            "description": "Resource name of the property. Format: properties/{property_id}."
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Optional. Maximum number of annotations to return. Defaults to 50, max 200."
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "examples": [
+              "token123"
+            ],
+            "nullable": true,
+            "description": "Optional. Token for retrieving the next page of results."
+          }
+        },
+        "description": "Request model for listing Reporting Data Annotations on a property."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_LIST_ROLLUP_PROPERTIES",
+      "description": "Tool to list roll-up GA4 properties accessible to the caller. Use when you need to identify roll-up properties across all accessible accounts.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListRollupPropertiesRequest",
+        "properties": {
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "maximum": 200,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Optional. Maximum number of account summaries to return; must be between 1 and 200."
+          }
+        },
+        "description": "Request model for listing roll-up GA4 properties accessible to the caller."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_LIST_SEARCH_ADS360_LINKS",
+      "description": "Tool to list all SearchAds360Links on a property. Use when you need to fetch all Search Ads 360 links for a given property after authenticating.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSearchAds360LinksRequest",
+        "required": [
+          "parent"
+        ],
+        "properties": {
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "examples": [
+              "properties/1234"
+            ],
+            "description": "Required. Resource name of the property. Format: properties/{propertyId} (e.g., properties/1234)."
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "maximum": 200,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Optional. Maximum number of results to return. Must be between 1 and 200. Defaults to 50."
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "examples": [
+              "token123"
+            ],
+            "nullable": true,
+            "description": "Optional. Token for retrieving the next page of results."
+          }
+        },
+        "description": "Request model for listing SearchAds360Links for a Google Analytics property."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_QUERY_AUDIENCE_EXPORT",
+      "description": "Tool to query a completed audience export. Use when you need to fetch user rows with pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "QueryAudienceExportRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "properties/1234/audienceExports/abcd-5678"
+            ],
+            "description": "Required. Resource name of the audience export. Format: properties/{property}/audienceExports/{audienceExport}."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "maximum": 250000,
+            "minimum": 1,
+            "examples": [
+              1000
+            ],
+            "nullable": true,
+            "description": "Optional. Number of rows to return. Must be between 1 and 250000. Defaults to 10000."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Optional. Zero-based start row index for pagination. Defaults to 0."
+          }
+        },
+        "description": "Request model for querying an existing Google Analytics audience export."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_QUERY_AUDIENCE_LIST",
+      "description": "Tool to query an audience list. Use when you need to retrieve user rows from a GA4 audience list with pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "QueryAudienceListRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "properties/1234/audienceLists/abcd-5678"
+            ],
+            "description": "Required. Audience list resource to query. Format: properties/{property}/audienceLists/{audienceList}."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "maximum": 250000,
+            "minimum": 1,
+            "examples": [
+              1000
+            ],
+            "nullable": true,
+            "description": "Optional. Number of rows to return; default 10,000; maximum 250,000."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Optional. Zero-based row offset for pagination."
+          }
+        },
+        "description": "Request model for querying a Google Analytics audience list."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_RUN_FUNNEL_REPORT",
+      "description": "Tool to run a GA4 funnel report. Use when you need a customized funnel analysis report for a given property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RunFunnelReportRequest",
+        "required": [
+          "property",
+          "funnel"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Number of rows to return. Default 10000; max 250000."
+          },
+          "funnel": {
+            "type": "object",
+            "title": "Funnel",
+            "description": "Funnel configuration object following the API schema (must include 'steps').",
+            "additionalProperties": true
+          },
+          "property": {
+            "type": "string",
+            "title": "Property",
+            "pattern": "^properties/[^/]+$",
+            "examples": [
+              "properties/1234"
+            ],
+            "description": "GA4 property resource name, format: properties/{property_id}."
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Segments",
+            "default": null,
+            "nullable": true,
+            "description": "Up to 4 segments; each yields its own row in the report."
+          },
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "DateRange",
+              "required": [
+                "startDate",
+                "endDate"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Optional user-defined name for this date range."
+                },
+                "endDate": {
+                  "type": "string",
+                  "title": "End Date",
+                  "description": "End date of the report range. Format YYYY-MM-DD or relative (e.g., 'today', '1daysAgo')."
+                },
+                "startDate": {
+                  "type": "string",
+                  "title": "Start Date",
+                  "description": "Start date of the report range. Format YYYY-MM-DD or relative (e.g., '7daysAgo', 'today')."
+                }
+              }
+            },
+            "title": "Date Ranges",
+            "default": null,
+            "nullable": true,
+            "description": "List of date ranges to read; overlapping ranges duplicate days across ranges."
+          },
+          "dimensionFilter": {
+            "type": "object",
+            "title": "Dimension Filter",
+            "default": null,
+            "nullable": true,
+            "description": "Dimension-only filter expression.",
+            "additionalProperties": true
+          },
+          "funnelBreakdown": {
+            "type": "object",
+            "title": "Funnel Breakdown",
+            "default": null,
+            "nullable": true,
+            "description": "Breakdown dimension configuration for the funnel table sub-report.",
+            "additionalProperties": true
+          },
+          "funnelNextAction": {
+            "type": "object",
+            "title": "Funnel Next Action",
+            "default": null,
+            "nullable": true,
+            "description": "Next-action dimension configuration for the funnel visualization sub-report.",
+            "additionalProperties": true
+          },
+          "returnPropertyQuota": {
+            "type": "boolean",
+            "title": "Return Property Quota",
+            "default": null,
+            "nullable": true,
+            "description": "If true, includes the property's current quota state."
+          },
+          "funnelVisualizationType": {
+            "enum": [
+              "STANDARD_FUNNEL",
+              "TRENDED_FUNNEL"
+            ],
+            "type": "string",
+            "title": "Funnel Visualization Type",
+            "default": null,
+            "nullable": true,
+            "description": "Visualization type: STANDARD_FUNNEL (default) or TRENDED_FUNNEL."
+          }
+        },
+        "description": "Request model for running a GA4 funnel report."
+      }
+    },
+    {
+      "name": "GOOGLE_ANALYTICS_RUN_REPORT",
+      "description": "Tool to run a customized GA4 data report. Use when you need event data after specifying dimensions, metrics, and date ranges.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RunReportRequest",
+        "required": [
+          "property"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1000
+            ],
+            "nullable": true,
+            "description": "Optional. Number of rows to return. Must be between 1 and 250000."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Optional. 0-based start row for pagination. Must be >= 0."
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Metrics",
+            "default": null,
+            "examples": [
+              {
+                "name": "activeUsers"
+              }
+            ],
+            "nullable": true,
+            "description": "Optional. The metrics to request and display. Each metric is an object with a 'name' field."
+          },
+          "orderBys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Order Bys",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. Specify how rows are ordered. Each object defines dimension or metric ordering."
+          },
+          "property": {
+            "type": "string",
+            "title": "Property",
+            "examples": [
+              "properties/1234"
+            ],
+            "description": "Required. The property resource on which to run the report. Format: properties/{property_id}."
+          },
+          "cohortSpec": {
+            "type": "object",
+            "title": "Cohort Spec",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. Cohort specification. Requires requesting the cohort dimension.",
+            "additionalProperties": true
+          },
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Date Ranges",
+            "default": null,
+            "examples": [
+              {
+                "endDate": "2023-01-31",
+                "startDate": "2023-01-01"
+              }
+            ],
+            "nullable": true,
+            "description": "Optional. The date ranges to read. Each range requires 'startDate' and 'endDate'."
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Dimensions",
+            "default": null,
+            "examples": [
+              {
+                "name": "city"
+              }
+            ],
+            "nullable": true,
+            "description": "Optional. The dimensions to request and display. Each dimension is an object with a 'name' field."
+          },
+          "comparisons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Comparisons",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. The comparison configuration. Adds a comparison column to the response."
+          },
+          "currencyCode": {
+            "type": "string",
+            "title": "Currency Code",
+            "default": null,
+            "examples": [
+              "USD"
+            ],
+            "nullable": true,
+            "description": "Optional. The currency code to apply, in ISO 4217 format. Defaults to property currency."
+          },
+          "metricFilter": {
+            "type": "object",
+            "title": "Metric Filter",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. The filter expression to restrict metric values. Applied after aggregation.",
+            "additionalProperties": true
+          },
+          "keepEmptyRows": {
+            "type": "boolean",
+            "title": "Keep Empty Rows",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. If true, rows with all zero metrics will be returned; otherwise omitted."
+          },
+          "dimensionFilter": {
+            "type": "object",
+            "title": "Dimension Filter",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. The filter expression to restrict dimension values. Only dimensions are allowed.",
+            "additionalProperties": true
+          },
+          "metricAggregations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Metric Aggregations",
+            "default": null,
+            "examples": [
+              "TOTAL"
+            ],
+            "nullable": true,
+            "description": "Optional. Aggregation types to include over metrics, e.g., 'TOTAL', 'MINIMUM', 'MAXIMUM'."
+          },
+          "returnPropertyQuota": {
+            "type": "boolean",
+            "title": "Return Property Quota",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. If true, include the property's current quota state in the response."
+          }
+        },
+        "description": "Request model for running a customized Google Analytics 4 report."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:40.587598+00:00",
+    "source": "smithery"
+  }
+}

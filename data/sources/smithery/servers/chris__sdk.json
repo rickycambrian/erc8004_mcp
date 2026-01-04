@@ -1,0 +1,230 @@
+{
+  "qualifiedName": "chris/sdk",
+  "displayName": "sdk",
+  "description": "Analyze your project to detect its language and deployment needs. Generate and validate Smithery-ready configuration, with the option to initialize files when you approve. Follow a guided workflow to convert existing setups and deploy with confidence.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/chris/sdk",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/chris/sdk/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "workingDirectory",
+          "allowWrite"
+        ],
+        "properties": {
+          "allowWrite": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allow writing files to disk (required for init/convert commands)"
+          },
+          "workingDirectory": {
+            "type": "string",
+            "default": "/app",
+            "description": "Base directory for resolving relative paths"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "detect",
+      "title": "Detect MCP Server",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Analyze a directory to detect the type of MCP server (TypeScript, Python, or container) and extract configuration details",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "default": ".",
+            "description": "Target directory to analyze (relative to working directory)"
+          }
+        }
+      }
+    },
+    {
+      "name": "generate_config",
+      "title": "Generate Deployment Config",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Generate smithery.yaml and other deployment files for an MCP server without writing to disk. Returns the file contents.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "target": {
+            "enum": [
+              "remote",
+              "local"
+            ],
+            "type": "string",
+            "default": "remote",
+            "description": "Deployment target: remote (SHTTP on Smithery) or local (stdio)"
+          },
+          "runtime": {
+            "enum": [
+              "typescript",
+              "python",
+              "container"
+            ],
+            "type": "string",
+            "description": "Force a specific runtime type (auto-detected if not specified)"
+          },
+          "directory": {
+            "type": "string",
+            "default": ".",
+            "description": "Target directory to analyze"
+          }
+        }
+      }
+    },
+    {
+      "name": "init",
+      "title": "Initialize Deployment",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Initialize Smithery deployment by writing smithery.yaml and other required files to disk. Requires allowWrite=true in config.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "force": {
+            "type": "boolean",
+            "default": false,
+            "description": "Overwrite existing files"
+          },
+          "target": {
+            "enum": [
+              "remote",
+              "local"
+            ],
+            "type": "string",
+            "default": "remote",
+            "description": "Deployment target"
+          },
+          "runtime": {
+            "enum": [
+              "typescript",
+              "python",
+              "container"
+            ],
+            "type": "string",
+            "description": "Force a specific runtime type"
+          },
+          "directory": {
+            "type": "string",
+            "default": ".",
+            "description": "Target directory"
+          }
+        }
+      }
+    },
+    {
+      "name": "validate",
+      "title": "Validate Configuration",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Validate that an MCP server is properly configured for Smithery deployment",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "default": ".",
+            "description": "Target directory to validate"
+          }
+        }
+      }
+    },
+    {
+      "name": "guide",
+      "title": "Transformation Guide",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get a detailed guide for transforming an MCP server to be Smithery-compatible",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "default": ".",
+            "description": "Target directory to analyze"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_files",
+      "title": "List Project Files",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List relevant files in a directory to understand the project structure",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "default": "*",
+            "description": "Glob pattern to filter files (e.g., '*.ts', '*.py')"
+          },
+          "directory": {
+            "type": "string",
+            "default": ".",
+            "description": "Target directory to list"
+          }
+        }
+      }
+    },
+    {
+      "name": "read_file",
+      "title": "Read File",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Read the contents of a file in the project",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "filePath"
+        ],
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Path to the file to read"
+          },
+          "maxLines": {
+            "type": "number",
+            "default": 200,
+            "description": "Maximum number of lines to return"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:17:00.108888+00:00",
+    "source": "smithery"
+  }
+}

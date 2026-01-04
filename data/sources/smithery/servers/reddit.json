@@ -1,0 +1,364 @@
+{
+  "qualifiedName": "reddit",
+  "displayName": "Reddit",
+  "description": "Reddit is a social news platform with user-driven communities (subreddits), offering content sharing, discussions, and viral marketing opportunities for brands",
+  "iconUrl": "https://logos.composio.dev/api/reddit",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/reddit",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/reddit/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "REDDIT_CREATE_REDDIT_POST",
+      "description": "Creates a new text or link post on a specified, existing Reddit subreddit, optionally applying a flair.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreatePostRequest",
+        "required": [
+          "subreddit",
+          "title",
+          "kind"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "examples": [
+              "https://www.example.com/news/article.html"
+            ],
+            "description": "The URL for a 'link' post. Required if `kind` is 'link'."
+          },
+          "kind": {
+            "enum": [
+              "link",
+              "self"
+            ],
+            "type": "string",
+            "title": "Kind",
+            "examples": [
+              "self",
+              "link"
+            ],
+            "description": "The type of the post. Use 'self' for a text-based post or 'link' for a post that links to an external URL."
+          },
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "examples": [
+              "This is the body of my text post. It can include **markdown** formatting."
+            ],
+            "description": "The markdown-formatted text content for a 'self' post. Required if `kind` is 'self'."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "My New Project!",
+              "Interesting Article I Found"
+            ],
+            "description": "The title of the post. Must be 300 characters or less."
+          },
+          "flair_id": {
+            "type": "string",
+            "title": "Flair Id",
+            "examples": [
+              "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+            ],
+            "description": "Optional ID of the flair to apply to the post. Use the 'REDDIT_GET_USER_FLAIR' action to find available flair IDs for the specified subreddit. Omit this field entirely if no flair is needed."
+          },
+          "subreddit": {
+            "type": "string",
+            "title": "Subreddit",
+            "examples": [
+              "learnpython",
+              "AskReddit"
+            ],
+            "description": "The name of the subreddit (without the 'r/' prefix) where the post will be submitted."
+          }
+        }
+      }
+    },
+    {
+      "name": "REDDIT_DELETE_REDDIT_COMMENT",
+      "description": "Deletes a Reddit comment, identified by its fullname ID, if it was authored by the authenticated user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteCommentRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "t1_c0s4w1c"
+            ],
+            "description": "The full 'thing ID' (fullname, e.g., 't1_c0s4w1c') of the comment to delete; typically starts with 't1_'."
+          }
+        }
+      }
+    },
+    {
+      "name": "REDDIT_DELETE_REDDIT_POST",
+      "description": "Permanently deletes a Reddit post by its ID, provided the authenticated user has deletion permissions for that post.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeletePostRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "t3_1abcdef",
+              "t3_gfedcba"
+            ],
+            "description": "The full name (fullname) of the Reddit post to be deleted. This ID must start with 't3_' followed by the post's unique base36 identifier."
+          }
+        }
+      }
+    },
+    {
+      "name": "REDDIT_EDIT_REDDIT_COMMENT_OR_POST",
+      "description": "Edits the body text of the authenticated user's own existing comment or self-post on Reddit; cannot edit link posts or titles.",
+      "inputSchema": {
+        "type": "object",
+        "title": "EditCommentOrPostRequest",
+        "required": [
+          "thing_id",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "examples": [
+              "This is the *updated* content with **markdown** formatting."
+            ],
+            "description": "The new raw markdown text for the body of the comment or self-post."
+          },
+          "thing_id": {
+            "type": "string",
+            "title": "Thing Id",
+            "examples": [
+              "t1_c0c0c0c",
+              "t3_h0h0h0h"
+            ],
+            "description": "The full name (fullname) of the comment or self-post to edit. This is a combination of a prefix (e.g., 't1_' for comment, 't3_' for post) and the item's ID."
+          }
+        }
+      }
+    },
+    {
+      "name": "REDDIT_GET_USER_FLAIR",
+      "description": "Fetches the list of available link flairs (i.e., post flairs, not user flairs) for a given subreddit.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetFlairRequest",
+        "required": [
+          "subreddit"
+        ],
+        "properties": {
+          "subreddit": {
+            "type": "string",
+            "title": "Subreddit",
+            "examples": [
+              "learnpython",
+              "datascience",
+              "announcements"
+            ],
+            "description": "Name of the subreddit (e.g., 'pics', 'gaming') for which to retrieve available link flairs."
+          }
+        }
+      }
+    },
+    {
+      "name": "REDDIT_POST_REDDIT_COMMENT",
+      "description": "Posts a comment on Reddit, replying to an existing and accessible submission (post) or another comment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PostCommentRequest",
+        "required": [
+          "thing_id",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "examples": [
+              "This is an insightful comment!",
+              "I agree completely."
+            ],
+            "description": "The raw Markdown text of the comment to be submitted."
+          },
+          "thing_id": {
+            "type": "string",
+            "title": "Thing Id",
+            "examples": [
+              "t3_10omtdx",
+              "t1_h2g9w8l"
+            ],
+            "description": "The ID of the parent post (link) or comment, prefixed with 't3_' for a post (e.g., 't3_10omtdx') or 't1_' for a comment (e.g., 't1_h2g9w8l')."
+          }
+        }
+      }
+    },
+    {
+      "name": "REDDIT_RETRIEVE_POST_COMMENTS",
+      "description": "Retrieves all comments for a Reddit post given its article ID (which must be for an existing, public post); nested replies within comments are returned as raw dictionaries requiring parsing.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveCommentsRequest",
+        "required": [
+          "article"
+        ],
+        "properties": {
+          "article": {
+            "type": "string",
+            "title": "Article",
+            "examples": [
+              "q5u7q5",
+              "13a9zao"
+            ],
+            "description": "Base-36 ID of the Reddit post (e.g., 'q5u7q5'), typically found in the post's URL and not including the 't3_' prefix."
+          }
+        }
+      }
+    },
+    {
+      "name": "REDDIT_RETRIEVE_REDDIT_POST",
+      "description": "Retrieves the current hot posts from a specified, publicly accessible subreddit.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrievePostRequest",
+        "required": [
+          "subreddit"
+        ],
+        "properties": {
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "default": 5,
+            "examples": [
+              "5",
+              "10",
+              "0",
+              "25"
+            ],
+            "nullable": true,
+            "description": "The maximum number of posts to return. Default is 5. Set to 0 to retrieve all available posts (or the maximum allowed by the Reddit API for a single request, typically up to 100 for this type of listing)."
+          },
+          "subreddit": {
+            "type": "string",
+            "title": "Subreddit",
+            "examples": [
+              "technology",
+              "python",
+              "news"
+            ],
+            "description": "The name of the subreddit from which to retrieve posts (e.g., 'popular', 'pics'). Do not include 'r/'."
+          }
+        }
+      }
+    },
+    {
+      "name": "REDDIT_RETRIEVE_SPECIFIC_COMMENT",
+      "description": "Retrieves detailed information for a specific Reddit comment or post using its fullname.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveCommentRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "t1_c123456",
+              "t3_x56789"
+            ],
+            "description": "Fullname of the comment or post to retrieve (e.g., 't1_c123456', 't3_x56789')."
+          }
+        }
+      }
+    },
+    {
+      "name": "REDDIT_SEARCH_ACROSS_SUBREDDITS",
+      "description": "Searches Reddit for content (e.g., posts, comments) using a query, with results typically confined to subreddits unless `restrict_sr` is set to False.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SearchAcrossSubredditsRequest",
+        "required": [
+          "search_query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "relevance",
+              "new",
+              "top",
+              "comments"
+            ],
+            "type": "string",
+            "title": "Sort",
+            "default": "relevance",
+            "examples": [
+              "relevance",
+              "new",
+              "top",
+              "comments"
+            ],
+            "description": "The criterion for sorting search results. 'relevance' (default) sorts by relevance to the query. 'new' sorts by newest first. 'top' sorts by highest score (typically all-time). 'comments' sorts by the number of comments."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 5,
+            "maximum": 100,
+            "examples": [
+              "5",
+              "10",
+              "25"
+            ],
+            "description": "The maximum number of search results to return. Default is 5. Maximum allowed value is 100."
+          },
+          "restrict_sr": {
+            "type": "boolean",
+            "title": "Restrict Sr",
+            "default": true,
+            "examples": [
+              true,
+              false
+            ],
+            "description": "If True (default), confines the search to posts and comments within subreddits. If False, the search scope is broader and may include matching subreddit names or other Reddit entities."
+          },
+          "search_query": {
+            "type": "string",
+            "title": "Search Query",
+            "examples": [
+              "latest AI research",
+              "funny cat videos",
+              "python programming tips"
+            ],
+            "description": "The search query string used to find content across subreddits."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:36.801145+00:00",
+    "source": "smithery"
+  }
+}

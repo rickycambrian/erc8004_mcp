@@ -1,0 +1,929 @@
+{
+  "qualifiedName": "@horizondatawave/hdw-mcp-server",
+  "displayName": "AnySite Social Media Data",
+  "description": "Find and research people across LinkedIn, Instagram, and the open web. Search with rich filters and retrieve detailed profile insights in seconds.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@horizondatawave/hdw-mcp-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@horizondatawave/hdw-mcp-server/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "ANYSITE_ACCESS_TOKEN"
+        ],
+        "properties": {
+          "ANYSITE_ACCOUNT_ID": {
+            "type": "string",
+            "description": "AnySite account ID (required for management operations)"
+          },
+          "ANYSITE_ACCESS_TOKEN": {
+            "type": "string",
+            "description": "AnySite API access token"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_linkedin_users",
+      "description": "Search for LinkedIn users with various filters",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max results"
+          },
+          "title": {
+            "type": "string",
+            "description": "Job title"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "keywords": {
+            "type": "string",
+            "description": "Search keywords"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name"
+          },
+          "company_keywords": {
+            "type": "string",
+            "description": "Company keywords"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_profile",
+      "description": "Get detailed information about a LinkedIn user profile",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "user"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "description": "User alias, URL, or URN"
+          },
+          "with_skills": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include skills info"
+          },
+          "with_education": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include education info"
+          },
+          "with_experience": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include experience info"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "google_search",
+      "description": "Perform Google search",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max results (1-20)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_instagram_user",
+      "description": "Get Instagram user information",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "user"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "description": "User ID, alias or URL"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_email_user",
+      "description": "Get LinkedIn user details by email",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "count": {
+            "type": "number",
+            "default": 5,
+            "description": "Max results"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_user_posts",
+      "description": "Get LinkedIn posts for a user by URN (must include prefix, example: fsd_profile:ACoAAEWn01Q...)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urn"
+        ],
+        "properties": {
+          "urn": {
+            "type": "string",
+            "description": "User URN (must include prefix, example: fsd_profile:ACoAA...)"
+          },
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max posts"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_user_reactions",
+      "description": "Get LinkedIn reactions for a user by URN",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urn"
+        ],
+        "properties": {
+          "urn": {
+            "type": "string",
+            "description": "User URN (must include prefix, example: fsd_profile:ACoAA...)"
+          },
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max reactions"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_user_comments",
+      "description": "Get LinkedIn comments for a user by URN",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urn"
+        ],
+        "properties": {
+          "urn": {
+            "type": "string",
+            "description": "User URN (must include prefix)"
+          },
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max comments"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "commented_after": {
+            "type": "number",
+            "description": "Filter comments after timestamp"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_linkedin_posts",
+      "description": "Search LinkedIn posts with keywords and filters",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "keywords"
+        ],
+        "properties": {
+          "sort": {
+            "type": "string",
+            "description": "Sort order"
+          },
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max results"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "keywords": {
+            "type": "string",
+            "description": "Search keywords"
+          },
+          "date_posted": {
+            "type": "string",
+            "description": "Date filter"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_post_comments",
+      "description": "Get LinkedIn post comments",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urn"
+        ],
+        "properties": {
+          "urn": {
+            "type": "string",
+            "description": "Post URN"
+          },
+          "sort": {
+            "type": "string",
+            "default": "relevance",
+            "description": "Sort order"
+          },
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max comments"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_post_reactions",
+      "description": "Get LinkedIn post reactions",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urn"
+        ],
+        "properties": {
+          "urn": {
+            "type": "string",
+            "description": "Post URN"
+          },
+          "count": {
+            "type": "number",
+            "default": 50,
+            "description": "Max reactions"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_post_reposts",
+      "description": "Get LinkedIn post reposts",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urn"
+        ],
+        "properties": {
+          "urn": {
+            "type": "string",
+            "description": "Post URN"
+          },
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max reposts"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_company",
+      "description": "Get LinkedIn company information",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "company"
+        ],
+        "properties": {
+          "company": {
+            "type": "string",
+            "description": "Company alias, URL or URN"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_company_employees",
+      "description": "Get LinkedIn company employees",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "companies"
+        ],
+        "properties": {
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max employees"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "keywords": {
+            "type": "string",
+            "description": "Search keywords"
+          },
+          "companies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Company URNs or aliases"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name filter"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name filter"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_company_posts",
+      "description": "Get LinkedIn company posts",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urn"
+        ],
+        "properties": {
+          "urn": {
+            "type": "string",
+            "description": "Company URN (example: company:11130470)"
+          },
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max posts"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_google_company",
+      "description": "Search company via Google",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "keywords"
+        ],
+        "properties": {
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Company search keywords"
+          },
+          "with_urn": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include LinkedIn URN"
+          },
+          "count_per_keyword": {
+            "type": "number",
+            "default": 1,
+            "description": "Results per keyword"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_instagram_user_posts",
+      "description": "Get Instagram user posts",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "user",
+          "count"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "description": "User ID, alias or URL"
+          },
+          "count": {
+            "type": "number",
+            "description": "Max posts"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_instagram_post_comments",
+      "description": "Get Instagram post comments",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "post",
+          "count"
+        ],
+        "properties": {
+          "post": {
+            "type": "string",
+            "description": "Post ID"
+          },
+          "count": {
+            "type": "number",
+            "description": "Max comments"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_reddit_posts",
+      "description": "Search Reddit posts",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "type": "string",
+            "default": "relevance",
+            "description": "Sort order"
+          },
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max results"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "time_filter": {
+            "type": "string",
+            "default": "all",
+            "description": "Time filter"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_reddit_posts",
+      "description": "Get Reddit post details by post URL",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "post_url"
+        ],
+        "properties": {
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "post_url": {
+            "type": "string",
+            "description": "Reddit post URL (e.g., '/r/DogAdvice/comments/1o2g2pq/i_think_i_need_to_rehome_my_dog/')"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_reddit_post_comments",
+      "description": "Get comments for a Reddit post by post URL",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "post_url"
+        ],
+        "properties": {
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "post_url": {
+            "type": "string",
+            "description": "Reddit post URL (e.g., '/r/DogAdvice/comments/1o2g2pq/i_think_i_need_to_rehome_my_dog/')"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_chat_messages",
+      "description": "Get LinkedIn chat messages (requires ACCOUNT_ID)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "user"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "description": "User URN (must include prefix)"
+          },
+          "count": {
+            "type": "number",
+            "default": 20,
+            "description": "Max messages"
+          },
+          "company": {
+            "type": "string",
+            "description": "Company URN"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "send_linkedin_chat_message",
+      "description": "Send LinkedIn chat message (requires ACCOUNT_ID)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "user",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "user": {
+            "type": "string",
+            "description": "Recipient user URN (must include prefix)"
+          },
+          "company": {
+            "type": "string",
+            "description": "Company URN"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "send_linkedin_connection_request",
+      "description": "Send LinkedIn connection request (requires ACCOUNT_ID)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "user"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Optional message"
+          },
+          "user": {
+            "type": "string",
+            "description": "User URN (must include prefix)"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "send_linkedin_post_comment",
+      "description": "Comment on LinkedIn post (requires ACCOUNT_ID)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "post",
+          "text"
+        ],
+        "properties": {
+          "post": {
+            "type": "string",
+            "description": "Post URN (activity: or comment:)"
+          },
+          "text": {
+            "type": "string",
+            "description": "Comment text"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "send_linkedin_post",
+      "description": "Create LinkedIn post (requires ACCOUNT_ID)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Post text"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "visibility": {
+            "type": "string",
+            "default": "ANYONE",
+            "description": "Post visibility"
+          },
+          "comment_scope": {
+            "type": "string",
+            "default": "ALL",
+            "description": "Comment scope"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_user_connections",
+      "description": "Get user's LinkedIn connections (requires ACCOUNT_ID)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "count": {
+            "type": "number",
+            "default": 20,
+            "description": "Max connections"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "connected_after": {
+            "type": "number",
+            "description": "Filter connections after timestamp"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_linkedin_conversations",
+      "description": "Get LinkedIn conversations (requires ACCOUNT_ID)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "count": {
+            "type": "number",
+            "default": 20,
+            "description": "Max conversations"
+          },
+          "company": {
+            "type": "string",
+            "description": "Company URN"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "connected_after": {
+            "type": "number",
+            "description": "Filter after timestamp"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "linkedin_sales_navigator_search_users",
+      "description": "Advanced LinkedIn Sales Navigator user search",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "count": {
+            "type": "number",
+            "default": 10,
+            "description": "Max results"
+          },
+          "timeout": {
+            "type": "number",
+            "default": 300,
+            "description": "Timeout in seconds"
+          },
+          "keywords": {
+            "type": "string",
+            "description": "Search keywords"
+          },
+          "last_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Last names"
+          },
+          "first_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "First names"
+          },
+          "current_titles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Current job titles"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:18:13.418224+00:00",
+    "source": "smithery"
+  }
+}

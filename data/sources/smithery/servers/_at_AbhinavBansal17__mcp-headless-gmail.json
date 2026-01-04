@@ -1,0 +1,151 @@
+{
+  "qualifiedName": "@AbhinavBansal17/mcp-headless-gmail",
+  "displayName": "mcp-headless-gmail",
+  "description": "Read recent Gmail messages, retrieve full bodies in chunks, and send emails. Operate headlessly with runtime-provided credentials to avoid local setup. Automatically refresh tokens to keep workflows uninterrupted.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@AbhinavBansal17/mcp-headless-gmail",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@AbhinavBansal17/mcp-headless-gmail/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {},
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "gmail_refresh_token",
+      "description": "Refresh the access token using the refresh token and client credentials",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "google_refresh_token",
+          "google_client_id",
+          "google_client_secret"
+        ],
+        "properties": {
+          "google_client_id": {
+            "type": "string",
+            "description": "Google OAuth2 client ID for token refresh"
+          },
+          "google_access_token": {
+            "type": "string",
+            "description": "Google OAuth2 access token (optional if expired)"
+          },
+          "google_client_secret": {
+            "type": "string",
+            "description": "Google OAuth2 client secret for token refresh"
+          },
+          "google_refresh_token": {
+            "type": "string",
+            "description": "Google OAuth2 refresh token"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "gmail_get_recent_emails",
+      "description": "Get the most recent emails from Gmail (returns metadata, snippets, and first 1k chars of body)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "google_access_token"
+        ],
+        "properties": {
+          "max_results": {
+            "type": "number",
+            "description": "Maximum number of emails to return (default: 10)"
+          },
+          "unread_only": {
+            "type": "boolean",
+            "description": "Whether to return only unread emails (default: False)"
+          },
+          "google_access_token": {
+            "type": "string",
+            "description": "Google OAuth2 access token"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "gmail_get_email_body_chunk",
+      "description": "Get a 1k character chunk of an email body starting from the specified offset",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "google_access_token"
+        ],
+        "properties": {
+          "offset": {
+            "type": "number",
+            "description": "Offset in characters to start from (default: 0)"
+          },
+          "thread_id": {
+            "type": "string",
+            "description": "ID of the thread to retrieve (will get the first message if multiple exist)"
+          },
+          "message_id": {
+            "type": "string",
+            "description": "ID of the message to retrieve"
+          },
+          "google_access_token": {
+            "type": "string",
+            "description": "Google OAuth2 access token"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "gmail_send_email",
+      "description": "Send an email via Gmail",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "google_access_token",
+          "to",
+          "subject",
+          "body"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient email address"
+          },
+          "body": {
+            "type": "string",
+            "description": "Email body content (plain text)"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Email subject"
+          },
+          "html_body": {
+            "type": "string",
+            "description": "Email body content in HTML format (optional)"
+          },
+          "google_access_token": {
+            "type": "string",
+            "description": "Google OAuth2 access token"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:17:55.446465+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,1076 @@
+{
+  "qualifiedName": "bitbucket",
+  "displayName": "Bitbucket",
+  "description": "Bitbucket is a Git-based code hosting and collaboration platform supporting private and public repositories, enabling teams to manage and review code through pull requests and integrations",
+  "iconUrl": "https://logos.composio.dev/api/bitbucket",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/bitbucket",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/bitbucket/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "BITBUCKET_CREATE_BRANCH",
+      "description": "Creates a new branch in a Bitbucket repository from a target commit hash; the branch name must be unique, adhere to Bitbucket's naming conventions, and not include the 'refs/heads/' prefix.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateBranchRequest",
+        "required": [
+          "workspace",
+          "repo_slug",
+          "name",
+          "target_hash"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "feature/new-branch"
+            ],
+            "description": "The name for the new branch (e.g., 'feature/new-login', 'bugfix/issue-123'). Important: Do not include the 'refs/heads/' prefix."
+          },
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "examples": [
+              "my-repo"
+            ],
+            "description": "The slug or UUID of the repository where the branch will be created. This is usually the repository's name in URL-friendly format."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "my-workspace"
+            ],
+            "description": "The workspace ID or UUID that owns the repository. This can typically be found in the URL of your Bitbucket workspace."
+          },
+          "target_hash": {
+            "type": "string",
+            "title": "Target Hash",
+            "examples": [
+              "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0"
+            ],
+            "description": "The full commit hash (SHA1) from which the new branch will be created. This commit must exist in the repository."
+          }
+        },
+        "description": "Request model for creating a new branch in a Bitbucket repository."
+      }
+    },
+    {
+      "name": "BITBUCKET_CREATE_ISSUE",
+      "description": "Creates a new issue in a Bitbucket repository, setting the authenticated user as reporter; ensures assignee (if provided) has repository access, and that any specified milestone, version, or component IDs exist.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateIssueRequest",
+        "required": [
+          "workspace",
+          "repo_slug",
+          "title",
+          "content"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind",
+            "default": null,
+            "examples": [
+              "bug",
+              "enhancement",
+              "proposal",
+              "task"
+            ],
+            "nullable": true,
+            "description": "Type of the issue (e.g., 'bug', 'enhancement', 'proposal', 'task')."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "Bug: Login not working"
+            ],
+            "description": "Title for the new issue."
+          },
+          "due_on": {
+            "type": "string",
+            "title": "Due On",
+            "default": null,
+            "examples": [
+              "2025-04-24T23:59:59Z"
+            ],
+            "nullable": true,
+            "description": "Due date for the issue in ISO 8601 format (e.g., 'YYYY-MM-DDTHH:mm:ssZ')."
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "Users are unable to log in when using Firefox browser"
+            ],
+            "description": "Detailed description for the new issue."
+          },
+          "assignee": {
+            "type": "string",
+            "title": "Assignee",
+            "default": null,
+            "examples": [
+              "johndoe"
+            ],
+            "nullable": true,
+            "description": "Bitbucket username of the assignee. The assignee must have repository access."
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority",
+            "default": null,
+            "examples": [
+              "trivial",
+              "minor",
+              "major",
+              "critical",
+              "blocker"
+            ],
+            "nullable": true,
+            "description": "Priority level of the issue (e.g., 'trivial', 'minor', 'major', 'critical', 'blocker')."
+          },
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "examples": [
+              "repo-name"
+            ],
+            "description": "The slug of the Bitbucket repository."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "workspace123"
+            ],
+            "description": "The ID or slug of the Bitbucket workspace."
+          },
+          "version_id": {
+            "type": "integer",
+            "title": "Version Id",
+            "default": null,
+            "examples": [
+              "67890"
+            ],
+            "nullable": true,
+            "description": "Numeric ID of an existing version to associate with this issue."
+          },
+          "component_id": {
+            "type": "integer",
+            "title": "Component Id",
+            "default": null,
+            "examples": [
+              "11223"
+            ],
+            "nullable": true,
+            "description": "Numeric ID of an existing component to associate with this issue."
+          },
+          "milestone_id": {
+            "type": "integer",
+            "title": "Milestone Id",
+            "default": null,
+            "examples": [
+              "12345"
+            ],
+            "nullable": true,
+            "description": "Numeric ID of an existing milestone to associate with this issue."
+          }
+        }
+      }
+    },
+    {
+      "name": "BITBUCKET_CREATE_ISSUE_COMMENT",
+      "description": "Adds a new comment with markdown support to an existing Bitbucket issue.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateIssueCommentRequest",
+        "required": [
+          "workspace",
+          "repo_slug",
+          "issue_id",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "This is a comment with **bold** text"
+            ],
+            "description": "The raw text content for the comment. This content supports markdown formatting, which Bitbucket will then render."
+          },
+          "issue_id": {
+            "type": "string",
+            "title": "Issue Id",
+            "examples": [
+              "123"
+            ],
+            "description": "The unique identifier of the issue on which the comment will be posted."
+          },
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "examples": [
+              "my-repo"
+            ],
+            "description": "The slug (URL-friendly version) of the repository name."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "my-workspace"
+            ],
+            "description": "The ID or slug of the workspace or user that owns the repository."
+          }
+        },
+        "description": "Request model for creating a comment on a Bitbucket issue."
+      }
+    },
+    {
+      "name": "BITBUCKET_CREATE_PULL_REQUEST",
+      "description": "Creates a new pull request in a specified Bitbucket repository, ensuring the source branch exists and is distinct from the (optional) destination branch.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreatePullRequestRequest",
+        "required": [
+          "workspace",
+          "repo_slug",
+          "title",
+          "source_branch"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "Feature: Add new login page",
+              "Fix: Resolve issue with user authentication"
+            ],
+            "maxLength": 255,
+            "minLength": 1,
+            "description": "Concise title summarizing the changes for the pull request."
+          },
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "pattern": "^[a-zA-Z0-9_\\-]+$",
+            "examples": [
+              "my-repo",
+              "another-repository"
+            ],
+            "description": "Slug (URL-friendly name) of the repository for the pull request."
+          },
+          "reviewers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "Reviewer",
+              "required": [
+                "uuid"
+              ],
+              "properties": {
+                "uuid": {
+                  "type": "string",
+                  "title": "Uuid",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                  "examples": [
+                    "{123e4567-e89b-12d3-a456-426614174000}"
+                  ],
+                  "description": "UUID of the Bitbucket user to be a reviewer."
+                }
+              }
+            },
+            "title": "Reviewers",
+            "default": null,
+            "examples": [
+              [
+                {
+                  "uuid": "{123e4567-e89b-12d3-a456-426614174000}"
+                },
+                {
+                  "uuid": "{098f6bcd-4621-4eb7-9cb0-1e234567c89d}"
+                }
+              ]
+            ],
+            "nullable": true,
+            "description": "List of Bitbucket user UUIDs to be added as reviewers."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "pattern": "^[a-zA-Z0-9_\\-]+$|^\\{[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}\\}$",
+            "examples": [
+              "my-workspace",
+              "{a1b2c3d4-e5f6-7890-1234-567890abcdef}"
+            ],
+            "description": "Workspace ID (UUID or slug) of the repository owner."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "examples": [
+              "This PR adds a new login page with improved security features and a redesigned UI. It addresses ticket #123.",
+              "Fixes a critical bug in the payment processing module that caused incorrect transaction amounts."
+            ],
+            "nullable": true,
+            "maxLength": 65535,
+            "description": "Detailed Markdown description of the pull request, outlining changes and purpose."
+          },
+          "source_branch": {
+            "type": "string",
+            "title": "Source Branch",
+            "pattern": "^[a-zA-Z0-9/._-]+$",
+            "examples": [
+              "feature/login-page",
+              "bugfix/auth-issue"
+            ],
+            "description": "Name of the source branch with changes to be merged."
+          },
+          "destination_branch": {
+            "type": "string",
+            "title": "Destination Branch",
+            "default": null,
+            "pattern": "^[a-zA-Z0-9/._-]+$",
+            "examples": [
+              "main",
+              "develop"
+            ],
+            "nullable": true,
+            "description": "Name of the destination branch for merging; defaults to repository's main branch if unspecified."
+          },
+          "close_source_branch": {
+            "type": "boolean",
+            "title": "Close Source Branch",
+            "default": false,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "If true, automatically closes the source branch upon pull request merge."
+          }
+        }
+      }
+    },
+    {
+      "name": "BITBUCKET_CREATE_REPOSITORY",
+      "description": "Creates a new Bitbucket 'git' repository in a specified workspace, defaulting to the workspace's oldest project if `project_key` is not provided.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateRepositoryRequest",
+        "required": [
+          "workspace",
+          "repo_slug"
+        ],
+        "properties": {
+          "has_wiki": {
+            "type": "boolean",
+            "title": "Has Wiki",
+            "default": true,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Enable the wiki (`True`), or disable it (`False`)."
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": null,
+            "examples": [
+              "python",
+              "java",
+              "javascript"
+            ],
+            "nullable": true,
+            "description": "Primary programming language (e.g., 'python', 'java') for categorization."
+          },
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "pattern": "^[a-zA-Z0-9-_]+$",
+            "examples": [
+              "my-repo"
+            ],
+            "description": "URL-friendly slug for the new repository."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "my-workspace"
+            ],
+            "description": "ID or slug of the Bitbucket workspace for the new repository."
+          },
+          "has_issues": {
+            "type": "boolean",
+            "title": "Has Issues",
+            "default": true,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Enable the issue tracker (`True`), or disable it (`False`)."
+          },
+          "is_private": {
+            "type": "boolean",
+            "title": "Is Private",
+            "default": true,
+            "examples": [
+              true,
+              false
+            ],
+            "description": "Repository visibility: `True` for private, `False` for public."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "examples": [
+              "My awesome repository"
+            ],
+            "nullable": true,
+            "description": "Description for the new repository."
+          },
+          "fork_policy": {
+            "enum": [
+              "allow_forks",
+              "no_public_forks",
+              "no_forks"
+            ],
+            "type": "string",
+            "title": "Fork Policy",
+            "default": "allow_forks",
+            "examples": [
+              "allow_forks",
+              "no_public_forks",
+              "no_forks"
+            ],
+            "nullable": true,
+            "description": "Forking policy for the repository, determining who can create forks."
+          },
+          "project_key": {
+            "type": "string",
+            "title": "Project Key",
+            "default": null,
+            "examples": [
+              "PROJ"
+            ],
+            "nullable": true,
+            "description": "Key of the Bitbucket project for the repository; if omitted, it's placed in the workspace's oldest project."
+          }
+        }
+      }
+    },
+    {
+      "name": "BITBUCKET_CREATE_SNIPPET_COMMENT",
+      "description": "Posts a new top-level comment or a threaded reply to an existing comment on a specified Bitbucket snippet.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateSnippetCommentRequest",
+        "required": [
+          "workspace",
+          "encoded_id",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "This is a comment on the snippet"
+            ],
+            "description": "Raw text content of the comment; Bitbucket will render any included markup (like Markdown)."
+          },
+          "parent_id": {
+            "type": "integer",
+            "title": "Parent Id",
+            "default": null,
+            "examples": [
+              123
+            ],
+            "nullable": true,
+            "description": "ID of an existing comment to reply to, creating a threaded comment; if omitted, a top-level comment is created."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "myworkspace"
+            ],
+            "description": "Workspace ID or slug (e.g., 'my_workspace_slug' or a UUID) for the Bitbucket workspace containing the snippet."
+          },
+          "encoded_id": {
+            "type": "string",
+            "title": "Encoded Id",
+            "examples": [
+              "ae8f3b"
+            ],
+            "description": "Unique, encoded ID of the Bitbucket snippet to comment on (typically part of the snippet's URL)."
+          }
+        }
+      }
+    },
+    {
+      "name": "BITBUCKET_DELETE_ISSUE",
+      "description": "Permanently deletes a specific issue, identified by its `issue_id`, from the repository specified by `repo_slug` within the given `workspace`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteIssueRequest",
+        "required": [
+          "workspace",
+          "repo_slug",
+          "issue_id"
+        ],
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "title": "Issue Id",
+            "examples": [
+              "123"
+            ],
+            "description": "The unique identifier of the issue to be deleted from the specified repository."
+          },
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "examples": [
+              "my-repo"
+            ],
+            "description": "The slug of the repository. This is the repository's name, usually in lowercase and with hyphens instead of spaces."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "my-workspace"
+            ],
+            "description": "The workspace ID (slug) or UUID of the Bitbucket workspace that owns the repository. This can be the workspace name or its universally unique identifier."
+          }
+        },
+        "description": "Request model for deleting an issue."
+      }
+    },
+    {
+      "name": "BITBUCKET_DELETE_REPOSITORY",
+      "description": "Permanently deletes a specified Bitbucket repository; this action is irreversible and does not affect forks.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteRepositoryRequest",
+        "required": [
+          "workspace",
+          "repo_slug"
+        ],
+        "properties": {
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "examples": [
+              "my-repo"
+            ],
+            "description": "The slug (URL-friendly name) of the repository to be deleted. This identifies the repository within the workspace."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "my-workspace"
+            ],
+            "description": "The ID or slug of the Bitbucket workspace that owns the repository. This can be a user's username or a team's slug."
+          }
+        },
+        "description": "Request model for deleting a repository."
+      }
+    },
+    {
+      "name": "BITBUCKET_GET_CURRENT_USER",
+      "description": "Retrieves the profile information (UUID, display name, links, creation date) for the currently authenticated Bitbucket user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCurrentUserRequest",
+        "properties": {},
+        "description": "Request model for the GetCurrentUser action. No parameters are required."
+      }
+    },
+    {
+      "name": "BITBUCKET_GET_FILE_FROM_REPOSITORY",
+      "description": "Retrieves a specific file's content from a Bitbucket repository at a given commit (hash, branch, or tag), failing if the file path is invalid for that commit.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetFileFromRepositoryRequest",
+        "required": [
+          "workspace",
+          "repo_slug",
+          "commit",
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "examples": [
+              "src/main.py",
+              "docs/README.md"
+            ],
+            "description": "Full path to the file within the repository (e.g., 'src/main.py')."
+          },
+          "commit": {
+            "type": "string",
+            "title": "Commit",
+            "examples": [
+              "main",
+              "develop",
+              "a1b2c3d4"
+            ],
+            "description": "Commit hash, branch name (fetches latest), or tag for the file version."
+          },
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "examples": [
+              "repo-name"
+            ],
+            "description": "Repository slug or UUID (typically URL-formatted name)."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "workspace123"
+            ],
+            "description": "Workspace ID or UUID (often username or team name) containing the repository."
+          }
+        }
+      }
+    },
+    {
+      "name": "BITBUCKET_GET_PULL_REQUEST",
+      "description": "Get a single pull request by ID with complete details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPullRequestRequest",
+        "required": [
+          "workspace",
+          "repo_slug",
+          "pull_request_id"
+        ],
+        "properties": {
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "examples": [
+              "my-cool-repo",
+              "project-x"
+            ],
+            "description": "Repository slug (URL-friendly name)."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "my-workspace",
+              "workspace-uuid"
+            ],
+            "description": "Workspace ID or slug (URL-friendly name)."
+          },
+          "pull_request_id": {
+            "type": "integer",
+            "title": "Pull Request Id",
+            "examples": [
+              1,
+              42,
+              123
+            ],
+            "description": "The ID of the pull request to retrieve.",
+            "exclusiveMinimum": 0
+          }
+        },
+        "description": "Request to get a single pull request by ID."
+      }
+    },
+    {
+      "name": "BITBUCKET_GET_SNIPPET",
+      "description": "Retrieves a specific Bitbucket snippet by its encoded ID from an existing workspace, returning its metadata and file structure.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSnippetRequest",
+        "required": [
+          "workspace",
+          "encoded_id"
+        ],
+        "properties": {
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "myworkspace",
+              "{123e4567-e89b-12d3-a456-426614174000}"
+            ],
+            "description": "The workspace ID (slug) or the workspace UUID surrounded by curly braces, identifying the Bitbucket workspace."
+          },
+          "encoded_id": {
+            "type": "string",
+            "title": "Encoded Id",
+            "examples": [
+              "kypj"
+            ],
+            "description": "The unique identifier (encoded ID) of the snippet to be retrieved."
+          },
+          "accept_format": {
+            "type": "string",
+            "title": "Accept Format",
+            "default": "application/json",
+            "examples": [
+              "application/json",
+              "multipart/related",
+              "multipart/form-data"
+            ],
+            "description": "The desired format for the response. Valid options are 'application/json', 'multipart/related', or 'multipart/form-data'. This may affect how snippet content or file data is presented."
+          }
+        },
+        "description": "Request model for getting a snippet."
+      }
+    },
+    {
+      "name": "BITBUCKET_LIST_PULL_REQUESTS",
+      "description": "Lists pull requests in a specified, accessible Bitbucket repository, optionally filtering by state (OPEN, MERGED, DECLINED).",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPullRequestsRequest",
+        "required": [
+          "workspace",
+          "repo_slug"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              "1",
+              "5"
+            ],
+            "nullable": true,
+            "description": "Page number for paginated results (starts from 1)."
+          },
+          "state": {
+            "enum": [
+              "OPEN",
+              "MERGED",
+              "DECLINED"
+            ],
+            "type": "string",
+            "title": "PullRequestState",
+            "default": null,
+            "examples": [
+              "OPEN",
+              "MERGED"
+            ],
+            "nullable": true,
+            "description": "Lifecycle state of a pull request."
+          },
+          "pagelen": {
+            "type": "integer",
+            "title": "Pagelen",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              "10",
+              "50",
+              "100"
+            ],
+            "nullable": true,
+            "description": "Number of pull requests per page (1-100). Bitbucket default if not specified."
+          },
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "examples": [
+              "my-cool-repo",
+              "project-x"
+            ],
+            "description": "Repository slug (URL-friendly name)."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "my-workspace",
+              "workspace-uuid"
+            ],
+            "description": "Workspace ID or slug (URL-friendly name)."
+          }
+        },
+        "description": "Lists pull requests in a specified repository."
+      }
+    },
+    {
+      "name": "BITBUCKET_LIST_REPOSITORIES_IN_WORKSPACE",
+      "description": "Lists repositories in a specified Bitbucket workspace, accessible to the authenticated user, with options to filter by role or query string, and sort results.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListRepositoriesInWorkspaceRequest",
+        "required": [
+          "workspace"
+        ],
+        "properties": {
+          "q": {
+            "type": "string",
+            "title": "Q",
+            "default": null,
+            "examples": [
+              "name~\"my-repo\"",
+              "project.key=\"PROJ\""
+            ],
+            "nullable": true,
+            "description": "Query string using Bitbucket's REST API filtering syntax to filter repositories. For detailed syntax, refer to Bitbucket API documentation."
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "default": null,
+            "examples": [
+              "member",
+              "contributor",
+              "admin",
+              "owner"
+            ],
+            "nullable": true,
+            "description": "Filters repositories by the authenticated user's role within each repository."
+          },
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "default": null,
+            "examples": [
+              "name",
+              "-created_on"
+            ],
+            "nullable": true,
+            "description": "Field for sorting repository results. Prefix with '-' for descending order. Common sortable fields: 'name', 'updated_on', 'created_on'."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "my-workspace",
+              "{workspace-uuid}"
+            ],
+            "description": "The identifier of the Bitbucket workspace. This can be the workspace slug (e.g., 'my-workspace') or its UUID enclosed in curly braces (e.g., '{workspace-uuid}')."
+          }
+        }
+      }
+    },
+    {
+      "name": "BITBUCKET_LIST_WORKSPACE_MEMBERS",
+      "description": "Lists all members of a specified Bitbucket workspace; the workspace must exist.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListWorkspaceMembersRequest",
+        "required": [
+          "workspace"
+        ],
+        "properties": {
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "my-workspace-slug",
+              "{123e4567-e89b-12d3-a456-426614174000}"
+            ],
+            "description": "The workspace ID (UUID) or slug from which to list members. The slug is the user-friendly, URL-safe identifier for the workspace."
+          }
+        },
+        "description": "Request model for the BITBUCKET_LIST_WORKSPACE_MEMBERS action."
+      }
+    },
+    {
+      "name": "BITBUCKET_LIST_WORKSPACES",
+      "description": "Lists Bitbucket workspaces accessible to the authenticated user, optionally filtered and sorted.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListWorkspacesRequest",
+        "properties": {
+          "q": {
+            "type": "string",
+            "title": "Q",
+            "default": null,
+            "examples": [
+              "slug=\"my-company-workspace\"",
+              "is_private=true",
+              "name~\"Test\""
+            ],
+            "nullable": true,
+            "description": "Query string to filter workspaces by attributes, following Bitbucket's filtering syntax."
+          },
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "default": null,
+            "examples": [
+              "created_on",
+              "-name",
+              "slug"
+            ],
+            "nullable": true,
+            "description": "Field to sort returned workspaces by; prefix with a hyphen (-) for descending order."
+          }
+        },
+        "description": "Request model for the ListWorkspaces action. Specifies optional query parameters for filtering and sorting workspaces."
+      }
+    },
+    {
+      "name": "BITBUCKET_UPDATE_ISSUE",
+      "description": "Updates an existing issue in a Bitbucket repository by modifying specified attributes; requires `workspace`, `repo_slug`, `issue_id`, and at least one attribute to update.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateIssueRequest",
+        "required": [
+          "workspace",
+          "repo_slug",
+          "issue_id"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind",
+            "default": null,
+            "pattern": "^(bug|enhancement|proposal|task)$",
+            "examples": [
+              "bug"
+            ],
+            "nullable": true,
+            "description": "The updated kind (type) for the issue. If omitted, kind remains unchanged."
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "default": null,
+            "pattern": "^(new|open|resolved|on hold|invalid|duplicate|wontfix|closed)$",
+            "examples": [
+              "resolved"
+            ],
+            "nullable": true,
+            "description": "The updated state for the issue. If omitted, state remains unchanged."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "examples": [
+              "Updated critical bug fix for login"
+            ],
+            "nullable": true,
+            "description": "The new title for the issue. If omitted, the title remains unchanged."
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "default": null,
+            "examples": [
+              "Detailed description of the updated steps to reproduce and the fix applied."
+            ],
+            "nullable": true,
+            "description": "The new content or description for the issue, in raw text format. If omitted, the content remains unchanged."
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": null,
+            "examples": [
+              "2.0"
+            ],
+            "nullable": true,
+            "description": "The name of the version affected by this issue (e.g., '1.0.0', '2.0-beta'). If omitted, the version remains unchanged."
+          },
+          "issue_id": {
+            "type": "string",
+            "title": "Issue Id",
+            "examples": [
+              "123"
+            ],
+            "description": "The unique identifier (ID) of the issue to be updated."
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority",
+            "default": null,
+            "pattern": "^(trivial|minor|major|critical|blocker)$",
+            "examples": [
+              "major"
+            ],
+            "nullable": true,
+            "description": "The updated priority for the issue. If omitted, priority remains unchanged."
+          },
+          "component": {
+            "type": "string",
+            "title": "Component",
+            "default": null,
+            "examples": [
+              "backend"
+            ],
+            "nullable": true,
+            "description": "The name of the component to associate with the issue (e.g., 'API', 'Frontend'). If omitted, the component remains unchanged."
+          },
+          "milestone": {
+            "type": "string",
+            "title": "Milestone",
+            "default": null,
+            "examples": [
+              "v1.0"
+            ],
+            "nullable": true,
+            "description": "The name of the milestone to associate with the issue (e.g., 'Sprint 1', 'v1.0 Launch'). If omitted, the milestone remains unchanged."
+          },
+          "repo_slug": {
+            "type": "string",
+            "title": "Repo Slug",
+            "examples": [
+              "my-repo"
+            ],
+            "description": "The slug or name of the repository (e.g., 'my-app-repo')."
+          },
+          "workspace": {
+            "type": "string",
+            "title": "Workspace",
+            "examples": [
+              "my-workspace"
+            ],
+            "description": "The workspace ID or slug that owns the repository (e.g., 'my-company' or '{123e4567-e89b-12d3-a456-426614174000}')."
+          },
+          "assignee_account_id": {
+            "type": "string",
+            "title": "Assignee Account Id",
+            "default": null,
+            "examples": [
+              "557058:c0b72ad0-1cb5-4018-9cdc-0cde8492c443"
+            ],
+            "nullable": true,
+            "description": "The Bitbucket account ID (UUID) of the user to assign the issue to. If omitted, the assignee remains unchanged."
+          }
+        },
+        "description": "Request model for updating an existing issue in a Bitbucket repository."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:27.447951+00:00",
+    "source": "smithery"
+  }
+}

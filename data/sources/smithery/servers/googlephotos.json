@@ -1,0 +1,959 @@
+{
+  "qualifiedName": "googlephotos",
+  "displayName": "Googlephotos",
+  "description": "Google Photos is a cloud-based photo storage and organization service offering automatic backups, AI-assisted search, and shared albums for personal and collaborative media management",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/Google_Photos.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/googlephotos",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/googlephotos/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "GOOGLEPHOTOS_ADD_ENRICHMENT",
+      "description": "Adds an enrichment at a specified position in a defined album.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddEnrichmentRequest",
+        "required": [
+          "albumId",
+          "newEnrichmentItem"
+        ],
+        "properties": {
+          "albumId": {
+            "type": "string",
+            "title": "Album Id",
+            "examples": [
+              "AGj1epU5H_bR3MWuuGxsVwk0TkwvNhxEGi1"
+            ],
+            "description": "Identifier of the album where the enrichment is to be added"
+          },
+          "albumPosition": {
+            "type": "object",
+            "title": "Album Position",
+            "examples": [
+              "FIRST_IN_ALBUM"
+            ],
+            "required": [
+              "position"
+            ],
+            "properties": {
+              "position": {
+                "enum": [
+                  "POSITION_TYPE_UNSPECIFIED",
+                  "FIRST_IN_ALBUM",
+                  "LAST_IN_ALBUM",
+                  "AFTER_MEDIA_ITEM",
+                  "AFTER_ENRICHMENT_ITEM"
+                ],
+                "type": "string",
+                "title": "Position",
+                "description": "Type of position, for a media or enrichment item"
+              },
+              "relativeMediaItemId": {
+                "type": "string",
+                "title": "Relative Media Item Id",
+                "description": "The media item to which the position is relative to. Only used when position type is AFTER_MEDIA_ITEM"
+              },
+              "relativeEnrichmentItemId": {
+                "type": "string",
+                "title": "Relative Enrichment Item Id",
+                "description": "The enrichment item to which the position is relative to. Only used when position type is AFTER_ENRICHMENT_ITEM"
+              }
+            },
+            "description": "Position in the album where the enrichment is to be inserted. Valid options are: POSITION_TYPE_UNSPECIFIED, FIRST_IN_ALBUM, LAST_IN_ALBUM, AFTER_MEDIA_ITEM, AFTER_ENRICHMENT_ITEM",
+            "additionalProperties": false
+          },
+          "newEnrichmentItem": {
+            "type": "object",
+            "title": "New Enrichment Item",
+            "examples": [
+              {
+                "textEnrichment": {
+                  "text": "Trip to Paris"
+                }
+              }
+            ],
+            "properties": {
+              "mapEnrichment": {
+                "type": "object",
+                "title": "Map Enrichment",
+                "required": [
+                  "origin",
+                  "destination"
+                ],
+                "properties": {
+                  "origin": {
+                    "type": "object",
+                    "title": "Origin",
+                    "required": [
+                      "locationName",
+                      "latlng"
+                    ],
+                    "properties": {
+                      "latlng": {
+                        "type": "object",
+                        "title": "Latlng",
+                        "required": [
+                          "latitude",
+                          "longitude"
+                        ],
+                        "properties": {
+                          "latitude": {
+                            "type": "number",
+                            "title": "Latitude",
+                            "maximum": 90,
+                            "minimum": -90,
+                            "description": "Latitude in degrees"
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "title": "Longitude",
+                            "maximum": 180,
+                            "minimum": -180,
+                            "description": "Longitude in degrees"
+                          }
+                        },
+                        "description": "Position of the location on the map",
+                        "additionalProperties": false
+                      },
+                      "locationName": {
+                        "type": "string",
+                        "title": "Location Name",
+                        "description": "Name of the location to be displayed"
+                      }
+                    },
+                    "description": "Origin location for this enrichment item",
+                    "additionalProperties": false
+                  },
+                  "destination": {
+                    "type": "object",
+                    "title": "Destination",
+                    "required": [
+                      "locationName",
+                      "latlng"
+                    ],
+                    "properties": {
+                      "latlng": {
+                        "type": "object",
+                        "title": "Latlng",
+                        "required": [
+                          "latitude",
+                          "longitude"
+                        ],
+                        "properties": {
+                          "latitude": {
+                            "type": "number",
+                            "title": "Latitude",
+                            "maximum": 90,
+                            "minimum": -90,
+                            "description": "Latitude in degrees"
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "title": "Longitude",
+                            "maximum": 180,
+                            "minimum": -180,
+                            "description": "Longitude in degrees"
+                          }
+                        },
+                        "description": "Position of the location on the map",
+                        "additionalProperties": false
+                      },
+                      "locationName": {
+                        "type": "string",
+                        "title": "Location Name",
+                        "description": "Name of the location to be displayed"
+                      }
+                    },
+                    "description": "Destination location for this enrichment item",
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "textEnrichment": {
+                "type": "object",
+                "title": "Text Enrichment",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "title": "Text",
+                    "description": "Text for this enrichment item"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "locationEnrichment": {
+                "type": "object",
+                "title": "Location Enrichment",
+                "required": [
+                  "location"
+                ],
+                "properties": {
+                  "location": {
+                    "type": "object",
+                    "title": "Location",
+                    "required": [
+                      "locationName",
+                      "latlng"
+                    ],
+                    "properties": {
+                      "latlng": {
+                        "type": "object",
+                        "title": "Latlng",
+                        "required": [
+                          "latitude",
+                          "longitude"
+                        ],
+                        "properties": {
+                          "latitude": {
+                            "type": "number",
+                            "title": "Latitude",
+                            "maximum": 90,
+                            "minimum": -90,
+                            "description": "Latitude in degrees"
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "title": "Longitude",
+                            "maximum": 180,
+                            "minimum": -180,
+                            "description": "Longitude in degrees"
+                          }
+                        },
+                        "description": "Position of the location on the map",
+                        "additionalProperties": false
+                      },
+                      "locationName": {
+                        "type": "string",
+                        "title": "Location Name",
+                        "description": "Name of the location to be displayed"
+                      }
+                    },
+                    "description": "Location for this enrichment item",
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "description": "The enrichment to be added, can be a text, location, or map enrichment",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_BATCH_ADD_MEDIA_ITEMS",
+      "description": "Adds one or more media items to an album in Google Photos.",
+      "inputSchema": {
+        "type": "object",
+        "title": "BatchAddMediaItemsRequest",
+        "required": [
+          "albumId",
+          "mediaItemIds"
+        ],
+        "properties": {
+          "albumId": {
+            "type": "string",
+            "title": "Album Id",
+            "examples": [
+              "AGj1epU5H_bR3MWuuGxsVwk0TkwvNhxEGi1"
+            ],
+            "description": "Identifier of the Album that the media items are added to"
+          },
+          "mediaItemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Media Item Ids",
+            "examples": [
+              [
+                "AGj1epU7vyyz0T6EMWx9qc9_DmHjS7OTKP1",
+                "AGj1epU8vyyz0T6EMWx9qc9_DmHjS7OTKP2"
+              ]
+            ],
+            "maxItems": 50,
+            "description": "Identifiers of the MediaItems to be added. Maximum 50 items."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_BATCH_CREATE_MEDIA_ITEMS",
+      "description": "Unified action to upload media files and create them as items in Google Photos.",
+      "inputSchema": {
+        "type": "object",
+        "title": "BatchCreateMediaItemsRequest",
+        "required": [
+          "albumId",
+          "files"
+        ],
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "FileUploadable",
+              "required": [
+                "name",
+                "mimetype",
+                "s3key"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "examples": [
+                    "document.pdf",
+                    "image.jpg",
+                    "report.docx"
+                  ],
+                  "description": "The filename that will be used when uploading the file to the destination service"
+                },
+                "s3key": {
+                  "type": "string",
+                  "title": "S3Key",
+                  "examples": [
+                    "47563/gmail/GET_ATTACHMENT/response/12345"
+                  ],
+                  "description": "The S3 key of a publicly accessible file, typically returned from a previous download action that stored the file in S3. This key references an existing file that can be uploaded to another service."
+                },
+                "mimetype": {
+                  "type": "string",
+                  "title": "Mimetype",
+                  "examples": [
+                    "application/pdf",
+                    "image/jpeg",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ],
+                  "description": "The MIME type of the file"
+                }
+              },
+              "file_uploadable": true
+            },
+            "title": "Files",
+            "examples": [
+              [
+                {
+                  "name": "vacation.jpg",
+                  "content": "base64_encoded_file_content_here",
+                  "contentType": "image/jpeg"
+                }
+              ]
+            ],
+            "description": "List of media files to upload and create as media items."
+          },
+          "albumId": {
+            "type": "string",
+            "title": "Album Id",
+            "examples": [
+              "AGj1epU5H_bR3MWuuGxsVwk0TkwvNhxEGi1"
+            ],
+            "description": "Identifier of the album where the media items are to be added."
+          },
+          "albumPosition": {
+            "type": "object",
+            "title": "Album Position",
+            "examples": [
+              {
+                "position": "LAST_IN_ALBUM"
+              }
+            ],
+            "properties": {
+              "position": {
+                "enum": [
+                  "POSITION_TYPE_UNSPECIFIED",
+                  "FIRST_IN_ALBUM",
+                  "LAST_IN_ALBUM",
+                  "AFTER_MEDIA_ITEM",
+                  "AFTER_ENRICHMENT_ITEM"
+                ],
+                "type": "string",
+                "title": "Position",
+                "default": "LAST_IN_ALBUM"
+              },
+              "relativeMediaItemId": {
+                "type": "string",
+                "title": "Relative Media Item Id",
+                "description": "The media item to which the position is relative."
+              },
+              "relativeEnrichmentItemId": {
+                "type": "string",
+                "title": "Relative Enrichment Item Id",
+                "description": "The enrichment item to which the position is relative."
+              }
+            },
+            "description": "Position in the album to add the media items.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_BATCH_GET_MEDIA_ITEMS",
+      "description": "Returns the list of media items for the specified media item identifiers.",
+      "inputSchema": {
+        "type": "object",
+        "title": "BatchGetMediaItemsRequest",
+        "required": [
+          "mediaItemIds"
+        ],
+        "properties": {
+          "mediaItemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Media Item Ids",
+            "maxItems": 50,
+            "description": "Identifiers of the media items to be requested. Must not contain duplicates."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_CREATE_ALBUM",
+      "description": "Creates a new album in Google Photos.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateAlbumRequest",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Identifier for the album"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "maxLength": 500,
+            "description": "Name of the album to be created in Google Photos. Maximum 500 characters."
+          },
+          "productUrl": {
+            "type": "string",
+            "title": "Product Url",
+            "description": "Google Photos URL for the album"
+          },
+          "isWriteable": {
+            "type": "boolean",
+            "title": "Is Writeable",
+            "description": "Whether media items can be created in this album"
+          },
+          "mediaItemsCount": {
+            "type": "string",
+            "title": "Media Items Count",
+            "description": "Number of media items in the album"
+          },
+          "coverPhotoBaseUrl": {
+            "type": "string",
+            "title": "Cover Photo Base Url",
+            "description": "URL to the cover photo"
+          },
+          "coverPhotoMediaItemId": {
+            "type": "string",
+            "title": "Cover Photo Media Item Id",
+            "description": "ID of the cover photo media item"
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_GET_ALBUM",
+      "description": "Returns the album based on the specified albumId.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAlbumRequest",
+        "required": [
+          "albumId"
+        ],
+        "properties": {
+          "albumId": {
+            "type": "string",
+            "title": "Album Id",
+            "description": "Identifier of the album to be requested."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_GET_MEDIA_ITEM_DOWNLOAD",
+      "description": "Downloads a media item from Google Photos and returns it as a file.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMediaItemDownloadRequest",
+        "required": [
+          "mediaItemId"
+        ],
+        "properties": {
+          "mediaItemId": {
+            "type": "string",
+            "title": "Media Item Id",
+            "description": "ID of the media item to download"
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_LIST_ALBUMS",
+      "description": "Lists all albums shown to a user in the Albums tab of Google Photos.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAlbumsRequest",
+        "properties": {
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 20,
+            "maximum": 50,
+            "description": "Maximum number of albums to return. Default 20, maximum 50.",
+            "exclusiveMinimum": 0
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "description": "Continuation token for getting the next page of results"
+          },
+          "excludeNonAppCreatedData": {
+            "type": "boolean",
+            "title": "Exclude Non App Created Data",
+            "description": "If true, excludes media items not created by this app"
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_LIST_MEDIA_ITEMS",
+      "description": "Lists all media items from a user's Google Photos library.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListMediaItemsRequest",
+        "properties": {
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 25,
+            "maximum": 100,
+            "description": "Maximum number of items to return. Default 25, maximum 100.",
+            "exclusiveMinimum": 0
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "description": "Token for getting the next page of results"
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_SEARCH_MEDIA_ITEMS",
+      "description": "Searches for media items in a user's Google Photos library.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SearchMediaItemsRequest",
+        "properties": {
+          "albumId": {
+            "type": "string",
+            "title": "Album Id",
+            "description": "Album to search within"
+          },
+          "filters": {
+            "type": "object",
+            "title": "Filters",
+            "properties": {
+              "dateFilter": {
+                "type": "object",
+                "title": "Date Filter",
+                "properties": {
+                  "dates": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "title": "Date",
+                      "properties": {
+                        "day": {
+                          "type": "integer",
+                          "title": "Day",
+                          "maximum": 31,
+                          "minimum": 0,
+                          "description": "Day from 1-31, or 0 for no day"
+                        },
+                        "year": {
+                          "type": "integer",
+                          "title": "Year",
+                          "maximum": 9999,
+                          "minimum": 0,
+                          "description": "Year from 1-9999, or 0 for no year"
+                        },
+                        "month": {
+                          "type": "integer",
+                          "title": "Month",
+                          "maximum": 12,
+                          "minimum": 0,
+                          "description": "Month from 1-12, or 0 for no month"
+                        }
+                      }
+                    },
+                    "title": "Dates",
+                    "maxItems": 5,
+                    "description": "List of dates to match"
+                  },
+                  "ranges": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "title": "DateRange",
+                      "required": [
+                        "startDate",
+                        "endDate"
+                      ],
+                      "properties": {
+                        "endDate": {
+                          "type": "object",
+                          "title": "End Date",
+                          "properties": {
+                            "day": {
+                              "type": "integer",
+                              "title": "Day",
+                              "maximum": 31,
+                              "minimum": 0,
+                              "description": "Day from 1-31, or 0 for no day"
+                            },
+                            "year": {
+                              "type": "integer",
+                              "title": "Year",
+                              "maximum": 9999,
+                              "minimum": 0,
+                              "description": "Year from 1-9999, or 0 for no year"
+                            },
+                            "month": {
+                              "type": "integer",
+                              "title": "Month",
+                              "maximum": 12,
+                              "minimum": 0,
+                              "description": "Month from 1-12, or 0 for no month"
+                            }
+                          },
+                          "description": "End date of the range",
+                          "additionalProperties": false
+                        },
+                        "startDate": {
+                          "type": "object",
+                          "title": "Start Date",
+                          "properties": {
+                            "day": {
+                              "type": "integer",
+                              "title": "Day",
+                              "maximum": 31,
+                              "minimum": 0,
+                              "description": "Day from 1-31, or 0 for no day"
+                            },
+                            "year": {
+                              "type": "integer",
+                              "title": "Year",
+                              "maximum": 9999,
+                              "minimum": 0,
+                              "description": "Year from 1-9999, or 0 for no year"
+                            },
+                            "month": {
+                              "type": "integer",
+                              "title": "Month",
+                              "maximum": 12,
+                              "minimum": 0,
+                              "description": "Month from 1-12, or 0 for no month"
+                            }
+                          },
+                          "description": "Start date of the range",
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "title": "Ranges",
+                    "maxItems": 5,
+                    "description": "List of date ranges to match"
+                  }
+                },
+                "description": "Filter by creation date",
+                "additionalProperties": false
+              },
+              "contentFilter": {
+                "type": "object",
+                "title": "Content Filter",
+                "properties": {
+                  "excludedContentCategories": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "NONE",
+                        "LANDSCAPES",
+                        "RECEIPTS",
+                        "CITYSCAPES",
+                        "LANDMARKS",
+                        "SELFIES",
+                        "PEOPLE",
+                        "PETS",
+                        "WEDDINGS",
+                        "BIRTHDAYS",
+                        "DOCUMENTS",
+                        "TRAVEL",
+                        "ANIMALS",
+                        "FOOD",
+                        "SPORT",
+                        "NIGHT",
+                        "PERFORMANCES",
+                        "WHITEBOARDS",
+                        "SCREENSHOTS",
+                        "UTILITY",
+                        "ARTS",
+                        "CRAFTS",
+                        "FASHION",
+                        "HOUSES",
+                        "GARDENS",
+                        "FLOWERS",
+                        "HOLIDAYS"
+                      ],
+                      "type": "string",
+                      "title": "ContentCategory",
+                      "properties": {}
+                    },
+                    "title": "Excluded Content Categories",
+                    "maxItems": 10,
+                    "description": "Categories to exclude (ORed)"
+                  },
+                  "includedContentCategories": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "NONE",
+                        "LANDSCAPES",
+                        "RECEIPTS",
+                        "CITYSCAPES",
+                        "LANDMARKS",
+                        "SELFIES",
+                        "PEOPLE",
+                        "PETS",
+                        "WEDDINGS",
+                        "BIRTHDAYS",
+                        "DOCUMENTS",
+                        "TRAVEL",
+                        "ANIMALS",
+                        "FOOD",
+                        "SPORT",
+                        "NIGHT",
+                        "PERFORMANCES",
+                        "WHITEBOARDS",
+                        "SCREENSHOTS",
+                        "UTILITY",
+                        "ARTS",
+                        "CRAFTS",
+                        "FASHION",
+                        "HOUSES",
+                        "GARDENS",
+                        "FLOWERS",
+                        "HOLIDAYS"
+                      ],
+                      "type": "string",
+                      "title": "ContentCategory",
+                      "properties": {}
+                    },
+                    "title": "Included Content Categories",
+                    "maxItems": 10,
+                    "description": "Categories to include (ORed)"
+                  }
+                },
+                "description": "Filter by content type",
+                "additionalProperties": false
+              },
+              "featureFilter": {
+                "type": "object",
+                "title": "Feature Filter",
+                "required": [
+                  "includedFeatures"
+                ],
+                "properties": {
+                  "includedFeatures": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "NONE",
+                        "FAVORITES"
+                      ],
+                      "type": "string",
+                      "title": "Feature",
+                      "properties": {}
+                    },
+                    "title": "Included Features",
+                    "description": "Features to filter on"
+                  }
+                },
+                "description": "Filter by features",
+                "additionalProperties": false
+              },
+              "mediaTypeFilter": {
+                "type": "object",
+                "title": "Media Type Filter",
+                "required": [
+                  "mediaTypes"
+                ],
+                "properties": {
+                  "mediaTypes": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "ALL_MEDIA",
+                        "VIDEO",
+                        "PHOTO"
+                      ],
+                      "type": "string",
+                      "title": "MediaType",
+                      "properties": {}
+                    },
+                    "title": "Media Types",
+                    "description": "Type of media items to return"
+                  }
+                },
+                "description": "Filter by media type",
+                "additionalProperties": false
+              },
+              "includeArchivedMedia": {
+                "type": "boolean",
+                "title": "Include Archived Media",
+                "description": "Include archived media items"
+              },
+              "excludeNonAppCreatedData": {
+                "type": "boolean",
+                "title": "Exclude Non App Created Data",
+                "description": "Exclude items not created by this app"
+              }
+            },
+            "description": "Search filters",
+            "additionalProperties": false
+          },
+          "orderBy": {
+            "type": "string",
+            "title": "Order By",
+            "description": "Sort order for results, e.g. 'MediaMetadata.creation_time desc'"
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 25,
+            "maximum": 100,
+            "description": "Maximum number of items to return. Default 25, maximum 100.",
+            "exclusiveMinimum": 0
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "description": "Token for getting the next page"
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_UPDATE_ALBUM",
+      "description": "Updates an album's title or cover photo in Google Photos.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateAlbumRequest",
+        "required": [
+          "albumId"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "nullable": true,
+            "maxLength": 500,
+            "description": "New title for the album. Maximum 500 characters."
+          },
+          "albumId": {
+            "type": "string",
+            "title": "Album Id",
+            "description": "Identifier of the album to update"
+          },
+          "coverPhotoMediaItemId": {
+            "type": "string",
+            "title": "Cover Photo Media Item Id",
+            "default": null,
+            "nullable": true,
+            "description": "ID of the media item to use as album cover photo"
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_UPDATE_MEDIA_ITEM",
+      "description": "Updates a media item's description in Google Photos.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateMediaItemRequest",
+        "required": [
+          "mediaItemId"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "nullable": true,
+            "maxLength": 1000,
+            "description": "New description for the media item. Must be shorter than 1000 characters."
+          },
+          "mediaItemId": {
+            "type": "string",
+            "title": "Media Item Id",
+            "description": "Identifier of the media item to update"
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEPHOTOS_UPLOAD_MEDIA",
+      "description": "Upload a media file to Google Photos. Supports images (up to 200MB) and videos (up to 20GB).",
+      "inputSchema": {
+        "type": "object",
+        "title": "UploadMediaRequest",
+        "required": [
+          "file_to_upload"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": "",
+            "maxLength": 1000,
+            "description": "Optional description for the media item"
+          },
+          "file_to_upload": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "The media file to upload to Google Photos",
+            "file_uploadable": true
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:06:38.745781+00:00",
+    "source": "smithery"
+  }
+}

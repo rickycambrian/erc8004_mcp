@@ -1,0 +1,361 @@
+{
+  "qualifiedName": "@kkjdaniel/bgg-mcp",
+  "displayName": "BoardGameGeek",
+  "description": "BGG MCP provides access to BoardGameGeek and a variety of board game related data through the Model Context Protocol. Enabling retrieval and filtering of board game data, user collections, and profiles.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/32d0d29b-b420-4bec-987f-30b5a659bac9.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@kkjdaniel/bgg-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@kkjdaniel/bgg-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {
+          "BGG_COOKIE": {
+            "type": "string",
+            "title": "BGG Cookie (Alternative)",
+            "description": "Cookie string for BGG authentication. Only needed if not using API key"
+          },
+          "BGG_API_KEY": {
+            "type": "string",
+            "title": "BGG API Key (Recommended)",
+            "description": "API key from BoardGameGeek for authentication. Get one at https://boardgamegeek.com/applications"
+          },
+          "BGG_USERNAME": {
+            "type": "string",
+            "title": "BGG Username",
+            "description": "Your BGG username for personalized features"
+          }
+        }
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "bgg-collection",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Find the details about a specific users board game collection on BoardGameGeek (BGG)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "owned": {
+            "type": "boolean",
+            "description": "Filters for owned games in the collection (default: true if no ownership filters specified)"
+          },
+          "rated": {
+            "type": "boolean",
+            "description": "Filters for games that are rated in the collection"
+          },
+          "played": {
+            "type": "boolean",
+            "description": "Filters for games that have recorded plays in the collection"
+          },
+          "subtype": {
+            "enum": [
+              "boardgame",
+              "boardgameexpansion"
+            ],
+            "type": "string",
+            "description": "Filter by game type: 'boardgame' for base games only (excludes expansions), 'boardgameexpansion' for expansions only"
+          },
+          "fortrade": {
+            "type": "boolean",
+            "description": "Filters for games that are marked for trade in the collection"
+          },
+          "hasparts": {
+            "type": "boolean",
+            "description": "Filters for games that have spare parts or not in the collection"
+          },
+          "maxplays": {
+            "type": "number",
+            "description": "Filters based on the maximum number of plays of the games in the collection"
+          },
+          "minplays": {
+            "type": "number",
+            "description": "Filters based on the minimum number of plays of the games in the collection"
+          },
+          "username": {
+            "type": "string",
+            "description": "The username of the BoardGameGeek (BGG) user who owns the collection. When the user refers to themselves (me, my, I), use 'SELF' as the value."
+          },
+          "wishlist": {
+            "type": "boolean",
+            "description": "Filters for wishlisted games in the collection"
+          },
+          "maxrating": {
+            "type": "number",
+            "description": "Filters based on the maximum personal rating of the games in the collection"
+          },
+          "minrating": {
+            "type": "number",
+            "description": "Filters based on the minimum personal rating of the games in the collection"
+          },
+          "wanttobuy": {
+            "type": "boolean",
+            "description": "Filters for games that the user wants to buy in the collection"
+          },
+          "preordered": {
+            "type": "boolean",
+            "description": "Filters for preordered games in the collection"
+          },
+          "wanttoplay": {
+            "type": "boolean",
+            "description": "Filters for games that the user wants to play in the collection"
+          },
+          "maxbggrating": {
+            "type": "number",
+            "description": "Filters based on the maximum global BoardGameGeek (BGG) rating of the games in the collection"
+          },
+          "minbggrating": {
+            "type": "number",
+            "description": "Filters based on the minimum global BoardGameGeek (BGG) rating of the games in the collection"
+          }
+        }
+      }
+    },
+    {
+      "name": "bgg-details",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Find the details about a specific board game on BoardGameGeek (BGG)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The BoardGameGeek ID of the board game"
+          },
+          "ids": {
+            "type": "array",
+            "description": "Array of BoardGameGeek IDs to get details for multiple games at once (maximum 20 IDs per request)"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the board game"
+          },
+          "full_details": {
+            "type": "boolean",
+            "description": "Return the complete BGG API response instead of essential info. WARNING: This returns significantly more data and can overload AI context windows. ONLY set this to true if the user explicitly requests 'full details', 'complete data', or similar. Default behavior returns essential info which is sufficient for most use cases."
+          }
+        }
+      }
+    },
+    {
+      "name": "bgg-hot",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Find the current board game hotness on BoardGameGeek (BGG)",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "bgg-price",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Get current prices for board games from multiple retailers using BGG IDs",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ids"
+        ],
+        "properties": {
+          "ids": {
+            "type": "string",
+            "description": "Comma-separated BGG IDs (e.g., '12,844,2096,13857')"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code: DKK, GBP, SEK, EUR, or USD (default: USD)"
+          },
+          "destination": {
+            "type": "string",
+            "description": "Destination country: DK, SE, GB, DE, or US (default: US)"
+          }
+        }
+      }
+    },
+    {
+      "name": "bgg-recommender",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Get game recommendations based on a specific game using either the BoardGameGeek (BGG) ID or name directly. ID is preferred for faster responses.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "BoardGameGeek (BGG) ID of the game to base recommendations on (preferred for speed)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the game to base recommendations on (slower than using ID)"
+          },
+          "min_votes": {
+            "type": "number",
+            "description": "Minimum votes threshold for recommendation quality (default: 30)"
+          }
+        }
+      }
+    },
+    {
+      "name": "bgg-rules",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Use this tool when users ask rules questions about board games (e.g., 'How does X work?', 'Can I do Y?', 'What happens when Z?'). Searches BoardGameGeek rules forums to find answers and clarifications from the community.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The BoardGameGeek ID of the board game"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the board game"
+          }
+        }
+      }
+    },
+    {
+      "name": "bgg-search",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Search for board games on BoardGameGeek (BGG) by name or part of a name using a broad search (e.g., 'Catan', 'Ticket to Ride')",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "all",
+              "boardgame",
+              "boardgameexpansion"
+            ],
+            "type": "string",
+            "description": "Filter by type (default: all, options: 'boardgame' (aka base game), 'boardgameexpansion', or 'all')"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return (default: 30)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Game name to search for on BoardGameGeek (BGG)"
+          }
+        }
+      }
+    },
+    {
+      "name": "bgg-thread-details",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Get full content of a specific BoardGameGeek forum thread, including all posts and replies. Use this after finding relevant threads with bgg-rules.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "thread_id"
+        ],
+        "properties": {
+          "thread_id": {
+            "type": "number",
+            "description": "The BoardGameGeek thread ID to fetch"
+          }
+        }
+      }
+    },
+    {
+      "name": "bgg-trade-finder",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Find what games user1 owns that user2 has on their wishlist. Shows potential trading opportunities.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "user1",
+          "user2"
+        ],
+        "properties": {
+          "user1": {
+            "type": "string",
+            "description": "BGG username whose collection will be checked. When the user refers to themselves (me, my, I), use 'SELF' as the value."
+          },
+          "user2": {
+            "type": "string",
+            "description": "BGG username whose wishlist will be checked against user1's collection"
+          }
+        }
+      }
+    },
+    {
+      "name": "bgg-user",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Find details about a specific user on BoardGameGeek (BGG)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "The username of the BoardGameGeek (BGG) user. When the user refers to themselves (me, my, I), use 'SELF' as the value."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:09:07.433280+00:00",
+    "source": "smithery"
+  }
+}
