@@ -1,0 +1,305 @@
+{
+  "qualifiedName": "@sunub/obsidian-mcp-server",
+  "displayName": "Obsidian Vault",
+  "description": "Search your Obsidian vault to quickly find notes by title or keyword, summarize related content, and surface open tasks and links. Generate and update frontmatter metadata automatically to keep titles, tags, and summaries accurate. Streamline knowledge management by keeping your vault organized and consistent.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@sunub/obsidian-mcp-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@sunub/obsidian-mcp-server/mcp",
+      "configSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {},
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "vault",
+      "title": "Obsidian Content Getter",
+      "annotations": {
+        "title": "Obsidian Content Getter",
+        "openWorldHint": true
+      },
+      "description": "\n  Retrieves and searches the content of Markdown (.md, .mdx) documents stored in an Obsidian vault. Use this tool to find notes related to a specific topic or keyword and understand their core content.\n\n  When to use:\n  - When you need to find a specific note by its title or a keyword to check its content.\n  - When you want to synthesize and summarize information scattered across multiple notes.\n  - When looking for answers to questions based on your saved records, such as \"What was the project deadline?\"\n  - To discover connections by finding all notes that link to a specific note.\n  - When you need to retrieve a list of unfinished tasks (- [ ]) from daily notes or meeting minutes.\n\n  Returns the content of the most relevant document(s) in text format. It can also include metadata such as the document's title, tags, and creation date.\n\n  Requirements: The user's Obsidian Vault path must be correctly configured in an environment variable or a similar setting. For searches, use the exact filename or include core keywords for content-based queries.\n",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of results to return (default: 10 for search, unlimited for others)"
+          },
+          "quiet": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true, suppresses non-error output messages. Default is false."
+          },
+          "action": {
+            "enum": [
+              "search",
+              "read",
+              "list_all",
+              "stats"
+            ],
+            "type": "string",
+            "description": "The action to perform: search documents, read specific file, list all content, or get stats"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "Keyword to search for in documents (required for search action)"
+          },
+          "filename": {
+            "type": "string",
+            "description": "Specific filename to read (required for read action)"
+          },
+          "excerptLength": {
+            "type": "number",
+            "default": 500,
+            "maximum": 2000,
+            "minimum": 100,
+            "description": "Length of content excerpt to include in search results (default: 500)"
+          },
+          "includeContent": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to include document content in search results (default: true)"
+          },
+          "includeFrontmatter": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to include frontmatter metadata in results (default: false)"
+          }
+        }
+      }
+    },
+    {
+      "name": "generate_property",
+      "title": "Obsidian Property Writer",
+      "annotations": {
+        "title": "Obsidian Property Writer",
+        "openWorldHint": true
+      },
+      "description": "\n  Analyzes the content of a specified Obsidian Markdown file to automatically generate the most suitable properties (frontmatter) and updates the file directly.\n\n  Use Cases:\n  \n  - After Completing a Draft: Use when the body of the text is complete, and you want to generate all properties at once.\n  - Updating Information: Use when you want to update existing properties with more accurate information reflecting the latest content.\n  - Completing Missing Info: Use when you want to automatically add missing properties like tags or a summary to a document that only has a title.\n  \n  Parameters:\n  \n  filename: The name or path of the file to analyze and add properties to (e.g., \"my-first-post.md\").\n  overwrite: If set to true, existing properties will be overwritten by the AI-generated content. Default: false.\n  \n  Generated Properties:\n  \n  The AI analyzes the context of the content to generate the following properties:\n  \n  - aliases: An array of alternative names or synonyms based on the content.\n  - title: A title that best represents the core topic of the document.\n  - tags: An array of tags extracted from the core keywords of the content (e.g., [AI, Obsidian, productivity]).\n  - summary: A one to two-sentence summary of the entire document.\n  - slug: A hyphenated-string suitable for URLs, containing the core keywords from the content.\n  - date: The event date or creation date inferred from the content (in ISO 8601 format).\n  - completed: A boolean (true or false) indicating whether the content is considered a final version.\n  \n  Return Value:\n  \n  Upon success, returns a JSON object containing a success message that includes the modified filename.\n  { \"status\": \"success\", \"message\": \"Successfully updated properties for my-first-post.md\" }\n  \n  Requirements:\n  \n  The user's absolute path to the Obsidian vault must be correctly set in an environment variable.\n",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "filename"
+        ],
+        "properties": {
+          "filename": {
+            "type": "string",
+            "description": "The name or path of the file to analyze and add properties to (e.g., \"my-first-post.md\")"
+          },
+          "overwrite": {
+            "type": "boolean",
+            "default": true,
+            "description": "If set to true, existing properties will be overwritten by the AI-generated content. Default: false."
+          }
+        }
+      }
+    },
+    {
+      "name": "write_property",
+      "title": "Write Obsidian Property",
+      "annotations": {
+        "title": "Write Obsidian Property",
+        "openWorldHint": true
+      },
+      "description": "\n  Description: Adds or updates properties within the frontmatter section at the top of a specified Obsidian markdown file. This tool is primarily used to apply metadata generated by the generate_obsidian_properties tool to an actual file.\n  \n  Parameters:\n  \n  - filePath (string, required): The path to the target markdown file to which properties will be added or updated.\n  Example: \"my-first-post.md\"\n  \n  - properties (object, required): A JSON object containing the key-value pairs to be written to the file's frontmatter. If a property with the same key already exists in the file, it will be overwritten with the new value.\n  \n  Example:\n  \n  JSON\n  {\n    \"title\": \"Optimizing I/O Handling in a Serverless Environment\",\n    \"date\": \"2025-04-03\",\n    \"tags\": [\"serverless\", \"optimization\"],\n    \"summary\": \"A case study on optimizing I/O in a serverless environment by benchmarking Promise.all and Workers.\",\n    \"completed\": true\n  }\n\n  Return Value:\n  \n  Upon successful execution, it returns a JSON object containing the status, a confirmation message, and the property object that was applied to the file.\n  \n  Example:\n  \n  JSON\n  {\n    \"status\": \"success\",\n    \"message\": \"Successfully updated properties for my-first-post.md\",\n    \"properties\": {\n      \"title\": \"Optimizing I/O Handling in a Serverless Environment\",\n      \"date\": \"2025-04-03\",\n      \"tags\": [\"serverless\", \"optimization\"],\n      \"summary\": \"A case study on optimizing I/O in a serverless environment by benchmarking Promise.all and Workers.\",\n      \"completed\": true\n    }\n  }\n\n  Dependencies & Requirements:\n  \n  - Input Data: The properties parameter should typically be the JSON object output from the generate_obsidian_properties tool.\n  - Environment Setup: The absolute path to the user's Obsidian Vault must be correctly set as an environment variable.\n",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "filePath",
+          "properties"
+        ],
+        "properties": {
+          "quiet": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true, suppresses non-error output messages. Default is false."
+          },
+          "filePath": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Path to the target markdown file within the Obsidian vault"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "description": "Creation date of the document in ISO 8601 format"
+              },
+              "slug": {
+                "type": "string",
+                "description": "URL-friendly identifier for the document"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of tags associated with the document"
+              },
+              "title": {
+                "type": "string",
+                "description": "Title of the document"
+              },
+              "summary": {
+                "type": "string",
+                "description": "Brief summary or abstract of the document"
+              },
+              "category": {
+                "type": "string",
+                "description": "Category or classification of the document"
+              },
+              "completed": {
+                "type": "boolean",
+                "description": "Indicates whether a task or item is completed"
+              },
+              "cssclasses": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of CSS classes associated with the document"
+              }
+            },
+            "description": "Key-value pairs to be written to the file's frontmatter",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "create_document_with_properties",
+      "title": "Create Document with Properties",
+      "annotations": {
+        "title": "Create Document with Properties",
+        "openWorldHint": true
+      },
+      "description": "\n  Initiates an integrated workflow to read a document, guide an AI to generate properties, and then write those properties to a file.\n\n  This tool acts as a workflow manager for an AI agent. It reads the content of a specified document and returns a structured, multi-step plan. The AI agent must follow this plan by first calling the 'generate_obsidian_property' tool to get the document's content for analysis, and then, after generating the properties, calling the 'write_obsidian_property' tool to save them.\n\n  Use this tool to start the end-to-end process of enriching a document with AI-generated metadata.\n",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "sourcePath"
+        ],
+        "properties": {
+          "quiet": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, the final write operation will return a minimal success message."
+          },
+          "overwrite": {
+            "type": "boolean",
+            "default": false,
+            "description": "If set to true, existing properties will be overwritten by the AI-generated content. Default: false."
+          },
+          "outputPath": {
+            "type": "string",
+            "description": "The path where the processed file with properties will be saved. If not provided, the source file will be updated in place."
+          },
+          "sourcePath": {
+            "type": "string",
+            "description": "The path to the source markdown file to read and analyze (e.g., \"draft/my-article.md\")"
+          },
+          "aiGeneratedProperties": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "description": "Creation date of the document in ISO 8601 format"
+              },
+              "slug": {
+                "type": "string",
+                "description": "URL-friendly identifier for the document"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of tags associated with the document"
+              },
+              "title": {
+                "type": "string",
+                "description": "Title of the document"
+              },
+              "summary": {
+                "type": "string",
+                "description": "Brief summary or abstract of the document"
+              },
+              "category": {
+                "type": "string",
+                "description": "Category or classification of the document"
+              },
+              "completed": {
+                "type": "boolean",
+                "description": "Indicates whether a task or item is completed"
+              },
+              "cssclasses": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of CSS classes associated with the document"
+              }
+            },
+            "description": "AI-generated properties based on content analysis. If provided, these will be used instead of internal analysis.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "organize_attachments",
+      "title": "Organize Attachments",
+      "annotations": {
+        "title": "Organize Attachments",
+        "openWorldHint": true
+      },
+      "description": "\n  Scans a specified markdown file for linked images (or other attachments),\n  moves them to a dedicated folder named after the document's title,\n  and updates the links within the markdown file automatically.\n\n  Use Cases:\n  - When a post is finalized and you want to clean up all associated images into a neat folder.\n  - To automatically organize attachments for better vault management.\n\n  Example Workflow:\n  1. Specify 'my-awesome-post.md' as the fileName.\n  2. The tool finds the 'title' property in the frontmatter (e.g., \"My Awesome Post\").\n  3. It finds all image links like ![[my-image.png]].\n  4. It creates a folder at '{vault}/images/My Awesome Post/'.\n  5. It moves 'my-image.png' into that new folder.\n  6. It updates the link in the markdown file to ![[images/My Awesome Post/my-image.png]].\n",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "keyword"
+        ],
+        "properties": {
+          "quiet": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, returns a minimal success message."
+          },
+          "keyword": {
+            "type": "string",
+            "description": "A keyword to search for the markdown file within the vault."
+          },
+          "destination": {
+            "type": "string",
+            "default": "images",
+            "description": "The base folder to move attachments into. Defaults to \"images\"."
+          },
+          "useTitleAsFolderName": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true, creates a subfolder named after the document title. Defaults to true."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:51:11.233592+00:00",
+    "source": "smithery"
+  }
+}

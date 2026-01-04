@@ -1,0 +1,499 @@
+{
+  "id": "@Kanta-Inc/kanta-mcp-server",
+  "name": "@Kanta-Inc/kanta-mcp-server",
+  "display_name": "Kanta MCP Server",
+  "version": null,
+  "description": "Enable AI assistants to interact seamlessly with Kanta data by managing clients, users, persons, and organizational structures. Facilitate operations such as creating, updating, searching, and downloading reports or files through a standardized protocol. Streamline access to Kanta's comprehensive data for enhanced automation and insights.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/a56d65ce-18fe-4251-a293-fd69235a333a.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "get_customers",
+      "title": "Get Customers",
+      "description": "R\u00e9cup\u00e8re la liste des clients avec pagination optionnelle",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Num\u00e9ro de page"
+          },
+          "per_page": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Nombre d'\u00e9l\u00e9ments par page (1-100)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_customer",
+      "title": "Get Customer",
+      "description": "R\u00e9cup\u00e8re les d\u00e9tails d'un client sp\u00e9cifique par son ID",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID UUID du client"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_customer",
+      "title": "Create Customer",
+      "description": "Cr\u00e9e un nouveau client avec son num\u00e9ro d'entreprise (SIREN/SIRET)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "company_number"
+        ],
+        "properties": {
+          "firm": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID du cabinet"
+          },
+          "turnover": {
+            "type": "number",
+            "description": "Chiffre d'affaires"
+          },
+          "bypass_RBE": {
+            "type": "boolean",
+            "description": "Contourner RBE"
+          },
+          "supervisor": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID du superviseur"
+          },
+          "contributors": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Liste des IDs des contributeurs"
+          },
+          "company_number": {
+            "type": "string",
+            "description": "Num\u00e9ro d'entreprise (SIREN ou SIRET)"
+          },
+          "documents_auto_get": {
+            "type": "boolean",
+            "description": "R\u00e9cup\u00e9ration automatique des documents"
+          },
+          "fiscal_year_end_date": {
+            "type": "string",
+            "description": "Date de fin d'exercice fiscal (YYYY-MM-DD)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_customer",
+      "title": "Update Customer",
+      "description": "Met \u00e0 jour les informations d'un client existant",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID UUID du client \u00e0 mettre \u00e0 jour"
+          },
+          "code": {
+            "type": "string",
+            "description": "Code client"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nom"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "Nom de famille"
+          },
+          "turnover": {
+            "type": "number",
+            "description": "Chiffre d'affaires"
+          },
+          "firstname": {
+            "type": "string",
+            "description": "Pr\u00e9nom"
+          },
+          "contact_name": {
+            "type": "string",
+            "description": "Nom du contact"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email de contact"
+          },
+          "contact_phone": {
+            "type": "string",
+            "description": "T\u00e9l\u00e9phone du contact"
+          },
+          "creation_date": {
+            "type": "string",
+            "description": "Date de cr\u00e9ation (YYYY-MM-DD)"
+          },
+          "company_number": {
+            "type": "string",
+            "description": "Num\u00e9ro d'entreprise (SIREN ou SIRET)"
+          },
+          "fiscal_year_end_date": {
+            "type": "string",
+            "description": "Date de fin d'exercice fiscal (YYYY-MM-DD)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_customers",
+      "title": "Search Customers",
+      "description": "Recherche des clients par num\u00e9ro d'entreprise, nom d'entreprise ou code",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Code client \u00e0 rechercher"
+          },
+          "page": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Num\u00e9ro de page"
+          },
+          "per_page": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Nombre d'\u00e9l\u00e9ments par page (1-100)"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "Nom d'entreprise \u00e0 rechercher"
+          },
+          "company_number": {
+            "type": "string",
+            "description": "Num\u00e9ro d'entreprise \u00e0 rechercher"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "assign_customers",
+      "title": "Assign Customers",
+      "description": "Assigne des superviseurs, contributeurs et cabinet \u00e0 des clients",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "customers"
+        ],
+        "properties": {
+          "firm": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID du cabinet \u00e0 assigner (null pour d\u00e9sassigner)"
+          },
+          "customers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "description": "Liste des IDs des clients \u00e0 assigner"
+          },
+          "supervisor": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID du superviseur \u00e0 assigner (null pour d\u00e9sassigner)"
+          },
+          "contributors": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Liste des IDs des contributeurs (tableau vide pour d\u00e9sassigner tous)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_customer_risk_summary",
+      "title": "Get Customer Risk Summary",
+      "description": "R\u00e9cup\u00e8re le r\u00e9sum\u00e9 des risques d'un client",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID UUID du client"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_users",
+      "title": "Get Users",
+      "description": "R\u00e9cup\u00e8re la liste des utilisateurs avec pagination optionnelle",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Num\u00e9ro de page"
+          },
+          "per_page": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Nombre d'\u00e9l\u00e9ments par page (1-100)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_user",
+      "title": "Get User",
+      "description": "R\u00e9cup\u00e8re les d\u00e9tails d'un utilisateur sp\u00e9cifique par son ID",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID UUID de l'utilisateur"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_user",
+      "title": "Create User",
+      "description": "Cr\u00e9e un nouvel utilisateur",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "firstname",
+          "lastname",
+          "email",
+          "role"
+        ],
+        "properties": {
+          "role": {
+            "enum": [
+              "certified accountant",
+              "controller",
+              "collaborator"
+            ],
+            "type": "string",
+            "description": "R\u00f4le de l'utilisateur"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email de l'utilisateur"
+          },
+          "firms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Liste des IDs des cabinets de l'utilisateur"
+          },
+          "trigram": {
+            "type": "string",
+            "description": "Trigramme de l'utilisateur"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "Nom de famille de l'utilisateur"
+          },
+          "firstname": {
+            "type": "string",
+            "description": "Pr\u00e9nom de l'utilisateur"
+          },
+          "default_supervisor": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID du superviseur par d\u00e9faut"
+          },
+          "default_contributor": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID du contributeur par d\u00e9faut"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_user",
+      "title": "Delete User",
+      "description": "Supprime un utilisateur",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID UUID de l'utilisateur \u00e0 supprimer"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_persons",
+      "title": "Get Persons",
+      "description": "R\u00e9cup\u00e8re la liste des personnes avec pagination optionnelle",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Num\u00e9ro de page"
+          },
+          "per_page": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Nombre d'\u00e9l\u00e9ments par page (1-100)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_person",
+      "title": "Get Person",
+      "description": "R\u00e9cup\u00e8re les d\u00e9tails d'une personne sp\u00e9cifique par son ID",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID UUID de la personne"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_firms",
+      "title": "Get Firms",
+      "description": "R\u00e9cup\u00e8re la liste des cabinets",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "per_page": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Nombre d'\u00e9l\u00e9ments par page (1-100)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_structure",
+      "title": "Get Structure",
+      "description": "R\u00e9cup\u00e8re les informations de la structure (cabinet)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 15,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@Kanta-Inc/kanta-mcp-server/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "get_customers",
+    "get_customer",
+    "create_customer",
+    "update_customer",
+    "search_customers",
+    "assign_customers",
+    "get_customer_risk_summary",
+    "get_users",
+    "get_user",
+    "create_user",
+    "delete_user",
+    "get_persons",
+    "get_person",
+    "get_firms",
+    "get_structure"
+  ]
+}

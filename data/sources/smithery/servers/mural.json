@@ -1,0 +1,390 @@
+{
+  "qualifiedName": "mural",
+  "displayName": "Mural",
+  "description": "Mural is a digital whiteboard platform enabling distributed teams to visually brainstorm, map ideas, and collaborate in real time with sticky notes and diagrams",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/mural.svg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/mural",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/mural/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "MURAL_AUTHORIZATION_REQUEST",
+      "description": "Tool to initiate the OAuth 2.0 authorization process. Use when you need to redirect a user to Mural to obtain an authorization code.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MuralAuthorizationRequestRequest",
+        "required": [
+          "client_id",
+          "redirect_uri",
+          "scope"
+        ],
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Scope",
+            "examples": [
+              [
+                "room:read",
+                "room:write"
+              ]
+            ],
+            "description": "List of permission scopes to request. Provided as a list of strings; they will be joined with spaces in the URL."
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "default": null,
+            "examples": [
+              "xyz123"
+            ],
+            "nullable": true,
+            "description": "Optional opaque value sent and returned in the callback to prevent CSRF and correlate requests."
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "examples": [
+              "my_client_id"
+            ],
+            "description": "The client identifier for your Mural app (provided when registering your app)."
+          },
+          "redirect_uri": {
+            "type": "string",
+            "title": "Redirect Uri",
+            "examples": [
+              "https://example.com/oauth/callback"
+            ],
+            "description": "The callback URL where users are redirected after granting access. Must match one of your app's registered redirect URLs."
+          },
+          "response_type": {
+            "type": "string",
+            "const": "code",
+            "title": "Response Type",
+            "default": "code",
+            "description": "Grant type for authorization code flow; must be 'code'."
+          }
+        },
+        "description": "Request model for initiating the OAuth 2.0 authorization process with Mural."
+      }
+    },
+    {
+      "name": "MURAL_CREATE_STICKY_NOTE",
+      "description": "Tool to create one or more sticky note widgets on a mural. Use when you need to add notes to a mural layout.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateStickyNoteRequest",
+        "required": [
+          "muralId",
+          "stickies"
+        ],
+        "properties": {
+          "muralId": {
+            "type": "string",
+            "title": "Mural Id",
+            "description": "Unique identifier of the mural"
+          },
+          "stickies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "StickyNoteItem",
+              "required": [
+                "x",
+                "y"
+              ],
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "title": "X",
+                  "description": "X-coordinate position in pixels"
+                },
+                "y": {
+                  "type": "number",
+                  "title": "Y",
+                  "description": "Y-coordinate position in pixels"
+                },
+                "text": {
+                  "type": "string",
+                  "title": "Text",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Text content of the sticky note"
+                },
+                "shape": {
+                  "enum": [
+                    "rectangle",
+                    "circle"
+                  ],
+                  "type": "string",
+                  "title": "Shape",
+                  "default": "rectangle",
+                  "description": "Shape of the sticky note ('rectangle' or 'circle')"
+                },
+                "style": {
+                  "type": "object",
+                  "title": "StickyNoteStyle",
+                  "default": null,
+                  "nullable": true,
+                  "required": [
+                    "backgroundColor",
+                    "font",
+                    "fontSize",
+                    "bold",
+                    "italic",
+                    "underline",
+                    "strike",
+                    "textAlign",
+                    "border"
+                  ],
+                  "properties": {
+                    "bold": {
+                      "type": "boolean",
+                      "title": "Bold",
+                      "description": "Whether text is bold"
+                    },
+                    "font": {
+                      "type": "string",
+                      "title": "Font",
+                      "description": "Font family for text"
+                    },
+                    "border": {
+                      "type": "boolean",
+                      "title": "Border",
+                      "description": "Whether the sticky note has a border"
+                    },
+                    "italic": {
+                      "type": "boolean",
+                      "title": "Italic",
+                      "description": "Whether text is italicized"
+                    },
+                    "strike": {
+                      "type": "boolean",
+                      "title": "Strike",
+                      "description": "Whether text has strikethrough"
+                    },
+                    "fontSize": {
+                      "type": "integer",
+                      "title": "Font Size",
+                      "description": "Font size in pixels"
+                    },
+                    "textAlign": {
+                      "enum": [
+                        "left",
+                        "center",
+                        "right"
+                      ],
+                      "type": "string",
+                      "title": "Text Align",
+                      "description": "Text alignment within the note"
+                    },
+                    "underline": {
+                      "type": "boolean",
+                      "title": "Underline",
+                      "description": "Whether text is underlined"
+                    },
+                    "backgroundColor": {
+                      "type": "string",
+                      "title": "Background Color",
+                      "description": "Hex RGBA background color"
+                    }
+                  },
+                  "description": "Styling options for a sticky note widget.",
+                  "additionalProperties": false
+                },
+                "width": {
+                  "type": "number",
+                  "title": "Width",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Width of the sticky note in pixels"
+                },
+                "areaId": {
+                  "type": "string",
+                  "title": "Area Id",
+                  "default": null,
+                  "nullable": true,
+                  "description": "ID of the area widget containing this sticky note"
+                },
+                "height": {
+                  "type": "number",
+                  "title": "Height",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Height of the sticky note in pixels"
+                },
+                "rotation": {
+                  "type": "number",
+                  "title": "Rotation",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Rotation angle of the widget in degrees"
+                },
+                "stackable": {
+                  "type": "boolean",
+                  "title": "Stackable",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Whether the widget is stackable within areas"
+                }
+              },
+              "description": "Definition of a sticky note to create on a mural."
+            },
+            "title": "Stickies",
+            "description": "List of sticky note definitions to create (max 1000)"
+          }
+        },
+        "description": "Request model for creating sticky note widgets on a mural."
+      }
+    },
+    {
+      "name": "MURAL_GET_CURRENT_USER",
+      "description": "Tool to retrieve information about the currently authenticated user. Use when you need current user details after authentication.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCurrentUserRequest",
+        "properties": {},
+        "description": "Request model for retrieving information about the currently authenticated user."
+      }
+    },
+    {
+      "name": "MURAL_GET_FILES_FOR_MURAL",
+      "description": "Tool to retrieve a list of file widgets in a mural. Use after confirming the mural ID when listing file attachments.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetFilesForMuralRequest",
+        "required": [
+          "muralId"
+        ],
+        "properties": {
+          "next": {
+            "type": "string",
+            "title": "Next",
+            "default": null,
+            "examples": [
+              "token123"
+            ],
+            "nullable": true,
+            "description": "Pagination token for next page of items"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Maximum number of results to return"
+          },
+          "muralId": {
+            "type": "string",
+            "title": "Mural Id",
+            "examples": [
+              "m12345"
+            ],
+            "description": "Unique identifier of the mural"
+          }
+        }
+      }
+    },
+    {
+      "name": "MURAL_GET_MURAL_WIDGETS",
+      "description": "Tool to retrieve all widgets within a specified mural. Use after confirming the mural ID is correct.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMuralWidgetsRequest",
+        "required": [
+          "muralId"
+        ],
+        "properties": {
+          "next": {
+            "type": "string",
+            "title": "Next",
+            "default": null,
+            "examples": [
+              "abc123"
+            ],
+            "nullable": true,
+            "description": "Pagination token for next page of results."
+          },
+          "type": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "area",
+                "arrow",
+                "comment",
+                "file",
+                "icon",
+                "image",
+                "shape",
+                "sticky note",
+                "text"
+              ],
+              "type": "string",
+              "title": "WidgetType",
+              "properties": {},
+              "description": "Types of widgets available in a mural."
+            },
+            "title": "Type",
+            "default": null,
+            "examples": [
+              [
+                "area",
+                "arrow"
+              ]
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of widget types to return. When omitted, returns all types."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Maximum number of results to return (must be \u22651)."
+          },
+          "muralId": {
+            "type": "string",
+            "title": "Mural Id",
+            "examples": [
+              "mural123"
+            ],
+            "description": "Unique identifier of the mural."
+          },
+          "parentId": {
+            "type": "string",
+            "title": "Parent Id",
+            "default": null,
+            "examples": [
+              "parent456"
+            ],
+            "nullable": true,
+            "description": "ID of the parent widget to filter results."
+          }
+        },
+        "description": "Request model for retrieving widgets within a mural."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:47:45.561125+00:00",
+    "source": "smithery"
+  }
+}

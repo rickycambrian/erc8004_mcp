@@ -1,0 +1,633 @@
+{
+  "id": "btcpay_server",
+  "name": "btcpay_server",
+  "display_name": "Btcpay server",
+  "version": null,
+  "description": "BTCPay Server is a free, open-source, self-hosted Bitcoin payment processor that enables merchants to accept Bitcoin payments without intermediaries.",
+  "icon_url": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/btcpay_server-logo.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "BTCPAY_SERVER_CREATE_PAYMENT_REQUEST",
+      "description": "Tool to create a new payment request for a store. Use after confirming store ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreatePaymentRequestRequest",
+        "required": [
+          "storeId",
+          "title",
+          "amount",
+          "currency"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "format": "email",
+            "default": null,
+            "examples": [
+              "customer@example.com"
+            ],
+            "nullable": true,
+            "description": "Customer email address for notifications"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "Invoice #456"
+            ],
+            "description": "Title of the payment request"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount",
+            "minimum": 0,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Requested amount, must be non-negative"
+          },
+          "storeId": {
+            "type": "string",
+            "title": "Store Id",
+            "examples": [
+              "abc123-store-id"
+            ],
+            "description": "BTCPay Server store ID where the payment request will be created"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "examples": [
+              "USD"
+            ],
+            "description": "Three-letter currency code (e.g., USD, EUR)"
+          },
+          "metadata": {
+            "type": "object",
+            "title": "Metadata",
+            "default": null,
+            "nullable": true,
+            "description": "Arbitrary metadata to attach to this payment request",
+            "additionalProperties": true
+          },
+          "expiryDate": {
+            "type": "string",
+            "title": "Expiry Date",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2023-12-31T23:59:59Z"
+            ],
+            "nullable": true,
+            "description": "Expiration date in ISO 8601 format"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "nullable": true,
+            "description": "Optional description for the customer"
+          },
+          "redirectUrl": {
+            "type": "string",
+            "title": "Redirect Url",
+            "format": "uri",
+            "default": null,
+            "examples": [
+              "https://merchant.example.com/thank-you"
+            ],
+            "nullable": true,
+            "minLength": 1,
+            "description": "URL to redirect the customer after payment"
+          },
+          "customAmount": {
+            "type": "boolean",
+            "title": "Custom Amount",
+            "default": false,
+            "nullable": true,
+            "description": "Allow customer to enter a custom amount"
+          },
+          "notificationUrl": {
+            "type": "string",
+            "title": "Notification Url",
+            "format": "uri",
+            "default": null,
+            "examples": [
+              "https://merchant.example.com/webhook"
+            ],
+            "nullable": true,
+            "minLength": 1,
+            "description": "Webhook URL for payment notifications"
+          }
+        },
+        "description": "Input schema for creating a BTCPay Server payment request."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_CREATE_STORE",
+      "description": "Tool to create a new store in BTCPay Server. Use when you need to provision a new store before processing transactions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateStoreRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "My New Store"
+            ],
+            "description": "The name of the store to be created."
+          },
+          "website": {
+            "type": "string",
+            "title": "Website",
+            "default": null,
+            "examples": [
+              "https://example.com"
+            ],
+            "nullable": true,
+            "description": "Optional: The public website URL of the store."
+          },
+          "defaultCurrency": {
+            "type": "string",
+            "title": "Default Currency",
+            "default": null,
+            "examples": [
+              "USD"
+            ],
+            "nullable": true,
+            "description": "Optional: ISO currency code (e.g., 'USD', 'BTC') to use as default for invoices."
+          }
+        },
+        "description": "Request parameters for creating a new store in BTCPay Server."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_CREATE_USER",
+      "description": "Tool to create a new BTCPay Server user. Use when you need to register a new user programmatically as an administrator.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateUserRequest",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "format": "email",
+            "examples": [
+              "user@example.com"
+            ],
+            "description": "The email address of the new user"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "examples": [
+              "P@ssw0rd!"
+            ],
+            "minLength": 8,
+            "description": "Password for the new user, minimum 8 characters"
+          },
+          "isAdministrator": {
+            "type": "boolean",
+            "title": "Is Administrator",
+            "default": false,
+            "description": "Indicates if the new user should have administrative privileges. Defaults to false"
+          }
+        }
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_CREATE_WEBHOOK",
+      "description": "Tool to register a new webhook. Use when you need to receive store event notifications.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateWebhookRequest",
+        "required": [
+          "storeId",
+          "url",
+          "authorizedEvents"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "examples": [
+              "https://example.com/your-webhook-endpoint"
+            ],
+            "description": "The callback URL to receive webhook POST payloads"
+          },
+          "secret": {
+            "type": "string",
+            "title": "Secret",
+            "default": null,
+            "nullable": true,
+            "description": "HMAC secret used to sign webhook deliveries. If omitted, the server generates one."
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true,
+            "description": "Whether the webhook is active"
+          },
+          "storeId": {
+            "type": "string",
+            "title": "Store Id",
+            "examples": [
+              "9CiNzKoANXxmk5ayZngSXrHTiVvvgCrwrpFQd4m2K776"
+            ],
+            "description": "The identifier of the store to register the webhook for"
+          },
+          "authorizedEvents": {
+            "type": "object",
+            "title": "Authorized Events",
+            "required": [
+              "everything"
+            ],
+            "properties": {
+              "everything": {
+                "type": "boolean",
+                "title": "Everything",
+                "description": "Subscribe to all events if true"
+              },
+              "specificEvents": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Specific Events",
+                "default": null,
+                "nullable": true,
+                "description": "List of specific event types to receive. Required if everything is false."
+              }
+            },
+            "description": "Events to subscribe to via this webhook",
+            "additionalProperties": false
+          },
+          "automaticRedelivery": {
+            "type": "boolean",
+            "title": "Automatic Redelivery",
+            "default": true,
+            "description": "Automatically retry failed deliveries"
+          }
+        }
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_DELETE_API_KEY",
+      "description": "Tool to revoke a specific API key. Use when you need to remove an API key to immediately prevent its use. Call after identifying the key to revoke.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteApiKeyRequest",
+        "required": [
+          "apikey"
+        ],
+        "properties": {
+          "apikey": {
+            "type": "string",
+            "title": "Apikey",
+            "examples": [
+              "abcdef1234567890"
+            ],
+            "description": "The API key string to revoke. Must match an existing API key for the authenticated user."
+          }
+        },
+        "description": "Path parameter for deleting (revoking) an API key."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_DELETE_PAYMENT_REQUEST",
+      "description": "Tool to delete a specific payment request. Use when you need to archive/remove an existing payment request for a store.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeletePaymentRequestRequest",
+        "required": [
+          "storeId",
+          "paymentRequestId"
+        ],
+        "properties": {
+          "storeId": {
+            "type": "string",
+            "title": "Store Id",
+            "examples": [
+              "9CiNzKoANXxmk5ayZngSXrHTiVvvgCrwrpFQd4m2K776"
+            ],
+            "description": "ID of the store"
+          },
+          "paymentRequestId": {
+            "type": "string",
+            "title": "Payment Request Id",
+            "examples": [
+              "INV-123493"
+            ],
+            "description": "ID of the payment request to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_DELETE_PAYOUT",
+      "description": "Tool to delete a specific payout from a store. Use when you need to cancel a payout no longer needed.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeletePayoutRequest",
+        "required": [
+          "storeId",
+          "payoutId"
+        ],
+        "properties": {
+          "storeId": {
+            "type": "string",
+            "title": "Store Id",
+            "examples": [
+              "9CiNzKoANXxmk5ayZngSXrHTiVvvgCrwrpFQd4m2K776"
+            ],
+            "description": "ID of the store containing the payout"
+          },
+          "payoutId": {
+            "type": "string",
+            "title": "Payout Id",
+            "examples": [
+              "string"
+            ],
+            "description": "ID of the payout to delete"
+          }
+        },
+        "description": "Request model for deleting a payout from a store."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_GET_API_KEY",
+      "description": "Tool to retrieve the current API key. Use after authentication to get API key details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetApiKeyRequest",
+        "properties": {},
+        "description": "No parameters required to retrieve current API key."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_GET_API_KEYS",
+      "description": "Tool to list API keys. Use when you need to retrieve all API keys associated with the authenticated user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetApiKeysRequest",
+        "properties": {},
+        "description": "Empty request. No parameters needed to list API keys."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_GET_PAYMENT_REQUESTS",
+      "description": "Tool to list all payment requests for a specific store. Use after confirming you have the store ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPaymentRequestsRequest",
+        "required": [
+          "store_id"
+        ],
+        "properties": {
+          "store_id": {
+            "type": "string",
+            "title": "Store Id",
+            "examples": [
+              "9CiNzKoANXxmk5ayZngSXrHTiVvvgCrwrpFQd4m2K776"
+            ],
+            "description": "Identifier of the store whose payment requests will be listed."
+          }
+        },
+        "description": "Request parameters for listing all payment requests of a specific store."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_GET_SERVER_INFO",
+      "description": "Tool to retrieve information about the BTCPay Server instance. Use when needing server version, tor address, supported payment methods, and synchronization states.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetServerInfoRequest",
+        "properties": {},
+        "description": "No parameters required to retrieve server information"
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_GET_STORE",
+      "description": "Tool to retrieve information about a specific store. Use when you need full store configuration.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetStoreRequest",
+        "required": [
+          "store_id"
+        ],
+        "properties": {
+          "store_id": {
+            "type": "string",
+            "title": "Store Id",
+            "examples": [
+              "9CiNzKoANXxmk5ayZngSXrHTiVvvgCrwrpFQd4m2K776"
+            ],
+            "description": "The identifier of the store to retrieve information for."
+          }
+        },
+        "description": "Request parameters for retrieving a specific store by its ID."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_GET_USER",
+      "description": "Tool to retrieve information about a specific user. Use when you need to fetch profile data for a given user ID or email.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUserRequest",
+        "required": [
+          "id_or_email"
+        ],
+        "properties": {
+          "id_or_email": {
+            "type": "string",
+            "title": "Id Or Email",
+            "examples": [
+              "user@example.com"
+            ],
+            "description": "The ID or email of the user to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_GET_WEBHOOK",
+      "description": "Tool to retrieve details of a specific webhook. Use when you need to verify the configuration or status of a webhook for a given store after its creation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetWebhookRequest",
+        "required": [
+          "storeId",
+          "webhookId"
+        ],
+        "properties": {
+          "storeId": {
+            "type": "string",
+            "title": "Store Id",
+            "examples": [
+              "9CiNzKoANXxmk5ayZngSXrHTiVvvgCrwrpFQd4m2K776"
+            ],
+            "description": "Identifier of the store containing the webhook"
+          },
+          "webhookId": {
+            "type": "string",
+            "title": "Webhook Id",
+            "examples": [
+              "47AC80AB-1234-5678-90AB-CDEF12345678"
+            ],
+            "description": "Identifier of the webhook to retrieve"
+          }
+        },
+        "description": "Request schema to retrieve a specific webhook for a store."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_GET_WEBHOOKS",
+      "description": "Tool to list all webhooks registered for a store. Use when you need to retrieve the configured webhooks for management or auditing.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetWebhooksRequest",
+        "required": [
+          "storeId"
+        ],
+        "properties": {
+          "storeId": {
+            "type": "string",
+            "title": "Store Id",
+            "examples": [
+              "9CiNzKoANXxmk5ayZngSXrHTiVvvgCrwrpFQd4m2K776"
+            ],
+            "description": "Identifier of the store to fetch webhooks for"
+          }
+        },
+        "description": "Request schema for listing webhooks of a specific store."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_LIST_APPS",
+      "description": "Tool to list all apps associated with a specific store. Use when retrieving basic metadata of every app in that store.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAppsRequest",
+        "required": [
+          "storeId"
+        ],
+        "properties": {
+          "storeId": {
+            "type": "string",
+            "title": "Store Id",
+            "examples": [
+              "9CiNzKoANXxmk5ayZngSXrHTiVvvgCrwrpFQd4m2K776"
+            ],
+            "description": "The identifier of the store to list apps for."
+          }
+        },
+        "description": "Request parameters for listing basic app data for a given store."
+      }
+    },
+    {
+      "name": "BTCPAY_SERVER_UPDATE_USER",
+      "description": "Tool to update current user information. Use when you need to modify your authenticated user profile on BTCPay Server.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateUserRequest",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Alice Example"
+            ],
+            "nullable": true,
+            "description": "New display name for the user"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "format": "email",
+            "default": null,
+            "examples": [
+              "alice@example.com"
+            ],
+            "nullable": true,
+            "description": "New email address for the user"
+          },
+          "imageUrl": {
+            "type": "string",
+            "title": "Image Url",
+            "default": null,
+            "examples": [
+              "https://example.com/avatar.png"
+            ],
+            "nullable": true,
+            "description": "New profile picture URL for the user"
+          },
+          "newPassword": {
+            "type": "string",
+            "title": "New Password",
+            "default": null,
+            "nullable": true,
+            "minLength": 8,
+            "description": "New password for the user (min length 8)"
+          },
+          "currentPassword": {
+            "type": "string",
+            "title": "Current Password",
+            "default": null,
+            "nullable": true,
+            "minLength": 1,
+            "description": "Current password (required when changing password)"
+          }
+        },
+        "description": "Request model for updating current user profile. All fields are optional; include only those to change."
+      }
+    }
+  ],
+  "tool_count": 17,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/btcpay_server/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "BTCPAY_SERVER_CREATE_PAYMENT_REQUEST",
+    "BTCPAY_SERVER_CREATE_STORE",
+    "BTCPAY_SERVER_CREATE_USER",
+    "BTCPAY_SERVER_CREATE_WEBHOOK",
+    "BTCPAY_SERVER_DELETE_API_KEY",
+    "BTCPAY_SERVER_DELETE_PAYMENT_REQUEST",
+    "BTCPAY_SERVER_DELETE_PAYOUT",
+    "BTCPAY_SERVER_GET_API_KEY",
+    "BTCPAY_SERVER_GET_API_KEYS",
+    "BTCPAY_SERVER_GET_PAYMENT_REQUESTS",
+    "BTCPAY_SERVER_GET_SERVER_INFO",
+    "BTCPAY_SERVER_GET_STORE",
+    "BTCPAY_SERVER_GET_USER",
+    "BTCPAY_SERVER_GET_WEBHOOK",
+    "BTCPAY_SERVER_GET_WEBHOOKS",
+    "BTCPAY_SERVER_LIST_APPS",
+    "BTCPAY_SERVER_UPDATE_USER"
+  ]
+}

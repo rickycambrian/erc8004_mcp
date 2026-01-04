@@ -1,0 +1,1204 @@
+{
+  "id": "quickbooks",
+  "name": "quickbooks",
+  "display_name": "Quickbooks",
+  "version": null,
+  "description": "Quickbooks is a cloud-based accounting software that helps you manage your finances, track your income and expenses, and get insights into your business",
+  "icon_url": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/quickbooks.jpg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "QUICKBOOKS_CREATE_ACCOUNT",
+      "description": "Create a new account in QuickBooks with the given parameters.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateAccountRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "maxLength": 100,
+            "description": "User recognizable name for the Account. Account.Name attribute must not contain double quotes (\") or colon (:)."
+          },
+          "account_type": {
+            "enum": [
+              "Bank",
+              "Other Current Asset",
+              "Fixed Asset",
+              "Other Asset",
+              "Accounts Receivable",
+              "Equity",
+              "Expense",
+              "Other Expense",
+              "Cost of Goods Sold",
+              "Accounts Payable",
+              "Credit Card",
+              "Long Term Liability",
+              "Other Current Liability",
+              "Income",
+              "Other Income"
+            ],
+            "type": "string",
+            "title": "AccountType",
+            "default": null,
+            "nullable": true,
+            "description": "Type of the account to be created"
+          },
+          "account_number": {
+            "type": "string",
+            "title": "Account Number",
+            "default": null,
+            "nullable": true,
+            "description": "User-defined account number to help the user in identifying the account within the chart-of-accounts and in deciding what should be posted to the account. must not contain colon (:). For France locales:"
+          },
+          "account_sub_type": {
+            "enum": [
+              "CashOnHand",
+              "Checking",
+              "MoneyMarket",
+              "RentsHeldInTrust",
+              "Savings",
+              "TrustAccounts"
+            ],
+            "type": "string",
+            "title": "BankAccSubType",
+            "default": null,
+            "examples": [
+              "AdvertisingPromotional",
+              "Checking",
+              "Inventory",
+              "Insurance"
+            ],
+            "nullable": true,
+            "description": "Sub-type of the account. Must use exact enum values (no spaces/slashes). Examples: 'AdvertisingPromotional' (NOT 'Advertising/Promotional'), 'Checking', 'Inventory', 'OtherCurrentAssets', 'Vehicles', 'RetainedEarnings', 'Insurance', 'InterestEarned'. See QuickBooks API docs for complete list."
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_CREATE_CUSTOMER",
+      "description": "Create a new customer in QuickBooks with the given parameters.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateCustomerRequest",
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "examples": [
+              "Mr.",
+              "Dr.",
+              "CEO",
+              "Director"
+            ],
+            "nullable": true,
+            "maxLength": 16,
+            "description": "Title of the person (max 16 characters - keep it short like 'Mr.', 'Dr.', 'CEO'). This tag supports i18n, all locales. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, Suffix, or FullyQualifiedName attributes are required during create."
+          },
+          "suffix": {
+            "type": "string",
+            "title": "Suffix",
+            "default": null,
+            "nullable": true,
+            "maxLength": 16,
+            "description": "Suffix of the name. For example, Jr. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+          },
+          "given_name": {
+            "type": "string",
+            "title": "Given Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Given name or first name of a person. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+          },
+          "family_name": {
+            "type": "string",
+            "title": "Family Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Family name or the last name of the person. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+          },
+          "middle_name": {
+            "type": "string",
+            "title": "Middle Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Middle name of the person. The person can have zero or more middle names. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 500,
+            "description": "The name as displayed. Must be unique across all Customer, Vendor, and Employee objects. Cannot be removed with sparse update. If not supplied, the system generates DisplayName by concatenating customer name components supplied in the request from the following list: Title, GivenName, MiddleName, FamilyName, and Suffix."
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_CREATE_EMPLOYEE",
+      "description": "Create a new employee in QuickBooks.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateEmployeeRequest",
+        "properties": {
+          "given_name": {
+            "type": "string",
+            "title": "Given Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Given name or Family name of a person. At least one of `given_name` or `family_name` attributes is required."
+          },
+          "family_name": {
+            "type": "string",
+            "title": "Family Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Family name or the last name of the person. At least one of `given_name` or `family_name` attributes is required."
+          },
+          "primary_addr": {
+            "type": "object",
+            "title": "EmployeeAddress",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "lat": {
+                "type": "string",
+                "title": "Lat",
+                "default": null,
+                "nullable": true,
+                "description": "Latitude coordinate of Geocode (Geospacial Entity Object Code). INVALID is returned for invalid addresses."
+              },
+              "city": {
+                "type": "string",
+                "title": "City",
+                "default": null,
+                "nullable": true,
+                "maxLength": 255,
+                "description": "City name."
+              },
+              "long": {
+                "type": "string",
+                "title": "Long",
+                "default": null,
+                "nullable": true,
+                "description": "Longitude coordinate of Geocode (Geospacial Entity Object Code). INVALID is returned for invalid addresses."
+              },
+              "line1": {
+                "type": "string",
+                "title": "Line1",
+                "default": null,
+                "nullable": true,
+                "maxLength": 500,
+                "description": "First line of the address."
+              },
+              "line2": {
+                "type": "string",
+                "title": "Line2",
+                "default": null,
+                "nullable": true,
+                "maxLength": 500,
+                "description": "Second line of the address."
+              },
+              "line3": {
+                "type": "string",
+                "title": "Line3",
+                "default": null,
+                "nullable": true,
+                "maxLength": 500,
+                "description": "Third line of the address."
+              },
+              "line4": {
+                "type": "string",
+                "title": "Line4",
+                "default": null,
+                "nullable": true,
+                "maxLength": 500,
+                "description": "Fourth line of the address."
+              },
+              "line5": {
+                "type": "string",
+                "title": "Line5",
+                "default": null,
+                "nullable": true,
+                "maxLength": 500,
+                "description": "Fifth line of the address."
+              },
+              "country": {
+                "type": "string",
+                "title": "Country",
+                "default": null,
+                "nullable": true,
+                "maxLength": 255,
+                "description": "Country name. For international addresses - countries should be passed as 3 ISO alpha-3 characters or the full name of the country."
+              },
+              "postal_code": {
+                "type": "string",
+                "title": "Postal Code",
+                "default": null,
+                "nullable": true,
+                "maxLength": 30,
+                "description": "Postal code. For example, zip code for USA and Canada."
+              },
+              "country_sub_division_code": {
+                "type": "string",
+                "title": "Country Sub Division Code",
+                "default": null,
+                "nullable": true,
+                "maxLength": 255,
+                "description": "Region within a country. For example, state name for USA, province name for Canada."
+              }
+            },
+            "description": "Represents the physical street address for this employee. If QuickBooks Payroll is enabled for the company, the following PhysicalAddress fields are required: City, CountrySubDivisionCode, PostalCode.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_CREATE_INVOICE",
+      "description": "Tool to create a new invoice in QuickBooks. Use after confirming customer and item details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateInvoiceRequest",
+        "required": [
+          "customer_id",
+          "lines"
+        ],
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Lines",
+            "description": "List of invoice line item objects. Each item must include at least: 'DetailType', 'Amount', and 'SalesItemLineDetail' with an 'ItemRef.value'."
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id",
+            "description": "ID of the customer to invoice (CustomerRef.value)"
+          },
+          "minorversion": {
+            "type": "integer",
+            "title": "Minorversion",
+            "default": null,
+            "nullable": true,
+            "description": "Optional minorversion query parameter to control API behavior"
+          }
+        },
+        "description": "Request parameters to create a new invoice in QuickBooks."
+      }
+    },
+    {
+      "name": "QUICKBOOKS_CREATE_VENDOR",
+      "description": "Create a new vendor in QuickBooks with the given details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateVendorRequest",
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "examples": [
+              "Mr.",
+              "Dr.",
+              "CEO",
+              "Director"
+            ],
+            "nullable": true,
+            "maxLength": 16,
+            "description": "Title of the person (max 16 characters - keep it short like 'Mr.', 'Dr.', 'CEO'). This tag supports i18n, all locales. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, Suffix, or FullyQualifiedName attributes are required during create."
+          },
+          "suffix": {
+            "type": "string",
+            "title": "Suffix",
+            "default": null,
+            "nullable": true,
+            "maxLength": 16,
+            "description": "Suffix of the name. For example, Jr. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+          },
+          "given_name": {
+            "type": "string",
+            "title": "Given Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Given name or first name of a person. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+          },
+          "family_name": {
+            "type": "string",
+            "title": "Family Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Family name or the last name of the person. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+          },
+          "middle_name": {
+            "type": "string",
+            "title": "Middle Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Middle name of the person. The person can have zero or more middle names. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 500,
+            "description": "The name as displayed. Must be unique across all Customer, Vendor, and Employee objects. Cannot be removed with sparse update. If not supplied, the system generates DisplayName by concatenating customer name components supplied in the request from the following list: Title, GivenName, MiddleName, FamilyName, and Suffix."
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_CUSTOMER_BALANCE_DETAIL",
+      "description": "Generate a balance detail report for a customer in QuickBooks with the given customer ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CustomerBalanceDetailRequest",
+        "properties": {
+          "arpaid": {
+            "enum": [
+              "All",
+              "Paid",
+              "Unpaid"
+            ],
+            "type": "string",
+            "title": "Arpaid",
+            "default": null,
+            "nullable": true,
+            "description": "Status of the balance."
+          },
+          "columns": {
+            "type": "string",
+            "title": "Columns",
+            "default": null,
+            "nullable": true,
+            "description": "Column types to be shown in the report. Supported Values: bill_addr, create_by, create_date, cust_bill_email, cust_comp_name, cust_msg, cust_phone_other, cust_tel, cust_name, deliv_addr, doc_num*, due_date*, last_mod_by, last_mod_date, memo*, sale_sent_state, ship_addr, ship_date, ship_via, term_name, tracking_num, tx_date*, txn_type*. Additional columns with custom fields enabled: sales_cust1, sales_cust2, sales_cust3. Additional columns with location tracking enabled: dept_name*"
+          },
+          "custom1": {
+            "type": "string",
+            "title": "Custom1",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by the specified custom field as defined by the CustomField attribute in transaction entities where supported. Supported Values: Name of custom field."
+          },
+          "shipvia": {
+            "type": "string",
+            "title": "Shipvia",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by the shipping method as stored in Invoice.ShipMethodRef.Name."
+          },
+          "sort_by": {
+            "type": "string",
+            "title": "Sort By",
+            "default": null,
+            "nullable": true,
+            "description": "The column type used in sorting report rows. Specify a column type as defined with the columns query parameter."
+          },
+          "term_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Term Ids",
+            "default": null,
+            "nullable": true,
+            "description": "One or more comma separated term IDs. Filters report contents based on term or terms supplied. "
+          },
+          "sort_order": {
+            "enum": [
+              "ascend",
+              "descend"
+            ],
+            "type": "string",
+            "title": "SortOrder",
+            "default": null,
+            "nullable": true,
+            "description": "The sort order."
+          },
+          "end_duedate": {
+            "type": "string",
+            "title": "End Duedate",
+            "default": null,
+            "nullable": true,
+            "description": "The range of dates over which receivables are due, in the format YYYY-MM-DD. start_duedate must be less than end_duedate. If not specified, all data is returned."
+          },
+          "report_date": {
+            "type": "string",
+            "title": "Report Date",
+            "default": null,
+            "nullable": true,
+            "description": "Start date to use for the report, in the format YYYY-MM-DD."
+          },
+          "aging_method": {
+            "enum": [
+              "Report_Date",
+              "Current"
+            ],
+            "type": "string",
+            "title": "AgingMethod",
+            "default": null,
+            "nullable": true,
+            "description": "The date upon which aging is determined."
+          },
+          "customer_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Customer Ids",
+            "default": null,
+            "nullable": true,
+            "description": "One or more comma separated customer IDs. Filters report contents to include information for specified customers. "
+          },
+          "start_duedate": {
+            "type": "string",
+            "title": "Start Duedate",
+            "default": null,
+            "nullable": true,
+            "description": "The range of dates over which receivables are due, in the format YYYY-MM-DD. start_duedate must be less than end_duedate. If not specified, all data is returned."
+          },
+          "department_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Department Ids",
+            "default": null,
+            "nullable": true,
+            "description": "One or more comma separated department IDs. Filters report contents to include information for specified departments if so configured in the company file. "
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_CUSTOMER_BALANCE_REPORT",
+      "description": "Generate a balance report for a customer in QuickBooks with the given customer ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CustomerBalanceReportRequest",
+        "properties": {
+          "arpaid": {
+            "enum": [
+              "All",
+              "Paid",
+              "Unpaid"
+            ],
+            "type": "string",
+            "title": "Arpaid",
+            "default": null,
+            "nullable": true,
+            "description": "Supported Values: All, Paid, Unpaid"
+          },
+          "date_macro": {
+            "enum": [
+              "Today",
+              "Yesterday",
+              "This Week",
+              "Last Week",
+              "This Week-to-date",
+              "Last Week-to-date",
+              "Next Week",
+              "Next 4 Weeks",
+              "This Month",
+              "Last Month",
+              "This Month-to-date",
+              "Last Month-to-date",
+              "Next Month",
+              "This Fiscal Quarter",
+              "Last Fiscal Quarter",
+              "This Fiscal Quarter-to-date",
+              "Last Fiscal Quarter-to-date",
+              "Next Fiscal Quarter",
+              "This Fiscal Year",
+              "Last Fiscal Year",
+              "This Fiscal Year-to-date",
+              "Last Fiscal Year-to-date",
+              "Next Fiscal Year"
+            ],
+            "type": "string",
+            "title": "DateMacro",
+            "default": null,
+            "nullable": true,
+            "description": "Predefined date range. Use if you want the report to cover a standard report date range; otherwise, use the start_date and end_date to cover an explicit report date range."
+          },
+          "sort_order": {
+            "enum": [
+              "ascend",
+              "descend"
+            ],
+            "type": "string",
+            "title": "SortOrder",
+            "default": null,
+            "nullable": true,
+            "description": "The sort order."
+          },
+          "report_date": {
+            "type": "string",
+            "title": "Report Date",
+            "default": null,
+            "nullable": true,
+            "description": "Start date to use for the report, in the format YYYY-MM-DD."
+          },
+          "customer_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Customer Ids",
+            "default": null,
+            "nullable": true,
+            "description": "Filters report contents to include information for specified customers. Supported Values: One or more comma separated customer IDs as returned in the attribute, Customer.Id, of the Customer object response code."
+          },
+          "department_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Department Ids",
+            "default": null,
+            "nullable": true,
+            "description": "One or more comma separated department IDs. Filters report contents to include information for specified departments if so configured in the company file. "
+          },
+          "accounting_method": {
+            "enum": [
+              "Cash",
+              "Accrual"
+            ],
+            "type": "string",
+            "title": "AccountingMethod",
+            "default": null,
+            "nullable": true,
+            "description": "The accounting method used in the report. "
+          },
+          "summarize_column_by": {
+            "enum": [
+              "Total",
+              "Month",
+              "Week",
+              "Days",
+              "Quarter",
+              "Year",
+              "Customers",
+              "Vendors",
+              "Classes",
+              "Departments",
+              "Employees",
+              "ProductsAndServices"
+            ],
+            "type": "string",
+            "title": "SummarizeColumnBy",
+            "default": null,
+            "nullable": true,
+            "description": "The criteria by which to group the report results."
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_LIST_INVOICES",
+      "description": "Tool to list invoices via QuickBooks Query endpoint. Use when retrieving invoices with optional pagination and custom fields.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInvoicesRequest",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Fields",
+            "default": null,
+            "examples": [
+              [
+                "Id",
+                "DocNumber",
+                "TotalAmt"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of fields to select in the query. Defaults to ['Id','SyncToken','DocNumber','TotalAmt','Balance','TxnDate']."
+          },
+          "max_results": {
+            "type": "integer",
+            "title": "Max Results",
+            "default": 50,
+            "maximum": 1000,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "description": "Maximum number of records to return; default 50, max 1000."
+          },
+          "start_position": {
+            "type": "integer",
+            "title": "Start Position",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "description": "Starting position for pagination within the result set. Default is 1."
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_QUERY_ACCOUNT",
+      "description": "Query an account in QuickBooks with the given parameters.",
+      "inputSchema": {
+        "type": "object",
+        "title": "QueryAccountRequest",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "Query to be executed"
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_READ_ACCOUNT",
+      "description": "Read an account in QuickBooks with the given account ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReadAccountRequest",
+        "required": [
+          "account_id"
+        ],
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "description": "ID of the account to be read"
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_READ_CUSTOMER",
+      "description": "Read a customer in QuickBooks with the given customer ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReadCustomerRequest",
+        "required": [
+          "customer_id"
+        ],
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id",
+            "description": "ID of the customer to be read"
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_READ_EMPLOYEE",
+      "description": "Read an employee's details in QuickBooks with the given employee ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReadEmployeeRequest",
+        "required": [
+          "employee_id"
+        ],
+        "properties": {
+          "employee_id": {
+            "type": "string",
+            "title": "Employee Id",
+            "description": "The ID of the employee to be read."
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_READ_INVOICE",
+      "description": "Tool to fetch a QuickBooks invoice by ID or the most recent if no ID provided. Use when needing full invoice details including metadata and sync token.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReadInvoiceRequest",
+        "properties": {
+          "invoice_id": {
+            "type": "string",
+            "title": "Invoice Id",
+            "default": null,
+            "examples": [
+              "12345"
+            ],
+            "nullable": true,
+            "description": "ID of the invoice to read; if not provided, fetches the latest invoice"
+          },
+          "minorversion": {
+            "type": "integer",
+            "title": "Minorversion",
+            "default": null,
+            "examples": [
+              65
+            ],
+            "nullable": true,
+            "description": "API minor version to use for the request"
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_READ_VENDOR",
+      "description": "Read a vendor in QuickBooks with the given vendor ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReadVendorRequest",
+        "required": [
+          "vendor_id"
+        ],
+        "properties": {
+          "vendor_id": {
+            "type": "string",
+            "title": "Vendor Id",
+            "description": "ID of the vendor to be read"
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_UPDATE_FULL_INVOICE",
+      "description": "Tool to fully replace an Invoice. Use when you need to update all aspects of an existing invoice in a single operation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateFullInvoiceRequest",
+        "required": [
+          "invoice"
+        ],
+        "properties": {
+          "invoice": {
+            "type": "object",
+            "title": "Invoice",
+            "description": "Full Invoice JSON payload to update; must include Id and SyncToken. Any writable field omitted will be cleared. Do not set sparse=true.",
+            "additionalProperties": true
+          },
+          "requestid": {
+            "type": "string",
+            "title": "Requestid",
+            "default": null,
+            "nullable": true,
+            "description": "Optional idempotency key (<=50 chars) to prevent duplicate writes on retries."
+          },
+          "minorversion": {
+            "type": "integer",
+            "title": "Minorversion",
+            "default": null,
+            "nullable": true,
+            "description": "Optional QuickBooks API minorversion to access newer fields (e.g., 63)."
+          }
+        },
+        "description": "Request model for fully replacing an existing QuickBooks Invoice."
+      }
+    },
+    {
+      "name": "QUICKBOOKS_UPDATE_SPARSE_INVOICE",
+      "description": "Tool to perform a sparse update of an existing invoice. Use when you need to update only specific invoice fields without overwriting other data.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateSparseInvoiceRequest",
+        "required": [
+          "invoice"
+        ],
+        "properties": {
+          "invoice": {
+            "type": "object",
+            "title": "Invoice",
+            "required": [
+              "Id",
+              "SyncToken"
+            ],
+            "properties": {
+              "Id": {
+                "type": "string",
+                "title": "Id",
+                "description": "Unique identifier of the Invoice to update"
+              },
+              "sparse": {
+                "type": "boolean",
+                "title": "Sparse",
+                "default": true,
+                "description": "Flag to indicate a sparse (partial) update; must be true"
+              },
+              "SyncToken": {
+                "type": "string",
+                "title": "Sync Token",
+                "description": "Concurrency token; must match the latest from QuickBooks"
+              }
+            },
+            "description": "Invoice object containing Id, SyncToken, sparse flag, and fields to update",
+            "additionalProperties": true
+          }
+        },
+        "description": "Request for performing a sparse (partial) update on an existing Invoice."
+      }
+    },
+    {
+      "name": "QUICKBOOKS_VENDOR_BALANCE_DETAIL",
+      "description": "Generate a balance detail report for a vendor in QuickBooks with the given vendor ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "VendorBalanceDetailRequest",
+        "properties": {
+          "appaid": {
+            "enum": [
+              "All",
+              "Paid",
+              "Unpaid"
+            ],
+            "type": "string",
+            "title": "Arpaid",
+            "default": null,
+            "nullable": true,
+            "description": "Status of the balance."
+          },
+          "sort_by": {
+            "type": "string",
+            "title": "Sort By",
+            "default": null,
+            "nullable": true,
+            "description": "The column type used in sorting report rows. Specify a column type as defined with the columns query parameter."
+          },
+          "term_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Term Ids",
+            "default": null,
+            "nullable": true,
+            "description": "One or more comma separated term IDs. Filters report contents based on term or terms supplied. "
+          },
+          "date_macro": {
+            "enum": [
+              "Today",
+              "Yesterday",
+              "This Week",
+              "Last Week",
+              "This Week-to-date",
+              "Last Week-to-date",
+              "Next Week",
+              "Next 4 Weeks",
+              "This Month",
+              "Last Month",
+              "This Month-to-date",
+              "Last Month-to-date",
+              "Next Month",
+              "This Fiscal Quarter",
+              "Last Fiscal Quarter",
+              "This Fiscal Quarter-to-date",
+              "Last Fiscal Quarter-to-date",
+              "Next Fiscal Quarter",
+              "This Fiscal Year",
+              "Last Fiscal Year",
+              "This Fiscal Year-to-date",
+              "Last Fiscal Year-to-date",
+              "Next Fiscal Year"
+            ],
+            "type": "string",
+            "title": "DateMacro",
+            "default": null,
+            "nullable": true,
+            "description": "Predefined date range. Use if you want the report to cover a standard report date range; otherwise, use the start_date and end_date to cover an explicit report date range."
+          },
+          "sort_order": {
+            "enum": [
+              "ascend",
+              "descend"
+            ],
+            "type": "string",
+            "title": "SortOrder",
+            "default": null,
+            "nullable": true,
+            "description": "The sort order."
+          },
+          "vendor_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Vendor Ids",
+            "default": null,
+            "nullable": true,
+            "description": "One or more comma separated vendor IDs. Filters report contents to include information for specified vendors. "
+          },
+          "end_duedate": {
+            "type": "string",
+            "title": "End Duedate",
+            "default": null,
+            "nullable": true,
+            "description": "The range of dates over which receivables are due, in the format YYYY-MM-DD. start_duedate must be less than end_duedate. If not specified, all data is returned."
+          },
+          "report_date": {
+            "type": "string",
+            "title": "Report Date",
+            "default": null,
+            "nullable": true,
+            "description": "Start date to use for the report, in the format YYYY-MM-DD."
+          },
+          "duedate_macro": {
+            "enum": [
+              "Today",
+              "Yesterday",
+              "This Week",
+              "Last Week",
+              "This Week-to-date",
+              "Last Week-to-date",
+              "Next Week",
+              "Next 4 Weeks",
+              "This Month",
+              "Last Month",
+              "This Month-to-date",
+              "Last Month-to-date",
+              "Next Month",
+              "This Fiscal Quarter",
+              "Last Fiscal Quarter",
+              "This Fiscal Quarter-to-date",
+              "Last Fiscal Quarter-to-date",
+              "Next Fiscal Quarter",
+              "This Fiscal Year",
+              "Last Fiscal Year",
+              "This Fiscal Year-to-date",
+              "Last Fiscal Year-to-date",
+              "Next Fiscal Year"
+            ],
+            "type": "string",
+            "title": "DateMacro",
+            "default": null,
+            "nullable": true,
+            "description": "Predefined date range of due dates for balances to include in the report; otherwise, use the start_duedate and end_duedate to cover an explicit report date range. "
+          },
+          "start_duedate": {
+            "type": "string",
+            "title": "Start Duedate",
+            "default": null,
+            "nullable": true,
+            "description": "The range of dates over which receivables are due, in the format YYYY-MM-DD. start_duedate must be less than end_duedate. If not specified, all data is returned."
+          },
+          "department_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Department Ids",
+            "default": null,
+            "nullable": true,
+            "description": "One or more comma separated department IDs. Filters report contents to include information for specified departments if so configured in the company file. "
+          },
+          "accounting_method": {
+            "enum": [
+              "Cash",
+              "Accrual"
+            ],
+            "type": "string",
+            "title": "AccountingMethod",
+            "default": null,
+            "nullable": true,
+            "description": "The accounting method used in the report."
+          }
+        }
+      }
+    },
+    {
+      "name": "QUICKBOOKS_VENDOR_BALANCE_REPORT",
+      "description": "Get the balance report of a vendor in QuickBooks with the given vendor ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "VendorBalanceReportRequest",
+        "properties": {
+          "qzurl": {
+            "type": "string",
+            "title": "Qzurl",
+            "default": null,
+            "nullable": true,
+            "description": "Specifies whether Quick Zoom URL information should be generated for rows in the report."
+          },
+          "appaid": {
+            "enum": [
+              "All",
+              "Paid",
+              "Unpaid"
+            ],
+            "type": "string",
+            "title": "Arpaid",
+            "default": null,
+            "nullable": true,
+            "description": "Status of the balance."
+          },
+          "date_macro": {
+            "enum": [
+              "Today",
+              "Yesterday",
+              "This Week",
+              "Last Week",
+              "This Week-to-date",
+              "Last Week-to-date",
+              "Next Week",
+              "Next 4 Weeks",
+              "This Month",
+              "Last Month",
+              "This Month-to-date",
+              "Last Month-to-date",
+              "Next Month",
+              "This Fiscal Quarter",
+              "Last Fiscal Quarter",
+              "This Fiscal Quarter-to-date",
+              "Last Fiscal Quarter-to-date",
+              "Next Fiscal Quarter",
+              "This Fiscal Year",
+              "Last Fiscal Year",
+              "This Fiscal Year-to-date",
+              "Last Fiscal Year-to-date",
+              "Next Fiscal Year"
+            ],
+            "type": "string",
+            "title": "DateMacro",
+            "default": null,
+            "nullable": true,
+            "description": "Predefined date range. Use if you want the report to cover a standard report date range; otherwise, use the start_date and end_date to cover an explicit report date range."
+          },
+          "sort_order": {
+            "enum": [
+              "ascend",
+              "descend"
+            ],
+            "type": "string",
+            "title": "SortOrder",
+            "default": null,
+            "nullable": true,
+            "description": "The sort order."
+          },
+          "vendor_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Vendor Ids",
+            "default": null,
+            "nullable": true,
+            "description": "Filters report contents to include information for specified vendors. Supported Values: One or more comma separated vendor IDs as returned in the attribute, Vendor.Id, of the Vendor object response code."
+          },
+          "report_date": {
+            "type": "string",
+            "title": "Report Date",
+            "default": null,
+            "nullable": true,
+            "description": "Start date to use for the report, in the format YYYY-MM-DD."
+          },
+          "department_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Department Ids",
+            "default": null,
+            "nullable": true,
+            "description": "One or more comma separated department IDs. Filters report contents to include information for specified departments if so configured in the company file. "
+          },
+          "accounting_method": {
+            "enum": [
+              "Cash",
+              "Accrual"
+            ],
+            "type": "string",
+            "title": "AccountingMethod",
+            "default": null,
+            "nullable": true,
+            "description": "The accounting method used in the report. "
+          },
+          "summarize_column_by": {
+            "enum": [
+              "Total",
+              "Month",
+              "Week",
+              "Days",
+              "Quarter",
+              "Year",
+              "Customers",
+              "Vendors",
+              "Classes",
+              "Departments",
+              "Employees",
+              "ProductsAndServices"
+            ],
+            "type": "string",
+            "title": "SummarizeColumnBy",
+            "default": null,
+            "nullable": true,
+            "description": "The criteria by which to group the report results."
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 18,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/quickbooks/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "QUICKBOOKS_CREATE_ACCOUNT",
+    "QUICKBOOKS_CREATE_CUSTOMER",
+    "QUICKBOOKS_CREATE_EMPLOYEE",
+    "QUICKBOOKS_CREATE_INVOICE",
+    "QUICKBOOKS_CREATE_VENDOR",
+    "QUICKBOOKS_CUSTOMER_BALANCE_DETAIL",
+    "QUICKBOOKS_CUSTOMER_BALANCE_REPORT",
+    "QUICKBOOKS_LIST_INVOICES",
+    "QUICKBOOKS_QUERY_ACCOUNT",
+    "QUICKBOOKS_READ_ACCOUNT",
+    "QUICKBOOKS_READ_CUSTOMER",
+    "QUICKBOOKS_READ_EMPLOYEE",
+    "QUICKBOOKS_READ_INVOICE",
+    "QUICKBOOKS_READ_VENDOR",
+    "QUICKBOOKS_UPDATE_FULL_INVOICE",
+    "QUICKBOOKS_UPDATE_SPARSE_INVOICE",
+    "QUICKBOOKS_VENDOR_BALANCE_DETAIL",
+    "QUICKBOOKS_VENDOR_BALANCE_REPORT"
+  ]
+}

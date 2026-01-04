@@ -1,0 +1,1107 @@
+{
+  "qualifiedName": "webex",
+  "displayName": "Webex",
+  "description": "Webex is a Cisco-powered video conferencing and collaboration platform offering online meetings, webinars, screen sharing, and team messaging",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/webex.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/webex",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/webex/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "WEBEX_CREATE_ROOM",
+      "description": "Tool to create a new room. Use when you need to spin up a dedicated space for team collaboration or topic discussion.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateRoomRequest",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "My Project Space"
+            ],
+            "description": "The title for the room."
+          },
+          "teamId": {
+            "type": "string",
+            "title": "Team Id",
+            "default": null,
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1RFQU0vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "nullable": true,
+            "description": "The team ID to associate the room with. Optional."
+          }
+        },
+        "description": "Request model for creating a Webex room."
+      }
+    },
+    {
+      "name": "WEBEX_CREATE_TEAM",
+      "description": "Tool to create a new team. Use when you need to group rooms under a shared team.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateTeamRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "My Project Team"
+            ],
+            "description": "The name of the team."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "examples": [
+              "Team for coordinating Project X"
+            ],
+            "nullable": true,
+            "description": "A description of the team."
+          }
+        },
+        "description": "Request model for creating a Webex team."
+      }
+    },
+    {
+      "name": "WEBEX_GET_TEAM_DETAILS",
+      "description": "Tool to retrieve details for a specific team by teamId. Use when you need full metadata of a team before performing team-related operations.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingGetTeamDetailsRequest",
+        "required": [
+          "teamId"
+        ],
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1RFQU0vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "description": "The unique identifier for the team."
+          }
+        },
+        "description": "Request model for retrieving details of a Webex team."
+      }
+    },
+    {
+      "name": "WEBEX_LIST_TEAMS",
+      "description": "Tool to list teams. Use when you need to retrieve the teams the authenticated user is a member of.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingListTeamsRequest",
+        "properties": {
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Maximum number of teams to return."
+          }
+        },
+        "description": "Request parameters to filter which teams to list."
+      }
+    },
+    {
+      "name": "WEBEX_LIST_WEBHOOKS",
+      "description": "Tool to list webhooks. Use after authentication to retrieve webhooks filtered by max or ownership.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListWebhooksRequest",
+        "properties": {
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Maximum number of webhooks to return"
+          },
+          "ownedBy": {
+            "enum": [
+              "creator",
+              "org"
+            ],
+            "type": "string",
+            "title": "Owned By",
+            "default": null,
+            "examples": [
+              "creator",
+              "org"
+            ],
+            "nullable": true,
+            "description": "Filter webhooks by ownership: 'creator' for user-owned, 'org' for org-wide"
+          }
+        },
+        "description": "Request parameters to filter which webhooks to list."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_CREATE_MESSAGE",
+      "description": "Tool to post a message to a Webex room or person. Use when you have a target roomId or private recipient and want to send text, markdown, files, or card attachments.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingCreateMessageRequest",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "default": null,
+            "examples": [
+              "Hello, world!"
+            ],
+            "nullable": true,
+            "description": "Plain-text message content."
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Files",
+            "default": null,
+            "examples": [
+              "https://example.com/image.png"
+            ],
+            "nullable": true,
+            "description": "Public URLs of files to post. Only one URL allowed per message."
+          },
+          "roomId": {
+            "type": "string",
+            "title": "Room Id",
+            "default": null,
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1JPT00vZjU1YWRkZTAtYmE4YS0xMWViLWI4ZTUtYzFjYWQzZTVhY2Jk"
+            ],
+            "nullable": true,
+            "description": "The room ID to post the message in. Required if sending to a room."
+          },
+          "markdown": {
+            "type": "string",
+            "title": "Markdown",
+            "default": null,
+            "examples": [
+              "**Bold** and _italic_ [link](https://example.com)"
+            ],
+            "nullable": true,
+            "description": "Markdown-formatted message. Overrides text if present."
+          },
+          "toPersonId": {
+            "type": "string",
+            "title": "To Person Id",
+            "default": null,
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1BFT1BMRS8xMjM0NTY3ODktYWJjZC0xMWViLWI4ZTUtYzFjYWQzZTVhY2Jk"
+            ],
+            "nullable": true,
+            "description": "The person ID for sending a private 1:1 message. Mutually exclusive with roomId."
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Attachments",
+            "default": null,
+            "examples": [
+              {
+                "content": {
+                  "body": [],
+                  "type": "AdaptiveCard"
+                },
+                "contentType": "application/vnd.microsoft.card.adaptive"
+              }
+            ],
+            "nullable": true,
+            "description": "Content attachments (cards). Only one attachment per message is supported."
+          },
+          "toPersonEmail": {
+            "type": "string",
+            "title": "To Person Email",
+            "default": null,
+            "examples": [
+              "alice@example.com"
+            ],
+            "nullable": true,
+            "description": "The email address of the person for a private 1:1 message. Mutually exclusive with roomId."
+          }
+        },
+        "description": "Request parameters for posting a message to a Webex room or person.\nNote: One of roomId, toPersonId, or toPersonEmail is required."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_CREATE_ROOM",
+      "description": "Tool to create a new room. Use to create a dedicated space for collaboration after authentication.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingCreateRoomRequest",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "My Project Room"
+            ],
+            "description": "Title of the room."
+          },
+          "teamId": {
+            "type": "string",
+            "title": "Team Id",
+            "default": null,
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1RFQU0vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "nullable": true,
+            "description": "Optional team ID to associate with the room."
+          }
+        },
+        "description": "Request model for creating a Webex room."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_CREATE_TEAM_MEMBERSHIP",
+      "description": "Tool to add a person to a Webex team by personId or personEmail. Use when granting a user access to a team; requires teamId and one of personId or personEmail.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingCreateTeamMembershipRequest",
+        "required": [
+          "teamId"
+        ],
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1RFQU0vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "description": "The team ID to add the person to."
+          },
+          "personId": {
+            "type": "string",
+            "title": "Person Id",
+            "default": null,
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1BFTlNJT04vZTdiY2NiODAtODUzMC0xMWU2LWJkZjgtOGFjYjI5Y2JkMjhj"
+            ],
+            "nullable": true,
+            "description": "The person ID to add. Required if personEmail is not provided."
+          },
+          "isModerator": {
+            "type": "boolean",
+            "title": "Is Moderator",
+            "default": false,
+            "nullable": true,
+            "description": "Set to true to make the person a team moderator."
+          },
+          "personEmail": {
+            "type": "string",
+            "title": "Person Email",
+            "default": null,
+            "examples": [
+              "alice@example.com"
+            ],
+            "nullable": true,
+            "description": "The email address of the person to add. Required if personId is not provided."
+          }
+        },
+        "description": "Request schema for adding a person to a Webex team by personId or personEmail.\nOne of personId or personEmail is required."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_DELETE_MEMBERSHIP",
+      "description": "Tool to delete a Webex membership by its unique identifier. Use when you need to remove a member from a space after confirming the membership exists. Example: \"Delete the membership with ID Y2lzY29zcGFjMDczNzA2Njg0ZDliY2YxNDE4NDQyYzQ5NDQzOTExYTk4\".",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingDeleteMembershipRequest",
+        "required": [
+          "membershipId"
+        ],
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "title": "Membership Id",
+            "examples": [
+              "Y2lzY29zcGFjMDczNzA2Njg0ZDliY2YxNDE4NDQyYzQ5NDQzOTExYTk4"
+            ],
+            "description": "Unique identifier for the membership to delete"
+          }
+        },
+        "description": "Request schema for `MessagingDeleteMembership`."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_DELETE_MESSAGE",
+      "description": "Tool to delete a Webex message by its unique identifier. Use after confirming the messageId to remove unintended or obsolete messages. Example: \"Delete the message with ID Y2lzY29zcGFyazovL21lc3NhZ2UvYWJjMTIzNDU2Nzg5\".",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingDeleteMessageRequest",
+        "required": [
+          "messageId"
+        ],
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL21lc3NhZ2UvYWJjMTIzNDU2Nzg5"
+            ],
+            "description": "Unique identifier for the message to delete"
+          }
+        },
+        "description": "Request schema for `MessagingDeleteMessage`."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_DELETE_ROOM",
+      "description": "Tool to delete a Webex room by its ID. Use after confirming the roomId when you need to permanently remove or archive a space. Example: \"Delete the room with ID Y2lzY29...\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingDeleteRoomRequest",
+        "required": [
+          "roomId"
+        ],
+        "properties": {
+          "roomId": {
+            "type": "string",
+            "title": "Room Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1JPT00vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "description": "Unique identifier for the room to delete"
+          }
+        },
+        "description": "Request schema for `MessagingDeleteRoom`."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_GET_MEMBERSHIP_DETAILS",
+      "description": "Tool to retrieve details for a specific membership. Use when you need metadata for a membership by its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingGetMembershipDetailsRequest",
+        "required": [
+          "membershipId"
+        ],
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "title": "Membership Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL21FTUJFUlNISXAvYTliYmFjZC1lN2IzLTQwOTUtYTc3YS0yZTJhNzI3ZjQyMzY="
+            ],
+            "description": "The unique identifier for the membership."
+          }
+        },
+        "description": "Request model for retrieving details of a Webex membership by its unique identifier."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_GET_MESSAGE_DETAILS",
+      "description": "Tool to retrieve details for a specific message. Use when you need full content and metadata by message ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingGetMessageDetailsRequest",
+        "required": [
+          "messageId"
+        ],
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL01FU1NBR0UvZjlhYmJjZC1lN2IzLTQwOTUtYTc3YS0yZTJhNzI3ZjQyMzY"
+            ],
+            "description": "The unique identifier for the message."
+          }
+        },
+        "description": "Request model for retrieving details of a Webex message by its unique identifier."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_GET_ROOM_DETAILS",
+      "description": "Tool to retrieve details for a specific room. Use when you need full metadata of a specific room before posting messages or updating settings.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingGetRoomDetailsRequest",
+        "required": [
+          "roomId"
+        ],
+        "properties": {
+          "roomId": {
+            "type": "string",
+            "title": "Room Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1JPT00vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "description": "Unique identifier for the room."
+          }
+        },
+        "description": "Request model for retrieving details of a Webex room."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_GET_TEAM_MEMBERSHIP_DETAILS",
+      "description": "Tool to retrieve details for a specific team membership. Use when you need metadata for a team membership by its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingGetTeamMembershipDetailsRequest",
+        "required": [
+          "membershipId"
+        ],
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "title": "Membership Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3RlYW1NZW1iZXJzL2Y5OWFjM2I3LWE4NTgtNGI2ZC05OGM3LWIyYzE2ZjE5M2I1Yg"
+            ],
+            "description": "The unique identifier for the team membership."
+          }
+        },
+        "description": "Request model for retrieving details of a Webex team membership by its unique identifier."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_LIST_MEMBERSHIPS",
+      "description": "Tool to list memberships in a Webex room. Use when you need to retrieve or filter membership details by roomId, personId, personEmail, or teamId. Supports limiting the response size.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingListMembershipsRequest",
+        "properties": {
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Limit the maximum number of membership records returned."
+          },
+          "roomId": {
+            "type": "string",
+            "title": "Room Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter memberships by the Webex room ID."
+          },
+          "teamId": {
+            "type": "string",
+            "title": "Team Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter memberships associated with a specific team ID."
+          },
+          "personId": {
+            "type": "string",
+            "title": "Person Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter memberships by the Webex person ID."
+          },
+          "personEmail": {
+            "type": "string",
+            "title": "Person Email",
+            "default": null,
+            "nullable": true,
+            "description": "Filter memberships by the member's email address."
+          }
+        },
+        "description": "Request parameters to filter which memberships to list."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_LIST_MESSAGES",
+      "description": "Tool to list messages in a room. Use when you need to retrieve chat history filtered by room, time window, or mentions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingListMessagesRequest",
+        "required": [
+          "roomId"
+        ],
+        "properties": {
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Maximum number of messages to return per request."
+          },
+          "before": {
+            "type": "string",
+            "title": "Before",
+            "default": null,
+            "nullable": true,
+            "description": "Filter messages sent before a specific ISO8601 timestamp."
+          },
+          "roomId": {
+            "type": "string",
+            "title": "Room Id",
+            "description": "Unique identifier for the room to list messages from."
+          },
+          "parentId": {
+            "type": "string",
+            "title": "Parent Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter messages that are replies to a specific message ID."
+          },
+          "beforeMessage": {
+            "type": "string",
+            "title": "Before Message",
+            "default": null,
+            "nullable": true,
+            "description": "Filter messages sent before a specific message, by its ID."
+          },
+          "mentionedPeople": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Mentioned People",
+            "default": null,
+            "nullable": true,
+            "description": "Filter messages where the caller is mentioned; use 'me' or person IDs."
+          }
+        },
+        "description": "Request parameters to filter which messages to list in a room."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_LIST_ROOMS",
+      "description": "Tool to list rooms the authenticated user belongs to. Use after authentication when needing to retrieve spaces filtered by team, type, or sorted. Example: \"List my group rooms sorted by last activity.\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingListRoomsRequest",
+        "properties": {
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              20
+            ],
+            "nullable": true,
+            "description": "Maximum number of rooms to return."
+          },
+          "type": {
+            "enum": [
+              "direct",
+              "group"
+            ],
+            "type": "string",
+            "title": "Type",
+            "default": null,
+            "examples": [
+              "group"
+            ],
+            "nullable": true,
+            "description": "Filter rooms by type: 'direct' (1:1) or 'group'."
+          },
+          "sortBy": {
+            "enum": [
+              "id",
+              "lastactivity",
+              "created"
+            ],
+            "type": "string",
+            "title": "Sort By",
+            "default": null,
+            "examples": [
+              "lastactivity"
+            ],
+            "nullable": true,
+            "description": "Sort results by 'id', 'lastactivity' (recent activity), or 'created' (creation date)."
+          },
+          "teamId": {
+            "type": "string",
+            "title": "Team Id",
+            "default": null,
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1RFQU0vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "nullable": true,
+            "description": "Limit rooms to those associated with a specific team by ID."
+          }
+        },
+        "description": "Request parameters to filter which rooms to list."
+      }
+    },
+    {
+      "name": "WEBEX_MESSAGING_LIST_TEAM_MEMBERSHIPS",
+      "description": "Tool to list team memberships. Use when you need to retrieve or filter team membership details by teamId, personId, or personEmail, with optional max limit. Use after confirming the team or person context.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingListTeamMembershipsRequest",
+        "properties": {
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Limit the maximum number of team membership records returned."
+          },
+          "teamId": {
+            "type": "string",
+            "title": "Team Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter memberships by the Webex team ID."
+          },
+          "personId": {
+            "type": "string",
+            "title": "Person Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter memberships by the Webex person ID."
+          },
+          "personEmail": {
+            "type": "string",
+            "title": "Person Email",
+            "default": null,
+            "nullable": true,
+            "description": "Filter memberships by the member's email address."
+          }
+        },
+        "description": "Request parameters to filter which team memberships to list."
+      }
+    },
+    {
+      "name": "WEBEX_PEOPLE_GET_PERSON",
+      "description": "Tool to get details for a specific person. Use when you have a person's ID and need full profile information. Call after confirming the person's ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PeopleGetPersonRequest",
+        "required": [
+          "personId"
+        ],
+        "properties": {
+          "personId": {
+            "type": "string",
+            "title": "Person Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1BFT1BMRS8xMjM0NTY3ODkw"
+            ],
+            "description": "Unique identifier for the person."
+          },
+          "callingData": {
+            "type": "boolean",
+            "title": "Calling Data",
+            "default": null,
+            "nullable": true,
+            "description": "If true, include the person's calling data in the response."
+          }
+        },
+        "description": "Request model for retrieving details of a specific person by ID."
+      }
+    },
+    {
+      "name": "WEBEX_PEOPLE_LIST_PEOPLE",
+      "description": "Tool to list people in your organization. Use when you need to retrieve people filtered by email, display name, IDs, roles, or location.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PeopleListPeopleRequest",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "default": null,
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1BFT1BMRS8wMTIzLGY2ZTY="
+            ],
+            "nullable": true,
+            "description": "List people by ID. Accepts up to 85 person IDs separated by commas."
+          },
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Maximum number of people to return per request."
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "default": null,
+            "examples": [
+              "alice@example.com"
+            ],
+            "nullable": true,
+            "description": "List people with this email address. For non-admin calls, either email or displayName is required."
+          },
+          "orgId": {
+            "type": "string",
+            "title": "Org Id",
+            "default": null,
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL09SR0FOSVpBVElPTj8="
+            ],
+            "nullable": true,
+            "description": "List people in this organization. Only admin users of another organization (such as partners) may use this parameter."
+          },
+          "roles": {
+            "type": "string",
+            "title": "Roles",
+            "default": null,
+            "examples": [
+              "ROLE_ID_1,ROLE_ID_2"
+            ],
+            "nullable": true,
+            "description": "List of role IDs separated by commas."
+          },
+          "locationId": {
+            "type": "string",
+            "title": "Location Id",
+            "default": null,
+            "examples": [
+              "LOCATION_ID_123"
+            ],
+            "nullable": true,
+            "description": "List people present in this location."
+          },
+          "callingData": {
+            "type": "boolean",
+            "title": "Calling Data",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Include Webex Calling user details in the response. Default is false."
+          },
+          "displayName": {
+            "type": "string",
+            "title": "Display Name",
+            "default": null,
+            "examples": [
+              "Alice"
+            ],
+            "nullable": true,
+            "description": "List people whose name starts with this string. For non-admin calls, either displayName or email is required."
+          }
+        },
+        "description": "Request parameters to filter which people to list."
+      }
+    },
+    {
+      "name": "WEBEX_ROOMS_GET_ROOM_DETAILS",
+      "description": "Tool to retrieve details for a specific room. Use when you need full metadata of a room before posting messages or updating settings.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RoomsGetRoomDetailsRequest",
+        "required": [
+          "roomId"
+        ],
+        "properties": {
+          "roomId": {
+            "type": "string",
+            "title": "Room Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1JPT00vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "description": "Unique identifier for the room."
+          }
+        },
+        "description": "Request model for retrieving details of a Webex room."
+      }
+    },
+    {
+      "name": "WEBEX_UPDATE_MEMBERSHIP",
+      "description": "Tool to update a membership by membershipId. Use when modifying a member's moderator or monitor status in a Webex room.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingUpdateMembershipRequest",
+        "required": [
+          "membershipId"
+        ],
+        "properties": {
+          "isMonitor": {
+            "type": "boolean",
+            "title": "Is Monitor",
+            "default": null,
+            "nullable": true,
+            "description": "Set to true to make the user a room monitor."
+          },
+          "isModerator": {
+            "type": "boolean",
+            "title": "Is Moderator",
+            "default": null,
+            "nullable": true,
+            "description": "Set to true to make the user a room moderator."
+          },
+          "membershipId": {
+            "type": "string",
+            "title": "Membership Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL01FTUJFUlNISXAvMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "description": "Unique identifier of the membership to update."
+          }
+        },
+        "description": "Request model for updating a Webex membership's moderator or monitor status."
+      }
+    },
+    {
+      "name": "WEBEX_UPDATE_ROOM",
+      "description": "Tool to update a room's title and settings. Use when you need to rename, lock/unlock, or reassign a Webex space.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingUpdateRoomRequest",
+        "required": [
+          "roomId"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "examples": [
+              "Project Discussion Room"
+            ],
+            "nullable": true,
+            "description": "New user-friendly name for the room."
+          },
+          "roomId": {
+            "type": "string",
+            "title": "Room Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1JPT00vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "description": "Unique identifier of the room to update."
+          },
+          "teamId": {
+            "type": "string",
+            "title": "Team Id",
+            "default": null,
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1RFQU0vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "nullable": true,
+            "description": "Team ID to associate the room with. Use to move the room under a different team."
+          },
+          "isLocked": {
+            "type": "boolean",
+            "title": "Is Locked",
+            "default": null,
+            "nullable": true,
+            "description": "Lock the room to prevent new users from joining."
+          }
+        },
+        "description": "Request model for updating a Webex room's details."
+      }
+    },
+    {
+      "name": "WEBEX_UPDATE_TEAM",
+      "description": "Tool to update a team's name by teamId. Use when you need to rename a Webex team. Example: \"Change team 12345 name to 'Project X Team'\".",
+      "inputSchema": {
+        "type": "object",
+        "title": "MessagingUpdateTeamRequest",
+        "required": [
+          "teamId",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Engineering Team"
+            ],
+            "description": "New user-friendly name for the team."
+          },
+          "teamId": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "Y2lzY29zcGFyazovL3VzL1RFQU0vMTIzNDU2Nzg5MGFiY2Rl"
+            ],
+            "description": "Unique identifier of the team to update."
+          }
+        },
+        "description": "Request model for updating a Webex team's details."
+      }
+    },
+    {
+      "name": "WEBEX_WEBHOOKS_CREATE_WEBHOOK",
+      "description": "Tool to create a new webhook for events. Use when you need to register for Webex event notifications.",
+      "inputSchema": {
+        "type": "object",
+        "title": "WebhooksCreateWebhookRequest",
+        "required": [
+          "name",
+          "targetUrl",
+          "resource",
+          "event"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "MyWebhook"
+            ],
+            "description": "User-friendly name for the webhook."
+          },
+          "appId": {
+            "type": "string",
+            "title": "App Id",
+            "default": null,
+            "nullable": true,
+            "description": "(Internal) Application ID associated with this webhook."
+          },
+          "event": {
+            "enum": [
+              "created",
+              "updated",
+              "deleted"
+            ],
+            "type": "string",
+            "title": "Event",
+            "description": "The event type that triggers the webhook (created, updated, or deleted)."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "roomId=Y2lzY29zcGFyazovL3VzL1JPT00vMTIz"
+            ],
+            "nullable": true,
+            "description": "Optional filter expression to scope notifications, e.g., 'roomId=Y2lzY29zcGFyazovL3VzL1JPT00vMTIz'."
+          },
+          "secret": {
+            "type": "string",
+            "title": "Secret",
+            "default": null,
+            "examples": [
+              "mySuperSecretKey123"
+            ],
+            "nullable": true,
+            "description": "Optional secret used to generate an HMAC payload signature."
+          },
+          "ownedBy": {
+            "enum": [
+              "creator",
+              "org"
+            ],
+            "type": "string",
+            "title": "Owned By",
+            "default": null,
+            "nullable": true,
+            "description": "Specifies webhook ownership: 'creator' delivers only to creator, 'org' delivers organization-wide."
+          },
+          "resource": {
+            "enum": [
+              "messages",
+              "memberships",
+              "rooms",
+              "teams",
+              "team_memberships",
+              "meetings",
+              "meetingRecordings",
+              "meetingTranscripts"
+            ],
+            "type": "string",
+            "title": "Resource",
+            "description": "The Webex resource to monitor. One of: messages, memberships, rooms, teams, team_memberships, meetings, meetingRecordings, meetingTranscripts."
+          },
+          "targetUrl": {
+            "type": "string",
+            "title": "Target Url",
+            "description": "The URL that will receive POST event notifications."
+          }
+        },
+        "description": "Request parameters for creating a Webex webhook."
+      }
+    },
+    {
+      "name": "WEBEX_WEBHOOKS_DELETE_WEBHOOK",
+      "description": "Tool to delete a specific webhook. Use when you need to remove an existing webhook by its ID after confirming the identifier.",
+      "inputSchema": {
+        "type": "object",
+        "title": "WebhooksDeleteWebhookRequest",
+        "required": [
+          "webhookId"
+        ],
+        "properties": {
+          "webhookId": {
+            "type": "string",
+            "title": "Webhook Id",
+            "examples": [
+              "5944d1e4-1101-4d33-8b47-f0f285d4882b"
+            ],
+            "description": "Unique identifier for the webhook to delete"
+          }
+        },
+        "description": "Request schema for WebhooksDeleteWebhook."
+      }
+    },
+    {
+      "name": "WEBEX_WEBHOOKS_GET_WEBHOOK",
+      "description": "Tool to get details for a specific webhook. Use when you need to inspect a webhook's configuration before taking action.",
+      "inputSchema": {
+        "type": "object",
+        "title": "WebhooksGetWebhookRequest",
+        "required": [
+          "webhookId"
+        ],
+        "properties": {
+          "webhookId": {
+            "type": "string",
+            "title": "Webhook Id",
+            "examples": [
+              "5944d1e4-1101-4d33-8b47-f0f285d4882b"
+            ],
+            "description": "The unique identifier of the webhook to retrieve."
+          }
+        },
+        "description": "Request model for retrieving details for a specific webhook by ID."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:58:26.909957+00:00",
+    "source": "smithery"
+  }
+}

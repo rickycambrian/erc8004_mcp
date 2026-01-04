@@ -1,0 +1,1389 @@
+{
+  "qualifiedName": "@call518/mcp-openstack-ops",
+  "displayName": "MCP-OpenStack-Ops",
+  "description": "Manage and monitor a single OpenStack project with bulk operations, consolidated queries, and real-time health reports. Filter and act across compute, networks, storage, images, orchestration, and load balancers with instant status verification. Protect tenants with strict project scoping and configurable modify permissions.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/c2c77569-34f0-4a25-a0a9-da5e18442948.jfif",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@call518/mcp-openstack-ops",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@call518/mcp-openstack-ops/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "get_service_status",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Provides status and health check information for each OpenStack service.\n\nFunctions:\n- Check active status of all OpenStack services\n- Verify API endpoint responsiveness for each service\n- Collect detailed status and version information per service\n- Detect and report service failures or error conditions\n\nUse when user requests service status, API status, health checks, or service troubleshooting.\n\nReturns:\n    Service status information in JSON format with service details and health summary.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_instance",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Unified instance query tool supporting all instance retrieval patterns.\nConsolidates functionality from get_instance_details, get_instance_by_name, get_instances_by_status, and search_instances.\n\nFunctions:\n- Get specific instances by names or IDs\n- Filter instances by status (ACTIVE, SHUTOFF, ERROR, etc.)\n- Search instances across multiple fields (name, flavor, image, host, etc.)\n- List all instances with pagination\n- Support both summary and detailed information modes\n\nUse when user requests instance information, status checks, or instance searches.\n\nArgs:\n    names: Specific instance name(s) to retrieve (comma-separated: \"vm1,vm2,vm3\")\n    ids: Specific instance ID(s) to retrieve (comma-separated)\n    status: Filter by instance status (e.g., \"ACTIVE\", \"SHUTOFF\", \"ERROR\")\n    search_term: Search term for partial matching across fields\n    search_in: Fields to search in (\"name\", \"status\", \"host\", \"flavor\", \"image\", \"availability_zone\", \"all\")\n    all_instances: If True, retrieve all instances (ignores other filters)\n    detailed: If True, return detailed information; if False, return summary only\n    limit: Maximum instances to return (default: 50, max: 200)\n    offset: Number of instances to skip for pagination\n    case_sensitive: Case-sensitive search (default: False)\n    \nReturns:\n    Instance information in JSON format with metadata and pagination info.\n    \nExamples:\n    get_instance(names=\"vm1,vm2\")                    # Get specific instances\n    get_instance(status=\"SHUTOFF\")                   # Get all stopped instances\n    get_instance(search_term=\"web\", search_in=\"name\") # Search by name\n    get_instance(all_instances=True, detailed=False) # List all (summary)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "string",
+            "title": "Ids",
+            "default": ""
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "names": {
+            "type": "string",
+            "title": "Names",
+            "default": ""
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": 0
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": ""
+          },
+          "detailed": {
+            "type": "boolean",
+            "title": "Detailed",
+            "default": true
+          },
+          "search_in": {
+            "type": "string",
+            "title": "Search In",
+            "default": "name"
+          },
+          "search_term": {
+            "type": "string",
+            "title": "Search Term",
+            "default": ""
+          },
+          "all_instances": {
+            "type": "boolean",
+            "title": "All Instances",
+            "default": false
+          },
+          "case_sensitive": {
+            "type": "boolean",
+            "title": "Case Sensitive",
+            "default": false
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_instance_details",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Provides detailed information and status for OpenStack instances with pagination support.\n\nFunctions:\n- Query basic instance information (name, ID, status, image, flavor) with efficient pagination\n- Collect network connection status and IP address information\n- Check CPU, memory, storage resource usage and allocation\n- Provide instance metadata, keypair, and security group settings\n- Support large-scale environments with configurable limits\n\nUse when user requests specific instance information, VM details, server analysis, or instance troubleshooting.\n\nArgs:\n    instance_names: Comma-separated list of instance names to query (optional)\n    instance_ids: Comma-separated list of instance IDs to query (optional)\n    all_instances: If True, returns all instances (default: False)\n    limit: Maximum number of instances to return (default: 50, max: 200)\n    offset: Number of instances to skip for pagination (default: 0)\n    include_all: If True, ignore pagination limits (use with caution in large environments)\n    \nReturns:\n    Instance detailed information in JSON format with instance, network, resource data, and pagination info.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": 0
+          },
+          "include_all": {
+            "type": "boolean",
+            "title": "Include All",
+            "default": false
+          },
+          "instance_ids": {
+            "type": "string",
+            "title": "Instance Ids",
+            "default": ""
+          },
+          "all_instances": {
+            "type": "boolean",
+            "title": "All Instances",
+            "default": false
+          },
+          "instance_names": {
+            "type": "string",
+            "title": "Instance Names",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "search_instances",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Search for OpenStack instances based on various criteria with efficient pagination.\n\nFunctions:\n- Search instances by name, status, host, flavor, image, or availability zone\n- Support partial matching with configurable case sensitivity\n- Return detailed information for matching instances with pagination\n- Optimized for large-scale environments with intelligent filtering\n\nArgs:\n    search_term: Term to search for (supports partial matching)\n    search_in: Field to search in ('name', 'status', 'host', 'flavor', 'image', 'availability_zone', 'all')\n    limit: Maximum number of matching instances to return (default: 50, max: 200)\n    offset: Number of matching instances to skip for pagination (default: 0)\n    case_sensitive: If True, performs case-sensitive search (default: False)\n    \nReturns:\n    List of matching instances with detailed information and pagination metadata",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "search_term"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": 0
+          },
+          "search_in": {
+            "type": "string",
+            "title": "Search In",
+            "default": "name"
+          },
+          "search_term": {
+            "type": "string",
+            "title": "Search Term"
+          },
+          "case_sensitive": {
+            "type": "boolean",
+            "title": "Case Sensitive",
+            "default": false
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_instance_by_name",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get detailed information for a specific instance by name.\n\nArgs:\n    instance_name: Name of the instance to retrieve\n    \nReturns:\n    Instance detailed information or error message if not found",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "instance_name"
+        ],
+        "properties": {
+          "instance_name": {
+            "type": "string",
+            "title": "Instance Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_instances_by_status",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get instances filtered by status.\n\nArgs:\n    status: Instance status to filter by (ACTIVE, SHUTOFF, ERROR, BUILDING, etc.)\n    \nReturns:\n    List of instances with the specified status",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_network_details",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Provides detailed information for OpenStack networks, subnets, routers, and security groups.\n\nFunctions:\n- Query configuration information for specified network or all networks\n- Check subnet configuration and IP allocation status per network\n- Collect router connection status and gateway configuration\n- Analyze security group rules and port information\n\nUse when user requests network information, subnet details, router configuration, or network troubleshooting.\n\nArgs:\n    network_name: Name of network to query or \"all\" for all networks (default: \"all\")\n    \nReturns:\n    Network detailed information in JSON format with networks, subnets, routers, and security groups.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "network_name": {
+            "type": "string",
+            "title": "Network Name",
+            "default": "all"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_resource_monitoring",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Monitors real-time resource usage across the OpenStack cluster.\n\nFunctions:\n- Monitor cluster-wide CPU, memory, and storage usage rates\n- Collect hypervisor statistics and resource allocation\n- Track resource utilization trends and capacity planning data\n- Provide resource usage summaries and utilization percentages\n\nUse when user requests resource monitoring, capacity planning, usage analysis, or performance monitoring.\n\nReturns:\n    Resource monitoring data in JSON format with cluster summary, hypervisor details, and usage statistics.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_user_list",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of OpenStack users in the current domain.\n\nFunctions:\n- Query user accounts and their basic information\n- Display user status (enabled/disabled)\n- Show user email and domain information\n- Provide user creation and modification timestamps\n\nUse when user requests user management information, identity queries, or user administration tasks.\n\nReturns:\n    List of users with detailed information in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_role_assignments",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get role assignments for the current project.\n\nFunctions:\n- Query role assignments for users and groups\n- Display project-level and domain-level permissions\n- Show scope of role assignments\n- Provide comprehensive access control information\n\nUse when user requests permission information, access control queries, or security auditing.\n\nReturns:\n    List of role assignments with detailed scope information in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_keypair_list",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of SSH keypairs for the current user.\n\nFunctions:\n- Query SSH keypairs and their fingerprints\n- Display keypair types and creation dates\n- Show public key information (truncated for security)\n- Provide keypair management information\n\nUse when user requests SSH key management, keypair information, or security key queries.\n\nReturns:\n    List of SSH keypairs with detailed information in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_security_groups",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of security groups with their rules.\n\nFunctions:\n- Query security groups and their rule configurations\n- Display ingress and egress rules with protocols and ports\n- Show remote IP prefixes and security group references\n- Provide comprehensive network security information\n\nUse when user requests security group information, firewall rules, or network security queries.\n\nReturns:\n    List of security groups with detailed rules in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_floating_ips",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of floating IPs with their associations.\n\nFunctions:\n- Query floating IPs and their current status\n- Display associated fixed IPs and ports\n- Show floating IP pool and router associations\n- Provide floating IP allocation and usage information\n\nUse when user requests floating IP information, external connectivity queries, or IP management tasks.\n\nReturns:\n    List of floating IPs with detailed association information in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_floating_ip_pools",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of floating IP pools (external networks).\n\nFunctions:\n- List all external networks that can provide floating IPs\n- Show available and used IP counts for each pool\n- Display network configuration for floating IP allocation\n- Provide pool capacity and utilization information\n\nUse when user requests:\n- \"Show floating IP pools\"\n- \"List available floating IP networks\"\n- \"Check floating IP capacity\"\n- \"What external networks are available?\"\n\nReturns:\n    List of floating IP pools with capacity information in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_routers",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of routers with their configuration.\n\nFunctions:\n- Query routers and their external gateway configurations\n- Display router interfaces and connected networks\n- Show routing table entries and static routes\n- Provide comprehensive network routing information\n\nUse when user requests router information, network connectivity queries, or routing configuration.\n\nReturns:\n    List of routers with detailed configuration in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_volume_types",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of volume types with their specifications.\n\nFunctions:\n- Query volume types and their capabilities\n- Display extra specifications and backend configurations\n- Show public/private volume type settings\n- Provide storage backend information\n\nUse when user requests volume type information, storage backend queries, or volume creation planning.\n\nReturns:\n    List of volume types with detailed specifications in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_volume_snapshots",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of volume snapshots.\n\nFunctions:\n- Query volume snapshots and their status\n- Display source volume information\n- Show snapshot creation and modification dates\n- Provide snapshot size and usage information\n\nUse when user requests snapshot information, backup queries, or volume restoration planning.\n\nReturns:\n    List of volume snapshots with detailed information in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_heat_stacks",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of Heat orchestration stacks.\n\nFunctions:\n- Query Heat stacks and their current status\n- Display stack creation and update timestamps\n- Show stack templates and resource information\n- Provide orchestration deployment information\n\nUse when user requests stack information, orchestration queries, or infrastructure-as-code status.\n\nReturns:\n    List of Heat stacks with detailed information in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_volume_list",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of all volumes with detailed information.\n\nFunctions:\n- List all volumes in the project\n- Show volume status, size, and type information\n- Display attachment information for volumes\n- Provide detailed metadata for each volume\n\nUse when user requests volume listing, volume information, or storage overview.\n\nReturns:\n    Detailed volume list in JSON format with volume information, attachments, and metadata.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_image_detail_list",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get detailed list of all images with comprehensive metadata.\n\nFunctions:\n- List all images available in the project\n- Show image status, size, and format information\n- Display image properties and metadata\n- Provide ownership and visibility details\n\nUse when user requests image listing, image information, or image metadata details.\n\nReturns:\n    Comprehensive image list in JSON format with detailed metadata, properties, and status information.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_usage_statistics",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get usage statistics for projects (similar to 'openstack usage list' command).\n\nFunctions:\n- Show project usage statistics over a specified time period\n- Display servers, RAM MB-Hours, CPU Hours, and Disk GB-Hours\n- Provide detailed server usage breakdown when available\n- Calculate usage summary across all projects\n\nUse when user requests usage statistics, billing information, resource consumption analysis, or project usage reports.\n\nArgs:\n    start_date: Start date in YYYY-MM-DD format (optional, defaults to 30 days ago)\n    end_date: End date in YYYY-MM-DD format (optional, defaults to today)\n    \nReturns:\n    Usage statistics in JSON format with project usage data, server details, and summary information.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "default": ""
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_quota",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get quota information for projects (similar to 'openstack quota show').\n\nArgs:\n    project_name: Name of the project (optional, defaults to current project if empty)\n\nReturns:\n    JSON string containing quota information for the specified project or current project",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "title": "Project Name",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_project_details",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get OpenStack project details (similar to 'openstack project list/show').\n\nArgs:\n    project_name: Name of specific project to show details for (optional, lists all if empty)\n\nReturns:\n    JSON string containing project information including details, roles, and quotas",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "title": "Project Name",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_server_events",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get recent events for a specific server\n\nArgs:\n    instance_name: Name or ID of the server instance\n    limit: Maximum number of events to return (default: 50)\n\nReturns:\n    JSON string with server events information",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "instance_name"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "instance_name": {
+            "type": "string",
+            "title": "Instance Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_server_groups",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "List all server groups with their details\n\nReturns:\n    JSON string with server groups information",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_hypervisor_details",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get detailed information about hypervisors\n\nArgs:\n    hypervisor_name: Name/ID of specific hypervisor or \"all\" for all hypervisors\n\nReturns:\n    JSON string with hypervisor details and statistics",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hypervisor_name": {
+            "type": "string",
+            "title": "Hypervisor Name",
+            "default": "all"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_availability_zones",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "List availability zones and their status\n\nReturns:\n    JSON string with availability zones information",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_server_volumes",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get all volumes attached to a specific server\n\nArgs:\n    instance_name: Name or ID of the server instance\n\nReturns:\n    JSON string with server volumes information",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "instance_name"
+        ],
+        "properties": {
+          "instance_name": {
+            "type": "string",
+            "title": "Instance Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_list",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieve comprehensive list of OpenStack load balancers with detailed information.\n\nFunctions:\n- Lists all load balancers in the OpenStack cluster\n- Provides detailed load balancer information including VIP, status, listeners\n- Supports pagination for large environments (limit/offset)\n- Shows listener count and basic listener information for each load balancer\n- Displays provisioning and operating status for troubleshooting\n\nUse when user requests:\n- \"Show me all load balancers\"\n- \"List load balancers with details\"\n- \"What load balancers are available?\"\n- \"Show load balancer status\"\n\nArgs:\n    limit: Maximum load balancers to return (1-200, default: 50)\n    offset: Number of load balancers to skip for pagination (default: 0)  \n    include_all: Return all load balancers ignoring limit/offset (default: False)\n    \nReturns:\n    JSON string containing load balancer details with summary statistics",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": 0
+          },
+          "include_all": {
+            "type": "boolean",
+            "title": "Include All",
+            "default": false
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_details",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get detailed information about a specific OpenStack load balancer.\n\nFunctions:\n- Shows comprehensive load balancer details including VIP configuration\n- Lists all listeners with their protocols and ports\n- Shows pools and members for each listener\n- Displays health monitor information if configured\n- Provides provisioning and operating status\n\nUse when user requests:\n- \"Show details for load balancer [name/id]\"\n- \"Get load balancer configuration\"\n- \"Show load balancer listeners and pools\"\n- \"What's the status of load balancer [name]?\"\n\nArgs:\n    lb_name_or_id: Load balancer name or ID to query\n    \nReturns:\n    JSON string containing detailed load balancer information",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "lb_name_or_id"
+        ],
+        "properties": {
+          "lb_name_or_id": {
+            "type": "string",
+            "title": "Lb Name Or Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_listeners",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get listeners for a specific OpenStack load balancer.\n\nFunctions:\n- Lists all listeners attached to a load balancer\n- Shows listener protocols, ports, and configurations\n- Displays admin state and default pool associations\n- Provides creation and update timestamps\n\nUse when user requests:\n- \"Show listeners for load balancer [name/id]\"\n- \"List load balancer listeners\"\n- \"What ports are configured on load balancer [name]?\"\n- \"Show listener configuration for [lb_name]\"\n\nArgs:\n    lb_name_or_id: Load balancer name or ID\n    \nReturns:\n    JSON string containing listener details for the load balancer",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "lb_name_or_id"
+        ],
+        "properties": {
+          "lb_name_or_id": {
+            "type": "string",
+            "title": "Lb Name Or Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_pools",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get load balancer pools, optionally filtered by listener.\n\nFunctions:\n- Lists all pools or pools for a specific listener\n- Shows pool protocols, load balancing algorithms\n- Displays members in each pool with their status\n- Provides health monitor associations\n\nUse when user requests:\n- \"Show all load balancer pools\"\n- \"List pools for listener [name/id]\"\n- \"What pools are configured on [listener_name]?\"\n- \"Show pool members and their status\"\n\nArgs:\n    listener_name_or_id: Optional listener name or ID to filter pools\n    \nReturns:\n    JSON string containing pool details with member information",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "listener_name_or_id": {
+            "type": "string",
+            "title": "Listener Name Or Id",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_pool_members",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get members for a specific OpenStack load balancer pool.\n\nFunctions:\n- Lists all members in a specific pool\n- Shows member addresses, ports, weights, and health status\n- Displays member admin state and operational status\n- Provides monitor configuration for each member\n\nUse when user requests:\n- \"Show members for pool [name/id]\"\n- \"List pool members\"\n- \"What members are in pool [name]?\"\n- \"Show pool member status\"\n\nArgs:\n    pool_name_or_id: Pool name or ID to query members for\n    \nReturns:\n    JSON string containing member details for the pool",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "pool_name_or_id"
+        ],
+        "properties": {
+          "pool_name_or_id": {
+            "type": "string",
+            "title": "Pool Name Or Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_health_monitors",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get health monitors, optionally filtered by pool.\n\nFunctions:\n- Lists all health monitors or monitors for a specific pool\n- Shows monitor types (HTTP, HTTPS, TCP, PING, UDP-CONNECT)\n- Displays health check intervals, timeouts, and retry settings\n- Provides HTTP-specific settings (method, URL path, expected codes)\n\nUse when user requests:\n- \"Show all health monitors\"\n- \"List health monitors for pool [name/id]\"\n- \"What health checks are configured?\"\n- \"Show health monitor configuration\"\n\nArgs:\n    pool_name_or_id: Optional pool name or ID to filter monitors (empty for all)\n    \nReturns:\n    JSON string containing health monitor details",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pool_name_or_id": {
+            "type": "string",
+            "title": "Pool Name Or Id",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_l7_policies",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get L7 policies for a listener or all L7 policies.\n\nArgs:\n    listener_name_or_id: Optional listener name or ID to filter policies. If empty, shows all policies.\n\nReturns:\n    JSON string containing L7 policies information including policy details, actions, and rules",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "listener_name_or_id": {
+            "type": "string",
+            "title": "Listener Name Or Id",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_amphorae",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get amphora instances for a load balancer or all amphorae.\n\nArgs:\n    lb_name_or_id: Optional load balancer name or ID. If empty, shows all amphorae.\n\nReturns:\n    JSON string containing amphora information including compute instances and network details",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "lb_name_or_id": {
+            "type": "string",
+            "title": "Lb Name Or Id",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_availability_zones",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get load balancer availability zones.\n\nReturns:\n    JSON string containing availability zones information",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_flavors",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get load balancer flavors.\n\nReturns:\n    JSON string containing flavors information",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_providers",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get load balancer providers.\n\nReturns:\n    JSON string containing providers information",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_quotas",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get load balancer quotas for a project or all projects.\n\nArgs:\n    project_id: Optional project ID. If empty, shows quotas for all projects.\n\nReturns:\n    JSON string containing quota information",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_load_balancer_l7_rules",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get L7 rules for a specific L7 policy.\n\nArgs:\n    policy_name_or_id: L7 policy name or ID (required)\n\nReturns:\n    JSON string containing L7 rules information including rule types, values, and conditions",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "policy_name_or_id"
+        ],
+        "properties": {
+          "policy_name_or_id": {
+            "type": "string",
+            "title": "Policy Name Or Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:21:52.530508+00:00",
+    "source": "smithery"
+  }
+}

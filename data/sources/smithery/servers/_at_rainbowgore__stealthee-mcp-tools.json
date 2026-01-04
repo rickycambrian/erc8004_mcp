@@ -1,0 +1,329 @@
+{
+  "qualifiedName": "@rainbowgore/stealthee-mcp-tools",
+  "displayName": "Stealth Launch Radar",
+  "description": "Spot pre-launch products before they trend. Search the web and tech sites, extract and parse pages, and score signals to prioritize promising launches. Automate end-to-end detection and receive alerts for high-confidence leads.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@rainbowgore/stealthee-mcp-tools",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@rainbowgore/stealthee-mcp-tools/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "ConfigSchema",
+        "required": [
+          "tavily_api_key",
+          "openai_api_key"
+        ],
+        "properties": {
+          "nimble_api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nimble Api Key",
+            "default": null,
+            "description": "Nimble API key for parsing"
+          },
+          "openai_api_key": {
+            "type": "string",
+            "title": "Openai Api Key",
+            "description": "OpenAI API key for AI scoring"
+          },
+          "tavily_api_key": {
+            "type": "string",
+            "title": "Tavily Api Key",
+            "description": "Tavily API key for web search"
+          },
+          "slack_webhook_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slack Webhook Url",
+            "default": null,
+            "description": "Slack webhook for alerts"
+          }
+        }
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "web_search",
+      "description": "Search the web for information about stealth product launches.",
+      "inputSchema": {
+        "type": "object",
+        "title": "web_searchArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "num_results": {
+            "type": "integer",
+            "title": "Num Results",
+            "default": 3
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "web_searchOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "url_extract",
+      "description": "Extract and clean text content from a given URL.",
+      "inputSchema": {
+        "type": "object",
+        "title": "url_extractArguments",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "wait_time": {
+            "type": "integer",
+            "title": "Wait Time",
+            "default": 2
+          },
+          "parsing_type": {
+            "type": "string",
+            "title": "Parsing Type",
+            "default": "plain_text"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "url_extractOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "score_signal",
+      "description": "Score a textual signal for likelihood of being a stealth product launch.",
+      "inputSchema": {
+        "type": "object",
+        "title": "score_signalArguments",
+        "required": [
+          "signal_text"
+        ],
+        "properties": {
+          "signal_text": {
+            "type": "string",
+            "title": "Signal Text"
+          },
+          "signal_title": {
+            "type": "string",
+            "title": "Signal Title",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "score_signalOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_tech_sites",
+      "description": "Search tech news sites and Product Hunt for stealth launches.",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_tech_sitesArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "num_results": {
+            "type": "integer",
+            "title": "Num Results",
+            "default": 5
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "search_tech_sitesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "batch_score_signals",
+      "description": "Score multiple signals for stealth launch likelihood in batch.",
+      "inputSchema": {
+        "type": "object",
+        "title": "batch_score_signalsArguments",
+        "required": [
+          "signals"
+        ],
+        "properties": {
+          "signals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "title": "Signals"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "batch_score_signalsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "parse_fields",
+      "description": "Extract structured stealth-launch indicators from raw HTML using Nimble's AI Parsing Skills.",
+      "inputSchema": {
+        "type": "object",
+        "title": "parse_fieldsArguments",
+        "required": [
+          "html"
+        ],
+        "properties": {
+          "html": {
+            "type": "string",
+            "title": "Html"
+          },
+          "target_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Fields",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "parse_fieldsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "run_pipeline",
+      "description": "End-to-end detection pipeline for stealth product launches.",
+      "inputSchema": {
+        "type": "object",
+        "title": "run_pipelineArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "num_results": {
+            "type": "integer",
+            "title": "Num Results",
+            "default": 5
+          },
+          "target_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Fields",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "run_pipelineOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:45:47.342038+00:00",
+    "source": "smithery"
+  }
+}

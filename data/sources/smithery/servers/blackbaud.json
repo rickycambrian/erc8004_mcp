@@ -1,0 +1,325 @@
+{
+  "qualifiedName": "blackbaud",
+  "displayName": "Blackbaud",
+  "description": "Blackbaud offers cloud-based software for nonprofits, schools, and healthcare institutions, supporting fundraising, financial management, and donor engagement in mission-driven organizations",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//blackbaud.svg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/blackbaud",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/blackbaud/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "BLACKBAUD_ADD_GIFTS_TO_BATCH",
+      "description": "Tool to add one or more gifts to a specified gift batch. Use when you need to append gifts to an existing open batch. Does not fail on non-2xx; returns response details for inspection.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddGiftsToBatchRequest",
+        "required": [
+          "batch_id",
+          "gifts"
+        ],
+        "properties": {
+          "gifts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "GiftObject",
+              "required": [
+                "constituent_id",
+                "amount",
+                "date"
+              ],
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "title": "Date",
+                  "examples": [
+                    "2023-12-31"
+                  ],
+                  "description": "Date of the gift in YYYY-MM-DD format"
+                },
+                "amount": {
+                  "type": "number",
+                  "title": "Amount",
+                  "minimum": 0,
+                  "description": "Monetary amount of the gift"
+                },
+                "splits": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "GiftSplit",
+                    "required": [
+                      "amount"
+                    ],
+                    "properties": {
+                      "amount": {
+                        "type": "number",
+                        "title": "Amount",
+                        "minimum": 0,
+                        "description": "Amount allocated for this split"
+                      },
+                      "fund_id": {
+                        "type": "string",
+                        "title": "Fund Id",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Fund ID for this split"
+                      },
+                      "appeal_id": {
+                        "type": "string",
+                        "title": "Appeal Id",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Appeal ID for this split"
+                      },
+                      "campaign_id": {
+                        "type": "string",
+                        "title": "Campaign Id",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Campaign ID for this split"
+                      }
+                    },
+                    "description": "Model for splitting gift across appeals, funds, or campaigns."
+                  },
+                  "title": "Splits",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Optional list of fund splits for the gift"
+                },
+                "payments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "GiftPayment",
+                    "required": [
+                      "amount",
+                      "date"
+                    ],
+                    "properties": {
+                      "date": {
+                        "type": "string",
+                        "title": "Date",
+                        "description": "Payment date in ISO-8601 format (YYYY-MM-DD)"
+                      },
+                      "amount": {
+                        "type": "number",
+                        "title": "Amount",
+                        "minimum": 0,
+                        "description": "Payment amount"
+                      },
+                      "method_type_id": {
+                        "type": "string",
+                        "title": "Method Type Id",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Payment method type ID"
+                      }
+                    },
+                    "description": "Model for gift payment details."
+                  },
+                  "title": "Payments",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Optional list of payment details"
+                },
+                "custom_fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "GiftCustomField",
+                    "required": [
+                      "field_id",
+                      "value"
+                    ],
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "title": "Value",
+                        "description": "Value for the custom field (string, number, or boolean)"
+                      },
+                      "field_id": {
+                        "type": "string",
+                        "title": "Field Id",
+                        "description": "Custom field ID"
+                      }
+                    },
+                    "description": "Model for custom field entry associated with a gift."
+                  },
+                  "title": "Custom Fields",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Optional list of custom fields for the gift"
+                },
+                "constituent_id": {
+                  "type": "string",
+                  "title": "Constituent Id",
+                  "examples": [
+                    "987e6543-e21c-12d3-a456-426655440000"
+                  ],
+                  "description": "System record ID of the constituent"
+                }
+              },
+              "description": "Model representing a gift to add to a batch."
+            },
+            "title": "Gifts",
+            "description": "List of gift objects to add to the batch"
+          },
+          "batch_id": {
+            "type": "string",
+            "title": "Batch Id",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "System record ID of the gift batch to add to"
+          }
+        },
+        "description": "Request model for adding one or more gifts to an existing gift batch."
+      }
+    },
+    {
+      "name": "BLACKBAUD_GET_GIFT_BY_ID",
+      "description": "Tool to fetch a gift by its system record ID. Use when you need to retrieve full gift details from SKY API.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetGiftByIdRequest",
+        "required": [
+          "gift_id"
+        ],
+        "properties": {
+          "gift_id": {
+            "type": "integer",
+            "title": "Gift Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "Unique system record ID of the gift to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a gift by its system record ID."
+      }
+    },
+    {
+      "name": "BLACKBAUD_GET_MEMBERSHIP_DETAILS",
+      "description": "Tool to fetch detailed membership information. Use when you need to retrieve membership details by its junction ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMembershipDetailsRequest",
+        "required": [
+          "member_junction_id"
+        ],
+        "properties": {
+          "member_junction_id": {
+            "type": "string",
+            "title": "Member Junction Id",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "The unique member junction ID (GUID) of the membership record."
+          }
+        },
+        "description": "Request model for retrieving detailed membership information."
+      }
+    },
+    {
+      "name": "BLACKBAUD_GET_PAYMENT_TRANSACTION",
+      "description": "Tool to fetch a payment transaction by its ID from SKY Payments API.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPaymentTransactionRequest",
+        "required": [
+          "transaction_id"
+        ],
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "title": "Transaction Id",
+            "examples": [
+              "d7a1b4c2-1234-5678-9abc-def012345678",
+              "txn_1234567890",
+              "123456789"
+            ],
+            "description": "The payment transaction ID to retrieve (as returned by BBMS/Payments API)."
+          }
+        },
+        "description": "Request model for retrieving a payment transaction by its ID."
+      }
+    },
+    {
+      "name": "BLACKBAUD_ONE_ROSTER_O_AUTH2_BASE_API",
+      "description": "Tool to interact with Blackbaud OneRoster OAuth2 base endpoints. Use to fetch OpenID configuration (/.well-known/openid-configuration), JWKS key set (publickeys), or obtain an access token via the client credentials grant. Ensure client credentials are configured before using the token operation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "OneRosterOAuth2BaseApiRequest",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": null,
+            "nullable": true,
+            "description": "Optional OAuth2 scope string. OneRoster generally does not require a scope; leave empty unless instructed by Blackbaud."
+          },
+          "clientId": {
+            "type": "string",
+            "title": "Client Id",
+            "default": null,
+            "nullable": true,
+            "description": "OneRoster OAuth2 client_id (key) provided by the institution."
+          },
+          "basicAuth": {
+            "type": "string",
+            "title": "Basic Auth",
+            "default": null,
+            "nullable": true,
+            "description": "Optional Authorization header value for HTTP Basic authentication, e.g., 'Basic base64(client_id:client_secret)'. If provided, it will be used."
+          },
+          "grantType": {
+            "type": "string",
+            "title": "Grant Type",
+            "default": "client_credentials",
+            "nullable": true,
+            "description": "OAuth2 grant type; must be 'client_credentials' for token operation."
+          },
+          "operation": {
+            "enum": [
+              "openid_configuration",
+              "jwks",
+              "token"
+            ],
+            "type": "string",
+            "title": "Operation",
+            "default": "openid_configuration",
+            "description": "Which OAuth2 resource to call: openid_configuration, jwks, or token"
+          },
+          "clientSecret": {
+            "type": "string",
+            "title": "Client Secret",
+            "default": null,
+            "nullable": true,
+            "description": "OneRoster OAuth2 client_secret provided by the institution."
+          },
+          "baseUrlOverride": {
+            "type": "string",
+            "title": "Base Url Override",
+            "default": null,
+            "nullable": true,
+            "description": "Optional override for OAuth2 server base URL. Defaults to 'https://oauth2.sky.blackbaud.com'."
+          }
+        },
+        "description": "Base API request for interacting with Blackbaud OAuth2 (OneRoster).\n\nSupports multiple operations to allow thorough testing without client credentials:\n- operation = \"openid_configuration\": GET the OpenID Connect discovery document.\n- operation = \"jwks\": GET the JSON Web Key Set used to validate tokens.\n- operation = \"token\": POST to the token endpoint using client credentials grant.\n\nWhen operation=\"token\", provide either:\n  - client_id and client_secret (will be encoded as HTTP Basic automatically), or\n  - basic_auth (prebuilt header value: \"Basic base64(client_id:client_secret)\")."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:15:38.806509+00:00",
+    "source": "smithery"
+  }
+}

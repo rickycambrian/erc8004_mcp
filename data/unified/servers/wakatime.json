@@ -1,0 +1,561 @@
+{
+  "id": "wakatime",
+  "name": "wakatime",
+  "display_name": "Wakatime",
+  "version": null,
+  "description": "WakaTime offers automatic time tracking for developers, integrating with code editors and delivering dashboards on coding activity, project progress, and productivity",
+  "icon_url": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//wakatime.svg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "WAKATIME_GET_EDITORS",
+      "description": "Tool to list WakaTime IDE plugins with metadata. Use when you want to discover available IDE integrations and their latest versions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "WakatimeGetEditorsRequest",
+        "properties": {
+          "unreleased": {
+            "type": "boolean",
+            "title": "Unreleased",
+            "default": false,
+            "examples": [
+              true,
+              false
+            ],
+            "description": "Include unreleased IDE plugins in the returned list."
+          }
+        },
+        "description": "Request model for listing IDE plugins in WakaTime."
+      }
+    },
+    {
+      "name": "WAKATIME_GET_GOALS",
+      "description": "Tool to list a user's goals with progress series and metadata. Use after authenticating the user with read_goals scope.",
+      "inputSchema": {
+        "type": "object",
+        "title": "WakatimeGetGoalsRequest",
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User",
+            "default": "current",
+            "examples": [
+              "current",
+              "123456"
+            ],
+            "description": "User identifier; use 'current' for the authenticated user or specify a user ID"
+          }
+        },
+        "description": "Request model for listing a user's goals."
+      }
+    },
+    {
+      "name": "WAKATIME_GET_GOALS_CURRENT",
+      "description": "Tool to list the current user's goals with progress series and metadata. Use when you need to fetch active goals (requires read_goals scope).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetGoalsCurrentRequest",
+        "properties": {},
+        "description": "Request model for listing the current user's goals. No parameters."
+      }
+    },
+    {
+      "name": "WAKATIME_GET_INSIGHTS",
+      "description": "Tool to retrieve an insight for a user over a time range. Use when analyzing user coding metrics after authentication.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetInsightsRequest",
+        "required": [
+          "user",
+          "insight_type",
+          "range"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User",
+            "examples": [
+              "current",
+              "123456"
+            ],
+            "description": "User identifier path segment; use 'current' for the authenticated user or specify a user ID"
+          },
+          "range": {
+            "type": "string",
+            "title": "Range",
+            "examples": [
+              "last_7_days",
+              "2023",
+              "2023-06"
+            ],
+            "description": "Time range for the insight; either a year (YYYY), a month (YYYY-MM), or one of: last_7_days, last_30_days, last_6_months, last_year, all_time"
+          },
+          "timeout": {
+            "type": "integer",
+            "title": "Timeout",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              2
+            ],
+            "nullable": true,
+            "description": "Keystroke timeout in seconds for stats; defaults to the user's setting"
+          },
+          "weekday": {
+            "type": "integer",
+            "title": "Weekday",
+            "default": null,
+            "examples": [
+              0,
+              "monday"
+            ],
+            "nullable": true,
+            "description": "Filter to a specific weekday; only applied when insight_type is 'days'; Accepts 0\u20136 or weekday name"
+          },
+          "writes_only": {
+            "type": "boolean",
+            "title": "Writes Only",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Whether to include only write events in stats; defaults to the user's setting"
+          },
+          "insight_type": {
+            "enum": [
+              "weekday",
+              "days",
+              "best_day",
+              "daily_average",
+              "projects",
+              "languages",
+              "editors",
+              "categories",
+              "machines",
+              "operating_systems"
+            ],
+            "type": "string",
+            "title": "Insight Type",
+            "examples": [
+              "projects",
+              "languages"
+            ],
+            "description": "Type of insight to retrieve"
+          }
+        },
+        "description": "Request parameters to fetch a user insight over a specified time range."
+      }
+    },
+    {
+      "name": "WAKATIME_GET_INSIGHTS_CURRENT",
+      "description": "Tool to fetch a coding insight for the current user over a time range. Use when you need summaries like 'projects' or 'best_day' for a specific period. Requires OAuth scope `read_summaries`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetInsightsCurrentRequest",
+        "required": [
+          "insight_type",
+          "range"
+        ],
+        "properties": {
+          "range": {
+            "type": "string",
+            "title": "Range",
+            "examples": [
+              "2023",
+              "2023-05",
+              "last_7_days",
+              "all_time"
+            ],
+            "description": "Time range specifier. Either a year (YYYY), a month (YYYY-MM), or one of: last_7_days, last_30_days, last_6_months, last_year, all_time."
+          },
+          "timeout": {
+            "type": "integer",
+            "title": "Timeout",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Override keystroke timeout in minutes used to calculate stats; defaults to user's setting."
+          },
+          "weekday": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "type": "integer",
+            "title": "Weekday",
+            "default": null,
+            "nullable": true,
+            "description": "Filter for 'days' insight: integer 0-6 or weekday name ('monday'-'sunday')."
+          },
+          "writes_only": {
+            "type": "boolean",
+            "title": "Writes Only",
+            "default": null,
+            "nullable": true,
+            "description": "When true, include only write events per user's writes_only setting."
+          },
+          "insight_type": {
+            "enum": [
+              "weekday",
+              "days",
+              "best_day",
+              "daily_average",
+              "projects",
+              "languages",
+              "editors",
+              "categories",
+              "machines",
+              "operating_systems"
+            ],
+            "type": "string",
+            "title": "Insight Type",
+            "examples": [
+              "projects",
+              "languages",
+              "best_day"
+            ],
+            "description": "Type of insight to retrieve. One of: weekday, days, best_day, daily_average, projects, languages, editors, categories, machines, operating_systems."
+          }
+        },
+        "description": "Request model for retrieving a coding insight for the current user over a time range."
+      }
+    },
+    {
+      "name": "WAKATIME_GET_LEADERS",
+      "description": "Tool to list public leaders ranked by coding activity. Use when viewing top coders globally or filtering by language, country code, or hireable status.",
+      "inputSchema": {
+        "type": "object",
+        "title": "WakatimeGetLeadersRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number to fetch; authenticated calls default to page containing current user"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": null,
+            "examples": [
+              "python"
+            ],
+            "nullable": true,
+            "description": "Filter leaders by a specific language (e.g., 'python')"
+          },
+          "is_hireable": {
+            "type": "boolean",
+            "title": "Is Hireable",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Filter leaders by hireable badge"
+          },
+          "country_code": {
+            "type": "string",
+            "title": "Country Code",
+            "default": null,
+            "examples": [
+              "US"
+            ],
+            "nullable": true,
+            "maxLength": 2,
+            "minLength": 2,
+            "description": "Filter leaders by a two-letter country code (e.g., 'US')"
+          }
+        },
+        "description": "Request model for listing public leaders ranked by coding activity."
+      }
+    },
+    {
+      "name": "WAKATIME_GET_MACHINE_NAMES",
+      "description": "Tool to list a user's machines including last seen time. Use when needing machine names for a specific user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "WakatimeGetMachineNamesRequest",
+        "required": [
+          "user"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User",
+            "examples": [
+              "current",
+              "123456"
+            ],
+            "description": "User identifier; use 'current' for the authenticated user."
+          }
+        },
+        "description": "Request model for listing a user's machines."
+      }
+    },
+    {
+      "name": "WAKATIME_GET_OAUTH_AUTHORIZE",
+      "description": "Tool to generate OAuth 2.0 authorization URL. Use when redirecting users to WakaTime to grant access.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetOauthAuthorizeRequest",
+        "required": [
+          "client_id",
+          "response_type",
+          "redirect_uri"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": null,
+            "examples": [
+              "read_stats write_data"
+            ],
+            "nullable": true,
+            "description": "Space- or comma-separated list of scopes to request (e.g., 'read_stats write_data')."
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "default": null,
+            "examples": [
+              "xyz123"
+            ],
+            "nullable": true,
+            "description": "Opaque value to maintain state between request and callback; returned unchanged."
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "examples": [
+              "abcdef123456"
+            ],
+            "description": "Your WakaTime App ID (found at wakatime.com/apps)."
+          },
+          "redirect_uri": {
+            "type": "string",
+            "title": "Redirect Uri",
+            "format": "uri",
+            "examples": [
+              "https://yourapp.com/oauth/callback"
+            ],
+            "maxLength": 2083,
+            "minLength": 1,
+            "description": "Redirect URI registered in your WakaTime app settings."
+          },
+          "force_approve": {
+            "type": "string",
+            "title": "Force Approve",
+            "default": null,
+            "examples": [
+              "true"
+            ],
+            "nullable": true,
+            "description": "If provided, forces the user to re-approve (behavior may vary)."
+          },
+          "response_type": {
+            "enum": [
+              "code",
+              "token"
+            ],
+            "type": "string",
+            "title": "Response Type",
+            "examples": [
+              "code"
+            ],
+            "description": "Must be \"code\" for authorization-code flow or \"token\" for implicit flow."
+          }
+        }
+      }
+    },
+    {
+      "name": "WAKATIME_GET_PROJECTS",
+      "description": "Tool to list all projects associated with the authenticated user. Use when you need project slugs and metadata. Useful for fetching projects after obtaining a valid OAuth token.",
+      "inputSchema": {
+        "type": "object",
+        "title": "WakatimeGetProjectsRequest",
+        "properties": {
+          "q": {
+            "type": "string",
+            "title": "Q",
+            "default": null,
+            "examples": [
+              "my-project"
+            ],
+            "nullable": true,
+            "description": "Filter project names by a search term"
+          }
+        },
+        "description": "Request model for listing projects of the current user."
+      }
+    },
+    {
+      "name": "WAKATIME_GET_USERS_ALL_TIME_SINCE_TODAY",
+      "description": "Tool to retrieve total coding time since account creation for a user. Use after authenticating to fetch all-time stats.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUsersAllTimeSinceTodayRequest",
+        "required": [
+          "user"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User",
+            "examples": [
+              "john_doe"
+            ],
+            "description": "User path segment. Use 'current' for the authenticated user."
+          },
+          "project": {
+            "type": "string",
+            "title": "Project",
+            "default": null,
+            "examples": [
+              "my-awesome-project"
+            ],
+            "nullable": true,
+            "description": "Optional project name to filter totals"
+          }
+        }
+      }
+    },
+    {
+      "name": "WAKATIME_GET_USERS_CURRENT_ALL_TIME_SINCE_TODAY",
+      "description": "Tool to get current user's total time logged since account creation. Use when you need lifetime aggregate stats for the authenticated user (requires read_stats scope).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUsersCurrentAllTimeSinceTodayRequest",
+        "properties": {
+          "project": {
+            "type": "string",
+            "title": "Project",
+            "default": null,
+            "nullable": true,
+            "description": "Optional project slug. If provided, returns total only for that project since its creation"
+          }
+        }
+      }
+    },
+    {
+      "name": "WAKATIME_GET_USERS_CURRENT_INSIGHTS",
+      "description": "Tool to fetch a coding insight for the current user over a time range. Use when needing project, language, or best_day metrics for a specific period. Requires OAuth scope `read_summaries`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUsersCurrentInsightsRequest",
+        "required": [
+          "insight_type",
+          "range"
+        ],
+        "properties": {
+          "range": {
+            "type": "string",
+            "title": "Range",
+            "examples": [
+              "2023",
+              "2023-05",
+              "last_7_days",
+              "all_time"
+            ],
+            "description": "Time range specifier. Either a year (YYYY), a month (YYYY-MM), or one of: last_7_days, last_30_days, last_6_months, last_year, all_time."
+          },
+          "timeout": {
+            "type": "integer",
+            "title": "Timeout",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Override keystroke timeout in minutes used to calculate stats; defaults to user's setting."
+          },
+          "weekday": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "type": "integer",
+            "title": "Weekday",
+            "default": null,
+            "nullable": true,
+            "description": "Filter for 'days' insight: integer 0-6 or weekday name ('monday'-'sunday')."
+          },
+          "writes_only": {
+            "type": "boolean",
+            "title": "Writes Only",
+            "default": null,
+            "nullable": true,
+            "description": "When true, include only write events (per user's writes_only setting)."
+          },
+          "insight_type": {
+            "enum": [
+              "weekday",
+              "days",
+              "best_day",
+              "daily_average",
+              "projects",
+              "languages",
+              "editors",
+              "categories",
+              "machines",
+              "operating_systems"
+            ],
+            "type": "string",
+            "title": "Insight Type",
+            "examples": [
+              "projects",
+              "languages",
+              "best_day"
+            ],
+            "description": "Type of insight to retrieve."
+          }
+        },
+        "description": "Request model for fetching a coding insight for the current user over a time range."
+      }
+    }
+  ],
+  "tool_count": 12,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/wakatime/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "WAKATIME_GET_EDITORS",
+    "WAKATIME_GET_GOALS",
+    "WAKATIME_GET_GOALS_CURRENT",
+    "WAKATIME_GET_INSIGHTS",
+    "WAKATIME_GET_INSIGHTS_CURRENT",
+    "WAKATIME_GET_LEADERS",
+    "WAKATIME_GET_MACHINE_NAMES",
+    "WAKATIME_GET_OAUTH_AUTHORIZE",
+    "WAKATIME_GET_PROJECTS",
+    "WAKATIME_GET_USERS_ALL_TIME_SINCE_TODAY",
+    "WAKATIME_GET_USERS_CURRENT_ALL_TIME_SINCE_TODAY",
+    "WAKATIME_GET_USERS_CURRENT_INSIGHTS"
+  ]
+}

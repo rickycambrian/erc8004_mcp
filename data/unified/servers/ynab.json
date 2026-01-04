@@ -1,0 +1,1101 @@
+{
+  "id": "ynab",
+  "name": "ynab",
+  "display_name": "Ynab",
+  "version": null,
+  "description": "YNAB (You Need A Budget) is a budgeting tool helping users track expenses, plan finances, and gain control over spending to reduce debt",
+  "icon_url": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//ynab.svg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "YNAB_CREATE_ACCOUNT",
+      "description": "Tool to create a new account in a budget. Use when you need to add a manual (non-linked) account to a specific budget.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateAccountRequest",
+        "required": [
+          "budget_id",
+          "account"
+        ],
+        "properties": {
+          "account": {
+            "type": "object",
+            "title": "Account",
+            "required": [
+              "name",
+              "type",
+              "balance"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "examples": [
+                  "My Checking"
+                ],
+                "description": "Name of the account"
+              },
+              "type": {
+                "enum": [
+                  "checking",
+                  "savings",
+                  "cash",
+                  "creditCard",
+                  "lineOfCredit",
+                  "otherAsset",
+                  "mortgage",
+                  "loan",
+                  "investment"
+                ],
+                "type": "string",
+                "title": "Type",
+                "examples": [
+                  "checking"
+                ],
+                "description": "Type of the account"
+              },
+              "balance": {
+                "type": "integer",
+                "title": "Balance",
+                "minimum": 0,
+                "examples": [
+                  100000
+                ],
+                "description": "Initial balance of the account in milliunits (1,000 milliunits = 1 unit of currency)"
+              }
+            },
+            "description": "The account object to create",
+            "additionalProperties": false
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "bgt5c6eabc-2e2e-4d3f-9155-abc123def456"
+            ],
+            "description": "ID of the budget in which to create the account"
+          }
+        }
+      }
+    },
+    {
+      "name": "YNAB_CREATE_SCHEDULED_TRANSACTION",
+      "description": "Tool to create a scheduled transaction. Use when you need to set up a repeating transaction in a budget.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateScheduledTransactionRequest",
+        "required": [
+          "budget_id",
+          "scheduled_transaction"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "description": "Budget UUID or literal 'last-used'/'default' to operate on"
+          },
+          "scheduled_transaction": {
+            "type": "object",
+            "title": "Scheduled Transaction",
+            "required": [
+              "account_id",
+              "date_first",
+              "frequency",
+              "amount"
+            ],
+            "properties": {
+              "memo": {
+                "type": "string",
+                "title": "Memo",
+                "default": null,
+                "nullable": true,
+                "description": "Optional note for the scheduled transaction"
+              },
+              "amount": {
+                "type": "integer",
+                "title": "Amount",
+                "minimum": 1,
+                "description": "Amount in milliunits (1,000 = 1 unit of currency)"
+              },
+              "payee_id": {
+                "type": "string",
+                "title": "Payee Id",
+                "default": null,
+                "nullable": true,
+                "description": "UUID of an existing payee (optional; use payee_name if not provided)"
+              },
+              "frequency": {
+                "type": "string",
+                "title": "Frequency",
+                "description": "Repeat frequency using YNAB standard schedule values"
+              },
+              "account_id": {
+                "type": "string",
+                "title": "Account Id",
+                "description": "UUID of the account where the scheduled transaction will post"
+              },
+              "date_first": {
+                "type": "string",
+                "title": "Date First",
+                "format": "date",
+                "description": "First scheduled date in YYYY-MM-DD format"
+              },
+              "payee_name": {
+                "type": "string",
+                "title": "Payee Name",
+                "default": null,
+                "nullable": true,
+                "description": "Name of payee to create/use (optional; use payee_id if provided)"
+              },
+              "category_id": {
+                "type": "string",
+                "title": "Category Id",
+                "default": null,
+                "nullable": true,
+                "description": "UUID of the category to associate (optional)"
+              }
+            },
+            "description": "Scheduled transaction object to create",
+            "additionalProperties": false
+          }
+        },
+        "description": "Path and body parameters for creating a scheduled transaction in YNAB."
+      }
+    },
+    {
+      "name": "YNAB_DELETE_SCHEDULED_TRANSACTION",
+      "description": "Tool to delete an existing scheduled transaction. Use after confirming the scheduled transaction ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteScheduledTransactionRequest",
+        "required": [
+          "budget_id",
+          "scheduled_transaction_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default",
+              "bgt123abc"
+            ],
+            "description": "The budget identifier. Use 'default' to target the default budget when enabled."
+          },
+          "scheduled_transaction_id": {
+            "type": "string",
+            "title": "Scheduled Transaction Id",
+            "examples": [
+              "sched123xyz"
+            ],
+            "description": "The identifier of the scheduled transaction to delete."
+          }
+        },
+        "description": "Request parameters for deleting a scheduled transaction."
+      }
+    },
+    {
+      "name": "YNAB_GET_ACCOUNT_BY_ID",
+      "description": "Tool to retrieve a single account resource. Use when you need details of a specific account by its ID after determining the budget.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAccountByIdRequest",
+        "required": [
+          "budget_id",
+          "account_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if the default budget selection is enabled for your OAuth app."
+          },
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "examples": [
+              "3f3b61fa-9850-4c36-bc25-xxxxxxxxxxxx"
+            ],
+            "description": "Account identifier (UUID) within the specified budget."
+          }
+        }
+      }
+    },
+    {
+      "name": "YNAB_GET_BUDGET_BY_ID",
+      "description": "Tool to retrieve a single budget by ID. Use when you need detailed budget info including date and currency formats. Supports optional delta via last_knowledge_of_server.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetBudgetByIdRequest",
+        "required": [
+          "budget_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "description": "The ID of the budget to retrieve. Use 'default' if default budget selection is enabled."
+          },
+          "last_knowledge_of_server": {
+            "type": "integer",
+            "title": "Last Knowledge Of Server",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. If provided, returns only entities changed since this server knowledge value (delta request)."
+          }
+        },
+        "description": "Request model for retrieving a single budget by its identifier."
+      }
+    },
+    {
+      "name": "YNAB_GET_BUDGET_MONTH",
+      "description": "Tool to retrieve a specific budget month. Use when you need detailed summary and category budgets for a given month after confirming the budget ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetBudgetMonthRequest",
+        "required": [
+          "budget_id",
+          "month"
+        ],
+        "properties": {
+          "month": {
+            "type": "string",
+            "title": "Month",
+            "examples": [
+              "2023-07-01"
+            ],
+            "description": "Budget month in ISO 8601 full-date format (YYYY-MM-01), UTC."
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; if OAuth 'default budget selection' is enabled, you may use 'default'."
+          }
+        },
+        "description": "Path parameters for retrieving a single YNAB budget month."
+      }
+    },
+    {
+      "name": "YNAB_GET_BUDGET_SETTINGS",
+      "description": "Tool to retrieve budget-level settings. Use when you need to fetch currency and date formatting preferences for a specific budget.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetBudgetSettingsRequest",
+        "required": [
+          "budget_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "description": "ID of the budget to fetch settings for. Supports special values like 'last-used' or 'default'."
+          }
+        },
+        "description": "Request model for GET_BUDGET_SETTINGS."
+      }
+    },
+    {
+      "name": "YNAB_GET_CATEGORY_BY_ID",
+      "description": "Tool to retrieve a single budget category by its ID. Use when you need detailed information about one category after confirming the budget selection.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCategoryByIdRequest",
+        "required": [
+          "budget_id",
+          "category_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default",
+              "bgt123"
+            ],
+            "description": "Budget identifier. If OAuth default budget selection is enabled,              you may use 'default' in place of a specific ID."
+          },
+          "category_id": {
+            "type": "string",
+            "title": "Category Id",
+            "examples": [
+              "e7a3f0c6-69cb-4f11-8d3d-0a7b27e8ef8b"
+            ],
+            "description": "The unique identifier of the category to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a single category by its ID."
+      }
+    },
+    {
+      "name": "YNAB_GET_MONTH_CATEGORY_BY_ID",
+      "description": "Tool to retrieve a single category for a specific budget month. Use after selecting the budget and month when you need month-specific category details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMonthCategoryByIdRequest",
+        "required": [
+          "budget_id",
+          "month",
+          "category_id"
+        ],
+        "properties": {
+          "month": {
+            "type": "string",
+            "title": "Month",
+            "examples": [
+              "2016-12-01"
+            ],
+            "description": "Budget month in ISO 8601 full-date format (YYYY-MM-DD)."
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if default budget selection is enabled."
+          },
+          "category_id": {
+            "type": "string",
+            "title": "Category Id",
+            "examples": [
+              "e3f3c2d4-xxxx-4d3f-9155-abc123def456"
+            ],
+            "description": "Category identifier (UUID) within the specified budget month."
+          }
+        }
+      }
+    },
+    {
+      "name": "YNAB_GET_PAYEE_BY_ID",
+      "description": "Tool to retrieve a single payee by its ID. Use when you need full details of a payee after confirming the budget and payee selection.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPayeeByIdRequest",
+        "required": [
+          "budget_id",
+          "payee_id"
+        ],
+        "properties": {
+          "payee_id": {
+            "type": "string",
+            "title": "Payee Id",
+            "examples": [
+              "c56d37d5-8c20-4a1a-888b-439e3b81875a"
+            ],
+            "description": "The unique identifier (UUID) of the payee to retrieve."
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier. Use 'default' if OAuth default budget selection is enabled."
+          }
+        },
+        "description": "Request model for retrieving a single payee by its ID."
+      }
+    },
+    {
+      "name": "YNAB_GET_SCHEDULED_TRANSACTION_BY_ID",
+      "description": "Tool to retrieve a single scheduled transaction. Use when you need details of a specific scheduled transaction by its ID after confirming the budget.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetScheduledTransactionByIdRequest",
+        "required": [
+          "budget_id",
+          "scheduled_transaction_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if the default budget selection is enabled."
+          },
+          "scheduled_transaction_id": {
+            "type": "string",
+            "title": "Scheduled Transaction Id",
+            "examples": [
+              "3f3b61fa-9850-4c36-bc25-xxxxxxxxxxxx"
+            ],
+            "description": "Scheduled transaction identifier (UUID) within the specified budget."
+          }
+        }
+      }
+    },
+    {
+      "name": "YNAB_GET_TRANSACTION_BY_ID",
+      "description": "Tool to retrieve a single transaction by its ID. Use when you need detailed information for a specific transaction after confirming the budget.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTransactionByIdRequest",
+        "required": [
+          "budget_id",
+          "transaction_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default",
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "The budget ID. Use 'default' to reference the default budget when OAuth default budget selection is enabled."
+          },
+          "transaction_id": {
+            "type": "string",
+            "title": "Transaction Id",
+            "examples": [
+              "abcdef12-3456-7890-abcd-ef1234567890"
+            ],
+            "description": "The transaction ID to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a single transaction by its ID."
+      }
+    },
+    {
+      "name": "YNAB_GET_USER",
+      "description": "Tool to retrieve the authorized user's information. Use after authentication to get current user details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUserRequest",
+        "properties": {},
+        "description": "Empty request model for GetUser action."
+      }
+    },
+    {
+      "name": "YNAB_LIST_ACCOUNTS",
+      "description": "Tool to list all accounts in a budget. Use when you need to retrieve all accounts (optionally only changes since last sync) after confirming the budget ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAccountsRequest",
+        "required": [
+          "budget_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if the default budget selection is enabled for your OAuth app."
+          },
+          "last_knowledge_of_server": {
+            "type": "integer",
+            "title": "Last Knowledge Of Server",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. If provided, returns only entities changed since this server knowledge value (delta request)."
+          }
+        }
+      }
+    },
+    {
+      "name": "YNAB_LIST_BUDGETS",
+      "description": "Tool to list budgets available to the authorized user. Use when you need to retrieve all budgets for the account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListBudgetsRequest",
+        "properties": {},
+        "description": "Request model for listing budgets. No parameters needed; uses Authorization header."
+      }
+    },
+    {
+      "name": "YNAB_LIST_CATEGORIES",
+      "description": "Tool to list all category groups and their categories for a budget. Use when you need the full set of budget categories or only those changed since last sync.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListCategoriesRequest",
+        "required": [
+          "budget_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if the default budget selection is enabled for your OAuth app."
+          },
+          "last_knowledge_of_server": {
+            "type": "integer",
+            "title": "Last Knowledge Of Server",
+            "default": null,
+            "examples": [
+              42
+            ],
+            "nullable": true,
+            "description": "For delta syncing: only return categories changed since this server knowledge. Response will include an updated server_knowledge."
+          }
+        },
+        "description": "Request model for listing category groups and categories for a budget."
+      }
+    },
+    {
+      "name": "YNAB_LIST_MONTHS",
+      "description": "Tool to list months for a budget with summary information. Use when you need an overview of all months or only changed months since a given knowledge value (delta requests).",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListMonthsRequest",
+        "required": [
+          "budget_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if the default budget selection is enabled for your OAuth app."
+          },
+          "last_knowledge_of_server": {
+            "type": "integer",
+            "title": "Last Knowledge Of Server",
+            "default": null,
+            "examples": [
+              42
+            ],
+            "nullable": true,
+            "description": "Monotonically increasing knowledge value for delta requests; if set, only returns months changed since this value."
+          }
+        }
+      }
+    },
+    {
+      "name": "YNAB_LIST_PAYEE_LOCATIONS",
+      "description": "Tool to list payee locations for a budget. Use when you need to retrieve all stored latitude/longitude details for payees under a specific budget.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPayeeLocationsRequest",
+        "required": [
+          "budget_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default",
+              "bgt5c6eabc-2e2e-4d3f-9155-abc123def456"
+            ],
+            "description": "Budget identifier; use 'default' if the default budget selection is enabled."
+          }
+        },
+        "description": "Request model for listing payee locations. No additional parameters besides budget_id."
+      }
+    },
+    {
+      "name": "YNAB_LIST_PAYEE_LOCATIONS_BY_PAYEE",
+      "description": "Tool to list locations associated with a payee. Use when you need all location entries of a given payee after confirming the budget.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPayeeLocationsByPayeeRequest",
+        "required": [
+          "budget_id",
+          "payee_id"
+        ],
+        "properties": {
+          "payee_id": {
+            "type": "string",
+            "title": "Payee Id",
+            "examples": [
+              "c56d37d5-8c20-4a1a-888b-439e3b81875a"
+            ],
+            "description": "Unique identifier (UUID) of the payee to list locations for."
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if default budget selection is enabled."
+          }
+        },
+        "description": "Request parameters for listing locations of a specific payee."
+      }
+    },
+    {
+      "name": "YNAB_LIST_PAYEES",
+      "description": "Tool to list payees in a budget. Use when you need all payees or only those changed since a known server knowledge value.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPayeesRequest",
+        "required": [
+          "budget_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default",
+              "bgt123e4567-e89b-12d3-a456-426655440000"
+            ],
+            "description": "Budget identifier. Use 'default' if OAuth default budget selection is enabled."
+          },
+          "last_knowledge_of_server": {
+            "type": "integer",
+            "title": "Last Knowledge Of Server",
+            "default": null,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Only return entities changed since this server knowledge value (delta requests)."
+          }
+        },
+        "description": "Request model for listing payees in a budget."
+      }
+    },
+    {
+      "name": "YNAB_LIST_SCHEDULED_TRANSACTIONS",
+      "description": "Tool to list scheduled transactions for a budget. Use after confirming the budget ID; supports delta sync via last_knowledge_of_server.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListScheduledTransactionsRequest",
+        "required": [
+          "budget_id"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if the default budget selection is enabled."
+          },
+          "last_knowledge_of_server": {
+            "type": "integer",
+            "title": "Last Knowledge Of Server",
+            "default": null,
+            "examples": [
+              10
+            ],
+            "nullable": true,
+            "description": "Optional delta token. When provided, only scheduled transactions changed since this server knowledge value are returned."
+          }
+        }
+      }
+    },
+    {
+      "name": "YNAB_LIST_TRANSACTIONS",
+      "description": "Tool to list transactions in a budget. Use when you need all or delta-filtered transactions after confirming the budget.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTransactionsRequest",
+        "required": [
+          "budget_id"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "uncategorized",
+              "unapproved"
+            ],
+            "type": "string",
+            "title": "Type",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by transaction type; supported values: 'uncategorized', 'unapproved'."
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if the default budget selection is enabled."
+          },
+          "since_date": {
+            "type": "string",
+            "title": "Since Date",
+            "default": null,
+            "examples": [
+              "2016-12-30"
+            ],
+            "nullable": true,
+            "description": "Only include transactions on or after this ISO date (YYYY-MM-DD)."
+          },
+          "last_knowledge_of_server": {
+            "type": "integer",
+            "title": "Last Knowledge Of Server",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. If provided, returns only entities changed since this server knowledge value (delta request)."
+          }
+        },
+        "description": "Request parameters for listing transactions in a budget, with optional filters."
+      }
+    },
+    {
+      "name": "YNAB_LIST_TRANSACTIONS_BY_ACCOUNT",
+      "description": "Tool to list transactions for a specific account. Use when you need all or delta-filtered transactions for a given account after confirming the budget and account ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTransactionsByAccountRequest",
+        "required": [
+          "budget_id",
+          "account_id"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "uncategorized",
+              "unapproved"
+            ],
+            "type": "string",
+            "title": "Type",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by transaction type; supported values: 'uncategorized', 'unapproved'."
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if the default budget selection is enabled."
+          },
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "examples": [
+              "account_id"
+            ],
+            "description": "Account identifier; the ID of the account to retrieve transactions from."
+          },
+          "last_knowledge_of_server": {
+            "type": "integer",
+            "title": "Last Knowledge Of Server",
+            "default": null,
+            "nullable": true,
+            "description": "Optional. If provided, returns only entities changed since this server knowledge value (delta request)."
+          }
+        },
+        "description": "Request parameters for listing transactions for a specific account in a budget."
+      }
+    },
+    {
+      "name": "YNAB_LIST_TRANSACTIONS_BY_CATEGORY",
+      "description": "Tool to list transactions for a specific category (excludes pending). Use when you need completed transactions for a given category after obtaining budget_id and category_id.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTransactionsByCategoryRequest",
+        "required": [
+          "budget_id",
+          "category_id"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "uncategorized",
+              "unapproved"
+            ],
+            "type": "string",
+            "title": "Type",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by transaction type; supported values: 'uncategorized', 'unapproved'."
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier; use 'default' if the default budget selection is enabled."
+          },
+          "since_date": {
+            "type": "string",
+            "title": "Since Date",
+            "default": null,
+            "examples": [
+              "2016-12-30"
+            ],
+            "nullable": true,
+            "description": "Only include transactions on or after this ISO date (YYYY-MM-DD)."
+          },
+          "category_id": {
+            "type": "string",
+            "title": "Category Id",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426655440000"
+            ],
+            "description": "Category identifier whose transactions are to be retrieved."
+          },
+          "last_knowledge_of_server": {
+            "type": "integer",
+            "title": "Last Knowledge Of Server",
+            "default": null,
+            "examples": [
+              42
+            ],
+            "nullable": true,
+            "description": "Delta-style filter; only return entities changed since this server knowledge index."
+          }
+        },
+        "description": "Request parameters for listing transactions for a specific category."
+      }
+    },
+    {
+      "name": "YNAB_LIST_TRANSACTIONS_BY_PAYEE",
+      "description": "Tool to list transactions for a specific payee in a budget. Use when you need to fetch all non-pending transactions for a payee after confirming budget and payee IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTransactionsByPayeeRequest",
+        "required": [
+          "budget_id",
+          "payee_id"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "uncategorized",
+              "unapproved"
+            ],
+            "type": "string",
+            "title": "Type",
+            "default": null,
+            "nullable": true,
+            "description": "Optional filter by transaction type: 'uncategorized' or 'unapproved'."
+          },
+          "payee_id": {
+            "type": "string",
+            "title": "Payee Id",
+            "examples": [
+              "abcdef12-3456-7890-abcd-ef1234567890"
+            ],
+            "description": "Payee identifier to filter transactions."
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default",
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "Budget identifier; use 'default' for the default budget if enabled for your OAuth app."
+          },
+          "since_date": {
+            "type": "string",
+            "title": "Since Date",
+            "default": null,
+            "nullable": true,
+            "description": "Optional ISO date (YYYY-MM-DD). Only include transactions on or after this date."
+          },
+          "last_knowledge_of_server": {
+            "type": "integer",
+            "title": "Last Knowledge Of Server",
+            "default": null,
+            "examples": [
+              42
+            ],
+            "nullable": true,
+            "description": "Optional. If provided, returns only entities changed since this server knowledge value (delta request)."
+          }
+        },
+        "description": "Request model for listing transactions by payee in a budget."
+      }
+    },
+    {
+      "name": "YNAB_UPDATE_PAYEE",
+      "description": "Tool to update a payee. Use when you need to rename an existing payee.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdatePayeeRequest",
+        "required": [
+          "budget_id",
+          "payee_id",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Acme Supplies"
+            ],
+            "description": "The new name for the payee."
+          },
+          "payee_id": {
+            "type": "string",
+            "title": "Payee Id",
+            "examples": [
+              "c56d37d5-8c20-4a1a-888b-439e3b81875a"
+            ],
+            "description": "The unique identifier (UUID) of the payee to update."
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget identifier. Use 'default' if OAuth default budget selection is enabled."
+          }
+        },
+        "description": "Request model for updating an existing payee."
+      }
+    },
+    {
+      "name": "YNAB_UPDATE_SCHEDULED_TRANSACTION",
+      "description": "Tool to update an existing scheduled transaction. Use when you need to change details of a scheduled transaction after confirming IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateScheduledTransactionRequest",
+        "required": [
+          "budget_id",
+          "scheduled_transaction_id",
+          "scheduled_transaction"
+        ],
+        "properties": {
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "examples": [
+              "default"
+            ],
+            "description": "Budget UUID or literal 'last-used'/'default' to operate on"
+          },
+          "scheduled_transaction": {
+            "type": "object",
+            "title": "Scheduled Transaction",
+            "properties": {
+              "memo": {
+                "type": "string",
+                "title": "Memo",
+                "default": null,
+                "nullable": true,
+                "description": "Optional note for the scheduled transaction"
+              },
+              "amount": {
+                "type": "integer",
+                "title": "Amount",
+                "default": null,
+                "minimum": 1,
+                "nullable": true,
+                "description": "Amount in milliunits (1,000 = 1 unit of currency)"
+              },
+              "payee_id": {
+                "type": "string",
+                "title": "Payee Id",
+                "default": null,
+                "nullable": true,
+                "description": "UUID of an existing payee (optional; use payee_name if not provided)"
+              },
+              "frequency": {
+                "type": "string",
+                "title": "Frequency",
+                "default": null,
+                "nullable": true,
+                "description": "Repeat frequency using YNAB standard schedule values"
+              },
+              "account_id": {
+                "type": "string",
+                "title": "Account Id",
+                "default": null,
+                "nullable": true,
+                "description": "UUID of the account where the scheduled transaction will post"
+              },
+              "date_first": {
+                "type": "string",
+                "title": "Date First",
+                "format": "date",
+                "default": null,
+                "nullable": true,
+                "description": "First scheduled date in YYYY-MM-DD format"
+              },
+              "payee_name": {
+                "type": "string",
+                "title": "Payee Name",
+                "default": null,
+                "nullable": true,
+                "description": "Name of payee to create/use (optional; use payee_id if provided)"
+              },
+              "category_id": {
+                "type": "string",
+                "title": "Category Id",
+                "default": null,
+                "nullable": true,
+                "description": "UUID of the category to associate (optional)"
+              }
+            },
+            "description": "Fields of the scheduled transaction to update",
+            "additionalProperties": false
+          },
+          "scheduled_transaction_id": {
+            "type": "string",
+            "title": "Scheduled Transaction Id",
+            "examples": [
+              "sched123xyz"
+            ],
+            "description": "Identifier of the scheduled transaction to update"
+          }
+        },
+        "description": "Request parameters for updating a scheduled transaction."
+      }
+    }
+  ],
+  "tool_count": 27,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/ynab/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "YNAB_CREATE_ACCOUNT",
+    "YNAB_CREATE_SCHEDULED_TRANSACTION",
+    "YNAB_DELETE_SCHEDULED_TRANSACTION",
+    "YNAB_GET_ACCOUNT_BY_ID",
+    "YNAB_GET_BUDGET_BY_ID",
+    "YNAB_GET_BUDGET_MONTH",
+    "YNAB_GET_BUDGET_SETTINGS",
+    "YNAB_GET_CATEGORY_BY_ID",
+    "YNAB_GET_MONTH_CATEGORY_BY_ID",
+    "YNAB_GET_PAYEE_BY_ID",
+    "YNAB_GET_SCHEDULED_TRANSACTION_BY_ID",
+    "YNAB_GET_TRANSACTION_BY_ID",
+    "YNAB_GET_USER",
+    "YNAB_LIST_ACCOUNTS",
+    "YNAB_LIST_BUDGETS",
+    "YNAB_LIST_CATEGORIES",
+    "YNAB_LIST_MONTHS",
+    "YNAB_LIST_PAYEE_LOCATIONS",
+    "YNAB_LIST_PAYEE_LOCATIONS_BY_PAYEE",
+    "YNAB_LIST_PAYEES",
+    "YNAB_LIST_SCHEDULED_TRANSACTIONS",
+    "YNAB_LIST_TRANSACTIONS",
+    "YNAB_LIST_TRANSACTIONS_BY_ACCOUNT",
+    "YNAB_LIST_TRANSACTIONS_BY_CATEGORY",
+    "YNAB_LIST_TRANSACTIONS_BY_PAYEE",
+    "YNAB_UPDATE_PAYEE",
+    "YNAB_UPDATE_SCHEDULED_TRANSACTION"
+  ]
+}

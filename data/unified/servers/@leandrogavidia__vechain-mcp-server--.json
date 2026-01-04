@@ -1,0 +1,281 @@
+{
+  "id": "@leandrogavidia/vechain-mcp-server--",
+  "name": "@leandrogavidia/vechain-mcp-server--",
+  "display_name": "VeChain Dev Suite",
+  "version": null,
+  "description": "Query VeChain accounts, transactions, blocks, and fees, and search official docs for answers. Generate wallets and sign messages, certificates, and transactions to streamline testing and integration. Accelerate development with reliable on-chain data and documentation in one place.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "searchDocumentation",
+      "title": "Search VeChain Documentation",
+      "description": "Search across the documentation to find relevant information, code examples, API references, and guides. Use this tool when you need to answer questions about VeChain Docs, find specific documentation, understand how features work, or locate implementation details. The search returns contextual content with titles and direct links to the documentation pages.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search query string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getAccount",
+      "title": "Retrieve account details",
+      "description": "Get information about a VeChain account/contract by address. Optionally specify a revision (best | justified | finalized | block number | block ID).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "address"
+        ],
+        "properties": {
+          "address": {
+            "type": "string",
+            "pattern": "^(0x)?[0-9a-fA-F]{40}$",
+            "description": "Account/contract address (20-byte hex, with or without 0x prefix)"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "enum": [
+                  "best",
+                  "justified",
+                  "finalized"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "Block ID (hex) or block number as string"
+              }
+            ],
+            "default": "best",
+            "description": "Revision: best | justified | finalized | block number | block ID (hex). If omitted, best is used."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getTransaction",
+      "title": "Retrieve a transaction by ID",
+      "description": "Get a VeChain transaction by its ID. Optionally include pending txs (meta may be null), return raw hex, or pin to a specific head block.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$",
+            "description": "Transaction ID (0x-prefixed 32-byte hex)"
+          },
+          "raw": {
+            "type": "boolean",
+            "description": "Include raw hex transaction in response. Default: false"
+          },
+          "head": {
+            "type": "string",
+            "description": "Head block ID to use; defaults to best if omitted"
+          },
+          "pending": {
+            "type": "boolean",
+            "description": "Include pending transactions (meta may be null). Default: false"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getBlock",
+      "title": "Get a VeChain block",
+      "description": "Retrieve information about a VeChain block by its revision (block ID, number, or keywords: best | justified | finalized).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "raw": {
+            "type": "boolean",
+            "description": "Return RLP-encoded block instead of structured JSON (default: false)"
+          },
+          "expanded": {
+            "type": "boolean",
+            "description": "Return transactions expanded (objects) instead of just IDs (default: false)"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "enum": [
+                  "best",
+                  "justified",
+                  "finalized"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "Block ID (hex) or block number as string"
+              }
+            ],
+            "default": "best",
+            "description": "Block revision: hex ID, block number, or keywords: best | justified | finalized"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getPriorityFee",
+      "title": "Suggest a priority fee",
+      "description": "Fetch a suggested priority fee for including a transaction in the next blocks from VeChain mainnet.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "createWallet",
+      "title": "Create a VeChain wallet (mnemonic + keys)",
+      "description": "Generate a BIP-39 mnemonic (12/15/18/21/24 words) and derive the account-level secp256k1 key at path m/44'/818'/0'/0 (VET coin type = 818). By default, the private key is REDACTED in the response. Set includeSecret=true to include it (handle with care).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "wordlistSize": {
+            "enum": [
+              12,
+              15,
+              18,
+              21,
+              24
+            ],
+            "type": "number",
+            "description": "Length of the BIP-39 mnemonic wordlist. Default: 12"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "signCertificate",
+      "title": "Sign certificate",
+      "description": "Create and sign a canonical certificate. Includes purpose, payload, domain, timestamp, nonce, and expiresAt.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "domain"
+        ],
+        "properties": {
+          "domain": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Scope or domain where it is valid"
+          },
+          "payload": {
+            "description": "Content to be attested (string or JSON)"
+          },
+          "purpose": {
+            "enum": [
+              "identification",
+              "attestation",
+              "verification"
+            ],
+            "type": "string",
+            "default": "identification"
+          },
+          "timestamp": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "signMessage",
+      "title": "Sign message",
+      "description": "Sign a message",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "signTransaction",
+      "title": "Sign transaction",
+      "description": "Decode and sign a raw transaction.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "rawTransaction"
+        ],
+        "properties": {
+          "rawTransaction": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 9,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@leandrogavidia/vechain-mcp-server--/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "searchDocumentation",
+    "getAccount",
+    "getTransaction",
+    "getBlock",
+    "getPriorityFee",
+    "createWallet",
+    "signCertificate",
+    "signMessage",
+    "signTransaction"
+  ]
+}

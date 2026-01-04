@@ -1,0 +1,763 @@
+{
+  "qualifiedName": "zoho_bigin",
+  "displayName": "Zoho bigin",
+  "description": "Zoho Bigin is a simplified CRM solution from Zoho tailored for small businesses, focusing on pipeline tracking and relationship management",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//zoho.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/zoho_bigin",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/zoho_bigin/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "ZOHO_BIGIN_ADD_RECORDS",
+      "description": "Tool to add new records to a module. Use when you need to programmatically insert one or more records into Bigin after confirming module name and field API names. Provide required fields per module (e.g., Contacts requires Last_Name).",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddRecordsRequest",
+        "required": [
+          "module_api_name",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Data",
+            "description": "List of JSON objects to insert. Each object maps Field API names to values. Max 100 records per call."
+          },
+          "trigger": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Trigger",
+            "default": null,
+            "examples": [
+              []
+            ],
+            "nullable": true,
+            "description": "Array of workflow triggers. Default ['workflow'] executes workflows; use [] to skip workflows."
+          },
+          "module_api_name": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Accounts",
+              "Products",
+              "Tasks",
+              "Events",
+              "Calls"
+            ],
+            "type": "string",
+            "title": "Module Api Name",
+            "examples": [
+              "Contacts",
+              "Accounts"
+            ],
+            "description": "The API name of the module to insert into. Allowed: Contacts, Pipelines, Accounts, Products, Tasks, Events, Calls"
+          }
+        }
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_ADD_TAGS_TO_RECORDS",
+      "description": "Tool to add tags to a specific record in a module. Use when you need to categorize or label a record after creation or update.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddTagsToRecordsRequest",
+        "required": [
+          "module_api_name",
+          "record_id",
+          "tags"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "Tag",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "Id",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Unique identifier of an existing tag, if applicable"
+                },
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "examples": [
+                    "Priority",
+                    "Important"
+                  ],
+                  "description": "Name of the tag to add"
+                }
+              },
+              "description": "Tag object to specify tag name and optional existing tag id."
+            },
+            "title": "Tags",
+            "description": "List of tag objects to add to the record"
+          },
+          "record_id": {
+            "type": "string",
+            "title": "Record Id",
+            "description": "Unique identifier of the record to which tags will be added"
+          },
+          "over_write": {
+            "type": "boolean",
+            "title": "Over Write",
+            "default": false,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Whether to overwrite existing tags (default: false)"
+          },
+          "module_api_name": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Companies",
+              "Products",
+              "Tasks",
+              "Events",
+              "Calls"
+            ],
+            "type": "string",
+            "title": "Module Api Name",
+            "description": "API name of the module where record resides"
+          }
+        },
+        "description": "Request model for adding tags to a specific record."
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_CREATE_TAGS",
+      "description": "Tool to create tags for a module. Use when you need to add new tags to a specific module in Zoho Bigin.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateTagsRequest",
+        "required": [
+          "module",
+          "tags"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "TagIn",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "examples": [
+                    "Important"
+                  ],
+                  "description": "Name of the tag to create"
+                },
+                "color_code": {
+                  "type": "string",
+                  "title": "Color Code",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Hex color code of the tag, e.g. '#FF5733'"
+                }
+              }
+            },
+            "title": "Tags",
+            "description": "List of tags to create"
+          },
+          "module": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Accounts",
+              "Products",
+              "Tasks",
+              "Events",
+              "Calls"
+            ],
+            "type": "string",
+            "title": "Module",
+            "examples": [
+              "Contacts"
+            ],
+            "description": "API name of the module where tags will be added"
+          }
+        }
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_DELETE_ATTACHMENT",
+      "description": "Tool to delete an attachment from a record. Use when you need to remove a file after confirming its record_id and attachment_id.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteAttachmentRequest",
+        "required": [
+          "module_api_name",
+          "record_id",
+          "attachment_id"
+        ],
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "title": "Record Id",
+            "description": "Unique ID of the record from which to delete the attachment."
+          },
+          "attachment_id": {
+            "type": "string",
+            "title": "Attachment Id",
+            "description": "Unique ID of the attachment to be deleted."
+          },
+          "module_api_name": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Accounts",
+              "Products",
+              "Tasks",
+              "Events",
+              "Notes"
+            ],
+            "type": "string",
+            "title": "Module Api Name",
+            "description": "API name of the module. Must be one of: Contacts, Pipelines, Accounts, Products, Tasks, Events, Notes."
+          }
+        },
+        "description": "Request parameters for deleting an attachment from a Zoho Bigin record."
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_DELETE_RECORDS",
+      "description": "Tool to delete records from a module. Use when removing one or multiple records after confirming their IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteRecordsRequest",
+        "required": [
+          "module_api_name",
+          "ids"
+        ],
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Ids",
+            "examples": [
+              "410405000002264040",
+              "410405000002264025"
+            ],
+            "description": "List of record IDs to delete"
+          },
+          "wf_trigger": {
+            "type": "boolean",
+            "title": "Wf Trigger",
+            "default": true,
+            "examples": [
+              true
+            ],
+            "description": "Whether to trigger workflow rules upon deletion"
+          },
+          "module_api_name": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Accounts",
+              "Products",
+              "Tasks",
+              "Events",
+              "Calls"
+            ],
+            "type": "string",
+            "title": "Module Api Name",
+            "examples": [
+              "Contacts"
+            ],
+            "description": "API name of the module to delete records from"
+          }
+        },
+        "description": "Request model for deleting one or more records from a Zoho Bigin module."
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_DOWNLOAD_ATTACHMENT",
+      "description": "Tool to download an attachment from a record. Use when you need the binary content of a specific attachment after confirming the record and attachment IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DownloadAttachmentRequest",
+        "required": [
+          "module_api_name",
+          "record_id",
+          "attachment_id"
+        ],
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "title": "Record Id",
+            "examples": [
+              "410405000002264040"
+            ],
+            "description": "The unique identifier of the record from which to download the attachment."
+          },
+          "attachment_id": {
+            "type": "string",
+            "title": "Attachment Id",
+            "examples": [
+              "412022000001234567"
+            ],
+            "description": "The unique identifier of the attachment to download."
+          },
+          "module_api_name": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Accounts",
+              "Products",
+              "Tasks",
+              "Events",
+              "Notes"
+            ],
+            "type": "string",
+            "title": "Module Api Name",
+            "examples": [
+              "Contacts"
+            ],
+            "description": "The API name of the module containing the record. One of: Contacts, Pipelines, Accounts, Products, Tasks, Events, Notes."
+          }
+        },
+        "description": "Request model for downloading an attachment from a specific record."
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_GET_ATTACHMENTS",
+      "description": "Tool to retrieve attachments for a record. Use when you need a paginated list of attachments for a given module record.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAttachmentsRequest",
+        "required": [
+          "module_api_name",
+          "record_id",
+          "fields"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination, must be >=1. Default is 1."
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "examples": [
+              "File_Name,$file_id,Size,Parent_Id"
+            ],
+            "description": "Comma-separated field API names to include in response. Up to 50 fields (e.g., File_Name,$file_id,Size,Parent_Id)."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              200
+            ],
+            "nullable": true,
+            "description": "Records per page, must be >=1. Default is 200."
+          },
+          "record_id": {
+            "type": "string",
+            "title": "Record Id",
+            "examples": [
+              "2034020000000478332"
+            ],
+            "description": "Unique identifier of the record."
+          },
+          "module_api_name": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Accounts",
+              "Products",
+              "Tasks",
+              "Events",
+              "Notes"
+            ],
+            "type": "string",
+            "title": "Module Api Name",
+            "examples": [
+              "Contacts",
+              "Accounts"
+            ],
+            "description": "API name of the module."
+          }
+        },
+        "description": "Request model for retrieving attachments of a record in a module."
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_GET_DELETED_RECORDS",
+      "description": "Tool to get a list of deleted records in a module. Use when auditing or restoring recently deleted data (recycle within 60 days, permanent within 120 days).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetDeletedRecordsRequest",
+        "required": [
+          "module_api_name"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "description": "Page number for pagination (starts at 1)."
+          },
+          "type": {
+            "enum": [
+              "all",
+              "recycle",
+              "permanent"
+            ],
+            "type": "string",
+            "title": "Type",
+            "default": "all",
+            "examples": [
+              "all",
+              "recycle",
+              "permanent"
+            ],
+            "description": "Type of deleted records to retrieve: all (default), recycle (in bin \u226460 days), permanent (deleted \u2264120 days)."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": 200,
+            "maximum": 200,
+            "minimum": 1,
+            "examples": [
+              50,
+              200
+            ],
+            "description": "Number of records per page (max 200)."
+          },
+          "module_api_name": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Accounts",
+              "Products",
+              "Tasks",
+              "Events",
+              "Calls"
+            ],
+            "type": "string",
+            "title": "Module Api Name",
+            "examples": [
+              "Contacts",
+              "Pipelines"
+            ],
+            "description": "API name of the module to retrieve deleted records from."
+          }
+        },
+        "description": "Path and query parameters for GET /{module_api_name}/deleted"
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_GET_MODULES",
+      "description": "Tool to retrieve a list of all modules. Use when you need to discover which modules are available in Bigin.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetModulesRequest",
+        "properties": {},
+        "description": "No request parameters for retrieving modules."
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_GET_RECORDS",
+      "description": "Tool to retrieve records from a Bigin module. Use when listing or querying module data with specific fields, sorting, filtering, and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetRecordsRequest",
+        "required": [
+          "module_api_name",
+          "fields"
+        ],
+        "properties": {
+          "cvid": {
+            "type": "string",
+            "title": "Cvid",
+            "default": null,
+            "examples": [
+              "203402000000123456"
+            ],
+            "nullable": true,
+            "description": "Custom view ID to filter by a saved custom view."
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1,
+              2
+            ],
+            "nullable": true,
+            "description": "Page index for pagination. Defaults to 1."
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "examples": [
+              "Last_Name,Email"
+            ],
+            "description": "Comma-separated list of up to 50 field API names to retrieve."
+          },
+          "sort_by": {
+            "type": "string",
+            "title": "Sort By",
+            "default": null,
+            "examples": [
+              "Email"
+            ],
+            "nullable": true,
+            "description": "Field API name to sort by."
+          },
+          "approved": {
+            "enum": [
+              "true",
+              "false",
+              "both"
+            ],
+            "type": "string",
+            "title": "Approved",
+            "default": null,
+            "examples": [
+              "both"
+            ],
+            "nullable": true,
+            "description": "Filter by approval status: 'true', 'false', or 'both'."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": 200,
+            "maximum": 200,
+            "minimum": 1,
+            "examples": [
+              50,
+              200
+            ],
+            "nullable": true,
+            "description": "Number of records per page. Defaults to 200, max 200."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "examples": [
+              "cd2cb80b7af..."
+            ],
+            "nullable": true,
+            "description": "Token from previous response for beyond-2000 retrieval."
+          },
+          "sort_order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "title": "Sort Order",
+            "default": null,
+            "examples": [
+              "desc"
+            ],
+            "nullable": true,
+            "description": "Sort order: 'asc' or 'desc'. Applies when sort_by is provided."
+          },
+          "module_api_name": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Accounts",
+              "Products",
+              "Tasks",
+              "Events",
+              "Calls"
+            ],
+            "type": "string",
+            "title": "Module Api Name",
+            "examples": [
+              "Contacts",
+              "Accounts"
+            ],
+            "description": "API name of the Bigin module to retrieve records from."
+          }
+        },
+        "description": "Path and query parameters for GET /{module_api_name}"
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_UPDATE_RECORDS",
+      "description": "Tool to update existing records in a module. Use when you need to modify one or multiple records after confirming their IDs and field API names. Supports up to 100 records per call; specify an optional trigger to control workflow execution.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateRecordsRequest",
+        "required": [
+          "module_api_name",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Data",
+            "description": "List of JSON objects to update. Each object must include 'id' and the fields to modify. Max 100 records per call."
+          },
+          "trigger": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Trigger",
+            "default": null,
+            "examples": [
+              []
+            ],
+            "nullable": true,
+            "description": "Array of workflow triggers. Default executes workflows; provide [] to skip workflow execution."
+          },
+          "record_id": {
+            "type": "string",
+            "title": "Record Id",
+            "default": null,
+            "examples": [
+              "2034020000000489124"
+            ],
+            "nullable": true,
+            "description": "Optional ID of a single record to update. If omitted, all IDs in `data` will be updated in bulk."
+          },
+          "module_api_name": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Accounts",
+              "Products",
+              "Tasks",
+              "Events",
+              "Calls"
+            ],
+            "type": "string",
+            "title": "Module Api Name",
+            "examples": [
+              "Contacts",
+              "Accounts"
+            ],
+            "description": "API name of the module to update records in. Allowed: Contacts, Pipelines, Accounts, Products, Tasks, Events, Calls"
+          }
+        },
+        "description": "Request model for updating existing records in a module."
+      }
+    },
+    {
+      "name": "ZOHO_BIGIN_UPLOAD_ATTACHMENT",
+      "description": "Tool to upload an attachment to a record. Use when you need to attach a file or specify a public URL for upload to a Bigin record. Ensure module_api_name and record_id are correct before calling.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UploadAttachmentRequest",
+        "required": [
+          "module_api_name",
+          "record_id"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "title": "File",
+            "default": null,
+            "examples": [
+              "/Users/alice/Documents/image.png"
+            ],
+            "nullable": true,
+            "description": "Local filesystem path of the file to upload. Provide either this or attachment_url."
+          },
+          "record_id": {
+            "type": "string",
+            "title": "Record Id",
+            "examples": [
+              "2034020000000478332"
+            ],
+            "description": "Unique identifier of the record."
+          },
+          "attachment_url": {
+            "type": "string",
+            "title": "Attachment Url",
+            "default": null,
+            "examples": [
+              "https://example.com/photo.jpg"
+            ],
+            "nullable": true,
+            "description": "Public URL of the attachment to upload. Provide either this or file."
+          },
+          "module_api_name": {
+            "enum": [
+              "Contacts",
+              "Pipelines",
+              "Accounts",
+              "Products",
+              "Tasks",
+              "Events",
+              "Notes"
+            ],
+            "type": "string",
+            "title": "Module Api Name",
+            "examples": [
+              "Contacts",
+              "Pipelines"
+            ],
+            "description": "API name of the module to which the attachment should be added."
+          }
+        },
+        "description": "Request model for uploading an attachment to a specific record in a module."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:15:43.460263+00:00",
+    "source": "smithery"
+  }
+}

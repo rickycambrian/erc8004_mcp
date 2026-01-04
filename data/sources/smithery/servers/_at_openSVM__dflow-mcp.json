@@ -1,0 +1,875 @@
+{
+  "qualifiedName": "@openSVM/dflow-mcp",
+  "displayName": "dflow-mcp",
+  "description": "Access real-time and historical https://kalshi.com prediction market data across events, markets, and trades. Analyze forecasts and candlestick time series to track sentiment and price action. Search and filter by tickers, mints, categories, and sports to quickly find the data you need. ",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/c0dd3987-3307-4f6b-b164-15d36bfaac30.jpeg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@openSVM/dflow-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@openSVM/dflow-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {
+          "apiUrl": {
+            "type": "string",
+            "default": "https://prediction-markets-api.dflow.net",
+            "description": "Base URL for the Prediction Market Metadata API"
+          },
+          "requestTimeout": {
+            "type": "number",
+            "default": 30000,
+            "description": "Timeout for API requests in milliseconds"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "get_event",
+      "title": "Get Event Details",
+      "annotations": {
+        "title": "Get Event Details",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a single event by ticker. Returns event metadata including series ticker, subtitle, markets, strike information and volume.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "event_id"
+        ],
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "description": "Event ticker"
+          },
+          "withNestedMarkets": {
+            "type": "boolean",
+            "description": "Include nested markets (optional)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_events",
+      "title": "Get Events List",
+      "annotations": {
+        "title": "Get Events List",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a paginated list of all events with optional filtering and sorting.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "sort": {
+            "enum": [
+              "volume",
+              "volume24h",
+              "liquidity",
+              "openInterest",
+              "startDate"
+            ],
+            "type": "string",
+            "description": "Sort field"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Maximum number of events to return"
+          },
+          "cursor": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Pagination cursor"
+          },
+          "status": {
+            "type": "string",
+            "description": "Filter by event status"
+          },
+          "isInitialized": {
+            "type": "boolean",
+            "description": "Filter by initialization status"
+          },
+          "seriesTickers": {
+            "type": "string",
+            "description": "Filter by series tickers (comma-separated)"
+          },
+          "withNestedMarkets": {
+            "type": "boolean",
+            "description": "Include nested markets"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_market",
+      "title": "Get Market Details",
+      "annotations": {
+        "title": "Get Market Details",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get details of a market by ticker.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "market_id"
+        ],
+        "properties": {
+          "market_id": {
+            "type": "string",
+            "description": "Market ticker"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_market_by_mint",
+      "title": "Get Market by Mint Address",
+      "annotations": {
+        "title": "Get Market by Mint Address",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a market by looking up its mint address.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "mint_address"
+        ],
+        "properties": {
+          "mint_address": {
+            "type": "string",
+            "description": "Ledger or outcome mint address"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_markets",
+      "title": "Get Markets List",
+      "annotations": {
+        "title": "Get Markets List",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a paginated list of markets with optional filtering.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "sort": {
+            "enum": [
+              "volume",
+              "volume24h",
+              "liquidity",
+              "openInterest",
+              "startDate"
+            ],
+            "type": "string",
+            "description": "Sort field"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of markets to return"
+          },
+          "cursor": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Pagination cursor"
+          },
+          "status": {
+            "type": "string",
+            "description": "Filter by status"
+          },
+          "isInitialized": {
+            "type": "boolean",
+            "description": "Filter by initialization status"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_markets_batch",
+      "title": "Get Markets Batch",
+      "annotations": {
+        "title": "Get Markets Batch",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get multiple markets by tickers and/or mint addresses (up to 100 results).",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "mints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of mint addresses"
+          },
+          "tickers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of market tickers"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_trades",
+      "title": "Get Trades",
+      "annotations": {
+        "title": "Get Trades",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a paginated list of trades across markets with optional filtering.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of trades to return"
+          },
+          "maxTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Maximum timestamp filter"
+          },
+          "minTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Minimum timestamp filter"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor"
+          },
+          "ticker": {
+            "type": "string",
+            "description": "Filter by market ticker"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_trades_by_mint",
+      "title": "Get Trades by Mint Address",
+      "annotations": {
+        "title": "Get Trades by Mint Address",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get trades for a market identified by a mint address.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "mint_address"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of trades to return"
+          },
+          "maxTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Maximum timestamp filter"
+          },
+          "minTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Minimum timestamp filter"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor"
+          },
+          "mint_address": {
+            "type": "string",
+            "description": "Mint address"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_forecast_percentile_history",
+      "title": "Get Forecast Percentile History",
+      "annotations": {
+        "title": "Get Forecast Percentile History",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get historical raw and formatted forecast numbers for an event at specified percentiles.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "series_ticker",
+          "event_id",
+          "percentiles",
+          "startTs",
+          "endTs",
+          "periodInterval"
+        ],
+        "properties": {
+          "endTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "End timestamp"
+          },
+          "startTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Start timestamp"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Event ticker"
+          },
+          "percentiles": {
+            "type": "string",
+            "description": "Comma-separated list of percentiles"
+          },
+          "series_ticker": {
+            "type": "string",
+            "description": "Series ticker"
+          },
+          "periodInterval": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Sampling interval in seconds"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_forecast_percentile_history_by_mint",
+      "title": "Get Forecast Percentile History by Mint",
+      "annotations": {
+        "title": "Get Forecast Percentile History by Mint",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get forecast history by looking up an event using a market mint address.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "mint_address",
+          "percentiles",
+          "startTs",
+          "endTs",
+          "periodInterval"
+        ],
+        "properties": {
+          "endTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "End timestamp"
+          },
+          "startTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Start timestamp"
+          },
+          "percentiles": {
+            "type": "string",
+            "description": "Comma-separated list of percentiles"
+          },
+          "mint_address": {
+            "type": "string",
+            "description": "Market mint address"
+          },
+          "periodInterval": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Sampling interval in seconds"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_event_candlesticks",
+      "title": "Get Event Candlesticks",
+      "annotations": {
+        "title": "Get Event Candlesticks",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get event candlesticks from the Kalshi API. Resolves series ticker automatically.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticker",
+          "startTs",
+          "endTs",
+          "periodInterval"
+        ],
+        "properties": {
+          "endTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "End timestamp"
+          },
+          "ticker": {
+            "type": "string",
+            "description": "Event ticker"
+          },
+          "startTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Start timestamp"
+          },
+          "periodInterval": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Interval size in seconds"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_market_candlesticks",
+      "title": "Get Market Candlesticks",
+      "annotations": {
+        "title": "Get Market Candlesticks",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get market candlesticks. Resolves series ticker automatically.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticker",
+          "startTs",
+          "endTs",
+          "periodInterval"
+        ],
+        "properties": {
+          "endTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "End timestamp"
+          },
+          "ticker": {
+            "type": "string",
+            "description": "Market ticker"
+          },
+          "startTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Start timestamp"
+          },
+          "periodInterval": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Interval size in seconds"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_market_candlesticks_by_mint",
+      "title": "Get Market Candlesticks by Mint",
+      "annotations": {
+        "title": "Get Market Candlesticks by Mint",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get candlesticks by looking up a market by mint address.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "mint_address",
+          "startTs",
+          "endTs",
+          "periodInterval"
+        ],
+        "properties": {
+          "endTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "End timestamp"
+          },
+          "startTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Start timestamp"
+          },
+          "mint_address": {
+            "type": "string",
+            "description": "Mint address"
+          },
+          "periodInterval": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Interval size in seconds"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_live_data",
+      "title": "Get Live Data",
+      "annotations": {
+        "title": "Get Live Data",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get live data from the Kalshi API for specific milestones.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "milestoneIds"
+        ],
+        "properties": {
+          "milestoneIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of milestone IDs"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_live_data_by_event",
+      "title": "Get Live Data by Event",
+      "annotations": {
+        "title": "Get Live Data by Event",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get live data for all milestones of an event.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "event_ticker"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Filter by milestone type"
+          },
+          "category": {
+            "type": "string",
+            "description": "Filter by category"
+          },
+          "sourceId": {
+            "type": "string",
+            "description": "Filter by data source"
+          },
+          "competition": {
+            "type": "string",
+            "description": "Filter by competition"
+          },
+          "event_ticker": {
+            "type": "string",
+            "description": "Event ticker"
+          },
+          "minimumStartDate": {
+            "type": "string",
+            "description": "Filter milestones after this date"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_live_data_by_mint",
+      "title": "Get Live Data by Mint Address",
+      "annotations": {
+        "title": "Get Live Data by Mint Address",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get live data by looking up an event from a market mint address.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "mint_address"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Filter by milestone type"
+          },
+          "category": {
+            "type": "string",
+            "description": "Filter by category"
+          },
+          "sourceId": {
+            "type": "string",
+            "description": "Filter by data source"
+          },
+          "competition": {
+            "type": "string",
+            "description": "Filter by competition"
+          },
+          "mint_address": {
+            "type": "string",
+            "description": "Mint address"
+          },
+          "minimumStartDate": {
+            "type": "string",
+            "description": "Filter milestones after this date"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_series",
+      "title": "Get Series Templates",
+      "annotations": {
+        "title": "Get Series Templates",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get all series templates with optional filtering.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "tags": {
+            "type": "string",
+            "description": "Filter by tags"
+          },
+          "status": {
+            "type": "string",
+            "description": "Filter by series status"
+          },
+          "category": {
+            "type": "string",
+            "description": "Filter by series category"
+          },
+          "isInitialized": {
+            "type": "boolean",
+            "description": "Filter by initialization status"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_series_by_ticker",
+      "title": "Get Series by Ticker",
+      "annotations": {
+        "title": "Get Series by Ticker",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a single series by its ticker.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "series_ticker"
+        ],
+        "properties": {
+          "series_ticker": {
+            "type": "string",
+            "description": "Series ticker"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_outcome_mints",
+      "title": "Get Outcome Mints",
+      "annotations": {
+        "title": "Get Outcome Mints",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a flat list of yes and no outcome mint pubkeys.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "minCloseTs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Filter by minimum close timestamp"
+          }
+        }
+      }
+    },
+    {
+      "name": "filter_outcome_mints",
+      "title": "Filter Outcome Mints",
+      "annotations": {
+        "title": "Filter Outcome Mints",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Filter a list of addresses and return only outcome mints.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "addresses"
+        ],
+        "properties": {
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 200,
+            "description": "Array of addresses to filter"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_tags_by_categories",
+      "title": "Get Tags by Categories",
+      "annotations": {
+        "title": "Get Tags by Categories",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a mapping of series categories to tags.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_filters_by_sports",
+      "title": "Get Filters by Sports",
+      "annotations": {
+        "title": "Get Filters by Sports",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get filtering options for each sport including scopes and competitions.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "search_events",
+      "title": "Search Events",
+      "annotations": {
+        "title": "Search Events",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search events with nested markets by title or ticker.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "q"
+        ],
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "sort": {
+            "enum": [
+              "volume",
+              "volume24h",
+              "liquidity",
+              "openInterest",
+              "startDate"
+            ],
+            "type": "string",
+            "description": "Sort field"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of results to return"
+          },
+          "order": {
+            "enum": [
+              "desc",
+              "asc"
+            ],
+            "type": "string",
+            "description": "Sort order"
+          },
+          "cursor": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Pagination cursor"
+          },
+          "withNestedMarkets": {
+            "type": "boolean",
+            "description": "Include nested markets"
+          },
+          "withMarketAccounts": {
+            "type": "boolean",
+            "description": "Include market accounts"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:27:07.443457+00:00",
+    "source": "smithery"
+  }
+}

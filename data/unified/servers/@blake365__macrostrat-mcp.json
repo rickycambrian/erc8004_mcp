@@ -1,0 +1,299 @@
+{
+  "id": "@blake365/macrostrat-mcp",
+  "name": "@blake365/macrostrat-mcp",
+  "display_name": "macrostrat-mcp",
+  "version": null,
+  "description": "Explore global geologic data to answer questions about bedrock, formations, ages, and stratigraphy. Retrieve units, columns, minerals, timescales, and definitions for any location to build accurate geological context. Generate geology map tiles for quick visualization of areas of interest.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "find-columns",
+      "title": "Find Columns",
+      "description": "Find geological stratigraphic columns, rock layers, and geological history for any location worldwide. Use for geology, bedrock, formations, age dating, and stratigraphic analysis.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "A valid latitude in decimal degrees"
+          },
+          "lng": {
+            "type": "number",
+            "description": "A valid longitude in decimal degrees"
+          },
+          "adjacents": {
+            "type": "boolean",
+            "description": "Include adjacent columns"
+          },
+          "responseType": {
+            "enum": [
+              "long",
+              "short"
+            ],
+            "type": "string",
+            "default": "long",
+            "description": "The length of response long or short"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "find-units",
+      "title": "Find Units",
+      "description": "Find geological rock units, formations, bedrock geology, and mineral information for any location worldwide. Use for geology questions, rock types, age dating, lithology, and geological analysis.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "A valid latitude in decimal degrees"
+          },
+          "lng": {
+            "type": "number",
+            "description": "A valid longitude in decimal degrees"
+          },
+          "responseType": {
+            "enum": [
+              "long",
+              "short"
+            ],
+            "type": "string",
+            "default": "long",
+            "description": "The length of response long or short. Long provides lots of good details"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "defs",
+      "title": "Definitions",
+      "description": "Routes giving access to standard fields and dictionaries used in Macrostrat",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "endpoint",
+          "parameters"
+        ],
+        "properties": {
+          "endpoint": {
+            "enum": [
+              "lithologies",
+              "structures",
+              "columns",
+              "econs",
+              "minerals",
+              "timescales",
+              "environments",
+              "strat_names",
+              "measurements",
+              "intervals"
+            ],
+            "type": "string",
+            "description": "The endpoint to query"
+          },
+          "parameters": {
+            "type": "string",
+            "description": "parameters to pass to the endpoint"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "defs-autocomplete",
+      "title": "Definitions Autocomplete",
+      "description": "Quickly retrieve all definitions matching a query. Limited to 100 results",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "the search term"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mineral-info",
+      "title": "Mineral Information",
+      "description": "Get information about a mineral, use one property",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "element": {
+            "type": "string",
+            "description": "An element that the mineral is made of"
+          },
+          "mineral": {
+            "type": "string",
+            "description": "The name of the mineral"
+          },
+          "mineral_type": {
+            "type": "string",
+            "description": "The type of mineral"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "timescale",
+      "title": "Timescale",
+      "description": "Get information about a time period",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "age"
+        ],
+        "properties": {
+          "age": {
+            "type": "number",
+            "description": "Age in millions of years before present"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "lat-lng-to-tile",
+      "title": "Latitude/Longitude to Tile",
+      "description": "Convert latitude/longitude coordinates to map tile coordinates (x, y) for a given zoom level. Uses the same web mercator projection as MapKit.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "lat",
+          "lng",
+          "zoom"
+        ],
+        "properties": {
+          "lat": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "description": "Latitude in decimal degrees (-90 to 90)"
+          },
+          "lng": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "description": "Longitude in decimal degrees (-180 to 180)"
+          },
+          "zoom": {
+            "type": "integer",
+            "maximum": 18,
+            "minimum": 0,
+            "description": "Zoom level (0-18)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "map-tiles",
+      "title": "Map Tiles",
+      "description": "Get map tile URLs from the Macrostrat tiles server. Use lat-lng-to-tile tool first to get proper x,y coordinates. Defaults to 'carto' scale which automatically adapts detail level to zoom.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "z",
+          "x",
+          "y"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Tile X coordinate - use lat-lng-to-tile tool to calculate this from lat/lng"
+          },
+          "y": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Tile Y coordinate - use lat-lng-to-tile tool to calculate this from lat/lng"
+          },
+          "z": {
+            "type": "integer",
+            "maximum": 18,
+            "minimum": 0,
+            "description": "Zoom level (0-18). Higher zoom = more detailed view of smaller area. Typical values: z=3 (continent), z=6 (country), z=10 (city), z=15 (neighborhood)"
+          },
+          "scale": {
+            "enum": [
+              "carto",
+              "tiny",
+              "small",
+              "medium",
+              "large"
+            ],
+            "type": "string",
+            "default": "carto",
+            "description": "Map scale layer - 'carto' automatically selects appropriate detail level based on zoom. Other scales (tiny, small, medium, large) may have limited coverage."
+          },
+          "format": {
+            "enum": [
+              "mvt",
+              "png"
+            ],
+            "type": "string",
+            "default": "png",
+            "description": "Tile format: 'png' for images, 'mvt' for vector tiles"
+          },
+          "fetch_image": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, actually fetch the tile image data so Claude can analyze the geological features visually"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 8,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@blake365/macrostrat-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "find-columns",
+    "find-units",
+    "defs",
+    "defs-autocomplete",
+    "mineral-info",
+    "timescale",
+    "lat-lng-to-tile",
+    "map-tiles"
+  ]
+}

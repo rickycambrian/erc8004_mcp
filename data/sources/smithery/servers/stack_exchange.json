@@ -1,0 +1,868 @@
+{
+  "qualifiedName": "stack_exchange",
+  "displayName": "Stack exchange",
+  "description": "Stack Exchange is a network of Q&A communities where users ask questions, share knowledge, and collaborate on topics like coding, math, and more",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/stackexchange.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/stack_exchange",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/stack_exchange/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "STACK_EXCHANGE_GET_COLLECTIVE_QUESTIONS",
+      "description": "Tool to retrieve questions associated with the specified collective. Use when you have a collective ID and need its questions for a site.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCollectiveQuestionsRequest",
+        "required": [
+          "id",
+          "site"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "azure"
+            ],
+            "description": "Slug of the collective to fetch questions for"
+          },
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1612137600
+            ],
+            "nullable": true,
+            "description": "Maximum value for sort parameter (timestamp for date sorts)"
+          },
+          "min": {
+            "type": "integer",
+            "title": "Min",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1609459200
+            ],
+            "nullable": true,
+            "description": "Minimum value for sort parameter (timestamp for date sorts)"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination"
+          },
+          "site": {
+            "type": "string",
+            "title": "Site",
+            "examples": [
+              "stackoverflow"
+            ],
+            "description": "The Stack Exchange site to query (e.g., 'stackoverflow')"
+          },
+          "sort": {
+            "enum": [
+              "activity",
+              "creation",
+              "votes"
+            ],
+            "type": "string",
+            "title": "Sort",
+            "default": "activity",
+            "examples": [
+              "activity"
+            ],
+            "nullable": true,
+            "description": "Sort by this parameter"
+          },
+          "order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "title": "Order",
+            "default": "desc",
+            "examples": [
+              "desc"
+            ],
+            "nullable": true,
+            "description": "Order of results, 'asc' or 'desc'"
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "nullable": true,
+            "description": "Response filter to include specific fields"
+          },
+          "todate": {
+            "type": "integer",
+            "title": "Todate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1612137600
+            ],
+            "nullable": true,
+            "description": "Unix timestamp for latest creation date filter"
+          },
+          "fromdate": {
+            "type": "integer",
+            "title": "Fromdate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1609459200
+            ],
+            "nullable": true,
+            "description": "Unix timestamp for earliest creation date filter"
+          },
+          "pagesize": {
+            "type": "integer",
+            "title": "Pagesize",
+            "default": 30,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              30
+            ],
+            "nullable": true,
+            "description": "Number of items per page (max 100)"
+          }
+        },
+        "description": "Request model for GetCollectiveQuestions. Retrieves questions for a given collective.",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "STACK_EXCHANGE_GET_COLLECTIVES",
+      "description": "Tool to retrieve all collectives on a Stack Exchange site in alphabetical order. Use when you need to list collectives for display or filtering.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCollectivesRequest",
+        "required": [
+          "site"
+        ],
+        "properties": {
+          "max": {
+            "type": "string",
+            "title": "Max",
+            "default": null,
+            "examples": [
+              ""
+            ],
+            "nullable": true,
+            "description": "Maximum value to include in results (applies to sort)"
+          },
+          "min": {
+            "type": "string",
+            "title": "Min",
+            "default": null,
+            "examples": [
+              ""
+            ],
+            "nullable": true,
+            "description": "Minimum value to include in results (applies to sort)"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination (1-based index)"
+          },
+          "site": {
+            "type": "string",
+            "title": "Site",
+            "examples": [
+              "stackoverflow"
+            ],
+            "description": "The Stack Exchange site to query (e.g., 'stackoverflow')"
+          },
+          "sort": {
+            "type": "string",
+            "const": "name",
+            "title": "Sort",
+            "default": null,
+            "examples": [
+              "name"
+            ],
+            "nullable": true,
+            "description": "Sort method; only 'name' supported (alphabetical)"
+          },
+          "order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "examples": [
+              "asc"
+            ],
+            "nullable": true,
+            "description": "Order of results, 'asc' or 'desc'"
+          },
+          "todate": {
+            "type": "integer",
+            "title": "Todate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1612137600
+            ],
+            "nullable": true,
+            "description": "Unix timestamp to return collectives created on or before this date"
+          },
+          "fromdate": {
+            "type": "integer",
+            "title": "Fromdate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1609459200
+            ],
+            "nullable": true,
+            "description": "Unix timestamp to return collectives created on or after this date"
+          },
+          "pagesize": {
+            "type": "integer",
+            "title": "Pagesize",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              30
+            ],
+            "nullable": true,
+            "description": "Number of results per page (max 100)"
+          }
+        },
+        "description": "Request model for GetCollectives. Retrieves all collectives on the site in alphabetical order.",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "STACK_EXCHANGE_GET_COLLECTIVE_TAGS",
+      "description": "Tool to retrieve tags associated with specified collectives. Use when you need collective tags for display or analysis after confirming which collectives to query.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCollectiveTagsRequest",
+        "required": [
+          "site"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "default": null,
+            "examples": [
+              "YOUR_APP_KEY"
+            ],
+            "nullable": true,
+            "description": "Application key for higher quota limits."
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination (1-based index)."
+          },
+          "site": {
+            "type": "string",
+            "title": "Site",
+            "examples": [
+              "stackoverflow"
+            ],
+            "description": "Site to fetch data from (e.g., 'stackoverflow')."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "default"
+            ],
+            "nullable": true,
+            "description": "API filter string to control which fields are returned."
+          },
+          "pagesize": {
+            "type": "integer",
+            "title": "Pagesize",
+            "default": 30,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              30
+            ],
+            "nullable": true,
+            "description": "Number of items per page (max 100)."
+          },
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "default": null,
+            "examples": [
+              "ACCESS_TOKEN"
+            ],
+            "nullable": true,
+            "description": "Access token for authenticated requests; if provided it is appended as a parameter."
+          },
+          "collective_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "properties": {}
+            },
+            "title": "Collective Ids",
+            "default": null,
+            "examples": [
+              [
+                123,
+                456
+              ]
+            ],
+            "nullable": true,
+            "description": "List of collective IDs to fetch tags for; sent as semicolon-separated string."
+          }
+        },
+        "description": "Request parameters for retrieving tags associated with specified collectives.",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "STACK_EXCHANGE_GET_COMMENT_FLAG_OPTIONS",
+      "description": "Tool to fetch valid flag options for a given comment. Use when you need to know which flags a user can raise before submitting. Requires authenticated access.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCommentFlagOptionsRequest",
+        "required": [
+          "ids",
+          "site"
+        ],
+        "properties": {
+          "ids": {
+            "type": "string",
+            "title": "Ids",
+            "examples": [
+              "12345;67890"
+            ],
+            "description": "Semicolon-delimited list of comment IDs to fetch flag options for"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "default": null,
+            "nullable": true,
+            "description": "Application key. Increases request quota if provided."
+          },
+          "site": {
+            "type": "string",
+            "title": "Site",
+            "examples": [
+              "stackoverflow"
+            ],
+            "description": "Stack Exchange site parameter (e.g., 'stackoverflow')"
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "nullable": true,
+            "description": "Response filter to include specific fields."
+          },
+          "preview": {
+            "type": "boolean",
+            "title": "Preview",
+            "default": false,
+            "nullable": true,
+            "description": "If true, returns a preview of flag options without affecting quota."
+          },
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "default": null,
+            "nullable": true,
+            "description": "OAuth2 access token for authenticated requests."
+          }
+        },
+        "description": "Request model for fetching valid flag options on specific comments.",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "STACK_EXCHANGE_GET_COMMENTS",
+      "description": "Tool to retrieve comments from a specified Stack Exchange site. Use when you need to list comments with optional filters and sorting.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCommentsRequest",
+        "required": [
+          "site"
+        ],
+        "properties": {
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1612137600
+            ],
+            "nullable": true,
+            "description": "Maximum value for the sort parameter (e.g., timestamp)"
+          },
+          "min": {
+            "type": "integer",
+            "title": "Min",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1609459200
+            ],
+            "nullable": true,
+            "description": "Minimum value for the sort parameter (e.g., timestamp)"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination (1-based)"
+          },
+          "site": {
+            "type": "string",
+            "title": "Site",
+            "examples": [
+              "stackoverflow"
+            ],
+            "description": "The Stack Exchange site to query (e.g., 'stackoverflow')"
+          },
+          "sort": {
+            "enum": [
+              "creation",
+              "votes"
+            ],
+            "type": "string",
+            "title": "Sort",
+            "default": null,
+            "examples": [
+              "creation"
+            ],
+            "nullable": true,
+            "description": "Sort by this parameter ('creation' or 'votes')"
+          },
+          "order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "examples": [
+              "desc"
+            ],
+            "nullable": true,
+            "description": "Order of results, 'asc' or 'desc'"
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "default"
+            ],
+            "nullable": true,
+            "description": "Custom filter to include/exclude specific fields"
+          },
+          "todate": {
+            "type": "integer",
+            "title": "Todate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1612137600
+            ],
+            "nullable": true,
+            "description": "Unix epoch timestamp to filter comments to"
+          },
+          "fromdate": {
+            "type": "integer",
+            "title": "Fromdate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1609459200
+            ],
+            "nullable": true,
+            "description": "Unix epoch timestamp to filter comments from"
+          },
+          "pagesize": {
+            "type": "integer",
+            "title": "Pagesize",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              30
+            ],
+            "nullable": true,
+            "description": "Number of items per page (max 100)"
+          }
+        },
+        "description": "Request model for GetComments. Retrieves comments from a specified site.",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "STACK_EXCHANGE_GET_REVISIONS_BY_IDS",
+      "description": "Tool to retrieve revisions for specific posts by their IDs. Use when you need to examine the edit history of posts by providing semicolon-delimited IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetRevisionsByIdsRequest",
+        "required": [
+          "ids",
+          "site"
+        ],
+        "properties": {
+          "ids": {
+            "type": "string",
+            "title": "Ids",
+            "examples": [
+              "123",
+              "123;456"
+            ],
+            "description": "Semicolon-delimited list of post IDs (question or answer IDs), e.g., '123;456'."
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination (1-based index)."
+          },
+          "site": {
+            "type": "string",
+            "title": "Site",
+            "examples": [
+              "stackoverflow"
+            ],
+            "description": "Target Stack Exchange site, e.g., 'stackoverflow'."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "nullable": true,
+            "description": "Custom filter to include specific fields in the response."
+          },
+          "todate": {
+            "type": "integer",
+            "title": "Todate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1612137600
+            ],
+            "nullable": true,
+            "description": "Unix epoch timestamp to filter revisions on or before this date."
+          },
+          "fromdate": {
+            "type": "integer",
+            "title": "Fromdate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1609459200
+            ],
+            "nullable": true,
+            "description": "Unix epoch timestamp to filter revisions on or after this date."
+          },
+          "pagesize": {
+            "type": "integer",
+            "title": "Pagesize",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              30
+            ],
+            "nullable": true,
+            "description": "Number of items per page (max 100)."
+          }
+        },
+        "description": "Request model for GetRevisionsByIds. Retrieves all revisions identified by a set of IDs.",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "STACK_EXCHANGE_GET_SEARCH_RESULTS",
+      "description": "Tool to search the site for questions meeting certain criteria. Use after defining tags or keywords to locate relevant questions. At least one of 'tagged' or 'intitle' must be set.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSearchResultsRequest",
+        "required": [
+          "site"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "default": null,
+            "nullable": true,
+            "description": "Application key for increased quota"
+          },
+          "max": {
+            "type": "integer",
+            "title": "Max",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Maximum value for the sort field (timestamp for date sorts)"
+          },
+          "min": {
+            "type": "integer",
+            "title": "Min",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Minimum value for the sort field (timestamp for date sorts)"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination"
+          },
+          "site": {
+            "type": "string",
+            "title": "Site",
+            "examples": [
+              "stackoverflow"
+            ],
+            "description": "Site to query (e.g., 'stackoverflow')"
+          },
+          "sort": {
+            "enum": [
+              "activity",
+              "votes",
+              "creation",
+              "relevance"
+            ],
+            "type": "string",
+            "title": "Sort",
+            "default": null,
+            "examples": [
+              "activity"
+            ],
+            "nullable": true,
+            "description": "Sort results by this field"
+          },
+          "order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "examples": [
+              "desc"
+            ],
+            "nullable": true,
+            "description": "Order of results"
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "default"
+            ],
+            "nullable": true,
+            "description": "Response filter to include specific fields"
+          },
+          "tagged": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Tagged",
+            "default": null,
+            "examples": [
+              [
+                "python",
+                "pandas"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of tags to include; at least one of 'tagged' or 'intitle' must be set"
+          },
+          "todate": {
+            "type": "integer",
+            "title": "Todate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1612137600
+            ],
+            "nullable": true,
+            "description": "Unix timestamp for latest creation date filter"
+          },
+          "intitle": {
+            "type": "string",
+            "title": "Intitle",
+            "default": null,
+            "examples": [
+              "api"
+            ],
+            "nullable": true,
+            "description": "Keyword to search for in question titles"
+          },
+          "fromdate": {
+            "type": "integer",
+            "title": "Fromdate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1609459200
+            ],
+            "nullable": true,
+            "description": "Unix timestamp for earliest creation date filter"
+          },
+          "pagesize": {
+            "type": "integer",
+            "title": "Pagesize",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              30
+            ],
+            "nullable": true,
+            "description": "Number of items per page (max 100)"
+          },
+          "nottagged": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Nottagged",
+            "default": null,
+            "examples": [
+              [
+                "javascript"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of tags to exclude; only used if 'tagged' is set"
+          },
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "default": null,
+            "nullable": true,
+            "description": "OAuth2 access token for authenticated requests"
+          }
+        },
+        "description": "Request model for GetSearchResults. Defines criteria for searching questions on a site.",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "STACK_EXCHANGE_GET_SITES",
+      "description": "Tool to retrieve all Stack Exchange sites and their api_site_parameter values. Use when you need to discover available sites for API calls.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSitesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination (1-based index)"
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "default"
+            ],
+            "nullable": true,
+            "description": "Filter to include or exclude specific fields in the response"
+          },
+          "pagesize": {
+            "type": "integer",
+            "title": "Pagesize",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Number of results per page (max 100)"
+          }
+        },
+        "description": "Request model for GetSites. Retrieves a paginated list of all Stack Exchange sites.",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:30:56.719413+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,632 @@
+{
+  "qualifiedName": "@turnono/datacommons-mcp-server",
+  "displayName": "Data Commons",
+  "description": "Discover statistical indicators and topics in Data Commons. Retrieve observations for specific variables and places to power analysis and visualization. Verify valid child place types to refine geographic queries.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/b19a739d-16ad-4c5b-ae51-e5d41d1f4bc6.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@turnono/datacommons-mcp-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@turnono/datacommons-mcp-server/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "ConfigSchema",
+        "required": [
+          "dc_api_key"
+        ],
+        "properties": {
+          "dc_api_key": {
+            "type": "string",
+            "title": "Dc Api Key",
+            "description": "Data Commons API key for accessing the Data Commons API"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "get_observations",
+      "description": "\n        Get observations for a variable and place from Data Commons.\n\n        This tool retrieves statistical observations (data points) for a specific\n        variable (statistical measure) and place (geographic location) from the\n        Data Commons knowledge graph.\n\n        Args:\n            variable_dcid: The DCID of the statistical variable to get data for\n            place_dcid: The DCID of the place to get data for\n            child_place_type: Optional child place type to get data for\n            source_override: Optional source to override the default data source\n            date: Date to get data for (default: latest available). If date_range_start or date_range_end are provided, this is automatically set to 'range'\n            date_range_start: Start date for date range queries (automatically enables range mode)\n            date_range_end: End date for date range queries (automatically enables range mode)\n            ctx: Smithery context for accessing session configuration\n\n        Returns:\n            ObservationToolResponse containing the requested observations\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_observationsArguments",
+        "required": [
+          "variable_dcid",
+          "place_dcid"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "default": "latest"
+          },
+          "place_dcid": {
+            "type": "string",
+            "title": "Place Dcid"
+          },
+          "variable_dcid": {
+            "type": "string",
+            "title": "Variable Dcid"
+          },
+          "date_range_end": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Range End",
+            "default": null
+          },
+          "source_override": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Override",
+            "default": null
+          },
+          "child_place_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Child Place Type",
+            "default": null
+          },
+          "date_range_start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Range Start",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "Node": {
+            "type": "object",
+            "title": "Node",
+            "properties": {
+              "dcid": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Dcid",
+                "default": null
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Name",
+                "default": null
+              },
+              "typeOf": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Typeof",
+                "default": null
+              }
+            },
+            "description": "Represents a Data Commons node, with an optional name, type, and dcid."
+          },
+          "FacetMetadata": {
+            "type": "object",
+            "title": "FacetMetadata",
+            "required": [
+              "source_id"
+            ],
+            "properties": {
+              "unit": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Unit",
+                "default": null
+              },
+              "source_id": {
+                "type": "string",
+                "title": "Source Id"
+              },
+              "importName": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Importname",
+                "default": null
+              },
+              "provenanceUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Provenanceurl",
+                "default": null
+              },
+              "measurementMethod": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Measurementmethod",
+                "default": null
+              },
+              "observationPeriod": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Observationperiod",
+                "default": null
+              }
+            },
+            "description": "Represents the static metadata for a data source."
+          },
+          "PlaceObservation": {
+            "type": "object",
+            "title": "PlaceObservation",
+            "required": [
+              "place"
+            ],
+            "properties": {
+              "place": {
+                "$ref": "#/$defs/Node"
+              },
+              "time_series": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "prefixItems": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "title": "Time Series",
+                "description": "List of observation tuples with the format (date, value)"
+              }
+            },
+            "description": "Contains all observation data for a single place."
+          },
+          "AlternativeSource": {
+            "type": "object",
+            "title": "AlternativeSource",
+            "required": [
+              "source_id"
+            ],
+            "properties": {
+              "unit": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Unit",
+                "default": null
+              },
+              "source_id": {
+                "type": "string",
+                "title": "Source Id"
+              },
+              "importName": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Importname",
+                "default": null
+              },
+              "provenanceUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Provenanceurl",
+                "default": null
+              },
+              "measurementMethod": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Measurementmethod",
+                "default": null
+              },
+              "observationPeriod": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Observationperiod",
+                "default": null
+              },
+              "places_found_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Places Found Count",
+                "default": null,
+                "description": "The number of places within the current API response for which this alternative source has data. Used only in child-place type responses."
+              }
+            },
+            "description": "Represents metadata for an alternative data source."
+          }
+        },
+        "title": "ObservationToolResponse",
+        "required": [
+          "variable",
+          "source_metadata"
+        ],
+        "properties": {
+          "variable": {
+            "$ref": "#/$defs/Node"
+          },
+          "source_metadata": {
+            "$ref": "#/$defs/FacetMetadata",
+            "description": "Information about the primary data source used for the observations."
+          },
+          "child_place_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Child Place Type",
+            "default": null,
+            "description": "The common place type for all observations in the response (e.g., 'State', 'County', 'AdministrativeArea2'). This is present when a hierarchical query was made."
+          },
+          "place_observations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/PlaceObservation"
+            },
+            "title": "Place Observations",
+            "description": "A list of observation data, with one entry per place. This list may be empty if no data is found."
+          },
+          "alternative_sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/AlternativeSource"
+            },
+            "title": "Alternative Sources",
+            "description": "A list of other available data sources for the same variable and places."
+          },
+          "resolved_parent_place": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The parent place that was resolved from the request, if a hierarchical query was made. This confirms how the tool interpreted the `place_name`."
+          }
+        },
+        "description": "The response from the get_observations tool.\n\nIt contains observation data organized as a list of places. To save tokens,\nsource information is normalized into a top-level `source_info` dictionary."
+      }
+    },
+    {
+      "name": "search_indicators",
+      "description": "\n        Search for data indicators and topics in Data Commons.\n\n        This tool searches the Data Commons knowledge graph for statistical\n        variables, topics, and other indicators that match your query.\n\n        Args:\n            query: Search query string\n            places: Optional list of place DCIDs to limit search to\n            per_search_limit: Maximum number of results per search type\n            include_topics: Whether to include topic results\n            maybe_bilateral: Whether to include bilateral indicators\n            ctx: Smithery context for accessing session configuration\n\n        Returns:\n            SearchResponse containing matching indicators and topics\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_indicatorsArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "places": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Places",
+            "default": null
+          },
+          "include_topics": {
+            "type": "boolean",
+            "title": "Include Topics",
+            "default": true
+          },
+          "maybe_bilateral": {
+            "type": "boolean",
+            "title": "Maybe Bilateral",
+            "default": false
+          },
+          "per_search_limit": {
+            "type": "integer",
+            "title": "Per Search Limit",
+            "default": 10
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "SearchTopic": {
+            "type": "object",
+            "title": "SearchTopic",
+            "required": [
+              "dcid"
+            ],
+            "properties": {
+              "dcid": {
+                "type": "string",
+                "title": "Dcid"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Description",
+                "default": null
+              },
+              "member_topics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "title": "Member Topics",
+                "description": "Direct member topic DCIDs"
+              },
+              "member_variables": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "title": "Member Variables",
+                "description": "Direct member variable DCIDs"
+              },
+              "places_with_data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Places With Data",
+                "default": null,
+                "description": "Place DCIDs where data exists (if place filtering was performed)"
+              },
+              "alternate_descriptions": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Alternate Descriptions",
+                "default": null,
+                "description": "Alternate descriptions or matched sentences."
+              }
+            },
+            "description": "Represents a topic object in search results."
+          },
+          "SearchVariable": {
+            "type": "object",
+            "title": "SearchVariable",
+            "required": [
+              "dcid"
+            ],
+            "properties": {
+              "dcid": {
+                "type": "string",
+                "title": "Dcid"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Description",
+                "default": null
+              },
+              "places_with_data": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "title": "Places With Data",
+                "description": "Place DCIDs where data exists"
+              },
+              "alternate_descriptions": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Alternate Descriptions",
+                "default": null,
+                "description": "Alternate descriptions or matched sentences."
+              }
+            },
+            "description": "Represents a variable object in search results."
+          }
+        },
+        "title": "SearchResponse",
+        "required": [
+          "variables"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "SUCCESS",
+            "description": "Status of the search operation"
+          },
+          "topics": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/SearchTopic"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topics",
+            "default": null,
+            "description": "List of topic objects (browse mode only)"
+          },
+          "variables": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/SearchVariable"
+            },
+            "title": "Variables",
+            "description": "List of variable objects with dcid and places_with_data"
+          },
+          "dcid_name_mappings": {
+            "type": "object",
+            "title": "Dcid Name Mappings",
+            "description": "DCID to name mappings",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "description": "Unified response model for search operations."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:21:22.088574+00:00",
+    "source": "smithery"
+  }
+}

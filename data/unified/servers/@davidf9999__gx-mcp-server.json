@@ -1,0 +1,366 @@
+{
+  "id": "@davidf9999/gx-mcp-server",
+  "name": "@davidf9999/gx-mcp-server",
+  "display_name": "Great Expectations Data Quality Server",
+  "version": null,
+  "description": "Expose Great Expectations data-quality checks as callable tools for LLM agents. Load datasets, define validation rules, and run data quality checks programmatically to integrate robust data validation into automated workflows. Support multiple data sources, authentication methods, and transport modes for flexible deployment.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "load_dataset",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Load data (CSV string, URL, or local file) into memory and return a handle.\n\nArgs:\n    source: Path to file, URL, or inline CSV string\n    source_type: Type of source - \"file\", \"url\", or \"inline\"\n\nArgs:\n    source: Path to file, URL, or inline CSV string\n    source_type: Type of source - \"file\", \"url\", or \"inline\"\n    max_rows: Maximum rows to read (None for all)\n    use_polars: Use ``polars.scan_csv`` for reading if available\n\nReturns:\n    DatasetHandle: Handle to the loaded dataset for use in other tools\n\nExamples:\n    - File: load_dataset(\"/path/to/data.csv\", \"file\")\n    - URL: load_dataset(\"https://example.com/data.csv\", \"url\")\n    - Inline: load_dataset(\"x,y\\n1,2\\n3,4\", \"inline\")",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "source"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "max_rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Rows",
+            "default": null
+          },
+          "use_polars": {
+            "type": "boolean",
+            "title": "Use Polars",
+            "default": false
+          },
+          "source_type": {
+            "enum": [
+              "file",
+              "url",
+              "inline"
+            ],
+            "type": "string",
+            "title": "Source Type",
+            "default": "file"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "DatasetHandle": {
+            "type": "object",
+            "title": "DatasetHandle",
+            "required": [
+              "handle"
+            ],
+            "properties": {
+              "handle": {
+                "type": "string",
+                "title": "Handle"
+              }
+            }
+          }
+        },
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/DatasetHandle"
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              }
+            ],
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "create_suite",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Create a named ExpectationSuite, optionally profiled from a dataset.\n\nArgs:\n    suite_name: Name for the new expectation suite\n    dataset_handle: Handle to dataset (currently unused, for future profiling)\n    profiler: Whether to auto-generate expectations via profiling (deprecated)\n\nReturns:\n    SuiteHandle: Handle to the created suite\n\nNote:\n    Profiler functionality is deprecated in Great Expectations 1.5+.\n    Create empty suites and add expectations manually using add_expectation.\n\nDeprecated:\n    The 'profiler' argument is deprecated and will be removed in a future release.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "suite_name",
+          "dataset_handle"
+        ],
+        "properties": {
+          "profiler": {
+            "type": "boolean",
+            "title": "Profiler",
+            "default": false
+          },
+          "suite_name": {
+            "type": "string",
+            "title": "Suite Name"
+          },
+          "dataset_handle": {
+            "type": "string",
+            "title": "Dataset Handle"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "SuiteHandle",
+        "required": [
+          "suite_name"
+        ],
+        "properties": {
+          "suite_name": {
+            "type": "string",
+            "title": "Suite Name"
+          }
+        }
+      }
+    },
+    {
+      "name": "add_expectation",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Add a single expectation to an existing suite (or create it).\n\nArgs:\n    suite_name: Name of the expectation suite\n    expectation_type: Type of expectation (e.g., \"expect_column_values_to_be_in_set\")\n    kwargs: Parameters for the expectation (e.g., {\"column\": \"status\", \"value_set\": [\"active\", \"inactive\"]})\n\nReturns:\n    ToolResponse: Success/failure status and message\n\nExamples:\n    - Column values in set: add_expectation(\"my_suite\", \"expect_column_values_to_be_in_set\", {\"column\": \"status\", \"value_set\": [\"A\", \"B\"]})\n    - Column not null: add_expectation(\"my_suite\", \"expect_column_values_to_not_be_null\", {\"column\": \"id\"})\n    - Table row count: add_expectation(\"my_suite\", \"expect_table_row_count_to_be_between\", {\"min_value\": 1, \"max_value\": 1000})",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "suite_name",
+          "expectation_type",
+          "kwargs"
+        ],
+        "properties": {
+          "kwargs": {
+            "type": "object",
+            "title": "Kwargs",
+            "additionalProperties": true
+          },
+          "suite_name": {
+            "type": "string",
+            "title": "Suite Name"
+          },
+          "expectation_type": {
+            "type": "string",
+            "title": "Expectation Type"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "ToolResponse",
+        "required": [
+          "success",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_version",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Return the API version for MCP server.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "run_checkpoint",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Run a validation checkpoint against a dataset using an expectation suite.\n\nArgs:\n    suite_name: Name of the expectation suite to validate against\n    dataset_handle: Handle to the dataset to validate\n    checkpoint_name: Optional name for the checkpoint (unused currently)\n\nReturns:\n    ValidationResult: Contains validation_id for retrieving detailed results\n\nNote:\n    Use get_validation_result() with the returned validation_id to get detailed results.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "suite_name",
+          "dataset_handle"
+        ],
+        "properties": {
+          "suite_name": {
+            "type": "string",
+            "title": "Suite Name"
+          },
+          "dataset_handle": {
+            "type": "string",
+            "title": "Dataset Handle"
+          },
+          "checkpoint_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpoint Name",
+            "default": null
+          },
+          "background_tasks": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Background Tasks",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "ValidationResult",
+        "required": [
+          "validation_id"
+        ],
+        "properties": {
+          "validation_id": {
+            "type": "string",
+            "title": "Validation Id"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_validation_result",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Fetch detailed validation results for a prior validation run.\n\nArgs:\n    validation_id: ID returned from run_checkpoint()\n\nReturns:\n    ValidationResultDetail: Detailed validation results including statistics and individual expectation results",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "validation_id"
+        ],
+        "properties": {
+          "validation_id": {
+            "type": "string",
+            "title": "Validation Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "ValidationResultDetail",
+        "required": [
+          "statistics",
+          "results",
+          "success"
+        ],
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error",
+            "default": null
+          },
+          "results": {
+            "title": "Results"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "statistics": {
+            "type": "object",
+            "title": "Statistics",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "ping",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Return basic health status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "tool_count": 7,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@davidf9999/gx-mcp-server/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "load_dataset",
+    "create_suite",
+    "add_expectation",
+    "get_version",
+    "run_checkpoint",
+    "get_validation_result",
+    "ping"
+  ]
+}

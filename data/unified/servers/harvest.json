@@ -1,0 +1,4239 @@
+{
+  "id": "harvest",
+  "name": "harvest",
+  "display_name": "Harvest",
+  "version": null,
+  "description": "Harvest is a time-tracking and invoicing tool designed for teams and freelancers, helping them log billable hours, manage projects, and streamline payments",
+  "icon_url": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/harvest.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "HARVEST_CREATE_CLIENT",
+      "description": "Tool to create a new client. Use after gathering client details to register a new client in Harvest.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateClientRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Acme Corporation"
+            ],
+            "description": "A textual description of the client."
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "default": null,
+            "examples": [
+              "123 Main St\nAnytown, CA 12345"
+            ],
+            "nullable": true,
+            "description": "The client's physical address. May include new line characters."
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": null,
+            "examples": [
+              "EUR",
+              "USD"
+            ],
+            "nullable": true,
+            "description": "ISO currency code for the client. If omitted, the company's default currency is used."
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the client is active, or archived. Defaults to true."
+          }
+        },
+        "description": "Request model for creating a new client in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_CLIENT_CONTACT",
+      "description": "Tool to create a new client contact. Use when you need to add a contact under an existing client. Call after you've retrieved or confirmed the client_id.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateClientContactRequest",
+        "required": [
+          "client_id",
+          "first_name"
+        ],
+        "properties": {
+          "fax": {
+            "type": "string",
+            "title": "Fax",
+            "default": null,
+            "examples": [
+              "+1-555-8765"
+            ],
+            "nullable": true,
+            "description": "Contact's fax number."
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "default": null,
+            "examples": [
+              "john.doe@example.com"
+            ],
+            "nullable": true,
+            "description": "Contact's email address."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "examples": [
+              "Director of Operations"
+            ],
+            "nullable": true,
+            "description": "Title of the contact (e.g., 'Director of Ops')."
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "minimum": 1,
+            "examples": [
+              12345
+            ],
+            "description": "ID of the client associated with this contact."
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name",
+            "default": null,
+            "examples": [
+              "Doe"
+            ],
+            "nullable": true,
+            "description": "Last name of the contact."
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name",
+            "examples": [
+              "John"
+            ],
+            "description": "First name of the contact."
+          },
+          "phone_mobile": {
+            "type": "string",
+            "title": "Phone Mobile",
+            "default": null,
+            "examples": [
+              "+1-555-5678"
+            ],
+            "nullable": true,
+            "description": "Contact's mobile phone number."
+          },
+          "phone_office": {
+            "type": "string",
+            "title": "Phone Office",
+            "default": null,
+            "examples": [
+              "+1-555-1234"
+            ],
+            "nullable": true,
+            "description": "Contact's office phone number."
+          }
+        },
+        "description": "Request schema for creating a client contact in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_ESTIMATE",
+      "description": "Tool to create a new estimate. Use after gathering client and line item details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateEstimateRequest",
+        "required": [
+          "client_id"
+        ],
+        "properties": {
+          "tax": {
+            "type": "number",
+            "title": "Tax",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              10
+            ],
+            "nullable": true,
+            "description": "First tax percentage applied to subtotal, e.g., 10.0 for 10%."
+          },
+          "tax2": {
+            "type": "number",
+            "title": "Tax2",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              5
+            ],
+            "nullable": true,
+            "description": "Second tax percentage applied to subtotal, e.g., 5.0 for 5%."
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "examples": [
+              "Thank you for your business."
+            ],
+            "nullable": true,
+            "description": "Additional notes to include on the estimate."
+          },
+          "number": {
+            "type": "string",
+            "title": "Number",
+            "default": null,
+            "examples": [
+              "2023-0001"
+            ],
+            "nullable": true,
+            "description": "If not set, the estimate number will be auto-generated."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "examples": [
+              "Website Redesign"
+            ],
+            "nullable": true,
+            "description": "Estimate subject."
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": null,
+            "examples": [
+              "USD"
+            ],
+            "nullable": true,
+            "description": "Currency for the estimate; defaults to client's currency."
+          },
+          "discount": {
+            "type": "number",
+            "title": "Discount",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              15
+            ],
+            "nullable": true,
+            "description": "Discount percentage subtracted from subtotal, e.g., 15.0 for 15%."
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "examples": [
+              123456
+            ],
+            "description": "ID of the client this estimate belongs to."
+          },
+          "issue_date": {
+            "type": "string",
+            "title": "Issue Date",
+            "default": null,
+            "examples": [
+              "2023-04-01"
+            ],
+            "nullable": true,
+            "description": "Date the estimate was issued (YYYY-MM-DD); defaults to today."
+          },
+          "line_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "EstimateLineItem",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "title": "Kind",
+                  "default": null,
+                  "examples": [
+                    "Services"
+                  ],
+                  "nullable": true,
+                  "description": "The name of an estimate item category."
+                },
+                "taxed": {
+                  "type": "boolean",
+                  "title": "Taxed",
+                  "default": null,
+                  "examples": [
+                    false
+                  ],
+                  "nullable": true,
+                  "description": "Whether the estimate's first tax percentage applies to this line item."
+                },
+                "taxed2": {
+                  "type": "boolean",
+                  "title": "Taxed2",
+                  "default": null,
+                  "examples": [
+                    false
+                  ],
+                  "nullable": true,
+                  "description": "Whether the estimate's second tax percentage applies to this line item."
+                },
+                "quantity": {
+                  "type": "number",
+                  "title": "Quantity",
+                  "default": null,
+                  "minimum": 0,
+                  "examples": [
+                    1
+                  ],
+                  "nullable": true,
+                  "description": "Unit quantity of the item (defaults to 1)."
+                },
+                "unit_price": {
+                  "type": "number",
+                  "title": "Unit Price",
+                  "default": null,
+                  "minimum": 0,
+                  "examples": [
+                    150
+                  ],
+                  "nullable": true,
+                  "description": "Individual price per unit (defaults to 0.0)."
+                },
+                "description": {
+                  "type": "string",
+                  "title": "Description",
+                  "default": null,
+                  "examples": [
+                    "Web design work"
+                  ],
+                  "nullable": true,
+                  "description": "Text description of the line item."
+                }
+              },
+              "description": "A line item to include in the estimate."
+            },
+            "title": "Line Items",
+            "default": null,
+            "nullable": true,
+            "description": "List of line items to include on the estimate."
+          },
+          "purchase_order": {
+            "type": "string",
+            "title": "Purchase Order",
+            "default": null,
+            "examples": [
+              "PO-7890"
+            ],
+            "nullable": true,
+            "description": "The purchase order number."
+          }
+        },
+        "description": "Parameters for creating a Harvest estimate."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_ESTIMATE_ITEM_CATEGORY",
+      "description": "Tool to create a new estimate item category in Harvest. Use after deciding to categorize line items within an estimate.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateEstimateItemCategoryRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Materials"
+            ],
+            "description": "The name of the estimate item category."
+          }
+        }
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_ESTIMATE_MESSAGE",
+      "description": "Tool to create a new message for an estimate. Use when you have an estimate ID and want to send a message or run an event (send, accept, decline, re-open) on the estimate.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateEstimateMessageRequest",
+        "required": [
+          "estimate_id"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "default": null,
+            "nullable": true,
+            "description": "The message body."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "nullable": true,
+            "description": "The message subject."
+          },
+          "event_type": {
+            "enum": [
+              "accept",
+              "decline",
+              "re-open",
+              "send"
+            ],
+            "type": "string",
+            "title": "Event Type",
+            "default": null,
+            "nullable": true,
+            "description": "If provided, runs an event on the estimate. Options: accept, decline, re-open, or send."
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "EstimateMessageRecipientParam",
+              "required": [
+                "email"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Name of the message recipient."
+                },
+                "email": {
+                  "type": "string",
+                  "title": "Email",
+                  "description": "Email of the message recipient."
+                }
+              },
+              "description": "Recipient parameter for creating a message."
+            },
+            "title": "Recipients",
+            "default": null,
+            "nullable": true,
+            "description": "Array of recipient parameters. Required unless performing an event-only call."
+          },
+          "estimate_id": {
+            "type": "integer",
+            "title": "Estimate Id",
+            "minimum": 1,
+            "examples": [
+              1439818
+            ],
+            "description": "ID of the estimate to add a message to."
+          },
+          "send_me_a_copy": {
+            "type": "boolean",
+            "title": "Send Me A Copy",
+            "default": null,
+            "nullable": true,
+            "description": "Whether to email a copy of the message to the current user. Defaults to false."
+          }
+        },
+        "description": "Request model for creating a new estimate message."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_EXPENSE",
+      "description": "Tool to create a new expense entry. Use when recording costs against projects. Ensure either units or total_cost is provided.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateExpenseRequest",
+        "required": [
+          "project_id",
+          "expense_category_id",
+          "spent_date"
+        ],
+        "properties": {
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "examples": [
+              "Lunch with client"
+            ],
+            "nullable": true,
+            "description": "Textual notes describing the expense."
+          },
+          "units": {
+            "type": "number",
+            "title": "Units",
+            "default": null,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Quantity of units to use for calculating total_cost. Required for unit-based categories."
+          },
+          "receipt": {
+            "type": "string",
+            "title": "Receipt",
+            "default": null,
+            "nullable": true,
+            "description": "Receipt file to attach. Multipart/form-data upload not supported by this tool."
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "default": null,
+            "examples": [
+              1782959
+            ],
+            "nullable": true,
+            "description": "ID of the user associated with this expense. Defaults to the authenticated user."
+          },
+          "billable": {
+            "type": "boolean",
+            "title": "Billable",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Whether the expense is billable. Defaults to true."
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id",
+            "examples": [
+              14308069
+            ],
+            "description": "ID of the project associated with this expense."
+          },
+          "spent_date": {
+            "type": "string",
+            "title": "Spent Date",
+            "format": "date",
+            "examples": [
+              "2017-03-01"
+            ],
+            "description": "Date the expense occurred (YYYY-MM-DD)."
+          },
+          "total_cost": {
+            "type": "number",
+            "title": "Total Cost",
+            "default": null,
+            "examples": [
+              13.59
+            ],
+            "nullable": true,
+            "description": "Total amount of the expense. Required if not using a unit-based category."
+          },
+          "expense_category_id": {
+            "type": "integer",
+            "title": "Expense Category Id",
+            "examples": [
+              4195926
+            ],
+            "description": "ID of the expense category this expense is tracked against."
+          }
+        },
+        "description": "Request model for creating a new expense in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_INVOICE",
+      "description": "Tool to create a new invoice. Use when you have gathered all invoice details and need to bill a client in Harvest.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateInvoiceRequest",
+        "required": [
+          "client_id",
+          "line_items"
+        ],
+        "properties": {
+          "tax": {
+            "type": "number",
+            "title": "Tax",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              5
+            ],
+            "nullable": true,
+            "description": "First tax rate applied to the invoice (0-100)."
+          },
+          "tax2": {
+            "type": "number",
+            "title": "Tax2",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              2.5
+            ],
+            "nullable": true,
+            "description": "Second tax rate applied to the invoice (0-100)."
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "examples": [
+              "Thank you for your business!"
+            ],
+            "nullable": true,
+            "description": "Additional notes on the invoice."
+          },
+          "state": {
+            "enum": [
+              "draft",
+              "open",
+              "paid",
+              "closed"
+            ],
+            "type": "string",
+            "title": "State",
+            "default": null,
+            "nullable": true,
+            "description": "State of the invoice. Options: 'draft', 'open', 'paid', 'closed'."
+          },
+          "number": {
+            "type": "string",
+            "title": "Number",
+            "default": null,
+            "examples": [
+              "INV-1001"
+            ],
+            "nullable": true,
+            "description": "Custom invoice number (e.g., 'INV-1001')."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "examples": [
+              "January Consulting"
+            ],
+            "nullable": true,
+            "description": "Subject of the invoice."
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": null,
+            "examples": [
+              "USD"
+            ],
+            "nullable": true,
+            "description": "Currency code (e.g., 'USD')."
+          },
+          "discount": {
+            "type": "number",
+            "title": "Discount",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              10
+            ],
+            "nullable": true,
+            "description": "Percentage discount applied to the invoice (0-100)."
+          },
+          "due_date": {
+            "type": "string",
+            "title": "Due Date",
+            "default": null,
+            "examples": [
+              "2023-02-15"
+            ],
+            "nullable": true,
+            "description": "Date the invoice is due (YYYY-MM-DD)."
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "minimum": 1,
+            "examples": [
+              12345
+            ],
+            "description": "ID of the client to associate with the invoice."
+          },
+          "issue_date": {
+            "type": "string",
+            "title": "Issue Date",
+            "default": null,
+            "examples": [
+              "2023-01-15"
+            ],
+            "nullable": true,
+            "description": "Date the invoice was issued (YYYY-MM-DD)."
+          },
+          "line_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "LineItem",
+              "required": [
+                "kind",
+                "description",
+                "quantity",
+                "unit_price"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "title": "Kind",
+                  "examples": [
+                    "Service"
+                  ],
+                  "description": "The name of an invoice item category."
+                },
+                "taxed": {
+                  "type": "boolean",
+                  "title": "Taxed",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Whether the invoice's `tax` percentage applies to this line item."
+                },
+                "taxed2": {
+                  "type": "boolean",
+                  "title": "Taxed2",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Whether the invoice's `tax2` percentage applies to this line item."
+                },
+                "quantity": {
+                  "type": "number",
+                  "title": "Quantity",
+                  "minimum": 0,
+                  "examples": [
+                    10.5
+                  ],
+                  "nullable": true,
+                  "description": "The unit quantity of the item."
+                },
+                "unit_price": {
+                  "type": "number",
+                  "title": "Unit Price",
+                  "minimum": 0,
+                  "examples": [
+                    150
+                  ],
+                  "nullable": true,
+                  "description": "The individual price per unit."
+                },
+                "description": {
+                  "type": "string",
+                  "title": "Description",
+                  "examples": [
+                    "Consulting services"
+                  ],
+                  "description": "Text description of the line item."
+                }
+              }
+            },
+            "title": "Line Items",
+            "description": "Array of line item objects to include in the invoice."
+          },
+          "purchase_order": {
+            "type": "string",
+            "title": "Purchase Order",
+            "default": null,
+            "examples": [
+              "PO-1234"
+            ],
+            "nullable": true,
+            "description": "Purchase order number."
+          }
+        }
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_INVOICE_ITEM_CATEGORY",
+      "description": "Tool to create a new invoice item category. Use after you have decided on the category name to register it in Harvest.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateInvoiceItemCategoryRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Hosting"
+            ],
+            "description": "The name of the invoice item category."
+          }
+        },
+        "description": "Request model for CREATE_INVOICE_ITEM_CATEGORY."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_INVOICE_MESSAGE",
+      "description": "Tool to create a new message for an invoice. Use after confirming the invoice ID when you need to notify a client with invoice details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateInvoiceMessageRequest",
+        "required": [
+          "invoice_id"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "default": null,
+            "examples": [
+              "Please review the attached invoice."
+            ],
+            "nullable": true,
+            "description": "The message body"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "examples": [
+              "Your Invoice is Ready"
+            ],
+            "nullable": true,
+            "description": "The message subject"
+          },
+          "thank_you": {
+            "type": "boolean",
+            "title": "Thank You",
+            "default": false,
+            "nullable": true,
+            "description": "If true, send a thank you message email"
+          },
+          "attach_pdf": {
+            "type": "boolean",
+            "title": "Attach Pdf",
+            "default": false,
+            "nullable": true,
+            "description": "If true, attach a PDF of the invoice to the message email"
+          },
+          "event_type": {
+            "enum": [
+              "close",
+              "draft",
+              "re-open",
+              "send"
+            ],
+            "type": "string",
+            "title": "Event Type",
+            "default": null,
+            "examples": [
+              "send"
+            ],
+            "nullable": true,
+            "description": "Invoice event type: omit or 'send' to send the message; 'close','draft','re-open' for state changes without emailing"
+          },
+          "invoice_id": {
+            "type": "integer",
+            "title": "Invoice Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "ID of the invoice to message"
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "Recipient",
+              "required": [
+                "email"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "default": null,
+                  "examples": [
+                    "Jane Doe"
+                  ],
+                  "nullable": true,
+                  "description": "Name of the message recipient"
+                },
+                "email": {
+                  "type": "string",
+                  "title": "Email",
+                  "examples": [
+                    "client@example.com"
+                  ],
+                  "description": "Email of the message recipient"
+                }
+              },
+              "description": "A single invoice message recipient."
+            },
+            "title": "Recipients",
+            "default": null,
+            "nullable": true,
+            "description": "List of message recipients; at least one email is required"
+          },
+          "send_me_a_copy": {
+            "type": "boolean",
+            "title": "Send Me A Copy",
+            "default": false,
+            "nullable": true,
+            "description": "If true, send a copy of the message email to the current user"
+          },
+          "include_link_to_client_invoice": {
+            "type": "boolean",
+            "title": "Include Link To Client Invoice",
+            "default": null,
+            "nullable": true,
+            "description": "Deprecated. Ignored if true; if false, clears payment options on the invoice."
+          }
+        },
+        "description": "Request schema for CREATE_INVOICE_MESSAGE action."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_INVOICE_PAYMENT",
+      "description": "Tool to create a new payment on an invoice. Use when recording a payment against an existing invoice.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateInvoicePaymentRequest",
+        "required": [
+          "invoice_id",
+          "amount"
+        ],
+        "properties": {
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "examples": [
+              "Paid by phone"
+            ],
+            "nullable": true,
+            "description": "Any notes to be associated with the payment."
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount",
+            "examples": [
+              1575.86
+            ],
+            "nullable": true,
+            "description": "The amount of the payment."
+          },
+          "paid_at": {
+            "type": "string",
+            "title": "Paid At",
+            "default": null,
+            "examples": [
+              "2017-07-24T13:32:18Z"
+            ],
+            "nullable": true,
+            "description": "Date and time the payment was made (ISO 8601). Pass either paid_at or paid_date, but not both."
+          },
+          "paid_date": {
+            "type": "string",
+            "title": "Paid Date",
+            "default": null,
+            "examples": [
+              "2017-07-24"
+            ],
+            "nullable": true,
+            "description": "Date the payment was made (YYYY-MM-DD). Pass either paid_date or paid_at, but not both."
+          },
+          "invoice_id": {
+            "type": "integer",
+            "title": "Invoice Id",
+            "minimum": 1,
+            "examples": [
+              13150378
+            ],
+            "description": "ID of the invoice to add a payment to."
+          },
+          "send_thank_you": {
+            "type": "boolean",
+            "title": "Send Thank You",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Whether to send a thank you email (if enabled). Only sends if invoice fully paid. Defaults to true."
+          }
+        },
+        "description": "Request model for creating a new payment on an invoice."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_PROJECT",
+      "description": "Tool to create a new project. Use after confirming the client exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateProjectRequest",
+        "required": [
+          "name",
+          "client_id"
+        ],
+        "properties": {
+          "fee": {
+            "type": "number",
+            "title": "Fee",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              2000
+            ],
+            "nullable": true,
+            "description": "The fee for the project when billing by project."
+          },
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": null,
+            "examples": [
+              "PRJ001"
+            ],
+            "nullable": true,
+            "description": "The project code."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Website Redesign"
+            ],
+            "description": "Name of the project."
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "nullable": true,
+            "description": "Any additional notes about the project."
+          },
+          "budget": {
+            "type": "number",
+            "title": "Budget",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1000
+            ],
+            "nullable": true,
+            "description": "The monetary budget for the project."
+          },
+          "bill_by": {
+            "enum": [
+              "Project",
+              "Tasks",
+              "People",
+              "None"
+            ],
+            "type": "string",
+            "title": "Bill By",
+            "default": null,
+            "examples": [
+              "Tasks"
+            ],
+            "nullable": true,
+            "description": "The method by which the project is invoiced."
+          },
+          "ends_on": {
+            "type": "string",
+            "title": "Ends On",
+            "format": "date",
+            "default": null,
+            "nullable": true,
+            "description": "Date the project ends (YYYY-MM-DD)."
+          },
+          "budget_by": {
+            "enum": [
+              "project",
+              "project_cost",
+              "task",
+              "person",
+              "none"
+            ],
+            "type": "string",
+            "title": "Budget By",
+            "default": null,
+            "examples": [
+              "project"
+            ],
+            "nullable": true,
+            "description": "The method by which the project is budgeted."
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "examples": [
+              123
+            ],
+            "description": "ID of the client to associate this project with."
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the project is active (true) or archived (false). Defaults to true."
+          },
+          "starts_on": {
+            "type": "string",
+            "title": "Starts On",
+            "format": "date",
+            "default": null,
+            "nullable": true,
+            "description": "Date the project starts (YYYY-MM-DD)."
+          },
+          "cost_budget": {
+            "type": "number",
+            "title": "Cost Budget",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              500
+            ],
+            "nullable": true,
+            "description": "The monetary cost budget for the project."
+          },
+          "hourly_rate": {
+            "type": "number",
+            "title": "Hourly Rate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              150
+            ],
+            "nullable": true,
+            "description": "The default hourly rate to use for this project when billing by project."
+          },
+          "is_billable": {
+            "type": "boolean",
+            "title": "Is Billable",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the project is billable. Defaults to true."
+          },
+          "is_fixed_fee": {
+            "type": "boolean",
+            "title": "Is Fixed Fee",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the project is a fixed-fee project."
+          },
+          "budget_is_monthly": {
+            "type": "boolean",
+            "title": "Budget Is Monthly",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the budget resets every month."
+          },
+          "show_budget_to_all": {
+            "type": "boolean",
+            "title": "Show Budget To All",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the budget is visible to all project members."
+          },
+          "notify_when_over_budget": {
+            "type": "boolean",
+            "title": "Notify When Over Budget",
+            "default": null,
+            "nullable": true,
+            "description": "Whether to send a notification when the project exceeds its budget."
+          },
+          "cost_budget_include_expenses": {
+            "type": "boolean",
+            "title": "Cost Budget Include Expenses",
+            "default": null,
+            "nullable": true,
+            "description": "Whether expenses are included in the cost budget."
+          },
+          "over_budget_notification_percentage": {
+            "type": "number",
+            "title": "Over Budget Notification Percentage",
+            "default": null,
+            "maximum": 100,
+            "minimum": 0,
+            "examples": [
+              80
+            ],
+            "nullable": true,
+            "description": "Percentage at which the over budget notification is triggered."
+          }
+        },
+        "description": "Request model for creating a new project in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_TASK",
+      "description": "Tool to create a new task. Use after identifying task details to register it in Harvest.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateTaskRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Development"
+            ],
+            "description": "The name of the task to create."
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "nullable": true,
+            "description": "Specifies if the task is active (true) or archived (false)."
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default",
+            "default": null,
+            "nullable": true,
+            "description": "Indicates if this task should be automatically added to future projects."
+          },
+          "billable_by_default": {
+            "type": "boolean",
+            "title": "Billable By Default",
+            "default": null,
+            "nullable": true,
+            "description": "Determines if the task is billable by default when added to a project."
+          },
+          "default_hourly_rate": {
+            "type": "number",
+            "title": "Default Hourly Rate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "The default hourly rate for this task when added to a project."
+          }
+        },
+        "description": "Request model for creating a new task in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_TIME_ENTRY",
+      "description": "Tool to create a new time entry. Use when logging hours for a project by specifying start/end times or duration.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateTimeEntryRequest",
+        "required": [
+          "project_id",
+          "task_id",
+          "spent_date"
+        ],
+        "properties": {
+          "hours": {
+            "type": "number",
+            "title": "Hours",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              8.5
+            ],
+            "nullable": true,
+            "description": "Total hours to log; required when not using start/end times"
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "nullable": true,
+            "description": "Notes or description of the work performed"
+          },
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id",
+            "examples": [
+              67890
+            ],
+            "description": "ID of the task to associate with the time entry"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "default": null,
+            "examples": [
+              111
+            ],
+            "nullable": true,
+            "description": "ID of the user; defaults to the authenticated user"
+          },
+          "ended_time": {
+            "type": "string",
+            "title": "Ended Time",
+            "default": null,
+            "nullable": true,
+            "description": "Time the entry ended (e.g., '5:00pm'); if omitted, timer remains running"
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id",
+            "examples": [
+              12345
+            ],
+            "description": "ID of the project to associate with the time entry"
+          },
+          "spent_date": {
+            "type": "string",
+            "title": "Spent Date",
+            "examples": [
+              "2021-09-15"
+            ],
+            "description": "Date the time entry was spent (YYYY-MM-DD)"
+          },
+          "started_time": {
+            "type": "string",
+            "title": "Started Time",
+            "default": null,
+            "nullable": true,
+            "description": "Time the entry started (e.g., '9:00am'); omit ended_time for running timer"
+          },
+          "external_reference": {
+            "type": "object",
+            "title": "ExternalReference",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "default": null,
+                "nullable": true,
+                "description": "External service's equivalent task or card ID"
+              },
+              "group_id": {
+                "type": "string",
+                "title": "Group Id",
+                "default": null,
+                "nullable": true,
+                "description": "External service's equivalent project or board ID"
+              },
+              "permalink": {
+                "type": "string",
+                "title": "Permalink",
+                "default": null,
+                "nullable": true,
+                "description": "URL of the external time tracking reference"
+              }
+            },
+            "description": "Links this entry to an external system (task, project, etc.).",
+            "additionalProperties": false
+          }
+        },
+        "description": "Parameters for creating a new time entry in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_CREATE_USER",
+      "description": "Tool to create a new user. Use after gathering user details to invite them to Harvest.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateUserRequest",
+        "required": [
+          "first_name",
+          "last_name",
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "examples": [
+              "george@example.com"
+            ],
+            "description": "The email address of the user."
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Roles",
+            "default": null,
+            "nullable": true,
+            "description": "Descriptive names of the business roles assigned to this person. Used for filtering reports, with no impact on permissions."
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": null,
+            "examples": [
+              "Eastern Time (US & Canada)"
+            ],
+            "nullable": true,
+            "description": "The user\u2019s timezone. Defaults to the company\u2019s timezone. See supported time zones in the Harvest docs."
+          },
+          "cost_rate": {
+            "type": "number",
+            "title": "Cost Rate",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "The cost rate to use for this user when calculating project costs. Defaults to 0.0."
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the user is active or archived. Defaults to true."
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name",
+            "examples": [
+              "Frank"
+            ],
+            "description": "The last name of the user."
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name",
+            "examples": [
+              "George"
+            ],
+            "description": "The first name of the user."
+          },
+          "access_roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Access Roles",
+            "default": null,
+            "nullable": true,
+            "description": "Access role(s) that determine the user\u2019s permissions in Harvest. Possible values: administrator, manager, member, and additional manager roles."
+          },
+          "is_contractor": {
+            "type": "boolean",
+            "title": "Is Contractor",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the user is a contractor or an employee. Defaults to false."
+          },
+          "weekly_capacity": {
+            "type": "integer",
+            "title": "Weekly Capacity",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              126000
+            ],
+            "nullable": true,
+            "description": "The number of hours per week this person is available to work in seconds. Defaults to 126000 (35 hours)."
+          },
+          "default_hourly_rate": {
+            "type": "number",
+            "title": "Default Hourly Rate",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "The billable rate to use for this user when added to a project. Defaults to 0.0."
+          },
+          "has_access_to_all_future_projects": {
+            "type": "boolean",
+            "title": "Has Access To All Future Projects",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the user should be automatically added to future projects. Defaults to false."
+          }
+        },
+        "description": "Request model for creating a new user in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_CLIENT",
+      "description": "Tool to delete a client. Use when you need to remove a client that has no associated projects, invoices, or estimates. Call after confirming the client_id exists and has no dependent resources.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteClientRequest",
+        "required": [
+          "client_id"
+        ],
+        "properties": {
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "The ID of the client to delete."
+          }
+        },
+        "description": "Request schema for deleting a client in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_CLIENT_CONTACT",
+      "description": "Tool to delete a client contact. Use when you need to remove a contact that is no longer relevant. Call after confirming the contact_id exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteClientContactRequest",
+        "required": [
+          "contact_id"
+        ],
+        "properties": {
+          "contact_id": {
+            "type": "integer",
+            "title": "Contact Id",
+            "description": "The ID of the contact to delete."
+          }
+        },
+        "description": "Request schema for deleting a client contact in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_ESTIMATE",
+      "description": "Tool to delete an estimate. Use when you need to remove an estimate that is no longer needed. Call after confirming the estimate_id exists and has no dependent resources.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteEstimateRequest",
+        "required": [
+          "estimate_id"
+        ],
+        "properties": {
+          "estimate_id": {
+            "type": "integer",
+            "title": "Estimate Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "The ID of the estimate to delete."
+          }
+        },
+        "description": "Request schema for deleting an estimate in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_ESTIMATE_MESSAGE",
+      "description": "Tool to delete an estimate message. Use when you need to remove a message from an estimate. Call after confirming estimate_id and message_id are correct.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteEstimateMessageRequest",
+        "required": [
+          "estimate_id",
+          "message_id"
+        ],
+        "properties": {
+          "message_id": {
+            "type": "integer",
+            "title": "Message Id",
+            "minimum": 1,
+            "examples": [
+              654321
+            ],
+            "description": "The ID of the message to delete from the estimate."
+          },
+          "estimate_id": {
+            "type": "integer",
+            "title": "Estimate Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "The ID of the estimate."
+          }
+        },
+        "description": "Request schema for deleting an estimate message."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_INVOICE",
+      "description": "Tool to delete an invoice. Use when you need to remove an invoice that has no associated payments. Call after confirming the invoice_id exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteInvoiceRequest",
+        "required": [
+          "invoice_id"
+        ],
+        "properties": {
+          "invoice_id": {
+            "type": "integer",
+            "title": "Invoice Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "The ID of the invoice to delete."
+          }
+        },
+        "description": "Request schema for deleting an invoice in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_INVOICE_ITEM_CATEGORY",
+      "description": "Tool to delete an invoice item category. Use when you need to remove an obsolete or incorrect invoice item category. Call after confirming the invoice_item_category_id exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteInvoiceItemCategoryRequest",
+        "required": [
+          "invoice_item_category_id"
+        ],
+        "properties": {
+          "invoice_item_category_id": {
+            "type": "integer",
+            "title": "Invoice Item Category Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "The ID of the invoice item category to delete."
+          }
+        },
+        "description": "Request schema for deleting an invoice item category in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_INVOICE_MESSAGE",
+      "description": "Tool to delete a message from an invoice. Use when you need to remove a specific message that is no longer relevant. Call after confirming the invoice_id and message_id.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteInvoiceMessageRequest",
+        "required": [
+          "invoice_id",
+          "message_id"
+        ],
+        "properties": {
+          "invoice_id": {
+            "type": "integer",
+            "title": "Invoice Id",
+            "minimum": 1,
+            "examples": [
+              13150403
+            ],
+            "description": "The ID of the invoice to delete a message from."
+          },
+          "message_id": {
+            "type": "integer",
+            "title": "Message Id",
+            "minimum": 1,
+            "examples": [
+              27835324
+            ],
+            "description": "The ID of the message to be deleted."
+          }
+        },
+        "description": "Request schema for deleting an invoice message in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_INVOICE_PAYMENT",
+      "description": "Tool to delete an invoice payment. Use when you need to remove a payment from an invoice after confirming payment details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteInvoicePaymentRequest",
+        "required": [
+          "invoice_id",
+          "payment_id"
+        ],
+        "properties": {
+          "invoice_id": {
+            "type": "integer",
+            "title": "Invoice Id",
+            "minimum": 1,
+            "examples": [
+              1234
+            ],
+            "description": "The ID of the invoice containing the payment to delete."
+          },
+          "payment_id": {
+            "type": "integer",
+            "title": "Payment Id",
+            "minimum": 1,
+            "examples": [
+              5678
+            ],
+            "description": "The ID of the invoice payment to delete."
+          }
+        },
+        "description": "Request schema for deleting an invoice payment in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_PROJECT",
+      "description": "Tool to delete a project. Use when you need to remove a project and all its associated time entries and expenses; invoices remain intact. Call after confirming the project_id exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteProjectRequest",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id",
+            "minimum": 1,
+            "examples": [
+              987654
+            ],
+            "description": "The ID of the project to delete."
+          }
+        },
+        "description": "Request schema for deleting a project in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_TASK",
+      "description": "Tool to delete a task. Use when you need to remove a task that has no associated time entries. Call after confirming the task_id exists and has no dependent time entries.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTaskRequest",
+        "required": [
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "The ID of the task to delete."
+          }
+        },
+        "description": "Request schema for deleting a task in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_TIME_ENTRY",
+      "description": "Tool to delete a time entry. Use when removing an existing time entry that is deletable (not closed or on archived projects/tasks). Call after confirming the time_entry_id exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTimeEntryRequest",
+        "required": [
+          "time_entry_id"
+        ],
+        "properties": {
+          "time_entry_id": {
+            "type": "integer",
+            "title": "Time Entry Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "The ID of the time entry to delete."
+          }
+        },
+        "description": "Request schema for deleting a time entry in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_DELETE_USER",
+      "description": "Tool to delete a user. Use when you need to remove a user that has no associated time entries or expenses. Call after confirming the user_id exists and has no dependent time entries or expenses.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteUserRequest",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "The ID of the user to delete."
+          }
+        },
+        "description": "Request schema for deleting a user in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_GET_CLIENT",
+      "description": "Tool to retrieve a specific client by ID. Use when you need details of a client before invoicing or reporting.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetClientRequest",
+        "required": [
+          "client_id"
+        ],
+        "properties": {
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "minimum": 1,
+            "examples": [
+              12345
+            ],
+            "description": "The ID of the client to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific client by ID."
+      }
+    },
+    {
+      "name": "HARVEST_GET_CLIENT_CONTACT",
+      "description": "Tool to retrieve a specific client contact. Use when you have client_id and contact_id to fetch and verify contact details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetClientContactRequest",
+        "required": [
+          "client_id",
+          "contact_id"
+        ],
+        "properties": {
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "ID of the client the contact belongs to."
+          },
+          "contact_id": {
+            "type": "integer",
+            "title": "Contact Id",
+            "minimum": 1,
+            "examples": [
+              654321
+            ],
+            "description": "ID of the contact to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific client contact."
+      }
+    },
+    {
+      "name": "HARVEST_GET_COMPANY_INFO",
+      "description": "Tool to retrieve information about the authenticated user's company. Use after authentication to fetch company settings for display or configuration.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCompanyInfoRequest",
+        "properties": {},
+        "description": "Request model for retrieving company information. No parameters required."
+      }
+    },
+    {
+      "name": "HARVEST_GET_ESTIMATE",
+      "description": "Tool to retrieve a specific estimate by ID. Use after confirming the estimate ID. Example: \"Get estimate with ID 123456\".",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetEstimateRequest",
+        "required": [
+          "estimate_id"
+        ],
+        "properties": {
+          "estimate_id": {
+            "type": "integer",
+            "title": "Estimate Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "ID of the estimate to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific estimate by ID."
+      }
+    },
+    {
+      "name": "HARVEST_GET_INVOICE",
+      "description": "Tool to retrieve a specific invoice by ID. Use when you need the full details of an invoice after selecting or creating it. Example: 'Get invoice with ID 13150378.'",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetInvoiceRequest",
+        "required": [
+          "invoice_id"
+        ],
+        "properties": {
+          "invoice_id": {
+            "type": "integer",
+            "title": "Invoice Id",
+            "minimum": 1,
+            "examples": [
+              13150378
+            ],
+            "description": "Unique ID of the invoice to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific invoice by ID."
+      }
+    },
+    {
+      "name": "HARVEST_GET_PROJECT",
+      "description": "Tool to retrieve a specific Harvest project by ID. Use when you have a project ID and need its details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetProjectRequest",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id",
+            "examples": [
+              123456
+            ],
+            "description": "The ID of the Harvest project to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific project by ID."
+      }
+    },
+    {
+      "name": "HARVEST_GET_TASK",
+      "description": "Tool to retrieve a specific task by ID. Use when you have a task ID and need its detailed information.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTaskRequest",
+        "required": [
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id",
+            "examples": [
+              123456
+            ],
+            "description": "Unique ID of the task to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific task by ID."
+      }
+    },
+    {
+      "name": "HARVEST_GET_TIME_ENTRY",
+      "description": "Tool to retrieve a single time entry by ID. Use when you have a specific time entry ID and need its full details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTimeEntryRequest",
+        "required": [
+          "time_entry_id"
+        ],
+        "properties": {
+          "time_entry_id": {
+            "type": "integer",
+            "title": "Time Entry Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "The ID of the time entry to retrieve."
+          }
+        },
+        "description": "Request schema for retrieving a single time entry."
+      }
+    },
+    {
+      "name": "HARVEST_GET_USER",
+      "description": "Tool to retrieve a specific user by ID. Use after obtaining a valid user ID (for example via List Users). Example: \"Get details of user 3230547\".",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUserRequest",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "The unique ID of the user to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific user by ID in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_CLIENT_CONTACTS",
+      "description": "Tool to list client contacts. Use when you need to retrieve contacts with optional filtering and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListClientContactsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number to use in pagination."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Number of records to return per page."
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "default": null,
+            "examples": [
+              123456
+            ],
+            "nullable": true,
+            "description": "Only return contacts belonging to the client with this ID."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "default": null,
+            "examples": [
+              "2021-03-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return contacts updated since this date/time (ISO 8601)."
+          }
+        },
+        "description": "Request model for listing client contacts."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_CLIENTS",
+      "description": "Tool to list clients. Use when you need to retrieve a paginated list of clients from Harvest. Ensure you have a valid access token in metadata before calling.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListClientsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "DEPRECATED. Page number for pagination. Defaults to 1."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 2000,
+            "minimum": 1,
+            "examples": [
+              100,
+              2000
+            ],
+            "nullable": true,
+            "description": "The number of records to return per page. Min 1, max 2000. Defaults to 2000."
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Pass true to only return active clients and false to return inactive clients."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2021-03-15T12:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return clients that have been updated since the given date and time, in ISO 8601 format."
+          }
+        },
+        "description": "Request model for listing clients in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_ESTIMATE_MESSAGES",
+      "description": "Tool to list messages for an estimate. Use after obtaining an estimate ID to retrieve associated messages, supports pagination and filtering by update time.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListEstimateMessagesRequest",
+        "required": [
+          "estimate_id"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              2
+            ],
+            "nullable": true,
+            "description": "DEPRECATED. Page number for pagination. Defaults to 1."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 2000,
+            "minimum": 1,
+            "examples": [
+              1000
+            ],
+            "nullable": true,
+            "description": "Number of records per page, between 1 and 2000. Defaults to 2000."
+          },
+          "estimate_id": {
+            "type": "integer",
+            "title": "Estimate Id",
+            "minimum": 1,
+            "examples": [
+              1439818
+            ],
+            "description": "ID of the estimate to retrieve messages for."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2020-01-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return estimate messages updated since the given date and time, in ISO 8601 format."
+          }
+        },
+        "description": "Request model for listing estimate messages in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_EXPENSE_CATEGORIES",
+      "description": "Tool to list expense categories. Use when you need to retrieve a paginated list of expense categories, optionally filtering by active status or last update timestamp.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListExpenseCategoriesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 2000,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Number of records to return per page (1\u20132000)."
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Pass true to return only active expense categories; false to return only inactive categories."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2023-01-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return expense categories updated since the given date and time (ISO 8601)."
+          }
+        },
+        "description": "Request model for listing expense categories in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_INVOICE_ITEM_CATEGORIES",
+      "description": "Tool to retrieve invoice item categories. Use when you need to fetch a paginated list of invoice item categories in Harvest.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInvoiceItemCategoriesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "DEPRECATED. Page number for pagination. Defaults to 1."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 2000,
+            "minimum": 1,
+            "examples": [
+              100,
+              2000
+            ],
+            "nullable": true,
+            "description": "The number of records to return per page. Min 1, max 2000. Defaults to 2000."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2021-03-15T12:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return invoice item categories that have been updated since the given date and time, in ISO 8601 format."
+          }
+        },
+        "description": "Request model for listing invoice item categories in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_INVOICE_MESSAGES",
+      "description": "Tool to list messages associated with a given invoice. Use when you need to retrieve invoice messages with optional filtering by update time and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInvoiceMessagesRequest",
+        "required": [
+          "invoice_id"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number to use in pagination (deprecated, defaults to 1)."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 2000,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Number of records to return per page (1-2000, defaults to 2000)."
+          },
+          "invoice_id": {
+            "type": "integer",
+            "title": "Invoice Id",
+            "examples": [
+              123456
+            ],
+            "description": "ID of the invoice to retrieve messages for."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "default": null,
+            "examples": [
+              "2021-04-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return messages updated since this date/time (ISO 8601)."
+          }
+        },
+        "description": "Request model for listing invoice messages."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_INVOICE_PAYMENTS",
+      "description": "Tool to retrieve payments for a specific invoice. Use when you need to list all payments applied to an invoice after confirming the invoice exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInvoicePaymentsRequest",
+        "required": [
+          "invoice_id"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1,
+              2
+            ],
+            "nullable": true,
+            "description": "DEPRECATED. Page number for pagination (defaults to 1)."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 2000,
+            "minimum": 1,
+            "examples": [
+              100,
+              500
+            ],
+            "nullable": true,
+            "description": "Number of records per page (1\u20132000; defaults to 2000)."
+          },
+          "invoice_id": {
+            "type": "integer",
+            "title": "Invoice Id",
+            "examples": [
+              12345
+            ],
+            "description": "Unique ID of the invoice to retrieve payments for."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2021-03-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return invoice payments updated since this date and time (ISO 8601)."
+          }
+        },
+        "description": "Request model for listing payments for a given invoice."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_INVOICES",
+      "description": "Tool to list invoices. Use when you need to retrieve invoices filtered by client, project, date range, or state. Example: 'List invoices for client 5735776 from 2023-01-01 to 2023-01-31.'",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInvoicesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination. Defaults to 1."
+          },
+          "state": {
+            "enum": [
+              "draft",
+              "open",
+              "paid",
+              "closed"
+            ],
+            "type": "string",
+            "title": "State",
+            "default": null,
+            "examples": [
+              "open"
+            ],
+            "nullable": true,
+            "description": "Only return invoices with a state matching this value."
+          },
+          "to_date": {
+            "type": "string",
+            "title": "To Date",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2021-03-31"
+            ],
+            "nullable": true,
+            "description": "Only return invoices with an issue_date on or before the given date (YYYY-MM-DD)."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 2000,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Number of records to return per page. 1\u20132000. Defaults to 100."
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "default": null,
+            "examples": [
+              5735776
+            ],
+            "nullable": true,
+            "description": "Only return invoices belonging to the client with the given ID."
+          },
+          "from_date": {
+            "type": "string",
+            "title": "From Date",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2021-03-01"
+            ],
+            "nullable": true,
+            "description": "Only return invoices with an issue_date on or after the given date (YYYY-MM-DD)."
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id",
+            "default": null,
+            "examples": [
+              14308069
+            ],
+            "nullable": true,
+            "description": "Only return invoices associated with the project with the given ID."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2021-03-15T12:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return invoices that have been updated since the given date and time, in ISO 8601 format."
+          }
+        },
+        "description": "Request model for listing invoices in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_PROJECTS",
+      "description": "Tool to list projects. Use when you need to retrieve a paginated list of projects from Harvest. Ensure a valid access token is present in metadata before calling.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListProjectsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination. Defaults to 1."
+          },
+          "client": {
+            "type": "integer",
+            "title": "Client",
+            "default": null,
+            "examples": [
+              123456
+            ],
+            "nullable": true,
+            "description": "Filter projects by the client ID."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Number of records per page. Min 1, max 100. Defaults to 100."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2021-03-15T12:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return projects updated since the given date/time (ISO 8601)."
+          }
+        },
+        "description": "Request model for listing projects in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_TASKS",
+      "description": "Tool to list tasks. Use when you need to retrieve a paginated list of tasks from Harvest. Ensure you have a valid access token in metadata before calling.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTasksRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination. Defaults to 1."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "The number of records to return per page. Min 1, max 100. Defaults to 100."
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Pass true to only return active tasks and false to return archived tasks."
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Pass true to only return default tasks."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2021-03-15T12:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return tasks that have been updated since the given date and time, in ISO 8601 format."
+          }
+        },
+        "description": "Request model for listing tasks in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_TIME_ENTRIES",
+      "description": "Tool to retrieve a list of time entries. Use when you need to fetch tracked hours with filters or date ranges for reporting or invoicing. Example: \"List time entries for project 123 between 2023-01-01 and 2023-01-31\".",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTimeEntriesRequest",
+        "properties": {
+          "to": {
+            "type": "string",
+            "title": "To",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-01-31"
+            ],
+            "nullable": true,
+            "description": "Only return time entries with a spent_date on or before this date (YYYY-MM-DD)."
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination."
+          },
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id",
+            "default": null,
+            "examples": [
+              321
+            ],
+            "nullable": true,
+            "description": "Only return time entries belonging to the task with the given ID."
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "default": null,
+            "examples": [
+              123
+            ],
+            "nullable": true,
+            "description": "Only return time entries belonging to the user with the given ID."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 2000,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Number of records to return per page (1\u20132000)."
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "default": null,
+            "examples": [
+              456
+            ],
+            "nullable": true,
+            "description": "Only return time entries belonging to the client with the given ID."
+          },
+          "from_date": {
+            "type": "string",
+            "title": "From Date",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-01-01"
+            ],
+            "nullable": true,
+            "description": "Only return time entries with a spent_date on or after this date (YYYY-MM-DD)."
+          },
+          "is_billed": {
+            "type": "boolean",
+            "title": "Is Billed",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Pass true to return invoiced entries, false for unbilled entries."
+          },
+          "is_running": {
+            "type": "boolean",
+            "title": "Is Running",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Pass true to return running timers, false for stopped entries."
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id",
+            "default": null,
+            "examples": [
+              789
+            ],
+            "nullable": true,
+            "description": "Only return time entries belonging to the project with the given ID."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2023-03-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return time entries updated since this date and time (ISO 8601)."
+          },
+          "external_reference_id": {
+            "type": "string",
+            "title": "External Reference Id",
+            "default": null,
+            "examples": [
+              "ref-123"
+            ],
+            "nullable": true,
+            "description": "Only return time entries with the given external reference ID."
+          }
+        },
+        "description": "Request model for listing time entries in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_LIST_USERS",
+      "description": "Tool to list users. Use when you need to retrieve a paginated list of users from Harvest.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListUsersRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "DEPRECATED. Page number for pagination. Defaults to 1."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 2000,
+            "minimum": 1,
+            "examples": [
+              100,
+              2000
+            ],
+            "nullable": true,
+            "description": "The number of records to return per page. Min 1, max 2000. Defaults to 2000."
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Pass true to only return active users and false to return inactive users."
+          },
+          "updated_since": {
+            "type": "string",
+            "title": "Updated Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2021-03-15T12:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return users that have been updated since the given date and time, in ISO 8601 format."
+          }
+        },
+        "description": "Request model for listing users in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_CLIENT",
+      "description": "Tool to update an existing client. Use after retrieving client details to modify its properties. Supports partial updates; omit fields to leave them unchanged.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateClientRequest",
+        "required": [
+          "client_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Acme Corporation Updated"
+            ],
+            "nullable": true,
+            "description": "A textual description of the client."
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "default": null,
+            "examples": [
+              "123 Main St\nAnytown, CA 12345"
+            ],
+            "nullable": true,
+            "description": "The client's physical address. May include new line characters."
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": null,
+            "examples": [
+              "USD",
+              "EUR"
+            ],
+            "nullable": true,
+            "description": "ISO currency code for the client."
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "examples": [
+              123456
+            ],
+            "description": "Unique ID of the client to update"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Whether the client is active or archived."
+          }
+        },
+        "description": "Request model for updating an existing client in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_CLIENT_CONTACT",
+      "description": "Tool to update a client contact. Use when you have a contact_id and need to modify its details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateClientContactRequest",
+        "required": [
+          "contact_id"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "default": null,
+            "examples": [
+              "john.doe@example.com"
+            ],
+            "nullable": true,
+            "description": "Contact's email address."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "examples": [
+              "Director of Marketing"
+            ],
+            "nullable": true,
+            "description": "Title of the contact (e.g., 'Director of Ops')."
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name",
+            "default": null,
+            "examples": [
+              "Doe"
+            ],
+            "nullable": true,
+            "description": "Last name of the contact."
+          },
+          "contact_id": {
+            "type": "integer",
+            "title": "Contact Id",
+            "minimum": 1,
+            "examples": [
+              12345
+            ],
+            "description": "ID of the contact to update."
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name",
+            "default": null,
+            "examples": [
+              "John"
+            ],
+            "nullable": true,
+            "description": "First name of the contact."
+          },
+          "phone_mobile": {
+            "type": "string",
+            "title": "Phone Mobile",
+            "default": null,
+            "examples": [
+              "+1-555-5678"
+            ],
+            "nullable": true,
+            "description": "Contact's mobile phone number."
+          },
+          "phone_office": {
+            "type": "string",
+            "title": "Phone Office",
+            "default": null,
+            "examples": [
+              "+1-555-1234"
+            ],
+            "nullable": true,
+            "description": "Contact's office phone number."
+          }
+        },
+        "description": "Request schema for updating a client contact in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_COMPANY_INFO",
+      "description": "Tool to update information about the company. Use to modify company settings such as name, timezone, or formatting options. Use after obtaining current settings to apply changes.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateCompanyInfoRequest",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Acme Corporation"
+            ],
+            "nullable": true,
+            "description": "The name of the company."
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": null,
+            "examples": [
+              "USD",
+              "EUR"
+            ],
+            "nullable": true,
+            "description": "The ISO currency code for the company."
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": null,
+            "examples": [
+              "America/Los_Angeles",
+              "Europe/Berlin"
+            ],
+            "nullable": true,
+            "description": "The timezone for the company, in IANA format."
+          },
+          "color_scheme": {
+            "type": "string",
+            "title": "Color Scheme",
+            "default": null,
+            "nullable": true,
+            "description": "Color scheme for the Harvest UI (e.g., 'green', 'blue')."
+          },
+          "decimal_symbol": {
+            "type": "string",
+            "title": "Decimal Symbol",
+            "default": null,
+            "examples": [
+              ".",
+              ","
+            ],
+            "nullable": true,
+            "description": "Character used as a decimal separator in amounts."
+          },
+          "week_start_day": {
+            "enum": [
+              "Saturday",
+              "Sunday",
+              "Monday"
+            ],
+            "type": "string",
+            "title": "Week Start Day",
+            "default": null,
+            "examples": [
+              "Monday"
+            ],
+            "nullable": true,
+            "description": "The day the week begins in the company settings."
+          },
+          "thousands_separator": {
+            "type": "string",
+            "title": "Thousands Separator",
+            "default": null,
+            "examples": [
+              ",",
+              "_"
+            ],
+            "nullable": true,
+            "description": "Character used to separate thousands in amounts."
+          }
+        },
+        "description": "Request model for updating company information. Only include fields to modify."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_ESTIMATE",
+      "description": "Tool to update an existing estimate. Use when you need to modify specific fields of an estimate; omit parameters to leave other fields unchanged.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateEstimateRequest",
+        "required": [
+          "estimate_id"
+        ],
+        "properties": {
+          "tax": {
+            "type": "number",
+            "title": "Tax",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              10
+            ],
+            "nullable": true,
+            "description": "First tax percentage applied to the subtotal, e.g., 10.0 for 10%."
+          },
+          "tax2": {
+            "type": "number",
+            "title": "Tax2",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              5
+            ],
+            "nullable": true,
+            "description": "Second tax percentage applied to the subtotal, e.g., 5.0 for 5%."
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "examples": [
+              "Please review changes."
+            ],
+            "nullable": true,
+            "description": "Additional notes for the estimate."
+          },
+          "number": {
+            "type": "string",
+            "title": "Number",
+            "default": null,
+            "examples": [
+              "2023-0001"
+            ],
+            "nullable": true,
+            "description": "Custom estimate number. Auto-generated if omitted."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "examples": [
+              "Updated Project Quote"
+            ],
+            "nullable": true,
+            "description": "Estimate subject line."
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": null,
+            "examples": [
+              "USD"
+            ],
+            "nullable": true,
+            "description": "Currency code for the estimate; defaults to client's currency."
+          },
+          "discount": {
+            "type": "number",
+            "title": "Discount",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              15
+            ],
+            "nullable": true,
+            "description": "Discount percentage subtracted from the subtotal, e.g., 15.0 for 15%."
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              5735776
+            ],
+            "nullable": true,
+            "description": "The ID of the client this estimate belongs to."
+          },
+          "issue_date": {
+            "type": "string",
+            "title": "Issue Date",
+            "default": null,
+            "examples": [
+              "2023-06-01"
+            ],
+            "nullable": true,
+            "description": "Date the estimate was issued (YYYY-MM-DD)."
+          },
+          "line_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "EstimateRequestLineItem",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "title": "Id",
+                  "default": null,
+                  "minimum": 1,
+                  "examples": [
+                    53334195
+                  ],
+                  "nullable": true,
+                  "description": "Unique ID for the estimate line item."
+                },
+                "kind": {
+                  "type": "string",
+                  "title": "Kind",
+                  "default": null,
+                  "examples": [
+                    "Service"
+                  ],
+                  "nullable": true,
+                  "description": "The name of an estimate item category."
+                },
+                "taxed": {
+                  "type": "boolean",
+                  "title": "Taxed",
+                  "default": null,
+                  "examples": [
+                    true,
+                    false
+                  ],
+                  "nullable": true,
+                  "description": "Whether the estimate's first tax applies to this line item."
+                },
+                "taxed2": {
+                  "type": "boolean",
+                  "title": "Taxed2",
+                  "default": null,
+                  "examples": [
+                    true,
+                    false
+                  ],
+                  "nullable": true,
+                  "description": "Whether the estimate's second tax applies to this line item."
+                },
+                "quantity": {
+                  "type": "number",
+                  "title": "Quantity",
+                  "default": null,
+                  "minimum": 0,
+                  "examples": [
+                    100
+                  ],
+                  "nullable": true,
+                  "description": "Unit quantity of the item (defaults to 1)."
+                },
+                "unit_price": {
+                  "type": "number",
+                  "title": "Unit Price",
+                  "default": null,
+                  "minimum": 0,
+                  "examples": [
+                    100
+                  ],
+                  "nullable": true,
+                  "description": "Individual price per unit."
+                },
+                "description": {
+                  "type": "string",
+                  "title": "Description",
+                  "default": null,
+                  "examples": [
+                    "Phase 2 Work"
+                  ],
+                  "nullable": true,
+                  "description": "Text description of the line item."
+                }
+              },
+              "description": "A line item to include when updating an estimate."
+            },
+            "title": "Line Items",
+            "default": null,
+            "nullable": true,
+            "description": "List of line items to update or add. Omit unchanged items."
+          },
+          "estimate_id": {
+            "type": "integer",
+            "title": "Estimate Id",
+            "minimum": 1,
+            "examples": [
+              1439827
+            ],
+            "description": "Unique ID of the estimate to update."
+          },
+          "purchase_order": {
+            "type": "string",
+            "title": "Purchase Order",
+            "default": null,
+            "examples": [
+              "PO-2345"
+            ],
+            "nullable": true,
+            "description": "The purchase order number."
+          }
+        },
+        "description": "Request model for updating an existing estimate. Only include fields to modify."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_ESTIMATE_ITEM_CATEGORY",
+      "description": "Tool to update an estimate item category. Use after retrieving the category to change its name.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateEstimateItemCategoryRequest",
+        "required": [
+          "estimate_item_category_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Materials Updated"
+            ],
+            "nullable": true,
+            "description": "The new name for the estimate item category."
+          },
+          "estimate_item_category_id": {
+            "type": "integer",
+            "title": "Estimate Item Category Id",
+            "examples": [
+              123
+            ],
+            "description": "Unique ID of the estimate item category to update"
+          }
+        },
+        "description": "Request model for updating an estimate item category."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_EXPENSE",
+      "description": "Tool to update an existing expense. Use after retrieving an expense to modify project, category, date, cost, or delete a receipt; omit fields to leave unchanged.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateExpenseRequest",
+        "required": [
+          "expense_id"
+        ],
+        "properties": {
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "examples": [
+              "Client dinner expenses"
+            ],
+            "nullable": true,
+            "description": "Notes or description for the expense."
+          },
+          "units": {
+            "type": "number",
+            "title": "Units",
+            "default": null,
+            "examples": [
+              3.5
+            ],
+            "nullable": true,
+            "description": "Quantity of units used to calculate the expense total."
+          },
+          "billable": {
+            "type": "boolean",
+            "title": "Billable",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Whether the expense is billable."
+          },
+          "expense_id": {
+            "type": "integer",
+            "title": "Expense Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "Unique ID of the expense to update"
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              654321
+            ],
+            "nullable": true,
+            "description": "ID of the project associated with this expense."
+          },
+          "spent_date": {
+            "type": "string",
+            "title": "Spent Date",
+            "default": null,
+            "examples": [
+              "2021-09-15"
+            ],
+            "nullable": true,
+            "description": "Date the expense occurred (YYYY-MM-DD)"
+          },
+          "total_cost": {
+            "type": "number",
+            "title": "Total Cost",
+            "default": null,
+            "examples": [
+              150.75
+            ],
+            "nullable": true,
+            "description": "Total amount of the expense."
+          },
+          "delete_receipt": {
+            "type": "boolean",
+            "title": "Delete Receipt",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Pass true to delete the attached receipt."
+          },
+          "expense_category_id": {
+            "type": "integer",
+            "title": "Expense Category Id",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              98765
+            ],
+            "nullable": true,
+            "description": "ID of the expense category for this expense."
+          }
+        },
+        "description": "Request model for updating an existing expense in Harvest. Only include fields to modify."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_INVOICE",
+      "description": "Tool to update an existing invoice. Use after retrieving invoice details to modify its fields. Supports partial updates; omit fields to leave unchanged.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateInvoiceRequest",
+        "required": [
+          "invoice_id"
+        ],
+        "properties": {
+          "tax": {
+            "type": "number",
+            "title": "Tax",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              10
+            ],
+            "nullable": true,
+            "description": "Tax percentage applied to the invoice."
+          },
+          "tax2": {
+            "type": "number",
+            "title": "Tax2",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              2.5
+            ],
+            "nullable": true,
+            "description": "Additional tax percentage applied."
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "examples": [
+              "Thank you for your business!"
+            ],
+            "nullable": true,
+            "description": "Additional notes to include on the invoice."
+          },
+          "number": {
+            "type": "string",
+            "title": "Number",
+            "default": null,
+            "examples": [
+              "INV-1001"
+            ],
+            "nullable": true,
+            "description": "Custom invoice number."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "examples": [
+              "Consulting Services"
+            ],
+            "nullable": true,
+            "description": "The invoice subject."
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": null,
+            "examples": [
+              "USD"
+            ],
+            "nullable": true,
+            "description": "Currency code (e.g., USD)."
+          },
+          "discount": {
+            "type": "number",
+            "title": "Discount",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              5
+            ],
+            "nullable": true,
+            "description": "Discount percentage applied to the invoice."
+          },
+          "due_date": {
+            "type": "string",
+            "title": "Due Date",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-02-15"
+            ],
+            "nullable": true,
+            "description": "Date the invoice is due (YYYY-MM-DD)."
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              12345
+            ],
+            "nullable": true,
+            "description": "ID of the client this invoice belongs to."
+          },
+          "invoice_id": {
+            "type": "integer",
+            "title": "Invoice Id",
+            "minimum": 1,
+            "examples": [
+              789
+            ],
+            "description": "Unique ID of the invoice to update."
+          },
+          "issue_date": {
+            "type": "string",
+            "title": "Issue Date",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-01-15"
+            ],
+            "nullable": true,
+            "description": "Date the invoice was issued (YYYY-MM-DD)."
+          },
+          "line_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "UpdateInvoiceLineItem",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "title": "Id",
+                  "default": null,
+                  "examples": [
+                    123
+                  ],
+                  "nullable": true,
+                  "description": "Unique ID for the line item."
+                },
+                "kind": {
+                  "type": "string",
+                  "title": "Kind",
+                  "default": null,
+                  "examples": [
+                    "Service"
+                  ],
+                  "nullable": true,
+                  "description": "Name of an invoice item category."
+                },
+                "taxed": {
+                  "type": "boolean",
+                  "title": "Taxed",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Whether the invoice's tax percentage applies to this line item."
+                },
+                "taxed2": {
+                  "type": "boolean",
+                  "title": "Taxed2",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Whether the invoice's tax2 percentage applies to this line item."
+                },
+                "quantity": {
+                  "type": "number",
+                  "title": "Quantity",
+                  "default": null,
+                  "minimum": 0,
+                  "examples": [
+                    10.5
+                  ],
+                  "nullable": true,
+                  "description": "Unit quantity of the item."
+                },
+                "project_id": {
+                  "type": "integer",
+                  "title": "Project Id",
+                  "default": null,
+                  "examples": [
+                    456
+                  ],
+                  "nullable": true,
+                  "description": "ID of the project associated with the line item."
+                },
+                "unit_price": {
+                  "type": "number",
+                  "title": "Unit Price",
+                  "default": null,
+                  "minimum": 0,
+                  "examples": [
+                    150
+                  ],
+                  "nullable": true,
+                  "description": "Individual price per unit."
+                },
+                "description": {
+                  "type": "string",
+                  "title": "Description",
+                  "default": null,
+                  "examples": [
+                    "Consulting services"
+                  ],
+                  "nullable": true,
+                  "description": "Text description of the line item."
+                }
+              }
+            },
+            "title": "Line Items",
+            "default": null,
+            "nullable": true,
+            "description": "Array of line item objects to update or add."
+          },
+          "estimate_id": {
+            "type": "integer",
+            "title": "Estimate Id",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              234
+            ],
+            "nullable": true,
+            "description": "ID of the estimate associated with this invoice."
+          },
+          "retainer_id": {
+            "type": "integer",
+            "title": "Retainer Id",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              678
+            ],
+            "nullable": true,
+            "description": "ID of the retainer associated with this invoice."
+          },
+          "payment_term": {
+            "enum": [
+              "upon receipt",
+              "net 15",
+              "net 30",
+              "net 45",
+              "net 60"
+            ],
+            "type": "string",
+            "title": "Payment Term",
+            "default": null,
+            "examples": [
+              "net 30"
+            ],
+            "nullable": true,
+            "description": "Payment timeframe: 'upon receipt', 'net 15', 'net 30', 'net 45', or 'net 60'."
+          },
+          "purchase_order": {
+            "type": "string",
+            "title": "Purchase Order",
+            "default": null,
+            "examples": [
+              "PO-1234"
+            ],
+            "nullable": true,
+            "description": "The purchase order number."
+          },
+          "payment_options": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "ach",
+                "credit_card",
+                "paypal"
+              ],
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Payment Options",
+            "default": null,
+            "nullable": true,
+            "description": "Payment options available: 'ach', 'credit_card', or 'paypal'."
+          }
+        },
+        "description": "Request model for updating an existing invoice in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_PROJECT",
+      "description": "Tool to update an existing project. Use when you need to modify one or more fields of a project by its ID. Invoke after confirming the project ID and desired changes.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateProjectRequest",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "fee": {
+            "type": "number",
+            "title": "Fee",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              7500
+            ],
+            "nullable": true,
+            "description": "Fixed-fee amount to invoice for fixed-fee projects"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": null,
+            "examples": [
+              "WR2023Q2"
+            ],
+            "nullable": true,
+            "description": "Project code identifier"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Website Redesign Q2"
+            ],
+            "nullable": true,
+            "description": "Name of the project"
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "examples": [
+              "Kickoff scheduled for May 1."
+            ],
+            "nullable": true,
+            "description": "Project notes or description"
+          },
+          "budget": {
+            "type": "number",
+            "title": "Budget",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              200
+            ],
+            "nullable": true,
+            "description": "Time budget in hours when budgeting by hours"
+          },
+          "bill_by": {
+            "enum": [
+              "Project",
+              "Tasks",
+              "People",
+              "none"
+            ],
+            "type": "string",
+            "title": "Bill By",
+            "default": null,
+            "examples": [
+              "Project"
+            ],
+            "nullable": true,
+            "description": "Billing method: 'Project', 'Tasks', 'People', or 'none'"
+          },
+          "ends_on": {
+            "type": "string",
+            "title": "Ends On",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-12-31"
+            ],
+            "nullable": true,
+            "description": "Project end date (YYYY-MM-DD)"
+          },
+          "budget_by": {
+            "enum": [
+              "project",
+              "project_cost",
+              "task",
+              "task_fees",
+              "person",
+              "none"
+            ],
+            "type": "string",
+            "title": "Budget By",
+            "default": null,
+            "examples": [
+              "project"
+            ],
+            "nullable": true,
+            "description": "Budgeting method: 'project' (hours per project), 'project_cost' (total fees), 'task' (hours per task), 'task_fees' (fees per task), 'person' (hours per person), or 'none'"
+          },
+          "client_id": {
+            "type": "integer",
+            "title": "Client Id",
+            "default": null,
+            "examples": [
+              5735776
+            ],
+            "nullable": true,
+            "description": "ID of the client to associate this project with"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Whether the project is active (true) or archived (false)"
+          },
+          "starts_on": {
+            "type": "string",
+            "title": "Starts On",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-05-01"
+            ],
+            "nullable": true,
+            "description": "Project start date (YYYY-MM-DD)"
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id",
+            "examples": [
+              14308112
+            ],
+            "description": "Unique ID of the project to update"
+          },
+          "cost_budget": {
+            "type": "number",
+            "title": "Cost Budget",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              5000
+            ],
+            "nullable": true,
+            "description": "Monetary budget when budgeting by money"
+          },
+          "hourly_rate": {
+            "type": "number",
+            "title": "Hourly Rate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Hourly rate when billed by project hourly rate"
+          },
+          "is_billable": {
+            "type": "boolean",
+            "title": "Is Billable",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Whether time on this project is billable"
+          },
+          "is_fixed_fee": {
+            "type": "boolean",
+            "title": "Is Fixed Fee",
+            "default": null,
+            "examples": [
+              false
+            ],
+            "nullable": true,
+            "description": "Whether this is a fixed-fee project"
+          },
+          "budget_is_monthly": {
+            "type": "boolean",
+            "title": "Budget Is Monthly",
+            "default": null,
+            "examples": [
+              false
+            ],
+            "nullable": true,
+            "description": "If true, reset budget each month; defaults to false"
+          },
+          "show_budget_to_all": {
+            "type": "boolean",
+            "title": "Show Budget To All",
+            "default": null,
+            "examples": [
+              false
+            ],
+            "nullable": true,
+            "description": "Show budget to all employees; defaults to false"
+          },
+          "notify_when_over_budget": {
+            "type": "boolean",
+            "title": "Notify When Over Budget",
+            "default": null,
+            "examples": [
+              false
+            ],
+            "nullable": true,
+            "description": "Email managers when over budget; defaults to false"
+          },
+          "cost_budget_include_expenses": {
+            "type": "boolean",
+            "title": "Cost Budget Include Expenses",
+            "default": null,
+            "examples": [
+              false
+            ],
+            "nullable": true,
+            "description": "Include tracked expenses in 'project_cost' budgets; defaults to false"
+          },
+          "over_budget_notification_percentage": {
+            "type": "number",
+            "title": "Over Budget Notification Percentage",
+            "default": null,
+            "maximum": 100,
+            "minimum": 0,
+            "examples": [
+              80
+            ],
+            "nullable": true,
+            "description": "Threshold percent to trigger over-budget alerts (e.g., 80.0)"
+          }
+        },
+        "description": "Request model for updating an existing project in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_TASK",
+      "description": "Tool to update an existing task. Use after retrieving task details to modify its attributes such as name, billing defaults, or status. Supports partial updates; omit fields to leave them unchanged.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateTaskRequest",
+        "required": [
+          "task_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Design Review"
+            ],
+            "nullable": true,
+            "description": "New name for the task."
+          },
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id",
+            "examples": [
+              123456
+            ],
+            "description": "Unique ID of the task to update"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Whether this task is active (true) or archived (false)."
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Whether this task should be automatically added to future projects."
+          },
+          "billable_by_default": {
+            "type": "boolean",
+            "title": "Billable By Default",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Whether new projects with this task are billable by default."
+          },
+          "default_hourly_rate": {
+            "type": "number",
+            "title": "Default Hourly Rate",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              150
+            ],
+            "nullable": true,
+            "description": "Default hourly rate when this task is added to a project."
+          }
+        },
+        "description": "Request model for updating an existing task in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_TIME_ENTRY",
+      "description": "Tool to update an existing time entry. Use after retrieving the entry to adjust hours, notes, project, or task details. Supports partial updates; omit fields to leave unchanged.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateTimeEntryRequest",
+        "required": [
+          "time_entry_id"
+        ],
+        "properties": {
+          "hours": {
+            "type": "number",
+            "title": "Hours",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              1.5
+            ],
+            "nullable": true,
+            "description": "The updated number of hours for the time entry."
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "examples": [
+              "Completed API integration"
+            ],
+            "nullable": true,
+            "description": "The updated notes for the time entry."
+          },
+          "task_id": {
+            "type": "integer",
+            "title": "Task Id",
+            "default": null,
+            "examples": [
+              67890
+            ],
+            "nullable": true,
+            "description": "ID of the task associated with the time entry."
+          },
+          "ended_time": {
+            "type": "string",
+            "title": "Ended Time",
+            "default": null,
+            "nullable": true,
+            "description": "The time the entry ended (e.g., '5:00pm'); if omitted, timer remains running"
+          },
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id",
+            "default": null,
+            "examples": [
+              12345
+            ],
+            "nullable": true,
+            "description": "ID of the project associated with the time entry."
+          },
+          "spent_date": {
+            "type": "string",
+            "title": "Spent Date",
+            "default": null,
+            "examples": [
+              "2021-09-15"
+            ],
+            "nullable": true,
+            "description": "The date the time entry was spent (YYYY-MM-DD)"
+          },
+          "started_time": {
+            "type": "string",
+            "title": "Started Time",
+            "default": null,
+            "nullable": true,
+            "description": "The time the entry started (e.g., '9:00am'); omit ended_time for running timer"
+          },
+          "time_entry_id": {
+            "type": "integer",
+            "title": "Time Entry Id",
+            "examples": [
+              123456
+            ],
+            "description": "Unique ID of the time entry to update"
+          }
+        },
+        "description": "Request model for updating an existing time entry in Harvest."
+      }
+    },
+    {
+      "name": "HARVEST_UPDATE_USER",
+      "description": "Tool to update an existing user. Use when you need to modify a user's profile or settings after confirming the user ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateUserRequest",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "default": null,
+            "examples": [
+              "george@example.com"
+            ],
+            "nullable": true,
+            "description": "The email address of the user. Cannot be updated if the user is inactive."
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Roles",
+            "default": null,
+            "nullable": true,
+            "description": "Descriptive names of the business roles assigned to this person. Used for filtering reports, with no impact on permissions."
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "examples": [
+              123456
+            ],
+            "description": "Unique ID of the user to update"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": null,
+            "examples": [
+              "Eastern Time (US & Canada)"
+            ],
+            "nullable": true,
+            "description": "The user\u2019s timezone. Defaults to the company\u2019s timezone. See supported time zones in the Harvest docs."
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the user is active or archived."
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name",
+            "default": null,
+            "examples": [
+              "Frank"
+            ],
+            "nullable": true,
+            "description": "The last name of the user. Cannot be updated if the user is inactive."
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name",
+            "default": null,
+            "examples": [
+              "George"
+            ],
+            "nullable": true,
+            "description": "The first name of the user. Cannot be updated if the user is inactive."
+          },
+          "access_roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Access Roles",
+            "default": null,
+            "nullable": true,
+            "description": "Access roles that determine the user\u2019s permissions in Harvest. Possible values: administrator, manager, member, project_creator, billable_rates_manager, managed_projects_invoice_drafter, managed_projects_invoice_manager, client_and_task_manager, time_and_expenses_manager, estimates_manager."
+          },
+          "is_contractor": {
+            "type": "boolean",
+            "title": "Is Contractor",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the user is a contractor or an employee. Defaults to false."
+          },
+          "weekly_capacity": {
+            "type": "integer",
+            "title": "Weekly Capacity",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              126000
+            ],
+            "nullable": true,
+            "description": "The number of hours per week this person is available to work, in seconds. Must be non-negative."
+          },
+          "has_access_to_all_future_projects": {
+            "type": "boolean",
+            "title": "Has Access To All Future Projects",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the user should be automatically added to future projects. Defaults to false."
+          }
+        },
+        "description": "Request model for updating an existing user in Harvest.\nOnly include fields to modify; omit others to leave them unchanged."
+      }
+    }
+  ],
+  "tool_count": 58,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/harvest/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "HARVEST_CREATE_CLIENT",
+    "HARVEST_CREATE_CLIENT_CONTACT",
+    "HARVEST_CREATE_ESTIMATE",
+    "HARVEST_CREATE_ESTIMATE_ITEM_CATEGORY",
+    "HARVEST_CREATE_ESTIMATE_MESSAGE",
+    "HARVEST_CREATE_EXPENSE",
+    "HARVEST_CREATE_INVOICE",
+    "HARVEST_CREATE_INVOICE_ITEM_CATEGORY",
+    "HARVEST_CREATE_INVOICE_MESSAGE",
+    "HARVEST_CREATE_INVOICE_PAYMENT",
+    "HARVEST_CREATE_PROJECT",
+    "HARVEST_CREATE_TASK",
+    "HARVEST_CREATE_TIME_ENTRY",
+    "HARVEST_CREATE_USER",
+    "HARVEST_DELETE_CLIENT",
+    "HARVEST_DELETE_CLIENT_CONTACT",
+    "HARVEST_DELETE_ESTIMATE",
+    "HARVEST_DELETE_ESTIMATE_MESSAGE",
+    "HARVEST_DELETE_INVOICE",
+    "HARVEST_DELETE_INVOICE_ITEM_CATEGORY",
+    "HARVEST_DELETE_INVOICE_MESSAGE",
+    "HARVEST_DELETE_INVOICE_PAYMENT",
+    "HARVEST_DELETE_PROJECT",
+    "HARVEST_DELETE_TASK",
+    "HARVEST_DELETE_TIME_ENTRY",
+    "HARVEST_DELETE_USER",
+    "HARVEST_GET_CLIENT",
+    "HARVEST_GET_CLIENT_CONTACT",
+    "HARVEST_GET_COMPANY_INFO",
+    "HARVEST_GET_ESTIMATE",
+    "HARVEST_GET_INVOICE",
+    "HARVEST_GET_PROJECT",
+    "HARVEST_GET_TASK",
+    "HARVEST_GET_TIME_ENTRY",
+    "HARVEST_GET_USER",
+    "HARVEST_LIST_CLIENT_CONTACTS",
+    "HARVEST_LIST_CLIENTS",
+    "HARVEST_LIST_ESTIMATE_MESSAGES",
+    "HARVEST_LIST_EXPENSE_CATEGORIES",
+    "HARVEST_LIST_INVOICE_ITEM_CATEGORIES",
+    "HARVEST_LIST_INVOICE_MESSAGES",
+    "HARVEST_LIST_INVOICE_PAYMENTS",
+    "HARVEST_LIST_INVOICES",
+    "HARVEST_LIST_PROJECTS",
+    "HARVEST_LIST_TASKS",
+    "HARVEST_LIST_TIME_ENTRIES",
+    "HARVEST_LIST_USERS",
+    "HARVEST_UPDATE_CLIENT",
+    "HARVEST_UPDATE_CLIENT_CONTACT",
+    "HARVEST_UPDATE_COMPANY_INFO",
+    "HARVEST_UPDATE_ESTIMATE",
+    "HARVEST_UPDATE_ESTIMATE_ITEM_CATEGORY",
+    "HARVEST_UPDATE_EXPENSE",
+    "HARVEST_UPDATE_INVOICE",
+    "HARVEST_UPDATE_PROJECT",
+    "HARVEST_UPDATE_TASK",
+    "HARVEST_UPDATE_TIME_ENTRY",
+    "HARVEST_UPDATE_USER"
+  ]
+}

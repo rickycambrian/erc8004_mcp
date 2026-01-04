@@ -1,0 +1,315 @@
+{
+  "qualifiedName": "zoho",
+  "displayName": "Zoho",
+  "description": "Zoho is a suite of cloud applications including CRM, email marketing, and collaboration tools, enabling businesses to automate and scale operations",
+  "iconUrl": "https://logos.composio.dev/api/zoho",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/zoho",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/zoho/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "ZOHO_CONVERT_ZOHO_LEAD",
+      "description": "Converts a lead into a contact, account, and optionally a deal in Zoho CRM.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ConvertZohoLeadRequest",
+        "required": [
+          "lead_id"
+        ],
+        "properties": {
+          "lead_id": {
+            "type": "string",
+            "title": "Lead Id",
+            "description": "The unique ID of the lead to convert."
+          },
+          "assign_to": {
+            "type": "string",
+            "title": "Assign To",
+            "default": "",
+            "description": "User ID to assign as the owner of the new contact/account."
+          },
+          "overwrite": {
+            "type": "boolean",
+            "title": "Overwrite",
+            "default": false,
+            "description": "Whether to overwrite the account name in the contact if it already exists and the company names mismatch."
+          },
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "default": "",
+            "description": "ID of an existing account to associate with the converted lead."
+          },
+          "contact_id": {
+            "type": "string",
+            "title": "Contact Id",
+            "default": "",
+            "description": "ID of an existing contact to associate with the converted lead."
+          },
+          "notify_lead_owner": {
+            "type": "boolean",
+            "title": "Notify Lead Owner",
+            "default": false,
+            "description": "Notify the lead owner about the conversion via email."
+          },
+          "notify_new_entity_owner": {
+            "type": "boolean",
+            "title": "Notify New Entity Owner",
+            "default": false,
+            "description": "Notify the new owner of the contact/account via email."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZOHO_CREATE_ZOHO_RECORD",
+      "description": "Creates new records in a specified module in Zoho CRM.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateZohoRecordRequest",
+        "required": [
+          "module_api_name",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Data",
+            "examples": [
+              [
+                {
+                  "id": "660867000000539002",
+                  "Email": "updatedemail@example.com",
+                  "Phone": "555-6789"
+                }
+              ]
+            ],
+            "description": "A list of dictionaries representing the records to be created."
+          },
+          "lar_id": {
+            "type": "string",
+            "title": "Lar Id",
+            "default": null,
+            "nullable": true,
+            "description": "The layout ID or lead assignment rule ID (lar_id) to be used if required."
+          },
+          "trigger": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Trigger",
+            "default": null,
+            "nullable": true,
+            "description": "List of triggers to invoke during record creation (e.g., ['workflow', 'blueprint'])."
+          },
+          "module_api_name": {
+            "type": "string",
+            "title": "Module Api Name",
+            "description": "The API name of the module to create a record in."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZOHO_CREATE_ZOHO_TAG",
+      "description": "Creates new tags in Zoho CRM.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateZohoTagRequest",
+        "required": [
+          "module_api_name",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name of the tag to be created (max 25 characters)."
+          },
+          "color_code": {
+            "type": "string",
+            "title": "Color Code",
+            "default": "#F48435",
+            "description": "Hex color code for the tag. Must be one of the allowed colors."
+          },
+          "module_api_name": {
+            "type": "string",
+            "title": "Module Api Name",
+            "description": "The API name of the module to create the tag in (e.g., 'Leads')."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZOHO_GET_ZOHO_RECORDS",
+      "description": "Retrieves records from a specified module in Zoho CRM. Notes: - Discrete (page/per_page) pagination is limited to the first 2,000 records. To retrieve records beyond this, use token-based pagination via page_token from the previous response's info.next_page_token. - Do not use page together with page_token. - You cannot use cvid together with sort_by.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetZohoRecordsRequest",
+        "required": [
+          "module_api_name"
+        ],
+        "properties": {
+          "ids": {
+            "type": "string",
+            "title": "Ids",
+            "default": "",
+            "description": "Comma-separated record IDs to fetch specific records."
+          },
+          "cvid": {
+            "type": "integer",
+            "title": "Cvid",
+            "description": "Custom view ID to filter the records. Cannot be used together with sort_by."
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "description": "Page number to retrieve. Without page_token, only the first 2,000 records are accessible using page/per_page. Maximum page number is floor(2000/per_page). Do not use together with page_token."
+          },
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "default": "First_Name,Last_Name,Email,Phone,Company",
+            "description": "Comma-separated API names of the fields to retrieve (max 50). Field names are module-specific. For Contacts module, use valid API names like First_Name, Last_Name, Email, Phone, Mobile, Account_Name, etc. Invalid examples: 'Company', 'Contact_Owner'."
+          },
+          "sort_by": {
+            "type": "string",
+            "title": "Sort By",
+            "default": "Modified_Time",
+            "description": "Field to sort records by (id, Created_Time, or Modified_Time). Cannot be used with cvid."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": 200,
+            "description": "Number of records per page (default and max is 200). Applies to both page and page_token pagination."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "default": null,
+            "nullable": true,
+            "description": "Token-based pagination parameter to fetch records beyond the 2,000-record discrete limit. Use the info.next_page_token from the previous response. Cannot be used together with page."
+          },
+          "sort_order": {
+            "type": "string",
+            "title": "Sort Order",
+            "default": "desc",
+            "description": "Sort order: 'asc' or 'desc' (default is 'desc')."
+          },
+          "module_api_name": {
+            "type": "string",
+            "title": "Module Api Name",
+            "description": "The API name of the module to retrieve records from."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZOHO_UPDATE_RELATED_RECORDS",
+      "description": "Associates or updates relationships between records across different modules in Zoho CRM.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateRelatedRecordsRequest",
+        "required": [
+          "module_api_name",
+          "record_id",
+          "related_list_api_name",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Data",
+            "description": "A list of dictionaries representing the related records to update. Each dictionary must include the 'id' of the related record."
+          },
+          "record_id": {
+            "type": "string",
+            "title": "Record Id",
+            "description": "The unique ID of the parent record."
+          },
+          "module_api_name": {
+            "type": "string",
+            "title": "Module Api Name",
+            "description": "The API name of the parent module (e.g., Leads, Contacts)."
+          },
+          "related_list_api_name": {
+            "type": "string",
+            "title": "Related List Api Name",
+            "description": "The API name of the related list (e.g., Campaigns, Products)."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZOHO_UPDATE_ZOHO_RECORD",
+      "description": "Updates existing records in a specified module in Zoho CRM.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateZohoRecordRequest",
+        "required": [
+          "module_api_name",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Data",
+            "description": "A list of dictionaries representing the records to be updated. Each record must include the 'id' field."
+          },
+          "lar_id": {
+            "type": "string",
+            "title": "Lar Id",
+            "description": "Layout ID for the module if required."
+          },
+          "trigger": {
+            "type": "string",
+            "title": "Trigger",
+            "description": "Comma-separated triggers to invoke during record update (e.g., workflow, blueprint)."
+          },
+          "wf_trigger": {
+            "type": "boolean",
+            "title": "Wf Trigger",
+            "default": false,
+            "description": "Whether to trigger workflows during record update."
+          },
+          "module_api_name": {
+            "type": "string",
+            "title": "Module Api Name",
+            "description": "The API name of the module to update records in."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:59:26.152124+00:00",
+    "source": "smithery"
+  }
+}

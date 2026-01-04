@@ -1,0 +1,1138 @@
+{
+  "qualifiedName": "square",
+  "displayName": "Square",
+  "description": "Square provides payment processing, POS systems, invoicing, and e-commerce tools, enabling sellers to accept card payments and manage their business",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//squareup.svg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/square",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/square/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "SQUARE_ACCEPT_DISPUTE",
+      "description": "Tool to accept a dispute and mark it as lost. Use after reviewing all evidence and deciding to accept liability.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AcceptDisputeRequest",
+        "required": [
+          "dispute_id"
+        ],
+        "properties": {
+          "dispute_id": {
+            "type": "string",
+            "title": "Dispute Id",
+            "examples": [
+              "DISPUTE_ID_123"
+            ],
+            "description": "ID of the dispute to accept."
+          }
+        },
+        "description": "Parameters required to accept a dispute."
+      }
+    },
+    {
+      "name": "SQUARE_CANCEL_INVOICE",
+      "description": "Tool to cancel an invoice. Use when you need to void an existing invoice; ensure the invoice isn't in DRAFT or a terminal state before cancelling.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CancelInvoiceRequest",
+        "required": [
+          "invoice_id",
+          "version"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "title": "Version",
+            "minimum": 0,
+            "examples": [
+              2
+            ],
+            "description": "The current version of the invoice; must match the server\u2019s version."
+          },
+          "invoice_id": {
+            "type": "string",
+            "title": "Invoice Id",
+            "examples": [
+              "INVOICE_ID_123"
+            ],
+            "description": "The ID of the invoice to cancel."
+          }
+        },
+        "description": "Parameters for cancelling a Square invoice."
+      }
+    },
+    {
+      "name": "SQUARE_CANCEL_PAYMENT",
+      "description": "Tool to cancel a payment. Use after confirming the payment is in APPROVED status.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CancelPaymentRequest",
+        "required": [
+          "payment_id"
+        ],
+        "properties": {
+          "payment_id": {
+            "type": "string",
+            "title": "Payment Id",
+            "examples": [
+              "PAYMENT_ID_123"
+            ],
+            "description": "The ID of the payment to cancel."
+          }
+        },
+        "description": "Parameters for cancelling a Square payment."
+      }
+    },
+    {
+      "name": "SQUARE_CREATE_CARD",
+      "description": "Tool to create a card on file. Use when you need to securely store a customer's card for future payments. Requires a valid nonce or payment ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateCardRequest",
+        "required": [
+          "idempotency_key",
+          "source_id",
+          "card"
+        ],
+        "properties": {
+          "card": {
+            "type": "object",
+            "title": "Card",
+            "required": [
+              "customer_id"
+            ],
+            "properties": {
+              "customer_id": {
+                "type": "string",
+                "title": "Customer Id",
+                "minLength": 1,
+                "description": "ID of the customer to associate with this card."
+              },
+              "reference_id": {
+                "type": "string",
+                "title": "Reference Id",
+                "default": null,
+                "nullable": true,
+                "maxLength": 128,
+                "description": "User-defined reference linking this card to an external entity; max length 128."
+              },
+              "billing_address": {
+                "type": "object",
+                "title": "Address",
+                "default": null,
+                "nullable": true,
+                "properties": {
+                  "country": {
+                    "type": "string",
+                    "title": "Country",
+                    "default": null,
+                    "nullable": true,
+                    "maxLength": 2,
+                    "minLength": 2,
+                    "description": "Two-letter country code in ISO 3166-1 alpha-2 format."
+                  },
+                  "locality": {
+                    "type": "string",
+                    "title": "Locality",
+                    "default": null,
+                    "nullable": true,
+                    "description": "City or town name."
+                  },
+                  "last_name": {
+                    "type": "string",
+                    "title": "Last Name",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Last name of the billing contact."
+                  },
+                  "first_name": {
+                    "type": "string",
+                    "title": "First Name",
+                    "default": null,
+                    "nullable": true,
+                    "description": "First name of the billing contact."
+                  },
+                  "postal_code": {
+                    "type": "string",
+                    "title": "Postal Code",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Postal or ZIP code."
+                  },
+                  "sublocality": {
+                    "type": "string",
+                    "title": "Sublocality",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Sublocality or neighborhood."
+                  },
+                  "sublocality_2": {
+                    "type": "string",
+                    "title": "Sublocality 2",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Additional sublocality field."
+                  },
+                  "sublocality_3": {
+                    "type": "string",
+                    "title": "Sublocality 3",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Additional sublocality field."
+                  },
+                  "address_line_1": {
+                    "type": "string",
+                    "title": "Address Line 1",
+                    "default": null,
+                    "nullable": true,
+                    "description": "First line of the address."
+                  },
+                  "address_line_2": {
+                    "type": "string",
+                    "title": "Address Line 2",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Second line of the address."
+                  },
+                  "address_line_3": {
+                    "type": "string",
+                    "title": "Address Line 3",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Third line of the address."
+                  },
+                  "administrative_district_level_1": {
+                    "type": "string",
+                    "title": "Administrative District Level 1",
+                    "default": null,
+                    "nullable": true,
+                    "description": "State, province, or region."
+                  },
+                  "administrative_district_level_2": {
+                    "type": "string",
+                    "title": "Administrative District Level 2",
+                    "default": null,
+                    "nullable": true,
+                    "description": "County, district, or other region."
+                  },
+                  "administrative_district_level_3": {
+                    "type": "string",
+                    "title": "Administrative District Level 3",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Additional administrative district."
+                  }
+                },
+                "description": "Mailing address for the card's billing information.",
+                "additionalProperties": false
+              },
+              "cardholder_name": {
+                "type": "string",
+                "title": "Cardholder Name",
+                "default": null,
+                "nullable": true,
+                "maxLength": 96,
+                "description": "Name on the card; max length 96."
+              }
+            },
+            "description": "Details of the card and customer to store on file.",
+            "additionalProperties": false
+          },
+          "source_id": {
+            "type": "string",
+            "title": "Source Id",
+            "maxLength": 16384,
+            "minLength": 1,
+            "description": "Card nonce or payment ID used as the source of card data."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "title": "Idempotency Key",
+            "maxLength": 45,
+            "minLength": 1,
+            "description": "Unique key for this CreateCard request (1\u201345 characters)."
+          },
+          "verification_token": {
+            "type": "string",
+            "title": "Verification Token",
+            "default": null,
+            "nullable": true,
+            "description": "Token from Payments.verifyBuyer() for SCA/3-D Secure verification."
+          }
+        },
+        "description": "Parameters for creating a card on file. Provide a unique idempotency key,\na source ID (nonce or payment ID), and card details."
+      }
+    },
+    {
+      "name": "SQUARE_CREATE_DISPUTE_EVIDENCE_FILE",
+      "description": "Tool to upload a file as dispute evidence. Use when you need to attach supporting documents (PDF, image, etc.) to an existing dispute. Use after creating or retrieving a dispute.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateDisputeEvidenceFileRequest",
+        "required": [
+          "dispute_id",
+          "idempotency_key",
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "The file to upload as dispute evidence (max 5 MB). FileUploadable object where 'name' is the filename.",
+            "file_uploadable": true
+          },
+          "dispute_id": {
+            "type": "string",
+            "title": "Dispute Id",
+            "examples": [
+              "DISPUTE_ID_123"
+            ],
+            "description": "The ID of the dispute to upload evidence for."
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type",
+            "default": null,
+            "examples": [
+              "image/jpeg",
+              "application/pdf"
+            ],
+            "nullable": true,
+            "maxLength": 40,
+            "description": "Optional MIME type of the uploaded file. Must be one of image/heic, image/heif, image/jpeg, application/pdf, image/png, image/tiff."
+          },
+          "evidence_type": {
+            "type": "string",
+            "title": "Evidence Type",
+            "default": null,
+            "examples": [
+              null,
+              "RECEIPT",
+              "GENERIC_EVIDENCE"
+            ],
+            "nullable": true,
+            "description": "Optional type of evidence. Allowed values include GENERIC_EVIDENCE, ONLINE_OR_APP_ACCESS_LOG, AUTHORIZATION_DOCUMENTATION, CANCELLATION_OR_REFUND_DOCUMENTATION, CARDHOLDER_COMMUNICATION, CARDHOLDER_INFORMATION, PURCHASE_ACKNOWLEDGEMENT, DUPLICATE_CHARGE_DOCUMENTATION, PRODUCT_OR_SERVICE_DESCRIPTION, RECEIPT, SERVICE_RECEIVED_DOCUMENTATION, PROOF_OF_DELIVERY_DOCUMENTATION, RELATED_TRANSACTION_DOCUMENTATION, REBUTTAL_EXPLANATION, TRACKING_NUMBER."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "title": "Idempotency Key",
+            "examples": [
+              "IDEMPOTENCY_KEY_ABC123"
+            ],
+            "maxLength": 45,
+            "minLength": 1,
+            "description": "A unique key for this upload to ensure idempotency (max 45 characters)."
+          },
+          "inline_file_name": {
+            "type": "string",
+            "title": "Inline File Name",
+            "default": null,
+            "examples": [
+              "evidence.png"
+            ],
+            "nullable": true,
+            "description": "Optional filename for inline file content. Defaults to the FileUploadable name."
+          },
+          "inline_file_mimetype": {
+            "type": "string",
+            "title": "Inline File Mimetype",
+            "default": null,
+            "examples": [
+              "image/png"
+            ],
+            "nullable": true,
+            "description": "Optional MIME type for inline file content. Defaults to the FileUploadable mimetype or application/octet-stream."
+          },
+          "inline_file_content_base64": {
+            "type": "string",
+            "title": "Inline File Content Base64",
+            "default": null,
+            "examples": [
+              "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMBAQF9oJwAAAAASUVORK5CYII="
+            ],
+            "nullable": true,
+            "description": "Optional base64-encoded file content. When provided, the file will be uploaded from this inline content instead of fetching from FileUploadable storage."
+          }
+        },
+        "description": "Parameters to upload a file as dispute evidence.\nEndpoint: POST /v2/disputes/{dispute_id}/evidence-files"
+      }
+    },
+    {
+      "name": "SQUARE_CREATE_DISPUTE_EVIDENCE_TEXT",
+      "description": "Tool to upload text as evidence for a dispute challenge. Endpoint: POST /v2/disputes/{dispute_id}/evidence-text",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateDisputeEvidenceTextRequest",
+        "required": [
+          "dispute_id",
+          "idempotency_key",
+          "evidence_text"
+        ],
+        "properties": {
+          "dispute_id": {
+            "type": "string",
+            "title": "Dispute Id",
+            "examples": [
+              "DISPUTE_ID_123"
+            ],
+            "description": "The ID of the dispute to upload text evidence for."
+          },
+          "evidence_text": {
+            "type": "string",
+            "title": "Evidence Text",
+            "examples": [
+              "Customer acknowledged receipt via email on 2024-10-01."
+            ],
+            "maxLength": 500,
+            "minLength": 1,
+            "description": "The text string to upload as evidence (max 500 characters)."
+          },
+          "evidence_type": {
+            "type": "string",
+            "title": "Evidence Type",
+            "default": null,
+            "examples": [
+              null,
+              "GENERIC_EVIDENCE",
+              "REBUTTAL_EXPLANATION"
+            ],
+            "nullable": true,
+            "description": "Optional type of evidence. Allowed values include GENERIC_EVIDENCE, ONLINE_OR_APP_ACCESS_LOG, AUTHORIZATION_DOCUMENTATION, CANCELLATION_OR_REFUND_DOCUMENTATION, CARDHOLDER_COMMUNICATION, CARDHOLDER_INFORMATION, PURCHASE_ACKNOWLEDGEMENT, DUPLICATE_CHARGE_DOCUMENTATION, PRODUCT_OR_SERVICE_DESCRIPTION, RECEIPT, SERVICE_RECEIVED_DOCUMENTATION, PROOF_OF_DELIVERY_DOCUMENTATION, RELATED_TRANSACTION_DOCUMENTATION, REBUTTAL_EXPLANATION, TRACKING_NUMBER."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "title": "Idempotency Key",
+            "examples": [
+              "IDEMPOTENCY_KEY_ABC123"
+            ],
+            "maxLength": 45,
+            "minLength": 1,
+            "description": "A unique key identifying the request (max 45 characters)."
+          }
+        },
+        "description": "Parameters to upload text evidence for a dispute.\nEndpoint: POST /v2/disputes/{dispute_id}/evidence-text"
+      }
+    },
+    {
+      "name": "SQUARE_CREATE_INVOICE_ATTACHMENT",
+      "description": "Tool to upload a file and attach it to a Square invoice. Use when you need to add supplementary documents to an invoice in DRAFT, SCHEDULED, UNPAID, or PARTIALLY_PAID state.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateInvoiceAttachmentRequest",
+        "required": [
+          "invoice_id",
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "File to upload. FileUploadable object where 'name' is the attachment filename.",
+            "file_uploadable": true
+          },
+          "invoice_id": {
+            "type": "string",
+            "title": "Invoice Id",
+            "examples": [
+              "INVOICE_ID_123"
+            ],
+            "description": "The ID of the invoice to attach the file to."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "examples": [
+              "Purchase receipt"
+            ],
+            "nullable": true,
+            "description": "Description for the attachment shown on the invoice; max 128 characters."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "title": "Idempotency Key",
+            "default": null,
+            "examples": [
+              "unique-key-123"
+            ],
+            "nullable": true,
+            "description": "A unique key to ensure idempotency for this request; max 128 characters."
+          },
+          "inline_file_name": {
+            "type": "string",
+            "title": "Inline File Name",
+            "default": null,
+            "examples": [
+              "upload.png"
+            ],
+            "nullable": true,
+            "description": "Optional filename for inline file content. Defaults to the FileUploadable name."
+          },
+          "inline_file_mimetype": {
+            "type": "string",
+            "title": "Inline File Mimetype",
+            "default": null,
+            "examples": [
+              "image/png"
+            ],
+            "nullable": true,
+            "description": "Optional MIME type for inline file content. Defaults to the FileUploadable mimetype or application/octet-stream."
+          },
+          "inline_file_content_base64": {
+            "type": "string",
+            "title": "Inline File Content Base64",
+            "default": null,
+            "examples": [
+              "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMBAQF9oJwAAAAASUVORK5CYII="
+            ],
+            "nullable": true,
+            "description": "Optional base64-encoded file content. When provided, the file will be uploaded from this inline content instead of fetching from FileUploadable storage."
+          }
+        },
+        "description": "Parameters to upload and attach a file to a Square invoice."
+      }
+    },
+    {
+      "name": "SQUARE_DELETE_DISPUTE_EVIDENCE",
+      "description": "Tool to delete specified evidence from a dispute. Use when you need to remove an evidence item that is no longer relevant. Use after verifying dispute_id and evidence_id.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteDisputeEvidenceRequest",
+        "required": [
+          "dispute_id",
+          "evidence_id"
+        ],
+        "properties": {
+          "dispute_id": {
+            "type": "string",
+            "title": "Dispute Id",
+            "examples": [
+              "DISPUTE_ID_123"
+            ],
+            "description": "ID of the dispute from which to remove evidence."
+          },
+          "evidence_id": {
+            "type": "string",
+            "title": "Evidence Id",
+            "examples": [
+              "EVIDENCE_ID_456"
+            ],
+            "description": "ID of the evidence item to remove."
+          }
+        },
+        "description": "Parameters required to delete a specific evidence item from a dispute.\nEndpoint: DELETE /v2/disputes/{dispute_id}/evidence/{evidence_id}"
+      }
+    },
+    {
+      "name": "SQUARE_DELETE_INVOICE",
+      "description": "Tool to delete a Square invoice (only DRAFT invoices can be deleted).",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteInvoiceRequest",
+        "required": [
+          "invoice_id"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "title": "Version",
+            "default": null,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "The version of the invoice to delete. If you do not know the version, retrieve the invoice first via Get Invoice or List Invoices."
+          },
+          "invoice_id": {
+            "type": "string",
+            "title": "Invoice Id",
+            "examples": [
+              "INVOICE_ID_123"
+            ],
+            "description": "The ID of the invoice to delete."
+          }
+        },
+        "description": "Parameters for deleting a Square invoice."
+      }
+    },
+    {
+      "name": "SQUARE_DELETE_INVOICE_ATTACHMENT",
+      "description": "Tool to delete an attachment from a Square invoice. Endpoint: DELETE /v2/invoices/{invoice_id}/attachments/{attachment_id}",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteInvoiceAttachmentRequest",
+        "required": [
+          "invoice_id",
+          "attachment_id"
+        ],
+        "properties": {
+          "invoice_id": {
+            "type": "string",
+            "title": "Invoice Id",
+            "examples": [
+              "INVOICE_ID_123"
+            ],
+            "description": "The ID of the invoice to delete the attachment from."
+          },
+          "attachment_id": {
+            "type": "string",
+            "title": "Attachment Id",
+            "examples": [
+              "ATTACHMENT_ID_456"
+            ],
+            "description": "The ID of the attachment to delete."
+          }
+        },
+        "description": "Parameters to delete an attachment from a Square invoice."
+      }
+    },
+    {
+      "name": "SQUARE_DELETE_WEBHOOK_SUBSCRIPTION",
+      "description": "Tool to delete a Square webhook subscription by ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteWebhookSubscriptionRequest",
+        "required": [
+          "subscription_id"
+        ],
+        "properties": {
+          "subscription_id": {
+            "type": "string",
+            "title": "Subscription Id",
+            "examples": [
+              "sub_123456789"
+            ],
+            "description": "ID of the webhook subscription to delete."
+          }
+        },
+        "description": "Parameters to delete a specific webhook subscription."
+      }
+    },
+    {
+      "name": "SQUARE_GET_DISPUTE_EVIDENCE",
+      "description": "Tool to retrieve a specific evidence item associated with a given dispute. Endpoint: GET /v2/disputes/{dispute_id}/evidence/{evidence_id}",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetDisputeEvidenceRequest",
+        "required": [
+          "dispute_id",
+          "evidence_id"
+        ],
+        "properties": {
+          "dispute_id": {
+            "type": "string",
+            "title": "Dispute Id",
+            "examples": [
+              "DISPUTE_ID_123"
+            ],
+            "description": "ID of the dispute to retrieve evidence for."
+          },
+          "evidence_id": {
+            "type": "string",
+            "title": "Evidence Id",
+            "examples": [
+              "EVIDENCE_ID_456"
+            ],
+            "description": "ID of the evidence item to retrieve."
+          }
+        },
+        "description": "Parameters required to retrieve a specific evidence item for a dispute."
+      }
+    },
+    {
+      "name": "SQUARE_GET_INVOICE",
+      "description": "Tool to retrieve an invoice by ID. Use when you already have an invoice ID and need its details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetInvoiceRequest",
+        "required": [
+          "invoice_id"
+        ],
+        "properties": {
+          "invoice_id": {
+            "type": "string",
+            "title": "Invoice Id",
+            "examples": [
+              "INVOICE_ID_123"
+            ],
+            "description": "The ID of the invoice to retrieve."
+          }
+        },
+        "description": "Parameters for retrieving an invoice by ID."
+      }
+    },
+    {
+      "name": "SQUARE_LIST_DISPUTE_EVIDENCE",
+      "description": "Tool to list evidence items associated with a given dispute. Endpoint: GET /v2/disputes/{dispute_id}/evidence",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListDisputeEvidenceRequest",
+        "required": [
+          "dispute_id"
+        ],
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "title": "Cursor",
+            "default": null,
+            "examples": [
+              null,
+              "CURSOR_ABC123"
+            ],
+            "nullable": true,
+            "description": "A pagination cursor returned by a previous call to this endpoint. Provide this to retrieve the next set of results."
+          },
+          "dispute_id": {
+            "type": "string",
+            "title": "Dispute Id",
+            "examples": [
+              "DISPUTE_ID_123"
+            ],
+            "description": "ID of the dispute to list evidence for."
+          }
+        },
+        "description": "Parameters required to list evidence for a specific dispute.\nEndpoint: GET /v2/disputes/{dispute_id}/evidence"
+      }
+    },
+    {
+      "name": "SQUARE_LIST_INVOICES",
+      "description": "Tool to list invoices for a Square location.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInvoicesRequest",
+        "required": [
+          "location_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "maximum": 200,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Maximum number of invoices to return (1-200). Defaults to Square's default if unset."
+          },
+          "cursor": {
+            "type": "string",
+            "title": "Cursor",
+            "default": null,
+            "examples": [
+              "Y3Vyc29yOnRocmVlLDE="
+            ],
+            "nullable": true,
+            "description": "Pagination cursor from a previous ListInvoices call; use to fetch the next page."
+          },
+          "location_id": {
+            "type": "string",
+            "title": "Location Id",
+            "examples": [
+              "L3HB3M4X4G76H"
+            ],
+            "description": "The Square location ID for which to list invoices."
+          }
+        },
+        "description": "Parameters for listing invoices for a specific location."
+      }
+    },
+    {
+      "name": "SQUARE_LIST_WEBHOOK_EVENT_TYPES",
+      "description": "Tool to list available webhook event types. Use when you need to discover event types before creating or updating a webhook subscription.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListWebhookEventTypesRequest",
+        "properties": {
+          "api_version": {
+            "type": "string",
+            "title": "Api Version",
+            "default": null,
+            "examples": [
+              "2024-08-21"
+            ],
+            "nullable": true,
+            "description": "Overrides the application default API version (YYYY-MM-DD) for listing event types."
+          }
+        },
+        "description": "Parameters for listing webhook event types. Omit to use the default application version."
+      }
+    },
+    {
+      "name": "SQUARE_LIST_WEBHOOK_SUBSCRIPTIONS",
+      "description": "Tool to list webhook subscriptions. Use when you need to retrieve a page of webhook subscriptions for your application; supports pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListWebhookSubscriptionsRequest",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              20
+            ],
+            "nullable": true,
+            "description": "Maximum number of subscriptions to return (1-100). Defaults to Square's default if unset."
+          },
+          "cursor": {
+            "type": "string",
+            "title": "Cursor",
+            "default": null,
+            "examples": [
+              "CURSOR_123"
+            ],
+            "nullable": true,
+            "description": "Pagination cursor from a previous call; use to fetch the next page."
+          },
+          "sort_order": {
+            "type": "string",
+            "title": "Sort Order",
+            "default": null,
+            "examples": [
+              "ASC",
+              "DESC"
+            ],
+            "nullable": true,
+            "description": "Sort order by creation time. Allowed values: 'ASC' or 'DESC'."
+          },
+          "include_disabled": {
+            "type": "boolean",
+            "title": "Include Disabled",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "If true, include disabled subscriptions in the response. Defaults to false."
+          }
+        },
+        "description": "Parameters for listing webhook subscriptions. Omit any field to use default behavior."
+      }
+    },
+    {
+      "name": "SQUARE_RETRIEVE_DISPUTE",
+      "description": "Tool to retrieve a Square dispute by ID. Endpoint: GET /v2/disputes/{dispute_id}",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveDisputeRequest",
+        "required": [
+          "dispute_id"
+        ],
+        "properties": {
+          "dispute_id": {
+            "type": "string",
+            "title": "Dispute Id",
+            "examples": [
+              "DISPUTE_ID_123"
+            ],
+            "description": "ID of the dispute to retrieve."
+          }
+        },
+        "description": "Parameters required to retrieve a specific dispute by its ID."
+      }
+    },
+    {
+      "name": "SQUARE_RETRIEVE_ORDER",
+      "description": "Tool to retrieve an order by its ID. Use when you have an order ID and need to fetch its details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveOrderRequest",
+        "required": [
+          "order_id"
+        ],
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id",
+            "examples": [
+              "ORDER_ID_123"
+            ],
+            "description": "ID of the order to retrieve."
+          }
+        },
+        "description": "Parameters required to retrieve a specific order by its ID."
+      }
+    },
+    {
+      "name": "SQUARE_RETRIEVE_PAYMENT_LINK",
+      "description": "Tool to retrieve a payment link by ID. Use when you need to fetch full details of a specific checkout link.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrievePaymentLinkRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "PAY_LINK_ID_123"
+            ],
+            "description": "The Square-assigned ID of the payment link to retrieve."
+          }
+        },
+        "description": "Parameters for retrieving a specific payment link by ID."
+      }
+    },
+    {
+      "name": "SQUARE_RETRIEVE_WEBHOOK_SUBSCRIPTION",
+      "description": "Tool to retrieve a Square webhook subscription by ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveWebhookSubscriptionRequest",
+        "required": [
+          "subscription_id"
+        ],
+        "properties": {
+          "subscription_id": {
+            "type": "string",
+            "title": "Subscription Id",
+            "examples": [
+              "sub_123456789"
+            ],
+            "description": "ID of the webhook subscription to retrieve."
+          }
+        },
+        "description": "Parameters to retrieve a specific webhook subscription."
+      }
+    },
+    {
+      "name": "SQUARE_SUBMIT_DISPUTE_EVIDENCE",
+      "description": "Tool to submit evidence for a dispute. Use when you have compiled all supporting documentation and want to send it to the cardholder's bank before the due date.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SubmitDisputeEvidenceRequest",
+        "required": [
+          "dispute_id"
+        ],
+        "properties": {
+          "dispute_id": {
+            "type": "string",
+            "title": "Dispute Id",
+            "examples": [
+              "DISPUTE_ID_123"
+            ],
+            "description": "The ID of the dispute to submit evidence for."
+          }
+        },
+        "description": "Parameters to submit evidence for a dispute."
+      }
+    },
+    {
+      "name": "SQUARE_TEST_WEBHOOK_SUBSCRIPTION",
+      "description": "Tool to test a webhook subscription. Use after creating or updating a subscription to verify its endpoint.",
+      "inputSchema": {
+        "type": "object",
+        "title": "TestWebhookSubscriptionRequest",
+        "required": [
+          "subscription_id"
+        ],
+        "properties": {
+          "event_type": {
+            "type": "string",
+            "title": "Event Type",
+            "default": null,
+            "examples": [
+              "payment.created"
+            ],
+            "nullable": true,
+            "description": "Event type used for the test; must be one of the subscription's event_types."
+          },
+          "subscription_id": {
+            "type": "string",
+            "title": "Subscription Id",
+            "examples": [
+              "sub_123456789"
+            ],
+            "description": "ID of the webhook subscription to test."
+          }
+        },
+        "description": "Parameters to test a webhook subscription."
+      }
+    },
+    {
+      "name": "SQUARE_UPDATE_ORDER",
+      "description": "Tool to update an order. Use when modifying fields on an existing open order; requires the latest version for optimistic concurrency.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateOrderRequest",
+        "required": [
+          "order_id"
+        ],
+        "properties": {
+          "order": {
+            "type": "object",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sparse Order object containing only the fields to update. Must include the latest order.version for concurrency.",
+            "additionalProperties": true
+          },
+          "order_id": {
+            "type": "string",
+            "title": "Order Id",
+            "examples": [
+              "ORDER_ID_123"
+            ],
+            "description": "ID of the order to update."
+          },
+          "fields_to_clear": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Fields To Clear",
+            "default": null,
+            "nullable": true,
+            "description": "List of dot-notation paths of fields to clear/delete in the order, e.g., ['line_items[uid].note']. Only used when removing fields."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "title": "Idempotency Key",
+            "default": null,
+            "examples": [
+              "a1b2c3d4-unique-key-5678"
+            ],
+            "nullable": true,
+            "maxLength": 192,
+            "description": "A unique key to ensure idempotency. Generate a new key per update."
+          }
+        },
+        "description": "Parameters for updating an existing Square order."
+      }
+    },
+    {
+      "name": "SQUARE_UPDATE_WEBHOOK_SUBSCRIPTION",
+      "description": "Tool to update a Square webhook subscription. Use when you need to modify subscription settings such as name, enabled state, event types, notification URL, or API version of an existing webhook subscription.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateWebhookSubscriptionRequest",
+        "required": [
+          "subscription_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "My Webhook Subscription"
+            ],
+            "nullable": true,
+            "maxLength": 64,
+            "description": "New display name for the subscription (max 64 characters)."
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Whether the subscription should be active."
+          },
+          "api_version": {
+            "type": "string",
+            "title": "Api Version",
+            "default": null,
+            "examples": [
+              "2021-06-16"
+            ],
+            "nullable": true,
+            "description": "Webhook API version to use for this subscription, e.g., '2021-06-16'."
+          },
+          "event_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Event Types",
+            "default": null,
+            "examples": [
+              [
+                "payment.created",
+                "order.updated"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of event types to subscribe to, e.g., ['payment.created']."
+          },
+          "subscription_id": {
+            "type": "string",
+            "title": "Subscription Id",
+            "examples": [
+              "sub_123456789"
+            ],
+            "description": "ID of the webhook subscription to update."
+          },
+          "notification_url": {
+            "type": "string",
+            "title": "Notification Url",
+            "default": null,
+            "examples": [
+              "https://example.com/webhook"
+            ],
+            "nullable": true,
+            "description": "Destination URL for webhook notifications."
+          }
+        },
+        "description": "Parameters to update a specific webhook subscription."
+      }
+    },
+    {
+      "name": "SQUARE_UPDATE_WEBHOOK_SUBSCRIPTION_SIGNATURE_KEY",
+      "description": "Tool to rotate the signature key for a webhook subscription. Use when you need to replace the current signature key for security purposes.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateWebhookSubscriptionSignatureKeyRequest",
+        "required": [
+          "subscription_id"
+        ],
+        "properties": {
+          "idempotency_key": {
+            "type": "string",
+            "title": "Idempotency Key",
+            "default": null,
+            "examples": [
+              "unique-idempotency-key"
+            ],
+            "nullable": true,
+            "maxLength": 45,
+            "description": "A unique string to make this request idempotent. Max 45 characters."
+          },
+          "subscription_id": {
+            "type": "string",
+            "title": "Subscription Id",
+            "examples": [
+              "sub_123456789"
+            ],
+            "description": "The ID of the webhook subscription to rotate the signature key for."
+          }
+        },
+        "description": "Request model for rotating the signature key of a webhook subscription."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:55:18.018598+00:00",
+    "source": "smithery"
+  }
+}

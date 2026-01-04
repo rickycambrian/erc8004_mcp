@@ -1,0 +1,469 @@
+{
+  "qualifiedName": "hoklims/stacksfinder-mcp",
+  "displayName": "stacksfinder-mcp",
+  "description": "Discover and analyze technologies across key dimensions, then compare options side-by-side to spot the best fit. Get tailored stack recommendations for your project\u2019s type, scale, and priorities. Create and manage reusable blueprints to align teams and accelerate delivery.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/hoklims/stacksfinder-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/hoklims/stacksfinder-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [],
+        "properties": {
+          "STACKSFINDER_API_KEY": {
+            "type": "string",
+            "default": "",
+            "description": "API key for Pro+ features (recommend_stack, blueprints, API key management). Get one at https://stacksfinder.com/account/api-keys. Leave empty for free tools only (list_technologies, analyze_tech, compare_techs, recommend_stack_demo)."
+          }
+        },
+        "description": "Configure your StacksFinder MCP server. Free tools work without API key. Pro+ features require authentication.",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "list_technologies",
+      "title": "List Technologies",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "description": "Lists all available technology IDs for use with other tools. Essential for discovering valid technology identifiers.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "category": {
+            "enum": [
+              "frontend",
+              "backend",
+              "meta-framework",
+              "database",
+              "orm",
+              "auth",
+              "hosting",
+              "payments"
+            ],
+            "type": "string",
+            "description": "Filter by category"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_tech",
+      "title": "Analyze Technology",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "description": "Detailed analysis of a technology with 6-dimension scores, strengths, weaknesses, and compatible technologies.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "technology"
+        ],
+        "properties": {
+          "context": {
+            "enum": [
+              "default",
+              "mvp",
+              "enterprise"
+            ],
+            "type": "string",
+            "description": "Context for scoring"
+          },
+          "technology": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Technology ID to analyze"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "compare_techs",
+      "title": "Compare Technologies",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "description": "Side-by-side comparison of 2-4 technologies with per-dimension winners and compatibility matrix.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "technologies"
+        ],
+        "properties": {
+          "context": {
+            "enum": [
+              "default",
+              "mvp",
+              "enterprise"
+            ],
+            "type": "string",
+            "description": "Context for scoring"
+          },
+          "technologies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "maxItems": 4,
+            "minItems": 2,
+            "description": "Technologies to compare"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "recommend_stack_demo",
+      "title": "Recommend Stack (Demo)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "description": "Try StacksFinder's tech stack recommendations for FREE - once per day, no account required.\n\nReturns the optimal technology for each category based on deterministic scoring.\nFor unlimited access, priorities, constraints, and AI-generated narratives, upgrade to Pro at https://stacksfinder.com/pricing",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectType"
+        ],
+        "properties": {
+          "scale": {
+            "enum": [
+              "mvp",
+              "startup",
+              "growth",
+              "enterprise"
+            ],
+            "type": "string",
+            "description": "Project scale"
+          },
+          "projectType": {
+            "enum": [
+              "web-app",
+              "mobile-app",
+              "api",
+              "desktop",
+              "cli",
+              "library",
+              "e-commerce",
+              "saas",
+              "marketplace"
+            ],
+            "type": "string",
+            "description": "Type of project"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "recommend_stack",
+      "title": "Recommend Stack",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "description": "Recommends the best tech stack for a project using real-time scoring with context adjustments. Requires API key.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectType"
+        ],
+        "properties": {
+          "scale": {
+            "enum": [
+              "mvp",
+              "startup",
+              "growth",
+              "enterprise"
+            ],
+            "type": "string",
+            "description": "Project scale"
+          },
+          "priorities": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "time-to-market",
+                "scalability",
+                "developer-experience",
+                "cost-efficiency",
+                "performance",
+                "security",
+                "maintainability"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "description": "Top priorities (max 3)"
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Project constraints"
+          },
+          "projectType": {
+            "enum": [
+              "web-app",
+              "mobile-app",
+              "api",
+              "desktop",
+              "cli",
+              "library",
+              "e-commerce",
+              "saas",
+              "marketplace"
+            ],
+            "type": "string",
+            "description": "Type of project"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_blueprint",
+      "title": "Get Blueprint",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "description": "Fetches an existing blueprint by ID. Blueprints are generated via the StacksFinder web UI. Requires API key.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "blueprintId"
+        ],
+        "properties": {
+          "blueprintId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Blueprint UUID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_blueprint",
+      "title": "Create Blueprint",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "description": "Creates a new tech stack blueprint for a project. Requires API key with 'blueprint:write' scope.\n\nThe blueprint generation is asynchronous. By default, this tool waits for completion and returns the full blueprint.\nSet waitForCompletion=false to get the job ID immediately for manual polling.\n\nExample usage:\n- Create a SaaS MVP: projectType=\"saas\", scale=\"mvp\", priorities=[\"time-to-market\", \"cost-efficiency\"]\n- Create an enterprise API: projectType=\"api\", scale=\"enterprise\", priorities=[\"security\", \"scalability\"]",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectType",
+          "scale"
+        ],
+        "properties": {
+          "scale": {
+            "enum": [
+              "mvp",
+              "startup",
+              "growth",
+              "enterprise"
+            ],
+            "type": "string",
+            "description": "Project scale"
+          },
+          "priorities": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "time-to-market",
+                "scalability",
+                "developer-experience",
+                "cost-efficiency",
+                "performance",
+                "security",
+                "maintainability"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "description": "Top 3 priorities (optional)"
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "description": "Technology constraint IDs (optional)"
+          },
+          "projectName": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Project name (optional)"
+          },
+          "projectType": {
+            "enum": [
+              "web-app",
+              "mobile-app",
+              "api",
+              "desktop",
+              "cli",
+              "library",
+              "e-commerce",
+              "saas",
+              "marketplace"
+            ],
+            "type": "string",
+            "description": "Type of project"
+          },
+          "waitForCompletion": {
+            "type": "boolean",
+            "description": "Wait for completion (default: true)"
+          },
+          "projectDescription": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Brief description (optional)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "setup_api_key",
+      "title": "Setup API Key",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "description": "Authenticates with your StacksFinder account and creates an API key. Requires Pro or Team tier. The key is returned once and should be saved securely.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Your StacksFinder account email"
+          },
+          "keyName": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Optional name for the API key"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Your StacksFinder account password"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_api_keys",
+      "title": "List API Keys",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "description": "Lists your StacksFinder API keys. Requires a configured API key.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "revoke_api_key",
+      "title": "Revoke API Key",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "description": "Revokes an API key. This action cannot be undone.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "keyId"
+        ],
+        "properties": {
+          "keyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The UUID of the API key to revoke"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:39:16.720320+00:00",
+    "source": "smithery"
+  }
+}

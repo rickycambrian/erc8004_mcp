@@ -1,0 +1,2562 @@
+{
+  "id": "dropbox_sign",
+  "name": "dropbox_sign",
+  "display_name": "Dropbox sign",
+  "version": null,
+  "description": "Dropbox Sign (formerly HelloSign) offers electronic signature and document workflow solutions, simplifying how businesses collect legally binding signatures online",
+  "icon_url": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//hellosign-logo.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "DROPBOX_SIGN_ADD_USER_TO_TEAM",
+      "description": "Tool to invite a user to your Team. Use when you need to add a member by email or account ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddUserToTeamRequest",
+        "properties": {
+          "role": {
+            "enum": [
+              "Member",
+              "Developer",
+              "Team Manager",
+              "Admin"
+            ],
+            "type": "string",
+            "title": "Role",
+            "default": null,
+            "nullable": true,
+            "description": "Role to assign to the invited user. Allowed values: Member, Developer, Team Manager, Admin."
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "default": null,
+            "examples": [
+              "f32ba4f0cda311e985b40a3fe3ad9f3f"
+            ],
+            "nullable": true,
+            "description": "The ID of the team to which the user will be invited."
+          },
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "default": null,
+            "examples": [
+              "d004ec4dc2194c5f9b4f0cda311e985b"
+            ],
+            "nullable": true,
+            "description": "The account ID of the user to invite. If provided, takes precedence over email_address."
+          },
+          "email_address": {
+            "type": "string",
+            "title": "Email Address",
+            "format": "email",
+            "default": null,
+            "examples": [
+              "user@example.com"
+            ],
+            "nullable": true,
+            "description": "The email address of the user to invite. Required if account_id is not provided."
+          }
+        },
+        "description": "Request model for inviting a user to a team.\nEither account_id or email_address must be provided."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_ADD_USER_TO_TEMPLATE",
+      "description": "Tool to grant a specified account access to a template. Use when you need to share a template with another user after confirming template and account identifiers.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddUserToTemplateRequest",
+        "required": [
+          "template_id"
+        ],
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "default": null,
+            "examples": [
+              "a1b2c3d4e5f6g7h8i9j0"
+            ],
+            "nullable": true,
+            "description": "ID of the account to grant access. Takes precedence over email_address."
+          },
+          "template_id": {
+            "type": "string",
+            "title": "Template Id",
+            "examples": [
+              "e3f1c4a2d5b711ebb5e0242ac130002a"
+            ],
+            "description": "ID of the template to share"
+          },
+          "email_address": {
+            "type": "string",
+            "title": "Email Address",
+            "format": "email",
+            "default": null,
+            "examples": [
+              "user@example.com"
+            ],
+            "nullable": true,
+            "description": "Email of the account to grant access. Ignored if account_id is provided."
+          },
+          "skip_notification": {
+            "type": "boolean",
+            "title": "Skip Notification",
+            "default": false,
+            "description": "If true, suppresses the email notification sent when sharing the template."
+          }
+        },
+        "description": "Request parameters for granting an account access to a template."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_BULK_SEND_WITH_TEMPLATE",
+      "description": "Tool to create a BulkSendJob for templated signature requests. Use when you need to send up to 250 signature requests at once via one or more templates.",
+      "inputSchema": {
+        "type": "object",
+        "title": "BulkSendWithTemplateRequest",
+        "required": [
+          "template_ids"
+        ],
+        "properties": {
+          "ccs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "CCRecipient",
+              "required": [
+                "role",
+                "email_address"
+              ],
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "title": "Role",
+                  "description": "CC role as defined in the template"
+                },
+                "email_address": {
+                  "type": "string",
+                  "title": "Email Address",
+                  "format": "email",
+                  "description": "Email address of the CC recipient"
+                }
+              },
+              "description": "CC recipient for a bulk send job."
+            },
+            "title": "Ccs",
+            "default": null,
+            "nullable": true,
+            "description": "CC recipients; required if template defines CC roles"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "nullable": true,
+            "maxLength": 255,
+            "description": "Optional internal title for the job"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": null,
+            "nullable": true,
+            "maxLength": 5000,
+            "description": "Custom email message to signers"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "nullable": true,
+            "maxLength": 255,
+            "description": "Custom email subject line"
+          },
+          "metadata": {
+            "type": "object",
+            "title": "Metadata",
+            "default": null,
+            "nullable": true,
+            "description": "Up to 10 key/value pairs to be returned in events; keys \u226440 chars, values \u22641000 chars",
+            "additionalProperties": true
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "default": null,
+            "nullable": true,
+            "description": "API App client_id for branding and callbacks"
+          },
+          "test_mode": {
+            "type": "boolean",
+            "title": "Test Mode",
+            "default": false,
+            "nullable": true,
+            "description": "If true, the request is not legally binding"
+          },
+          "signer_file": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "CSV file with signer data: columns name,email_address,optional pin,sms_phone_number, and any *_field for custom fields. Required unless signer_list is provided.",
+            "file_uploadable": true
+          },
+          "signer_list": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SignerListItem",
+              "required": [
+                "signers"
+              ],
+              "properties": {
+                "signers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "Signer",
+                    "required": [
+                      "role",
+                      "name",
+                      "email_address"
+                    ],
+                    "properties": {
+                      "pin": {
+                        "type": "string",
+                        "title": "Pin",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Optional numeric PIN for signer (if template defines PIN)"
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "Signer\u2019s full name"
+                      },
+                      "role": {
+                        "type": "string",
+                        "title": "Role",
+                        "description": "Role name as defined in the template"
+                      },
+                      "email_address": {
+                        "type": "string",
+                        "title": "Email Address",
+                        "format": "email",
+                        "description": "Email address of the signer"
+                      }
+                    },
+                    "description": "Individual signer in a bulk send job."
+                  },
+                  "title": "Signers",
+                  "description": "List of signer objects; order maps to template roles"
+                },
+                "custom_fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "CustomField",
+                    "required": [
+                      "name",
+                      "value"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "Template custom field name"
+                      },
+                      "value": {
+                        "type": "string",
+                        "title": "Value",
+                        "description": "Value to prefill into the custom field"
+                      }
+                    },
+                    "description": "Custom merge field for a template."
+                  },
+                  "title": "Custom Fields",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Optional custom field values for this set of signers"
+                }
+              },
+              "description": "Structured signer list entry for bulk send."
+            },
+            "title": "Signer List",
+            "default": null,
+            "nullable": true,
+            "description": "Structured list of signers and custom fields. Required unless signer_file is provided."
+          },
+          "template_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Template Ids",
+            "description": "List of template IDs in the order they should be applied"
+          },
+          "allow_decline": {
+            "type": "boolean",
+            "title": "Allow Decline",
+            "default": false,
+            "nullable": true,
+            "description": "Allow signers to decline the request"
+          },
+          "custom_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "CustomField",
+              "required": [
+                "name",
+                "value"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "description": "Template custom field name"
+                },
+                "value": {
+                  "type": "string",
+                  "title": "Value",
+                  "description": "Value to prefill into the custom field"
+                }
+              },
+              "description": "Custom merge field for a template."
+            },
+            "title": "Custom Fields",
+            "default": null,
+            "nullable": true,
+            "description": "Global template merge fields to prefill"
+          },
+          "signing_redirect_url": {
+            "type": "string",
+            "title": "Signing Redirect Url",
+            "default": null,
+            "nullable": true,
+            "description": "URL to redirect signers after signing completes"
+          }
+        },
+        "description": "Request model for creating a bulk send job with templates."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_CREATE_REPORT",
+      "description": "Tool to request creation of CSV report(s). Use when you need account activity or document status reports for a specific date range.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateReportRequest",
+        "required": [
+          "start_date",
+          "end_date",
+          "report_type"
+        ],
+        "properties": {
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "examples": [
+              "12/31/2023"
+            ],
+            "description": "Inclusive end date in MM/DD/YYYY format."
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "examples": [
+              "01/01/2023"
+            ],
+            "description": "Inclusive start date in MM/DD/YYYY format. Date range may be up to 12 months; start_date must not be more than 10 years in the past."
+          },
+          "report_type": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "user_activity",
+                "document_status",
+                "sms_activity"
+              ],
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Report Type",
+            "examples": [
+              [
+                "user_activity",
+                "document_status"
+              ]
+            ],
+            "description": "Type(s) of report to create. Allowed values: 'user_activity', 'document_status', 'sms_activity'. Up to two report types may be requested."
+          }
+        },
+        "description": "Request parameters for creating one or more CSV reports within a date range."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_DELETE_TEMPLATE",
+      "description": "Tool to permanently delete a template. Use when you need to remove a template after confirming its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTemplateRequest",
+        "required": [
+          "template_id"
+        ],
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "title": "Template Id",
+            "examples": [
+              "f57db65d3f933b5316d398057a36176831451a35"
+            ],
+            "description": "The ID of the template to permanently delete."
+          }
+        },
+        "description": "Request model for permanently deleting a template."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_DOWNLOAD_SIGNATURE_REQUEST_FILES",
+      "description": "Tool to download documents for a signature request. Use after confirming the request is complete; returns a PDF or ZIP file.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DownloadSignatureRequestFilesRequest",
+        "required": [
+          "signature_request_id"
+        ],
+        "properties": {
+          "file_type": {
+            "enum": [
+              "pdf",
+              "zip"
+            ],
+            "type": "string",
+            "title": "File Type",
+            "default": "pdf",
+            "examples": [
+              "zip"
+            ],
+            "description": "Output format: 'pdf' for merged PDF or 'zip' for individual documents."
+          },
+          "signature_request_id": {
+            "type": "string",
+            "title": "Signature Request Id",
+            "examples": [
+              "fa5c8a0b0f492d768749333ad6fcc214c111e967"
+            ],
+            "description": "ID of the SignatureRequest to download documents for. Example: fa5c8a0b...967"
+          }
+        },
+        "description": "Request parameters for downloading signature request documents."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_EDIT_AND_RESEND_EMBEDDED_SIGNATURE_REQUEST",
+      "description": "Tool to edit and resend an embedded signature request. Use when you need to modify and restart the embedded signing flow for an existing request.",
+      "inputSchema": {
+        "type": "object",
+        "title": "EditAndResendEmbeddedSignatureRequestRequest",
+        "required": [
+          "signature_request_id",
+          "client_id"
+        ],
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "FileUploadable",
+              "required": [
+                "name",
+                "mimetype",
+                "s3key"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "examples": [
+                    "document.pdf",
+                    "image.jpg",
+                    "report.docx"
+                  ],
+                  "description": "The filename that will be used when uploading the file to the destination service"
+                },
+                "s3key": {
+                  "type": "string",
+                  "title": "S3Key",
+                  "examples": [
+                    "47563/gmail/GET_ATTACHMENT/response/12345"
+                  ],
+                  "description": "The S3 key of a publicly accessible file, typically returned from a previous download action that stored the file in S3. This key references an existing file that can be uploaded to another service."
+                },
+                "mimetype": {
+                  "type": "string",
+                  "title": "Mimetype",
+                  "examples": [
+                    "application/pdf",
+                    "image/jpeg",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ],
+                  "description": "The MIME type of the file"
+                }
+              },
+              "file_uploadable": true
+            },
+            "title": "Files",
+            "default": null,
+            "nullable": true,
+            "description": "Files to upload; use files or file_urls, not both. FileUploadable where `name` is filename."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "nullable": true,
+            "maxLength": 255,
+            "description": "Title for the signature request"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": null,
+            "nullable": true,
+            "maxLength": 5000,
+            "description": "Custom message to signers"
+          },
+          "signers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubSigner",
+              "required": [
+                "email_address",
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "description": "Signer name"
+                },
+                "order": {
+                  "type": "integer",
+                  "title": "Order",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Zero-based signing order for sequential signing"
+                },
+                "email_address": {
+                  "type": "string",
+                  "title": "Email Address",
+                  "format": "email",
+                  "description": "Signer email address"
+                }
+              }
+            },
+            "title": "Signers",
+            "default": null,
+            "nullable": true,
+            "description": "List of signer definitions; use signers or grouped_signers, not both."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "nullable": true,
+            "maxLength": 255,
+            "description": "Email subject for signers"
+          },
+          "metadata": {
+            "type": "object",
+            "title": "Metadata",
+            "default": null,
+            "nullable": true,
+            "description": "Up to 10 custom key/value metadata entries (keys <=40 chars, values <=1000 chars)",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "examples": [
+              "YOUR_CLIENT_ID"
+            ],
+            "description": "Client ID for embedded signing"
+          },
+          "file_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "File Urls",
+            "default": null,
+            "nullable": true,
+            "description": "URLs for files; Dropbox Sign will fetch. Use file_urls or files, not both."
+          },
+          "test_mode": {
+            "type": "boolean",
+            "title": "Test Mode",
+            "default": false,
+            "nullable": true,
+            "description": "If true, this is a test (non-binding) request"
+          },
+          "expires_at": {
+            "type": "integer",
+            "title": "Expires At",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp when request expires; unsigned requests move to expired"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubAttachment",
+              "required": [
+                "name",
+                "signer"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "description": "Attachment name for signer to upload"
+                },
+                "signer": {
+                  "type": "integer",
+                  "title": "Signer",
+                  "minimum": 1,
+                  "description": "1-based index of signer for this attachment"
+                },
+                "required": {
+                  "type": "boolean",
+                  "title": "Required",
+                  "default": true,
+                  "nullable": true,
+                  "description": "Whether this attachment is required"
+                },
+                "instructions": {
+                  "type": "string",
+                  "title": "Instructions",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Instructions for the signer attachment"
+                }
+              }
+            },
+            "title": "Attachments",
+            "default": null,
+            "nullable": true,
+            "description": "Signer attachments to collect"
+          },
+          "allow_decline": {
+            "type": "boolean",
+            "title": "Allow Decline",
+            "default": false,
+            "nullable": true,
+            "description": "Allow signers to decline (default false)"
+          },
+          "custom_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubCustomField",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "description": "Custom field name for merge fields or text tags"
+                },
+                "value": {
+                  "type": "string",
+                  "title": "Value",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Pre-filled value for this custom field"
+                }
+              }
+            },
+            "title": "Custom Fields",
+            "default": null,
+            "nullable": true,
+            "description": "Custom field values for merge fields or text tags"
+          },
+          "field_options": {
+            "type": "object",
+            "title": "SubFieldOptions",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "date_format": {
+                "type": "string",
+                "title": "Date Format",
+                "default": null,
+                "nullable": true,
+                "description": "Date format to use for date fields, e.g., 'DD - MM - YYYY'"
+              }
+            },
+            "description": "Request-level field options",
+            "additionalProperties": false
+          },
+          "use_text_tags": {
+            "type": "boolean",
+            "title": "Use Text Tags",
+            "default": false,
+            "nullable": true,
+            "description": "Enable text tags parsing in documents"
+          },
+          "allow_reassign": {
+            "type": "boolean",
+            "title": "Allow Reassign",
+            "default": false,
+            "nullable": true,
+            "description": "Allow signers to reassign (premium feature, default false)"
+          },
+          "hide_text_tags": {
+            "type": "boolean",
+            "title": "Hide Text Tags",
+            "default": false,
+            "nullable": true,
+            "description": "Remove text tags in the final document"
+          },
+          "grouped_signers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubGroupedSigner",
+              "required": [
+                "group_name",
+                "signers"
+              ],
+              "properties": {
+                "signers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "SubSigner",
+                    "required": [
+                      "email_address",
+                      "name"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "Signer name"
+                      },
+                      "order": {
+                        "type": "integer",
+                        "title": "Order",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Zero-based signing order for sequential signing"
+                      },
+                      "email_address": {
+                        "type": "string",
+                        "title": "Email Address",
+                        "format": "email",
+                        "description": "Signer email address"
+                      }
+                    }
+                  },
+                  "title": "Signers",
+                  "description": "List of signers in this group"
+                },
+                "group_name": {
+                  "type": "string",
+                  "title": "Group Name",
+                  "description": "Name of signer group"
+                }
+              }
+            },
+            "title": "Grouped Signers",
+            "default": null,
+            "nullable": true,
+            "description": "List of grouped signer definitions; use grouped_signers or signers, not both."
+          },
+          "signing_options": {
+            "type": "object",
+            "title": "SubSigningOptions",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "draw": {
+                "type": "boolean",
+                "title": "Draw",
+                "default": null,
+                "nullable": true,
+                "description": "Allow signature by drawing"
+              },
+              "type": {
+                "type": "boolean",
+                "title": "Type",
+                "default": null,
+                "nullable": true,
+                "description": "Allow signature by text typing"
+              },
+              "phone": {
+                "type": "boolean",
+                "title": "Phone",
+                "default": null,
+                "nullable": true,
+                "description": "Allow signature by phone authentication"
+              },
+              "upload": {
+                "type": "boolean",
+                "title": "Upload",
+                "default": null,
+                "nullable": true,
+                "description": "Allow signature by file upload"
+              },
+              "default_type": {
+                "type": "string",
+                "title": "Default Type",
+                "default": null,
+                "nullable": true,
+                "description": "Default signature type to use when signer arrives"
+              }
+            },
+            "description": "Allowed signature creation types",
+            "additionalProperties": false
+          },
+          "cc_email_addresses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email",
+              "properties": {}
+            },
+            "title": "Cc Email Addresses",
+            "default": null,
+            "nullable": true,
+            "description": "Email addresses to CC on the request"
+          },
+          "signature_request_id": {
+            "type": "string",
+            "title": "Signature Request Id",
+            "description": "ID of the signature request to edit and resend"
+          },
+          "populate_auto_fill_fields": {
+            "type": "boolean",
+            "title": "Populate Auto Fill Fields",
+            "default": false,
+            "nullable": true,
+            "description": "Allow auto-fill fields to pre-populate signer info during signing"
+          }
+        }
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_EDIT_AND_RESEND_EMBEDDED_SIGNATURE_REQUEST_WITH_TEMPLATE",
+      "description": "Tool to edit and resend an embedded signature request using templates. Use when you need to update request details or recipients and resend within an embedded signing flow.",
+      "inputSchema": {
+        "type": "object",
+        "title": "EditAndResendEmbeddedSignatureRequestWithTemplateRequest",
+        "required": [
+          "signature_request_id",
+          "client_id",
+          "template_ids",
+          "signers"
+        ],
+        "properties": {
+          "ccs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubCC",
+              "required": [
+                "role",
+                "email_address"
+              ],
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "title": "Role",
+                  "minLength": 1,
+                  "description": "Template role name for this CC recipient"
+                },
+                "email_address": {
+                  "type": "string",
+                  "title": "Email Address",
+                  "format": "email",
+                  "description": "CC recipient\u2019s email address"
+                }
+              }
+            },
+            "title": "Ccs",
+            "default": null,
+            "nullable": true,
+            "description": "CC recipients matching any CC roles in template"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "FileUploadable",
+              "required": [
+                "name",
+                "mimetype",
+                "s3key"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "examples": [
+                    "document.pdf",
+                    "image.jpg",
+                    "report.docx"
+                  ],
+                  "description": "The filename that will be used when uploading the file to the destination service"
+                },
+                "s3key": {
+                  "type": "string",
+                  "title": "S3Key",
+                  "examples": [
+                    "47563/gmail/GET_ATTACHMENT/response/12345"
+                  ],
+                  "description": "The S3 key of a publicly accessible file, typically returned from a previous download action that stored the file in S3. This key references an existing file that can be uploaded to another service."
+                },
+                "mimetype": {
+                  "type": "string",
+                  "title": "Mimetype",
+                  "examples": [
+                    "application/pdf",
+                    "image/jpeg",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ],
+                  "description": "The MIME type of the file"
+                }
+              },
+              "file_uploadable": true
+            },
+            "title": "Files",
+            "default": null,
+            "nullable": true,
+            "description": "Binary file uploads; mutually exclusive with file_urls"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "nullable": true,
+            "maxLength": 255,
+            "description": "Title for the signature request (max 255 chars)"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": null,
+            "nullable": true,
+            "maxLength": 5000,
+            "description": "Custom email message to signers (max 5000 chars)"
+          },
+          "signers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubSignatureRequestTemplateSigner",
+              "required": [
+                "role",
+                "name",
+                "email_address"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "minLength": 1,
+                  "description": "Signer\u2019s full name"
+                },
+                "role": {
+                  "type": "string",
+                  "title": "Role",
+                  "minLength": 1,
+                  "description": "Template role name for this signer"
+                },
+                "order": {
+                  "type": "integer",
+                  "title": "Order",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Signing order for this signer"
+                },
+                "email_address": {
+                  "type": "string",
+                  "title": "Email Address",
+                  "format": "email",
+                  "description": "Signer\u2019s email address"
+                }
+              }
+            },
+            "title": "Signers",
+            "minItems": 1,
+            "description": "Signer definitions matching template roles"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "nullable": true,
+            "maxLength": 255,
+            "description": "Email subject to signers (max 255 chars)"
+          },
+          "metadata": {
+            "type": "object",
+            "title": "Metadata",
+            "default": null,
+            "nullable": true,
+            "description": "Key/value metadata (\u226410 keys, values \u22641000 chars)",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "minLength": 1,
+            "description": "Client ID of your HelloSign app for this embedded request"
+          },
+          "file_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "File Urls",
+            "default": null,
+            "nullable": true,
+            "description": "URLs for Dropbox Sign to fetch file(s); mutually exclusive with files"
+          },
+          "test_mode": {
+            "type": "boolean",
+            "title": "Test Mode",
+            "default": false,
+            "nullable": true,
+            "description": "If true, signature request is a non-legally binding test"
+          },
+          "template_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "properties": {}
+            },
+            "title": "Template Ids",
+            "minItems": 1,
+            "description": "One or more template IDs in order"
+          },
+          "allow_decline": {
+            "type": "boolean",
+            "title": "Allow Decline",
+            "default": false,
+            "nullable": true,
+            "description": "Allow signers to decline"
+          },
+          "custom_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubCustomField",
+              "required": [
+                "name",
+                "value"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "minLength": 1,
+                  "description": "Name of the merge field"
+                },
+                "value": {
+                  "type": "string",
+                  "title": "Value",
+                  "minLength": 1,
+                  "description": "Value to populate into field"
+                },
+                "editor": {
+                  "type": "string",
+                  "title": "Editor",
+                  "format": "email",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Email address allowed to edit this custom field"
+                },
+                "required": {
+                  "type": "boolean",
+                  "title": "Required",
+                  "default": false,
+                  "nullable": true,
+                  "description": "Whether the signer must fill this field"
+                }
+              }
+            },
+            "title": "Custom Fields",
+            "default": null,
+            "nullable": true,
+            "description": "Values for merge fields in template"
+          },
+          "signing_options": {
+            "type": "object",
+            "title": "SubSigningOptions",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "draw": {
+                "type": "boolean",
+                "title": "Draw",
+                "default": null,
+                "nullable": true,
+                "description": "Allow drawn signatures"
+              },
+              "type": {
+                "type": "boolean",
+                "title": "Type",
+                "default": null,
+                "nullable": true,
+                "description": "Allow typed signatures"
+              },
+              "phone": {
+                "type": "boolean",
+                "title": "Phone",
+                "default": null,
+                "nullable": true,
+                "description": "Allow SMS-authenticated signatures"
+              },
+              "upload": {
+                "type": "boolean",
+                "title": "Upload",
+                "default": null,
+                "nullable": true,
+                "description": "Allow upload of signature images"
+              },
+              "default_type": {
+                "type": "string",
+                "title": "Default Type",
+                "default": null,
+                "nullable": true,
+                "description": "Default signature type to present"
+              }
+            },
+            "description": "Override account signing method options",
+            "additionalProperties": false
+          },
+          "signature_request_id": {
+            "type": "string",
+            "title": "Signature Request Id",
+            "description": "The ID of the signature request to edit and resend"
+          },
+          "populate_auto_fill_fields": {
+            "type": "boolean",
+            "title": "Populate Auto Fill Fields",
+            "default": false,
+            "nullable": true,
+            "description": "If true, auto-fill fields are pre-populated during embedded signing"
+          }
+        },
+        "description": "Request model for editing and resending an embedded signature request using templates."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_EDIT_AND_RESEND_SIGNATURE_REQUEST",
+      "description": "Tool to edit and resend a signature request. Use when you need to update documents, signers, or metadata and resend an existing non-templated request.",
+      "inputSchema": {
+        "type": "object",
+        "title": "EditAndResendSignatureRequestRequest",
+        "required": [
+          "signature_request_id"
+        ],
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "FileUploadable",
+              "required": [
+                "name",
+                "mimetype",
+                "s3key"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "examples": [
+                    "document.pdf",
+                    "image.jpg",
+                    "report.docx"
+                  ],
+                  "description": "The filename that will be used when uploading the file to the destination service"
+                },
+                "s3key": {
+                  "type": "string",
+                  "title": "S3Key",
+                  "examples": [
+                    "47563/gmail/GET_ATTACHMENT/response/12345"
+                  ],
+                  "description": "The S3 key of a publicly accessible file, typically returned from a previous download action that stored the file in S3. This key references an existing file that can be uploaded to another service."
+                },
+                "mimetype": {
+                  "type": "string",
+                  "title": "Mimetype",
+                  "examples": [
+                    "application/pdf",
+                    "image/jpeg",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ],
+                  "description": "The MIME type of the file"
+                }
+              },
+              "file_uploadable": true
+            },
+            "title": "Files",
+            "default": null,
+            "nullable": true,
+            "description": "Files to upload; use files or file_urls, not both. FileUploadable where `name` is filename."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "nullable": true,
+            "maxLength": 255,
+            "description": "Title for the signature request"
+          },
+          "is_eid": {
+            "type": "boolean",
+            "title": "Is Eid",
+            "default": false,
+            "nullable": true,
+            "description": "Require eID identity verification (premium feature)"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": null,
+            "nullable": true,
+            "maxLength": 5000,
+            "description": "Custom email message to signers"
+          },
+          "signers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubSigner",
+              "required": [
+                "email_address",
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "description": "Signer name"
+                },
+                "order": {
+                  "type": "integer",
+                  "title": "Order",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Zero-based signing order for sequential signing"
+                },
+                "email_address": {
+                  "type": "string",
+                  "title": "Email Address",
+                  "format": "email",
+                  "description": "Signer email address"
+                }
+              }
+            },
+            "title": "Signers",
+            "default": null,
+            "nullable": true,
+            "description": "List of signer definitions; use signers or grouped_signers, not both."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "nullable": true,
+            "maxLength": 255,
+            "description": "Custom email subject line"
+          },
+          "metadata": {
+            "type": "object",
+            "title": "Metadata",
+            "default": null,
+            "nullable": true,
+            "description": "Up to 10 custom key/value metadata entries (keys \u226440 chars, values \u22641000 chars)",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "default": null,
+            "nullable": true,
+            "description": "API App client_id for branding and callbacks"
+          },
+          "file_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "File Urls",
+            "default": null,
+            "nullable": true,
+            "description": "URLs for files; Dropbox Sign will fetch. Use file_urls or files, not both."
+          },
+          "test_mode": {
+            "type": "boolean",
+            "title": "Test Mode",
+            "default": false,
+            "nullable": true,
+            "description": "If true, the request is not legally binding"
+          },
+          "expires_at": {
+            "type": "integer",
+            "title": "Expires At",
+            "default": null,
+            "nullable": true,
+            "description": "Unix timestamp when request expires"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubAttachment",
+              "required": [
+                "name",
+                "signer"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "description": "Attachment name for signer to upload"
+                },
+                "signer": {
+                  "type": "integer",
+                  "title": "Signer",
+                  "minimum": 1,
+                  "description": "1-based index of signer for this attachment"
+                },
+                "required": {
+                  "type": "boolean",
+                  "title": "Required",
+                  "default": true,
+                  "nullable": true,
+                  "description": "Whether this attachment is required"
+                },
+                "instructions": {
+                  "type": "string",
+                  "title": "Instructions",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Instructions for the signer attachment"
+                }
+              }
+            },
+            "title": "Attachments",
+            "default": null,
+            "nullable": true,
+            "description": "Signer attachments to collect"
+          },
+          "allow_decline": {
+            "type": "boolean",
+            "title": "Allow Decline",
+            "default": false,
+            "nullable": true,
+            "description": "Allow signers to decline the request"
+          },
+          "custom_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubCustomField",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "description": "Custom field name for merge fields or text tags"
+                },
+                "value": {
+                  "type": "string",
+                  "title": "Value",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Pre-filled value for this custom field"
+                }
+              }
+            },
+            "title": "Custom Fields",
+            "default": null,
+            "nullable": true,
+            "description": "Custom field values for merge fields or text tags"
+          },
+          "field_options": {
+            "type": "object",
+            "title": "SubFieldOptions",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "date_format": {
+                "type": "string",
+                "title": "Date Format",
+                "default": null,
+                "nullable": true,
+                "description": "Date format to use for date fields, e.g., 'DD - MM - YYYY'"
+              }
+            },
+            "description": "Request-level field options",
+            "additionalProperties": false
+          },
+          "use_text_tags": {
+            "type": "boolean",
+            "title": "Use Text Tags",
+            "default": false,
+            "nullable": true,
+            "description": "Enable text tags parsing in documents"
+          },
+          "allow_reassign": {
+            "type": "boolean",
+            "title": "Allow Reassign",
+            "default": false,
+            "nullable": true,
+            "description": "Allow signers to reassign (premium feature)"
+          },
+          "hide_text_tags": {
+            "type": "boolean",
+            "title": "Hide Text Tags",
+            "default": false,
+            "nullable": true,
+            "description": "Remove text tags in the final document"
+          },
+          "grouped_signers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubGroupedSigner",
+              "required": [
+                "group_name",
+                "signers"
+              ],
+              "properties": {
+                "signers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "SubSigner",
+                    "required": [
+                      "email_address",
+                      "name"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "Signer name"
+                      },
+                      "order": {
+                        "type": "integer",
+                        "title": "Order",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Zero-based signing order for sequential signing"
+                      },
+                      "email_address": {
+                        "type": "string",
+                        "title": "Email Address",
+                        "format": "email",
+                        "description": "Signer email address"
+                      }
+                    }
+                  },
+                  "title": "Signers",
+                  "description": "List of signers in this group"
+                },
+                "group_name": {
+                  "type": "string",
+                  "title": "Group Name",
+                  "description": "Name of signer group"
+                }
+              }
+            },
+            "title": "Grouped Signers",
+            "default": null,
+            "nullable": true,
+            "description": "List of grouped signer definitions; use grouped_signers or signers, not both."
+          },
+          "signing_options": {
+            "type": "object",
+            "title": "SubSigningOptions",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "draw": {
+                "type": "boolean",
+                "title": "Draw",
+                "default": null,
+                "nullable": true,
+                "description": "Allow signature by drawing"
+              },
+              "type": {
+                "type": "boolean",
+                "title": "Type",
+                "default": null,
+                "nullable": true,
+                "description": "Allow signature by text typing"
+              },
+              "phone": {
+                "type": "boolean",
+                "title": "Phone",
+                "default": null,
+                "nullable": true,
+                "description": "Allow signature by phone authentication"
+              },
+              "upload": {
+                "type": "boolean",
+                "title": "Upload",
+                "default": null,
+                "nullable": true,
+                "description": "Allow signature by file upload"
+              },
+              "default_type": {
+                "type": "string",
+                "title": "Default Type",
+                "default": null,
+                "nullable": true,
+                "description": "Default signature type to use when signer arrives"
+              }
+            },
+            "description": "Allowed signature creation types",
+            "additionalProperties": false
+          },
+          "form_field_rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Form Field Rules",
+            "default": null,
+            "nullable": true,
+            "description": "Conditional logic rules for form fields"
+          },
+          "form_field_groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Form Field Groups",
+            "default": null,
+            "nullable": true,
+            "description": "Definitions for form field groups referenced by fields"
+          },
+          "cc_email_addresses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email",
+              "properties": {}
+            },
+            "title": "Cc Email Addresses",
+            "default": null,
+            "nullable": true,
+            "description": "Email addresses to CC on the request"
+          },
+          "signature_request_id": {
+            "type": "string",
+            "title": "Signature Request Id",
+            "examples": [
+              "5e825a6545e98a03ed9c019e78f0847cfa72064c"
+            ],
+            "description": "ID of the signature request to edit and resend"
+          },
+          "signing_redirect_url": {
+            "type": "string",
+            "title": "Signing Redirect Url",
+            "default": null,
+            "nullable": true,
+            "description": "URL to redirect signers after signing completes"
+          },
+          "form_fields_per_document": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Form Fields Per Document",
+            "default": null,
+            "nullable": true,
+            "description": "Form fields placement per document"
+          }
+        },
+        "description": "Request model for editing and resending a non-templated signature request."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_EDIT_AND_RESEND_UNCLAIMED_DRAFT",
+      "description": "Tool to edit and resend a previously created unclaimed draft. Use when you have an existing signature_request_id and want to modify the draft before reissuing.",
+      "inputSchema": {
+        "type": "object",
+        "title": "EditAndResendUnclaimedDraftRequest",
+        "required": [
+          "signature_request_id",
+          "client_id"
+        ],
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "description": "Client ID of the app used to create the draft; applies app branding and callback URL"
+          },
+          "test_mode": {
+            "type": "boolean",
+            "title": "Test Mode",
+            "default": false,
+            "nullable": true,
+            "description": "If true, created request is not legally binding"
+          },
+          "editor_options": {
+            "type": "object",
+            "title": "Editor Options",
+            "default": null,
+            "nullable": true,
+            "description": "Options for the built-in document editor while preparing the draft",
+            "additionalProperties": true
+          },
+          "signature_request_id": {
+            "type": "string",
+            "title": "Signature Request Id",
+            "description": "ID of the signature request to edit and resend"
+          },
+          "signing_redirect_url": {
+            "type": "string",
+            "title": "Signing Redirect Url",
+            "default": null,
+            "nullable": true,
+            "description": "URL to redirect signers after they successfully sign"
+          },
+          "show_progress_stepper": {
+            "type": "boolean",
+            "title": "Show Progress Stepper",
+            "default": true,
+            "nullable": true,
+            "description": "Show progress stepper; set to false to hide when only one step remains"
+          },
+          "is_for_embedded_signing": {
+            "type": "boolean",
+            "title": "Is For Embedded Signing",
+            "default": false,
+            "nullable": true,
+            "description": "If true, the resulting request will be signable in embedded mode"
+          },
+          "requester_email_address": {
+            "type": "string",
+            "title": "Requester Email Address",
+            "format": "email",
+            "default": null,
+            "nullable": true,
+            "description": "Email to designate as the requester; defaults to the original requester if not set"
+          },
+          "requesting_redirect_url": {
+            "type": "string",
+            "title": "Requesting Redirect Url",
+            "default": null,
+            "nullable": true,
+            "description": "URL to redirect users after they successfully request a signature"
+          }
+        },
+        "description": "Request schema for editing and resending an unclaimed draft."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_GET_ACCOUNT",
+      "description": "Tool to retrieve the properties and settings of your Dropbox Sign account. Use when you need to inspect account details. Requires either account_id or email_address.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAccountRequest",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "default": null,
+            "examples": [
+              "abcd1234-12ab-34cd-56ef-123456abcdef"
+            ],
+            "nullable": true,
+            "description": "The ID of the account. If both account_id and email_address are provided, account_id takes precedence."
+          },
+          "email_address": {
+            "type": "string",
+            "title": "Email Address",
+            "format": "email",
+            "default": null,
+            "examples": [
+              "user@example.com"
+            ],
+            "nullable": true,
+            "description": "The email address of the account. One of account_id or email_address is required."
+          }
+        },
+        "description": "Request parameters for retrieving Dropbox Sign account details."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_GET_BULK_SEND_JOB",
+      "description": "Tool to retrieve the status of a bulk send job. Use when you need up-to-date job progress and request details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetBulkSendJobRequest",
+        "required": [
+          "bulk_send_job_id"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number of the Bulk Send Job signature requests to return. Defaults to 1."
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              20
+            ],
+            "nullable": true,
+            "description": "Number of signature requests per page (1-100). Defaults to 20."
+          },
+          "bulk_send_job_id": {
+            "type": "string",
+            "title": "Bulk Send Job Id",
+            "examples": [
+              "6e683bc0369ba3d5b6f43c2c22a8031dbf6bd174"
+            ],
+            "description": "The ID of the Bulk Send Job to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a Bulk Send Job."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_GET_CURRENT_TEAM",
+      "description": "Tool to get the current team membership status and details. Use when you need to check if the authenticated user is part of a team and retrieve team information. Returns is_on_team False if user is not part of any team (no retries needed for this case).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCurrentTeamRequest",
+        "properties": {},
+        "description": "Request model for retrieving team membership status. No parameters."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_GET_EMBEDDED_SIGN_URL",
+      "description": "Tool to generate an embedded signing URL for a signature. Use after creating a signature request when embedding HelloSign in an iFrame.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetEmbeddedSignUrlRequest",
+        "required": [
+          "signature_id"
+        ],
+        "properties": {
+          "signature_id": {
+            "type": "string",
+            "title": "Signature Id",
+            "examples": [
+              "50e3542f738adfa7ddd4cbd4c00d2a8ab6e4194b"
+            ],
+            "description": "The ID of the signature to retrieve the embedded signing URL for"
+          }
+        },
+        "description": "Request model for retrieving an embedded signing URL."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_GET_EMBEDDED_TEMPLATE_EDIT_URL",
+      "description": "Tool to generate an edit URL for embedded template editing. Use after selecting or uploading a template to allow users to modify it in an iframe.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetEmbeddedTemplateEditUrlRequest",
+        "required": [
+          "template_id"
+        ],
+        "properties": {
+          "cc_roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Cc Roles",
+            "default": null,
+            "nullable": true,
+            "description": "List of CC role names; pass empty list to remove all CC roles."
+          },
+          "test_mode": {
+            "type": "boolean",
+            "title": "Test Mode",
+            "default": false,
+            "nullable": true,
+            "description": "Allow editing locked templates when in test mode."
+          },
+          "template_id": {
+            "type": "string",
+            "title": "Template Id",
+            "description": "ID of the template to generate an edit URL for."
+          },
+          "merge_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "SubMergeField",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "description": "Name of the merge field in the template."
+                },
+                "value": {
+                  "type": "string",
+                  "title": "Value",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Value to pre-fill for this merge field."
+                }
+              },
+              "description": "Merge field definition for prefilling data in the template."
+            },
+            "title": "Merge Fields",
+            "default": null,
+            "nullable": true,
+            "description": "Merge fields to prefill; pass empty list to clear all existing."
+          },
+          "preview_only": {
+            "type": "boolean",
+            "title": "Preview Only",
+            "default": false,
+            "nullable": true,
+            "description": "Preview-only mode with no adding fields; overrides show_preview."
+          },
+          "show_preview": {
+            "type": "boolean",
+            "title": "Show Preview",
+            "default": false,
+            "nullable": true,
+            "description": "Enable the editor preview experience."
+          },
+          "allow_edit_ccs": {
+            "type": "boolean",
+            "title": "Allow Edit Ccs",
+            "default": false,
+            "nullable": true,
+            "description": "Allow adding or changing CC roles during editing."
+          },
+          "editor_options": {
+            "type": "object",
+            "title": "SubEditorOptions",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "show_branding": {
+                "type": "boolean",
+                "title": "Show Branding",
+                "default": null,
+                "nullable": true,
+                "description": "Show HelloSign branding in the editor (default hidden)."
+              },
+              "hide_text_tags": {
+                "type": "boolean",
+                "title": "Hide Text Tags",
+                "default": null,
+                "nullable": true,
+                "description": "Hide text tags from the editor UI."
+              },
+              "hide_signer_tool": {
+                "type": "boolean",
+                "title": "Hide Signer Tool",
+                "default": null,
+                "nullable": true,
+                "description": "Disable signer tools (signature, date, etc.) in the editor."
+              }
+            },
+            "description": "Options to configure the embedded template editor UI.",
+            "additionalProperties": false
+          },
+          "force_signer_roles": {
+            "type": "boolean",
+            "title": "Force Signer Roles",
+            "default": false,
+            "nullable": true,
+            "description": "Allow users to review or edit signer roles before sending."
+          },
+          "force_subject_message": {
+            "type": "boolean",
+            "title": "Force Subject Message",
+            "default": false,
+            "nullable": true,
+            "description": "Allow users to review or edit email subject and message."
+          },
+          "show_progress_stepper": {
+            "type": "boolean",
+            "title": "Show Progress Stepper",
+            "default": true,
+            "nullable": true,
+            "description": "Show the progress stepper unless only one step remains."
+          }
+        },
+        "description": "Request model for generating an embedded template edit URL."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_GET_SIGNATURE_REQUEST",
+      "description": "Tool to get the status and details of a signature request. Use when you need to retrieve up-to-date information after sending a request.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSignatureRequestRequest",
+        "required": [
+          "signature_request_id"
+        ],
+        "properties": {
+          "signature_request_id": {
+            "type": "string",
+            "title": "Signature Request Id",
+            "examples": [
+              "fa5c8a0b0f492d768749333ad6fcc214c111e967"
+            ],
+            "description": "ID of the SignatureRequest to retrieve. Example: fa5c8a0b0f492d768749333ad6fcc214c111e967"
+          }
+        },
+        "description": "Request model for retrieving a signature request's status and details."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_GET_TEAM_INFO",
+      "description": "Tool to get information about a team. Use when you need to retrieve details of a team by its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTeamInfoRequest",
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "default": null,
+            "examples": [
+              "abcd1234-12ab-34cd-56ef-123456abcdef"
+            ],
+            "nullable": true,
+            "description": "The ID of the team to retrieve information for. Optional \u2014 if omitted, the API will return information for the authenticated user's team."
+          }
+        },
+        "description": "Request parameters for retrieving information about a Dropbox Sign team."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_GET_TEMPLATE",
+      "description": "Tool to return the specified template. Use when you need to fetch full template details by ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTemplateRequest",
+        "required": [
+          "template_id"
+        ],
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "title": "Template Id",
+            "examples": [
+              "5305a77b8b938843f0000001a3d50f36bb2b0320"
+            ],
+            "description": "The unique ID of the template to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a template by its ID."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_GET_TEMPLATE_FILES",
+      "description": "Tool to download documents associated with a template. Use after confirming the template is created; returns a PDF or ZIP archive of the documents.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTemplateFilesRequest",
+        "required": [
+          "template_id"
+        ],
+        "properties": {
+          "file_type": {
+            "enum": [
+              "pdf",
+              "zip"
+            ],
+            "type": "string",
+            "title": "File Type",
+            "default": "pdf",
+            "examples": [
+              "zip"
+            ],
+            "description": "Format of the output: 'pdf' for merged PDF, 'zip' for individual docs in a ZIP archive."
+          },
+          "template_id": {
+            "type": "string",
+            "title": "Template Id",
+            "examples": [
+              "3b2f1ac79dfc679ba07de7fa5f3c4e8a0c1b2d3e"
+            ],
+            "description": "ID of the HelloSign template to download documents for. Example: 3b2f1ac79dfc679ba07de7fa5f3c4e8a0c1b2d3e"
+          }
+        },
+        "description": "Request parameters for downloading template documents."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_LIST_BULK_SEND_JOBS",
+      "description": "Tool to list bulk send jobs. Use when you need to retrieve all bulk send job summaries the authenticated user can access. Supports pagination via page and page_size.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListBulkSendJobsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number of the Bulk Send Job list (default 1)."
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              20
+            ],
+            "nullable": true,
+            "description": "Number of Bulk Send Jobs to return per page (1\u2013100, default 20)."
+          }
+        },
+        "description": "Request model for listing Bulk Send Jobs with pagination."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_LIST_FAX_LINES",
+      "description": "Tool to list fax lines and their properties. Use when you need to retrieve available fax lines for an account, optionally paging or including team lines.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFaxLinesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number to return. Defaults to 1."
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              20
+            ],
+            "nullable": true,
+            "description": "Number of results per page (1\u2013100). Defaults to 20."
+          },
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "default": null,
+            "examples": [
+              "abcd1234efgh5678"
+            ],
+            "nullable": true,
+            "description": "Filter fax lines to this account ID."
+          },
+          "show_team_lines": {
+            "type": "boolean",
+            "title": "Show Team Lines",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Include fax lines belonging to team members."
+          }
+        },
+        "description": "Request model for listing fax lines."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_LIST_SIGNATURE_REQUESTS",
+      "description": "Tool to list signature requests. Use when you need to retrieve paginated signature requests with optional filters.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSignatureRequestsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "description": "Page number to return."
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "default": null,
+            "examples": [
+              "from:me title:Agreement"
+            ],
+            "nullable": true,
+            "description": "Search string with optional fielded filters (e.g., 'from:me AND complete:true')."
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              20
+            ],
+            "description": "Number of objects per page, between 1 and 100."
+          },
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "default": null,
+            "examples": [
+              "all"
+            ],
+            "nullable": true,
+            "description": "Team account to list requests for; use 'all' for all team members; defaults to your account."
+          }
+        },
+        "description": "Request parameters for listing signature requests with optional filters."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_LIST_SUB_TEAMS",
+      "description": "Tool to list sub-teams of a parent team. Use when you need to retrieve all sub-teams under a given team with pagination support.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSubTeamsRequest",
+        "required": [
+          "team_id"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number to return; minimum is 1; default is 1."
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "abcd1234-12ab-34cd-56ef-123456abcdef"
+            ],
+            "description": "The unique identifier of the parent team whose sub-teams you want to list."
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              20
+            ],
+            "nullable": true,
+            "description": "Number of items per page; range is 1 to 100; default is 20."
+          }
+        },
+        "description": "Request model for listing sub-teams of a parent team."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_LIST_TEAM_MEMBERS",
+      "description": "Tool to list members and roles for a team. Use after you have a valid team_id to view its members and their roles.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTeamMembersRequest",
+        "required": [
+          "team_id"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number to return (default is 1)"
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id",
+            "examples": [
+              "0123abcd1234efgh5678ijkl"
+            ],
+            "description": "The ID of the team to retrieve members for"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              20
+            ],
+            "nullable": true,
+            "description": "Number of results per page (1-100, default is 20)"
+          }
+        },
+        "description": "Request parameters for listing team members."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_LIST_TEAMS",
+      "description": "Tool to list all teams available to the user. Use after authenticating to retrieve the current team and its sub-teams, returning their team_ids and names for downstream actions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTeamsRequest",
+        "properties": {},
+        "description": "Request model for listing all teams available to the authenticated user. No parameters."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_LIST_TEMPLATES",
+      "description": "Tool to list templates. Use when you need to retrieve a paginated list of templates accessible to your account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTemplatesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "description": "Page number to return; minimum 1; default is 1"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "default": null,
+            "examples": [
+              "title:Agreement"
+            ],
+            "nullable": true,
+            "description": "Search string to filter templates; supports fielded queries per Search guide"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              20
+            ],
+            "description": "Number of templates per page; minimum 1; maximum 100; default is 20"
+          },
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "default": null,
+            "examples": [
+              "all"
+            ],
+            "nullable": true,
+            "description": "Team member account to return templates for; use 'all' for all members; defaults to your account."
+          }
+        },
+        "description": "Request model for listing templates."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_O_AUTH_AUTHORIZE",
+      "description": "Tool to generate an OAuth authorization URL. Use before directing the user to grant access.",
+      "inputSchema": {
+        "type": "object",
+        "title": "OAuthAuthorizeRequest",
+        "required": [
+          "state"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": null,
+            "examples": [
+              "account_access signature_request_access template_access"
+            ],
+            "nullable": true,
+            "description": "Optional space-delimited list of OAuth scopes. If omitted, default scopes for the app are used."
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "examples": [
+              "user-login-123"
+            ],
+            "description": "Opaque value used to maintain state between the request and callback. Must be unique per auth request."
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "default": null,
+            "examples": [
+              "abcd1234efgh5678"
+            ],
+            "nullable": true,
+            "description": "Client ID of the Dropbox Sign API app. If not provided, the value from connection metadata will be used."
+          },
+          "redirect_uri": {
+            "type": "string",
+            "title": "Redirect Uri",
+            "default": null,
+            "examples": [
+              "https://example.com/oauth/callback"
+            ],
+            "nullable": true,
+            "description": "Optional redirect URI to which the OAuth server will send the user after authorization. Must match a configured callback URL if provided."
+          }
+        },
+        "description": "Request parameters for initiating the OAuth authorization flow."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_RELEASE_SIGNATURE_REQUEST_HOLD",
+      "description": "Tool to release a held signature request. Use when a signature request created from an unclaimed draft is held and you want to send it to signers.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReleaseSignatureRequestHoldRequest",
+        "required": [
+          "signature_request_id"
+        ],
+        "properties": {
+          "signature_request_id": {
+            "type": "string",
+            "title": "Signature Request Id",
+            "examples": [
+              "fa5c8a0b0f492d768749333ad6fcc214c111e967"
+            ],
+            "description": "ID of the held Signature Request to release. Example: fa5c8a0b0f492d768749333ad6fcc214c111e967"
+          }
+        },
+        "description": "Request model for releasing a held Signature Request."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_REMOVE_USER_FROM_TEMPLATE",
+      "description": "Tool to remove an account's access to a template. Use when you need to revoke a user's permission on a template after confirming template ID and target account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RemoveUserFromTemplateRequest",
+        "required": [
+          "template_id"
+        ],
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "default": null,
+            "examples": [
+              "a1b2c3d4e5f6g7h8i9j0"
+            ],
+            "nullable": true,
+            "description": "ID of the account to revoke access. Takes precedence over email_address."
+          },
+          "template_id": {
+            "type": "string",
+            "title": "Template Id",
+            "description": "ID of the template from which to remove access."
+          },
+          "email_address": {
+            "type": "string",
+            "title": "Email Address",
+            "format": "email",
+            "default": null,
+            "examples": [
+              "user@example.com"
+            ],
+            "nullable": true,
+            "description": "Email of the account to revoke access. Ignored if account_id is provided."
+          }
+        },
+        "description": "Request parameters for revoking an account's access to a template."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_SEND_SIGNATURE_REQUEST_REMINDER",
+      "description": "Tool to send an email reminder to a signer. Use when you need to remind a signer about an outstanding signature request at least 1 hour after the last reminder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SendSignatureRequestReminderRequest",
+        "required": [
+          "signature_request_id",
+          "email_address"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Alice Smith"
+            ],
+            "nullable": true,
+            "description": "Name of the signer; required if multiple signers share the same email"
+          },
+          "email_address": {
+            "type": "string",
+            "title": "Email Address",
+            "format": "email",
+            "examples": [
+              "alice@example.com"
+            ],
+            "description": "Email address of the signer to remind"
+          },
+          "signature_request_id": {
+            "type": "string",
+            "title": "Signature Request Id",
+            "examples": [
+              "fa5c8a0b0f492d768749333ad6fcc214c111e967"
+            ],
+            "description": "ID of the SignatureRequest to send a reminder for"
+          }
+        },
+        "description": "Request model for sending a reminder email to a signer for an outstanding signature request."
+      }
+    },
+    {
+      "name": "DROPBOX_SIGN_VERIFY_ACCOUNT",
+      "description": "Tool to verify whether a Dropbox Sign account exists for the given email. Use when you need to check account existence before sending signature requests.",
+      "inputSchema": {
+        "type": "object",
+        "title": "VerifyAccountRequest",
+        "required": [
+          "email_address"
+        ],
+        "properties": {
+          "email_address": {
+            "type": "string",
+            "title": "Email Address",
+            "format": "email",
+            "examples": [
+              "user@example.com"
+            ],
+            "description": "Email address to verify for a Dropbox Sign account."
+          }
+        },
+        "description": "Request to verify if a Dropbox Sign account exists for the given email."
+      }
+    }
+  ],
+  "tool_count": 31,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/dropbox_sign/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "DROPBOX_SIGN_ADD_USER_TO_TEAM",
+    "DROPBOX_SIGN_ADD_USER_TO_TEMPLATE",
+    "DROPBOX_SIGN_BULK_SEND_WITH_TEMPLATE",
+    "DROPBOX_SIGN_CREATE_REPORT",
+    "DROPBOX_SIGN_DELETE_TEMPLATE",
+    "DROPBOX_SIGN_DOWNLOAD_SIGNATURE_REQUEST_FILES",
+    "DROPBOX_SIGN_EDIT_AND_RESEND_EMBEDDED_SIGNATURE_REQUEST",
+    "DROPBOX_SIGN_EDIT_AND_RESEND_EMBEDDED_SIGNATURE_REQUEST_WITH_TEMPLATE",
+    "DROPBOX_SIGN_EDIT_AND_RESEND_SIGNATURE_REQUEST",
+    "DROPBOX_SIGN_EDIT_AND_RESEND_UNCLAIMED_DRAFT",
+    "DROPBOX_SIGN_GET_ACCOUNT",
+    "DROPBOX_SIGN_GET_BULK_SEND_JOB",
+    "DROPBOX_SIGN_GET_CURRENT_TEAM",
+    "DROPBOX_SIGN_GET_EMBEDDED_SIGN_URL",
+    "DROPBOX_SIGN_GET_EMBEDDED_TEMPLATE_EDIT_URL",
+    "DROPBOX_SIGN_GET_SIGNATURE_REQUEST",
+    "DROPBOX_SIGN_GET_TEAM_INFO",
+    "DROPBOX_SIGN_GET_TEMPLATE",
+    "DROPBOX_SIGN_GET_TEMPLATE_FILES",
+    "DROPBOX_SIGN_LIST_BULK_SEND_JOBS",
+    "DROPBOX_SIGN_LIST_FAX_LINES",
+    "DROPBOX_SIGN_LIST_SIGNATURE_REQUESTS",
+    "DROPBOX_SIGN_LIST_SUB_TEAMS",
+    "DROPBOX_SIGN_LIST_TEAM_MEMBERS",
+    "DROPBOX_SIGN_LIST_TEAMS",
+    "DROPBOX_SIGN_LIST_TEMPLATES",
+    "DROPBOX_SIGN_O_AUTH_AUTHORIZE",
+    "DROPBOX_SIGN_RELEASE_SIGNATURE_REQUEST_HOLD",
+    "DROPBOX_SIGN_REMOVE_USER_FROM_TEMPLATE",
+    "DROPBOX_SIGN_SEND_SIGNATURE_REQUEST_REMINDER",
+    "DROPBOX_SIGN_VERIFY_ACCOUNT"
+  ]
+}

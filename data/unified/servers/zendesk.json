@@ -1,0 +1,938 @@
+{
+  "id": "zendesk",
+  "name": "zendesk",
+  "display_name": "Zendesk",
+  "version": null,
+  "description": "Zendesk provides customer support software with ticketing, live chat, and knowledge base features, enabling efficient helpdesk operations and customer engagement",
+  "icon_url": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/zendesk.svg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "ZENDESK_COUNT_ZENDESK_ORGANIZATIONS",
+      "description": "Count the number of organizations in Zendesk.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CountZendeskOrganizationsRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "ZENDESK_CREATE_ZENDESK_ORGANIZATION",
+      "description": "Tool to create a Zendesk organization. Use when you need to group end users under a shared company profile. Use after confirming the organization name is unique.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateZendeskOrganizationRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Acme Corp"
+            ],
+            "description": "Unique organization name. Leading/trailing whitespace is trimmed by Zendesk."
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id",
+            "default": null,
+            "examples": [
+              "ext-1234"
+            ],
+            "nullable": true,
+            "description": "Optional unique external identifier for this organization. Comparison is case-insensitive; use to sync with external systems."
+          }
+        },
+        "description": "Request parameters for creating a new Zendesk organization."
+      }
+    },
+    {
+      "name": "ZENDESK_CREATE_ZENDESK_TICKET",
+      "description": "Create a ticket in Zendesk.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateZendeskTicketRequest",
+        "required": [
+          "subject",
+          "description"
+        ],
+        "properties": {
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "examples": [
+              "Unable to reset password",
+              "Billing discrepancy"
+            ],
+            "description": "Short summary of the issue. Keep it concise (e.g. 'Cannot log in')."
+          },
+          "priority": {
+            "enum": [
+              "urgent",
+              "high",
+              "normal",
+              "low"
+            ],
+            "type": "string",
+            "title": "Priority",
+            "default": "normal",
+            "examples": [
+              "high"
+            ],
+            "description": "Zendesk priority. Must be one of: 'urgent', 'high', 'normal', 'low'."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "examples": [
+              "User reports\u2026"
+            ],
+            "description": "Long-form description / steps to reproduce."
+          },
+          "requester_name": {
+            "type": "string",
+            "title": "Requester Name",
+            "default": null,
+            "examples": [
+              "Jane Doe"
+            ],
+            "nullable": true,
+            "description": "Name of the requester. If you supply this, you MUST also supply `requester_email`. Leave both blank to default to the authenticated user."
+          },
+          "requester_email": {
+            "type": "string",
+            "title": "Requester Email",
+            "default": null,
+            "examples": [
+              "jane@example.com"
+            ],
+            "nullable": true,
+            "description": "Email of the requester. Must accompany `requester_name`."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZENDESK_CREATE_ZENDESK_USER",
+      "description": "Tool to create a new user in Zendesk. Use when you need to onboard a user with specific details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateZendeskUserRequest",
+        "required": [
+          "user"
+        ],
+        "properties": {
+          "user": {
+            "type": "object",
+            "title": "User",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "examples": [
+                  "Jane Doe"
+                ],
+                "description": "Full name for the new user"
+              },
+              "role": {
+                "enum": [
+                  "end-user",
+                  "agent",
+                  "admin"
+                ],
+                "type": "string",
+                "title": "Role",
+                "default": null,
+                "examples": [
+                  "agent"
+                ],
+                "nullable": true,
+                "description": "User role; defaults to 'end-user' if omitted"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Tags",
+                "default": null,
+                "examples": [
+                  [
+                    "support",
+                    "beta-user"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of user tags"
+              },
+              "alias": {
+                "type": "string",
+                "title": "Alias",
+                "default": null,
+                "nullable": true,
+                "description": "Alias displayed to end users"
+              },
+              "email": {
+                "type": "string",
+                "title": "Email",
+                "default": null,
+                "examples": [
+                  "jane@example.com"
+                ],
+                "nullable": true,
+                "description": "Primary email address"
+              },
+              "phone": {
+                "type": "string",
+                "title": "Phone",
+                "default": null,
+                "examples": [
+                  "+14155551234"
+                ],
+                "nullable": true,
+                "description": "Direct line phone number in E.164 format"
+              },
+              "locale": {
+                "type": "string",
+                "title": "Locale",
+                "default": null,
+                "examples": [
+                  "en-US"
+                ],
+                "nullable": true,
+                "description": "BCP-47 locale; overrides locale_id"
+              },
+              "details": {
+                "type": "string",
+                "title": "Details",
+                "default": null,
+                "nullable": true,
+                "description": "Free-form details about the user"
+              },
+              "locale_id": {
+                "type": "integer",
+                "title": "Locale Id",
+                "default": null,
+                "examples": [
+                  1
+                ],
+                "nullable": true,
+                "description": "Language locale ID for user"
+              },
+              "signature": {
+                "type": "string",
+                "title": "Signature",
+                "default": null,
+                "nullable": true,
+                "description": "Agent/Admin signature"
+              },
+              "suspended": {
+                "type": "boolean",
+                "title": "Suspended",
+                "default": null,
+                "examples": [
+                  false
+                ],
+                "nullable": true,
+                "description": "True to suspend the account"
+              },
+              "time_zone": {
+                "type": "string",
+                "title": "Time Zone",
+                "default": null,
+                "examples": [
+                  "Pacific Time (US & Canada)"
+                ],
+                "nullable": true,
+                "description": "User's time zone"
+              },
+              "identities": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "title": "Identity",
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "title": "Type",
+                      "examples": [
+                        "email"
+                      ],
+                      "description": "Identity type (e.g., 'email', 'phone')"
+                    },
+                    "value": {
+                      "type": "string",
+                      "title": "Value",
+                      "examples": [
+                        "jdoe@example.com"
+                      ],
+                      "description": "Identity value corresponding to the type"
+                    }
+                  }
+                },
+                "title": "Identities",
+                "default": null,
+                "nullable": true,
+                "description": "List of additional identities (type and value)"
+              },
+              "external_id": {
+                "type": "string",
+                "title": "External Id",
+                "default": null,
+                "nullable": true,
+                "description": "External system ID (case-insensitive)"
+              },
+              "user_fields": {
+                "type": "object",
+                "title": "User Fields",
+                "default": null,
+                "nullable": true,
+                "description": "Key-value map of custom user fields",
+                "additionalProperties": true
+              },
+              "custom_role_id": {
+                "type": "integer",
+                "title": "Custom Role Id",
+                "default": null,
+                "examples": [
+                  987654
+                ],
+                "nullable": true,
+                "description": "Agent-only: ID of a custom agent role"
+              },
+              "agent_brand_ids": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "properties": {}
+                },
+                "title": "Agent Brand Ids",
+                "default": null,
+                "examples": [
+                  [
+                    1001,
+                    1002
+                  ]
+                ],
+                "nullable": true,
+                "description": "Brand IDs to assign to an agent"
+              },
+              "organization_id": {
+                "type": "integer",
+                "title": "Organization Id",
+                "default": null,
+                "examples": [
+                  123456
+                ],
+                "nullable": true,
+                "description": "ID of default organization"
+              },
+              "default_group_id": {
+                "type": "integer",
+                "title": "Default Group Id",
+                "default": null,
+                "examples": [
+                  200
+                ],
+                "nullable": true,
+                "description": "Default group ID for the user"
+              },
+              "ticket_restriction": {
+                "enum": [
+                  "organization",
+                  "groups",
+                  "assigned",
+                  "requested"
+                ],
+                "type": "string",
+                "title": "Ticket Restriction",
+                "default": null,
+                "nullable": true,
+                "description": "Ticket access restriction; 'groups'/'assigned' only valid for agents"
+              }
+            },
+            "description": "User object containing all attributes to create",
+            "additionalProperties": false
+          },
+          "skip_verify_email": {
+            "type": "boolean",
+            "title": "Skip Verify Email",
+            "default": false,
+            "nullable": true,
+            "description": "If true, do not send a verification email upon creation"
+          }
+        },
+        "description": "Request model for creating a new Zendesk user."
+      }
+    },
+    {
+      "name": "ZENDESK_DELETE_ZENDESK_ORGANIZATION",
+      "description": "Delete an organization in Zendesk.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteZendeskOrganizationRequest",
+        "required": [
+          "organization_id"
+        ],
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "title": "Organization Id",
+            "description": "ID of the organization to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "ZENDESK_DELETE_ZENDESK_TICKET",
+      "description": "Delete a ticket in Zendesk.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteZendeskTicketRequest",
+        "required": [
+          "ticket_id"
+        ],
+        "properties": {
+          "ticket_id": {
+            "type": "integer",
+            "title": "Ticket Id",
+            "description": "ID of the ticket to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "ZENDESK_DESTROY_MANY_ORGANIZATIONS",
+      "description": "Tool to bulk delete Zendesk organizations. Use when cleaning up test data or removing obsolete organizations in one call. Returns a job_status payload to track progress.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DestroyManyOrganizationsRequest",
+        "properties": {
+          "ids": {
+            "type": "string",
+            "title": "Ids",
+            "default": null,
+            "examples": [
+              "123,456,789"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of Zendesk organization IDs to delete (max 100). Required if external_ids is not provided."
+          },
+          "external_ids": {
+            "type": "string",
+            "title": "External Ids",
+            "default": null,
+            "examples": [
+              "ext1,ext2,ext3"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of Zendesk external organization IDs to delete (max 100). Required if ids is not provided."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZENDESK_GET_ABOUT_ME",
+      "description": "Get information about the owner account in Zendesk.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAboutMeRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "ZENDESK_GET_ALL_ZENDESK_ORGANIZATIONS",
+      "description": "Get all organizations in Zendesk.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAllZendeskOrganizationsRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "ZENDESK_GET_ZENDESK_ORGANIZATION",
+      "description": "Get information about a specific organization in Zendesk.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetZendeskOrganizationRequest",
+        "required": [
+          "organization_id"
+        ],
+        "properties": {
+          "organization_id": {
+            "type": "integer",
+            "title": "Organization Id",
+            "minimum": 1,
+            "examples": [
+              123456
+            ],
+            "description": "Numeric ID of the organization to retrieve (e.g. 123456)."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZENDESK_GET_ZENDESK_TICKET_BY_ID",
+      "description": "Get ticket details from Zendesk.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetZendeskTicketByIdRequest",
+        "required": [
+          "ticket_id"
+        ],
+        "properties": {
+          "ticket_id": {
+            "type": "integer",
+            "title": "Ticket Id",
+            "description": "ID of the ticket to get details for."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZENDESK_LIST_ZENDESK_TICKETS",
+      "description": "List Zendesk tickets with pagination and filtering.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListZendeskTicketsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for offset pagination (starts at 1)"
+          },
+          "sort_by": {
+            "type": "string",
+            "title": "Sort By",
+            "default": null,
+            "examples": [
+              "updated_at"
+            ],
+            "nullable": true,
+            "description": "Field to sort by: 'assignee', 'assignee.name', 'created_at', 'group', 'id', 'requester', 'requester.name', 'status', 'subject', 'updated_at'"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              25
+            ],
+            "nullable": true,
+            "description": "Number of tickets per page (max 100)"
+          },
+          "sort_order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "title": "Sort Order",
+            "default": null,
+            "examples": [
+              "desc"
+            ],
+            "nullable": true,
+            "description": "Sort order: 'asc' or 'desc'"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id",
+            "default": null,
+            "examples": [
+              "ext-123"
+            ],
+            "nullable": true,
+            "description": "Filter tickets by external ID"
+          }
+        },
+        "description": "Request parameters for listing Zendesk tickets with pagination and filtering."
+      }
+    },
+    {
+      "name": "ZENDESK_REPLY_ZENDESK_TICKET",
+      "description": "Action to reply to a Zendesk ticket by adding a comment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReplyZendeskTicketRequest",
+        "required": [
+          "ticket_id"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "default": "",
+            "description": "Comment content"
+          },
+          "public": {
+            "type": "boolean",
+            "title": "Public",
+            "default": true,
+            "description": "Whether the comment is public or internal"
+          },
+          "ticket_id": {
+            "type": "integer",
+            "title": "Ticket Id",
+            "description": "ID of the ticket to reply to"
+          }
+        },
+        "description": "Request model for replying to a Zendesk ticket."
+      }
+    },
+    {
+      "name": "ZENDESK_SEARCH_ZENDESK_USERS",
+      "description": "Tool to search Zendesk users by email or name. Use after confirming user identity before ticket creation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SearchZendeskUsersRequest",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Jane Doe"
+            ],
+            "nullable": true,
+            "description": "Full or partial name to search for. For phrase searches, enclose in quotes."
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for offset pagination (starts at 1)."
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "default": null,
+            "examples": [
+              "jdoe@example.com"
+            ],
+            "nullable": true,
+            "description": "Email address to search for. Exact match (e.g., 'jdoe@example.com')."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              25
+            ],
+            "nullable": true,
+            "description": "Number of users per page (max 100)."
+          }
+        },
+        "description": "Request parameters for searching Zendesk users by email or name."
+      }
+    },
+    {
+      "name": "ZENDESK_UPDATE_ZENDESK_ORGANIZATION",
+      "description": "Update an organization in Zendesk.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateZendeskOrganizationRequest",
+        "required": [
+          "organization_id",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "title": "Data",
+            "description": "New data for the organization",
+            "additionalProperties": true
+          },
+          "organization_id": {
+            "type": "integer",
+            "title": "Organization Id",
+            "description": "ID of the organization to update"
+          }
+        }
+      }
+    },
+    {
+      "name": "ZENDESK_UPDATE_ZENDESK_TICKET",
+      "description": "Tool to update a ticket in Zendesk. Use when you need to modify ticket fields like status, priority, or subject after confirming the ticket ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateZendeskTicketRequest",
+        "required": [
+          "ticket_id"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "title": "Data",
+            "default": null,
+            "nullable": true,
+            "description": "Optional raw ticket update object. Provide this to send fields under the 'ticket' wrapper directly. Alternatively, use the un-nested fields above.",
+            "additionalProperties": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Tags",
+            "default": null,
+            "nullable": true,
+            "description": "Tags to set on the ticket. Using tags here replaces all existing tags."
+          },
+          "due_at": {
+            "type": "string",
+            "title": "Due At",
+            "default": null,
+            "nullable": true,
+            "description": "Due date/time for task-type tickets (ISO 8601)."
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "nullable": true,
+            "description": "Ticket status to set. If your account uses custom statuses, use custom_status_id via other endpoints."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "nullable": true,
+            "description": "Ticket subject/title to set during update."
+          },
+          "metadata": {
+            "type": "object",
+            "title": "Metadata",
+            "default": null,
+            "nullable": true,
+            "description": "Custom metadata to attach to this update's audit (approximately up to 1 KB).",
+            "additionalProperties": true
+          },
+          "priority": {
+            "enum": [
+              "urgent",
+              "high",
+              "normal",
+              "low"
+            ],
+            "type": "string",
+            "title": "Priority",
+            "default": null,
+            "nullable": true,
+            "description": "Ticket priority. Allowed values: urgent, high, normal, low."
+          },
+          "email_ccs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Email Ccs",
+            "default": null,
+            "nullable": true,
+            "description": "Email CCs to add/remove. Each object includes user_id or user_email, optional user_name, and action ('put'|'delete')."
+          },
+          "followers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Followers",
+            "default": null,
+            "nullable": true,
+            "description": "Followers to add/remove. Each object should include user_id or user_email, with optional action ('put'|'delete')."
+          },
+          "ticket_id": {
+            "type": "integer",
+            "title": "Ticket Id",
+            "description": "ID of the ticket to update."
+          },
+          "safe_update": {
+            "type": "boolean",
+            "title": "Safe Update",
+            "default": null,
+            "nullable": true,
+            "description": "Enable optimistic locking to prevent overwrites during collisions."
+          },
+          "comment_body": {
+            "type": "string",
+            "title": "Comment Body",
+            "default": null,
+            "nullable": true,
+            "description": "Text body of the comment to add."
+          },
+          "collaborators": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              ],
+              "properties": {}
+            },
+            "title": "Collaborators",
+            "default": null,
+            "nullable": true,
+            "description": "Collaborators to set (replaces existing). Accepts user IDs, emails, or {name, email} objects."
+          },
+          "custom_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Custom Fields",
+            "default": null,
+            "nullable": true,
+            "description": "List of custom field values. Each item: {id: number, value: any}."
+          },
+          "updated_stamp": {
+            "type": "string",
+            "title": "Updated Stamp",
+            "default": null,
+            "nullable": true,
+            "description": "Last-known updated_at timestamp (ISO 8601) used together with safe_update."
+          },
+          "comment_public": {
+            "type": "boolean",
+            "title": "Comment Public",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the added comment is public (visible to requester) or internal."
+          },
+          "comment_uploads": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Comment Uploads",
+            "default": null,
+            "nullable": true,
+            "description": "Upload tokens to attach files to the comment."
+          },
+          "collaborator_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "properties": {}
+            },
+            "title": "Collaborator Ids",
+            "default": null,
+            "nullable": true,
+            "description": "Collaborator user IDs to set (replaces existing)."
+          },
+          "comment_author_id": {
+            "type": "integer",
+            "title": "Comment Author Id",
+            "default": null,
+            "nullable": true,
+            "description": "Author ID for the comment, if different from the authenticated user."
+          },
+          "comment_html_body": {
+            "type": "string",
+            "title": "Comment Html Body",
+            "default": null,
+            "nullable": true,
+            "description": "HTML body of the comment to add."
+          },
+          "additional_collaborators": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              ],
+              "properties": {}
+            },
+            "title": "Additional Collaborators",
+            "default": null,
+            "nullable": true,
+            "description": "Add collaborators without removing existing ones."
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 16,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/zendesk/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "ZENDESK_COUNT_ZENDESK_ORGANIZATIONS",
+    "ZENDESK_CREATE_ZENDESK_ORGANIZATION",
+    "ZENDESK_CREATE_ZENDESK_TICKET",
+    "ZENDESK_CREATE_ZENDESK_USER",
+    "ZENDESK_DELETE_ZENDESK_ORGANIZATION",
+    "ZENDESK_DELETE_ZENDESK_TICKET",
+    "ZENDESK_DESTROY_MANY_ORGANIZATIONS",
+    "ZENDESK_GET_ABOUT_ME",
+    "ZENDESK_GET_ALL_ZENDESK_ORGANIZATIONS",
+    "ZENDESK_GET_ZENDESK_ORGANIZATION",
+    "ZENDESK_GET_ZENDESK_TICKET_BY_ID",
+    "ZENDESK_LIST_ZENDESK_TICKETS",
+    "ZENDESK_REPLY_ZENDESK_TICKET",
+    "ZENDESK_SEARCH_ZENDESK_USERS",
+    "ZENDESK_UPDATE_ZENDESK_ORGANIZATION",
+    "ZENDESK_UPDATE_ZENDESK_TICKET"
+  ]
+}

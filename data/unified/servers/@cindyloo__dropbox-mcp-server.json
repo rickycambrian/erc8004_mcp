@@ -1,0 +1,342 @@
+{
+  "id": "@cindyloo/dropbox-mcp-server",
+  "name": "@cindyloo/dropbox-mcp-server",
+  "display_name": "Dropbox Explorer",
+  "version": null,
+  "description": "Search, browse, and read your Dropbox files. Find documents by name or content, list folders, and pull detailed file info. Search within selected files and get contextual snippets to speed up research.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "search_files",
+      "description": "\n    Search for files in Dropbox by name or content.\n    \n    Args:\n        query: Search query (searches file names and content)\n        file_types: File types to search (\"all\", \"pdf\", \"docx\", \"txt\", or comma-separated list)\n        max_results: Maximum number of results to return\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_filesArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "file_types": {
+            "type": "string",
+            "title": "File Types",
+            "default": "all"
+          },
+          "max_results": {
+            "type": "integer",
+            "title": "Max Results",
+            "default": 10
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "SearchResult": {
+            "type": "object",
+            "title": "SearchResult",
+            "required": [
+              "file_path",
+              "file_name",
+              "match_context",
+              "file_size",
+              "modified"
+            ],
+            "properties": {
+              "modified": {
+                "type": "string",
+                "title": "Modified"
+              },
+              "file_name": {
+                "type": "string",
+                "title": "File Name"
+              },
+              "file_path": {
+                "type": "string",
+                "title": "File Path"
+              },
+              "file_size": {
+                "type": "integer",
+                "title": "File Size"
+              },
+              "match_context": {
+                "type": "string",
+                "title": "Match Context"
+              }
+            },
+            "description": "Search result structure."
+          }
+        },
+        "title": "search_filesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/SearchResult"
+            },
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_files",
+      "description": "\n    List files and folders in a Dropbox directory.\n    \n    Args:\n        folder_path: Path to the folder (empty string for root)\n        max_files: Maximum number of items to return\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_filesArguments",
+        "properties": {
+          "max_files": {
+            "type": "integer",
+            "title": "Max Files",
+            "default": 20
+          },
+          "folder_path": {
+            "type": "string",
+            "title": "Folder Path",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "FileInfo": {
+            "type": "object",
+            "title": "FileInfo",
+            "required": [
+              "name",
+              "path",
+              "size",
+              "modified",
+              "is_folder"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Name"
+              },
+              "path": {
+                "type": "string",
+                "title": "Path"
+              },
+              "size": {
+                "type": "integer",
+                "title": "Size"
+              },
+              "modified": {
+                "type": "string",
+                "title": "Modified"
+              },
+              "is_folder": {
+                "type": "boolean",
+                "title": "Is Folder"
+              },
+              "content_preview": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Content Preview",
+                "default": null
+              }
+            },
+            "description": "File information structure."
+          }
+        },
+        "title": "list_filesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/FileInfo"
+            },
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "read_file",
+      "description": "\n    Read and return the full content of a file.\n    \n    Args:\n        file_path: Full path to the file in Dropbox\n        max_length: Maximum characters to return (0 for no limit)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "read_fileArguments",
+        "required": [
+          "file_path"
+        ],
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "title": "File Path"
+          },
+          "max_length": {
+            "type": "integer",
+            "title": "Max Length",
+            "default": 5000
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "read_fileOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_file_info",
+      "description": "\n    Get detailed information about a specific file.\n    \n    Args:\n        file_path: Full path to the file in Dropbox\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_file_infoArguments",
+        "required": [
+          "file_path"
+        ],
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "title": "File Path"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "FileInfo",
+        "required": [
+          "name",
+          "path",
+          "size",
+          "modified",
+          "is_folder"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size"
+          },
+          "modified": {
+            "type": "string",
+            "title": "Modified"
+          },
+          "is_folder": {
+            "type": "boolean",
+            "title": "Is Folder"
+          },
+          "content_preview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Preview",
+            "default": null
+          }
+        },
+        "description": "File information structure."
+      }
+    },
+    {
+      "name": "search_file_content",
+      "description": "\n    Search for text within specific files.\n    \n    Args:\n        file_paths: List of file paths to search in\n        query: Text to search for\n        context_chars: Number of characters of context around matches\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_file_contentArguments",
+        "required": [
+          "file_paths",
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "file_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "File Paths"
+          },
+          "context_chars": {
+            "type": "integer",
+            "title": "Context Chars",
+            "default": 100
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "search_file_contentOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 5,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@cindyloo/dropbox-mcp-server/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "search_files",
+    "list_files",
+    "read_file",
+    "get_file_info",
+    "search_file_content"
+  ]
+}

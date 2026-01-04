@@ -1,0 +1,314 @@
+{
+  "id": "laei/romania",
+  "name": "laei/romania",
+  "display_name": "romania",
+  "version": null,
+  "description": "Caut\u0103 \u0219i filtreaz\u0103 anun\u021buri clasificate din Rom\u00e2nia dup\u0103 categorie, pre\u021b \u0219i loca\u021bie. Acceseaz\u0103 detalii complete, tendin\u021be \u0219i pre\u021buri medii pentru decizii informate. Exploreaz\u0103 ierarhia geografic\u0103 (\u021b\u0103ri, jude\u021be, ora\u0219e) \u0219i descoper\u0103 structura ora\u0219elor.",
+  "icon_url": null,
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "cauta-anunturi",
+      "annotations": {
+        "title": "C\u0103utare Anun\u021buri Clasificate",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "C\u0103ut\u0103 anun\u021buri clasificate cu filtre avansate. Returneaz\u0103 o list\u0103 de anun\u021buri care corespund criteriilor de c\u0103utare, incluz\u00e2nd titlul, pre\u021bul, loca\u021bia, categoria \u0219i detaliile fiec\u0103rui anun\u021b.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "sort": {
+            "enum": [
+              "recent",
+              "price_asc",
+              "price_desc",
+              "title"
+            ],
+            "type": "string",
+            "default": "recent",
+            "description": "Criteriul de sortare"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Num\u0103rul maxim de anun\u021buri de returnat (implicit: 10)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Cuvinte cheie pentru c\u0103utare \u00een titlul \u0219i descrierea anun\u021burilor"
+          },
+          "city_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "ID-ul ora\u0219ului pentru filtrarea anun\u021burilor dup\u0103 loca\u021bie"
+          },
+          "price_max": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Pre\u021bul maxim pentru filtrarea anun\u021burilor"
+          },
+          "price_min": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Pre\u021bul minim pentru filtrarea anun\u021burilor"
+          },
+          "category_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "ID-ul categoriei pentru filtrarea anun\u021burilor"
+          }
+        }
+      }
+    },
+    {
+      "name": "detalii-anunt",
+      "annotations": {
+        "title": "Detalii Anun\u021b",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Ob\u021bine detaliile complete ale unui anun\u021b specificat prin ID, incluz\u00e2nd descrierea complet\u0103, informa\u021bii contact, imagini \u0219i metadata.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "ID-ul anun\u021bului pentru care se solicit\u0103 detaliile"
+          }
+        }
+      }
+    },
+    {
+      "name": "obtine-categorii",
+      "annotations": {
+        "title": "Ob\u021bine Categorii",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Ob\u021bine structura ierarhic\u0103 a categoriilor de anun\u021buri disponibile, incluz\u00e2nd subcategorii \u0219i num\u0103rul de anun\u021buri pentru fiecare categorie.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "level": {
+            "type": "integer",
+            "maximum": 5,
+            "minimum": 1,
+            "description": "Nivelul de ad\u00e2ncime pentru categorii (implicit: toate)"
+          },
+          "parent_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "ID-ul categoriei p\u0103rinte pentru ob\u021binerea subcategoriilor (op\u021bional)"
+          },
+          "include_count": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include num\u0103rul de anun\u021buri pentru fiecare categorie"
+          }
+        }
+      }
+    },
+    {
+      "name": "obtine-locatii",
+      "annotations": {
+        "title": "Ob\u021bine Loca\u021bii",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Ob\u021bine informa\u021bii despre \u021b\u0103ri, jude\u021be \u0219i ora\u0219e pentru filtrarea geografic\u0103 a anun\u021burilor. Suport\u0103 c\u0103utare ierarhic\u0103 de la \u021b\u0103ri la jude\u021be \u0219i ora\u0219e.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "countries",
+              "states",
+              "cities"
+            ],
+            "type": "string",
+            "default": "cities",
+            "description": "Tipul loca\u021biei solicitate"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Num\u0103rul maxim de rezultate (implicit: 50)"
+          },
+          "state_code": {
+            "type": "string",
+            "description": "Codul jude\u021bului (pentru cities)"
+          },
+          "country_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "description": "Codul \u021b\u0103rii (pentru states/cities)"
+          },
+          "include_count": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include num\u0103rul de anun\u021buri pentru fiecare loca\u021bie"
+          }
+        }
+      }
+    },
+    {
+      "name": "statistici-anunturi",
+      "annotations": {
+        "title": "Statistici Anun\u021buri",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Ob\u021bine statistici \u0219i tendin\u021be pentru anun\u021buri, incluz\u00e2nd num\u0103rul de anun\u021buri per perioad\u0103, categorii populare, pre\u021buri medii \u0219i distribu\u021bia geografic\u0103.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "period": {
+            "enum": [
+              "today",
+              "week",
+              "month",
+              "year",
+              "all"
+            ],
+            "type": "string",
+            "default": "month",
+            "description": "Perioada pentru statistici"
+          },
+          "city_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "ID ora\u0219 pentru filtrare (op\u021bional)"
+          },
+          "category_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "ID categoria pentru filtrare (op\u021bional)"
+          },
+          "include_trends": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include tendin\u021bele \u0219i compara\u021biile cu perioada anterioar\u0103"
+          },
+          "include_price_stats": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include statisticile de pre\u021b"
+          }
+        }
+      }
+    },
+    {
+      "name": "explorare-orase",
+      "annotations": {
+        "title": "Explorare Ora\u0219e Rom\u00e2nia",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Exploreaz\u0103 \u0219i \u00een\u021belege structura ora\u0219elor din Rom\u00e2nia, incluz\u00e2nd jude\u021be, ora\u0219e, popula\u021bie, coordonate geografice \u0219i rela\u021biile dintre acestea.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Num\u0103rul maxim de rezultate (implicit: 20)"
+          },
+          "action": {
+            "enum": [
+              "overview",
+              "counties",
+              "top_cities",
+              "county_cities",
+              "city_details",
+              "search",
+              "geographic"
+            ],
+            "type": "string",
+            "default": "overview",
+            "description": "Tipul de explorare dorit"
+          },
+          "city_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "ID-ul ora\u0219ului pentru detalii specifice"
+          },
+          "county_code": {
+            "type": "string",
+            "description": "Codul jude\u021bului (ex: RO.10, RO.23) pentru ac\u021biuni specifice"
+          },
+          "search_term": {
+            "type": "string",
+            "minLength": 2,
+            "description": "Termen de c\u0103utare pentru ora\u0219e sau jude\u021be"
+          },
+          "population_min": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Popula\u021bia minim\u0103 pentru filtrare"
+          },
+          "include_coordinates": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include coordonatele geografice \u00een rezultate"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 6,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/laei/romania/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "cauta-anunturi",
+    "detalii-anunt",
+    "obtine-categorii",
+    "obtine-locatii",
+    "statistici-anunturi",
+    "explorare-orase"
+  ]
+}

@@ -1,0 +1,1074 @@
+{
+  "id": "@dev/justcall-mcp",
+  "name": "@dev/justcall-mcp",
+  "display_name": "JustCall",
+  "version": null,
+  "description": "Manage calls, SMS, contacts, numbers, and campaigns from your JustCall workspace. Track agent, account, and dialer performance with robust analytics. Automate workflows with webhooks and streamline outreach with quick updates and real-time insights.",
+  "icon_url": null,
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "list_calls",
+      "description": "Lists all JustCall calls",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number for which calls are to be fetched"
+          },
+          "sort": {
+            "enum": [
+              "id",
+              "datetime"
+            ],
+            "type": "string",
+            "description": "Select a parameter to sort the order of calls. By default we apply sorting on id field"
+          },
+          "order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "description": "Order in which the calls list should appear based on the sort parameter selected above"
+          },
+          "agent_id": {
+            "type": "number",
+            "description": "ID of the agent for whom the calls are to be fetched. Agent ID can be accessed using List all users API"
+          },
+          "per_page": {
+            "type": "number",
+            "description": "Number of calls to be fetched per page. Default value is 20 and maximum value is 100"
+          },
+          "call_type": {
+            "enum": [
+              "OUTGOING_ANSWERED",
+              "OUTGOING_UNANSWERED",
+              "OUTGOING_BUSY",
+              "OUTGOING_FAILED",
+              "OUTGOING_RESTRICTED",
+              "OUTGOING_BLOCKED",
+              "OUTGOING_CANCELLED",
+              "INCOMING_ANSWERED",
+              "INCOMING_BUSY",
+              "INCOMING_FAILED",
+              "INCOMING_MISSED",
+              "INCOMING_ABANDONED",
+              "INCOMING_VOICEMAIL"
+            ],
+            "type": "string",
+            "description": "Enter the type of calls (answered, unanswered, missed, voicemail, abandoned) that need to be fetched"
+          },
+          "ivr_digit": {
+            "type": "number",
+            "description": "Enter the IVR digit the calls routed through which need to be filtered (optional). Note: call_direction and call_type filter won't work in case you send ivr_digit"
+          },
+          "call_traits": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "QUEUE",
+                "CALLBACK",
+                "FORWARD",
+                "TRANSFER",
+                "MERGE",
+                "IVR",
+                "VOICE_AGENT"
+              ],
+              "type": "string"
+            },
+            "description": "Select one or more traits associated with a call to fetch all calls containing those traits"
+          },
+          "to_datetime": {
+            "type": "string",
+            "description": "Datetime in yyyy-mm-dd hh:mm:ss or yyyy-mm-dd format till when the calls are to be fetched in user's timezone"
+          },
+          "fetch_ai_data": {
+            "type": "boolean",
+            "description": "Set fetch_ai_data to true to fetch coaching data by Justcall AI. Default entry is false"
+          },
+          "from_datetime": {
+            "type": "string",
+            "description": "Datetime in yyyy-mm-dd hh:mm:ss or yyyy-mm-dd format starting from when the calls are to be fetched in user's timezone"
+          },
+          "call_direction": {
+            "enum": [
+              "Incoming",
+              "Outgoing"
+            ],
+            "type": "string",
+            "description": "Enter the direction of calls (incoming/outgoing) to be fetched"
+          },
+          "contact_number": {
+            "type": "number",
+            "description": "Number of the contact for which calls are to be fetched. Please provide a valid contact number with country code"
+          },
+          "justcall_number": {
+            "type": "number",
+            "description": "JustCall number for which the calls are to be fetched"
+          },
+          "fetch_queue_data": {
+            "type": "boolean",
+            "description": "Set fetch_queue_data to true to fetch queue data like callback time, callback status, callback wait duration, etc. Default entry is false"
+          },
+          "disposition_codes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter calls by the disposition code (call outcome) added by the agent at the end of each call"
+          },
+          "last_call_id_fetched": {
+            "type": "number",
+            "description": "Id of the last call fetched in the previous query. This Id ensures that you won't receive any duplicate data when using the next_page_link parameter"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_call",
+      "description": "Get a specific JustCall call by ID",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique id of the call generated by JustCall"
+          },
+          "fetch_ai_data": {
+            "type": "boolean",
+            "description": "Set fetch_ai_data to true to fetch coaching data by Justcall AI. Default entry is false"
+          },
+          "fetch_queue_data": {
+            "type": "boolean",
+            "description": "Set fetch_queue_data to true to fetch queue data like callback time, callback status, callback wait duration, etc. Default entry is false"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_call",
+      "description": "Update a JustCall call",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique id of the call generated by JustCall"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Call notes"
+          },
+          "rating": {
+            "type": "number",
+            "description": "Call rating"
+          },
+          "disposition": {
+            "type": "string",
+            "description": "Call disposition"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_call_journey",
+      "description": "Get call journey details",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique id of the call generated by JustCall"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_voice_agent_data",
+      "description": "Get voice agent data",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique id of the call generated by JustCall"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_users",
+      "description": "List all users/agents in the account",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "inactive",
+              "all"
+            ],
+            "type": "string",
+            "description": "Filter users by status"
+          },
+          "per_page": {
+            "type": "number",
+            "description": "Number of users per page"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_user",
+      "description": "Get detailed information for a specific user/agent",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique identifier of the user"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "send_sms",
+      "description": "Send an SMS/text message to a contact",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "to",
+          "from",
+          "body"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient phone number with country code"
+          },
+          "body": {
+            "type": "string",
+            "description": "Text message content"
+          },
+          "from": {
+            "type": "string",
+            "description": "Sender JustCall phone number"
+          },
+          "media_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of media URLs to attach to the message"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_sms",
+      "description": "Retrieve all SMS/text messages",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "direction": {
+            "enum": [
+              "sent",
+              "received",
+              "failed"
+            ],
+            "type": "string",
+            "description": "Message direction filter"
+          },
+          "to_datetime": {
+            "type": "string",
+            "description": "End datetime in yyyy-mm-dd hh:mm:ss or yyyy-mm-dd format"
+          },
+          "from_datetime": {
+            "type": "string",
+            "description": "Start datetime in yyyy-mm-dd hh:mm:ss or yyyy-mm-dd format"
+          },
+          "contact_number": {
+            "type": "string",
+            "description": "Contact phone number to filter messages"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_sms",
+      "description": "Get detailed information for a specific SMS/text message",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique identifier of the SMS/text message"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "check_sms_reply",
+      "description": "Check for the most recent inbound SMS reply from a specific contact",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "contact_number"
+        ],
+        "properties": {
+          "contact_number": {
+            "type": "string",
+            "description": "Contact phone number to check for replies (E.164 format)"
+          },
+          "justcall_number": {
+            "type": "string",
+            "description": "JustCall number to filter replies (E.164 format)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_sms_tags",
+      "description": "Retrieve all SMS tags used for organizing text messages",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination"
+          },
+          "per_page": {
+            "type": "number",
+            "description": "Number of tags per page"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_sms_tag",
+      "description": "Get detailed information for a specific SMS tag",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique identifier of the SMS tag"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_sms_tag",
+      "description": "Create a new tag for organizing SMS conversations",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name",
+          "color"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the SMS tag"
+          },
+          "color": {
+            "type": "string",
+            "description": "Color code for the tag (hex format)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_sms_tag",
+      "description": "Delete a specific SMS tag",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique identifier of the SMS tag to delete"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_contacts",
+      "description": "Retrieve all contacts from the CRM",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number for which contacts are to be fetched. Page number '0' indicates first page containing records."
+          },
+          "order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "description": "Order in which the contacts list should appear based on the 'id' of the contact. Recently added contacts are represented by larger 'id' values. Defaults to DESC (descending order)."
+          },
+          "per_page": {
+            "type": "number",
+            "description": "Number of contacts to be fetched per page. Default value is 50 and maximum value is 500."
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name of the contact"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name of the contact"
+          },
+          "contact_number": {
+            "type": "string",
+            "description": "Phone number of the contact"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_contact",
+      "description": "Create a new contact in the CRM",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "first_name",
+          "contact_number"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email id of the contact"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional information added for the contact in JustCall"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address of the contact"
+          },
+          "company": {
+            "type": "string",
+            "description": "Company with which the contact is associated"
+          },
+          "agent_id": {
+            "type": "number",
+            "description": "Specify the agent_id to create contact only for a specific agent"
+          },
+          "agent_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Specify the agent_ids to create contact only for a specific agents"
+          },
+          "extension": {
+            "type": "number",
+            "description": "Assign an extension to the contact"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name of the contact"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name of the contact"
+          },
+          "across_team": {
+            "type": "boolean",
+            "description": "Choose to add a contact for all agents or only for the account owner"
+          },
+          "other_numbers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "label",
+                "number"
+              ],
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "number": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Other phone numbers associated with the contact"
+          },
+          "contact_number": {
+            "type": "string",
+            "description": "Phone number of the contact"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_agent_analytics",
+      "description": "Retrieve agent analytics data for specified date range",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "from_date",
+          "to_date"
+        ],
+        "properties": {
+          "to_date": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "agent_id": {
+            "type": "number",
+            "description": "Agent ID to filter analytics"
+          },
+          "from_date": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_account_analytics",
+      "description": "Retrieve account analytics data for specified date range",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "from_date",
+          "to_date"
+        ],
+        "properties": {
+          "to_date": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "from_date": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_number_analytics",
+      "description": "Retrieve number analytics data for specified date range",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "from_date",
+          "to_date",
+          "justcall_number"
+        ],
+        "properties": {
+          "to_date": {
+            "type": "string",
+            "description": "End date (yyyy-mm-dd)"
+          },
+          "from_date": {
+            "type": "string",
+            "description": "Start date (yyyy-mm-dd)"
+          },
+          "justcall_number": {
+            "type": "number",
+            "description": "JustCall number for which the analytics are to be fetched."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_webhooks",
+      "description": "Retrieve all configured webhooks",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "inactive",
+              "failed"
+            ],
+            "type": "string",
+            "description": "Filter webhooks by status"
+          },
+          "per_page": {
+            "type": "number",
+            "description": "Number of webhooks per page"
+          },
+          "event_type": {
+            "type": "string",
+            "description": "Filter webhooks by event type"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_webhook",
+      "description": "Create a new webhook endpoint to receive real-time notifications",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url",
+          "events"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Webhook URL endpoint"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of event types to subscribe to"
+          },
+          "secret": {
+            "type": "string",
+            "description": "Secret key for webhook signature verification"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the webhook"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_numbers",
+      "description": "Retrieve all JustCall phone numbers",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination"
+          },
+          "type": {
+            "enum": [
+              "local",
+              "toll_free",
+              "international"
+            ],
+            "type": "string",
+            "description": "Filter numbers by type"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "inactive",
+              "pending"
+            ],
+            "type": "string",
+            "description": "Filter numbers by status"
+          },
+          "per_page": {
+            "type": "number",
+            "description": "Number of phone numbers per page"
+          },
+          "country_code": {
+            "type": "string",
+            "description": "Filter numbers by country code"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_number",
+      "description": "Retrieve detailed information for a specific JustCall phone number",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique identifier of the phone number"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_campaigns",
+      "description": "Retrieve all sales dialer campaigns",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination"
+          },
+          "type": {
+            "type": "string",
+            "description": "Campaign type filter"
+          },
+          "order": {
+            "type": "string",
+            "description": "Order for sorting"
+          },
+          "per_page": {
+            "type": "number",
+            "description": "Number of campaigns per page"
+          },
+          "to_datetime": {
+            "type": "string",
+            "description": "End datetime for filtering campaigns"
+          },
+          "from_datetime": {
+            "type": "string",
+            "description": "Start datetime for filtering campaigns"
+          },
+          "contact_number": {
+            "type": "string",
+            "description": "Contact number to filter by"
+          },
+          "sales_dialer_number": {
+            "type": "string",
+            "description": "Sales dialer number to filter by"
+          },
+          "last_campaign_id_fetched": {
+            "type": "number",
+            "description": "Last campaign ID fetched"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_campaign",
+      "description": "Retrieve detailed information for a specific sales dialer campaign",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique identifier of the campaign"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_campaign",
+      "description": "Create a new sales dialer campaign",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name",
+          "country_code"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Provide a name for the campaign"
+          },
+          "type": {
+            "enum": [
+              "Autodial",
+              "Predictive",
+              "Dynamic"
+            ],
+            "type": "string",
+            "description": "Select a type from Autodial, Predictive, or Dynamic"
+          },
+          "call_scripts": {
+            "type": "string",
+            "description": "Comma separated IDs of Call Scripts"
+          },
+          "country_code": {
+            "type": "string",
+            "description": "Default country code for phone numbers where the country code is not present"
+          },
+          "assign_agents": {
+            "type": "string",
+            "description": "Comma separated IDs of agents to assign to the campaign"
+          },
+          "default_number": {
+            "type": "string",
+            "description": "Set a default phone number for the campaign"
+          },
+          "disposition_groups": {
+            "type": "string",
+            "description": "Comma separated IDs of Disposition Groups"
+          },
+          "voicemail_message_id": {
+            "type": "number",
+            "description": "ID of the voicemail audio message"
+          },
+          "abandoning_message_id": {
+            "type": "number",
+            "description": "ID of the abandoning audio message"
+          },
+          "contact_dialing_order": {
+            "enum": [
+              "first_in_first_out",
+              "last_in_first_out"
+            ],
+            "type": "string",
+            "description": "Order in which contacts are dialed"
+          },
+          "call_forwarding_number": {
+            "type": "string",
+            "description": "Number to which incoming calls should be forwarded"
+          },
+          "maximum_calls_per_agent": {
+            "type": "number",
+            "description": "Maximum number of calls allowed per agent (2-10, only for Predictive)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_campaign",
+      "description": "Update campaign details including name, description, status, and assignments",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique identifier of the campaign"
+          },
+          "name": {
+            "type": "string",
+            "description": "Updated name of the campaign"
+          },
+          "type": {
+            "enum": [
+              "Autodial",
+              "Predictive",
+              "Dynamic"
+            ],
+            "type": "string",
+            "description": "Updated campaign type"
+          },
+          "call_scripts": {
+            "type": "string",
+            "description": "Updated call scripts"
+          },
+          "assign_agents": {
+            "type": "string",
+            "description": "Updated comma separated agent IDs"
+          },
+          "default_number": {
+            "type": "string",
+            "description": "Updated default phone number"
+          },
+          "disposition_groups": {
+            "type": "string",
+            "description": "Updated disposition groups"
+          },
+          "voicemail_message_id": {
+            "type": "number",
+            "description": "Updated voicemail message ID"
+          },
+          "abandoning_message_id": {
+            "type": "number",
+            "description": "Updated abandoning message ID"
+          },
+          "contact_dialing_order": {
+            "enum": [
+              "first_in_first_out",
+              "last_in_first_out"
+            ],
+            "type": "string",
+            "description": "Updated dialing order"
+          },
+          "call_forwarding_number": {
+            "type": "string",
+            "description": "Updated call forwarding number"
+          },
+          "maximum_calls_per_agent": {
+            "type": "number",
+            "description": "Updated maximum calls per agent"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_sales_dialer_analytics",
+      "description": "Retrieve comprehensive analytics data for sales dialer campaigns",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "from_date",
+          "to_date"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "overview",
+              "detailed",
+              "performance"
+            ],
+            "type": "string",
+            "description": "Type of analytics to retrieve"
+          },
+          "to_date": {
+            "type": "string",
+            "description": "End date for analytics (yyyy-mm-dd)"
+          },
+          "agent_id": {
+            "type": "number",
+            "description": "Specific agent ID to filter analytics"
+          },
+          "from_date": {
+            "type": "string",
+            "description": "Start date for analytics (yyyy-mm-dd)"
+          },
+          "campaign_id": {
+            "type": "number",
+            "description": "Specific campaign ID to filter analytics"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 29,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@dev/justcall-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "list_calls",
+    "get_call",
+    "update_call",
+    "get_call_journey",
+    "get_voice_agent_data",
+    "list_users",
+    "get_user",
+    "send_sms",
+    "list_sms",
+    "get_sms",
+    "check_sms_reply",
+    "list_sms_tags",
+    "get_sms_tag",
+    "create_sms_tag",
+    "delete_sms_tag",
+    "list_contacts",
+    "create_contact",
+    "get_agent_analytics",
+    "get_account_analytics",
+    "get_number_analytics",
+    "list_webhooks",
+    "create_webhook",
+    "list_numbers",
+    "get_number",
+    "list_campaigns",
+    "get_campaign",
+    "create_campaign",
+    "update_campaign",
+    "get_sales_dialer_analytics"
+  ]
+}

@@ -1,0 +1,898 @@
+{
+  "qualifiedName": "toneden",
+  "displayName": "Toneden",
+  "description": "ToneDen automates social media campaigns, advertising, and landing pages, particularly for music promoters and event organizers looking to boost audience reach",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//toneden-logo.jpeg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/toneden",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/toneden/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "TONEDEN_CREATE_ATTACHMENT",
+      "description": "Tool to create an attachment. Use when you need to programmatically create a social unlock or contest attachment after gathering all required parameters.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateAttachmentRequest",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "unlock",
+              "contest"
+            ],
+            "type": "string",
+            "title": "Type",
+            "examples": [
+              "unlock"
+            ],
+            "description": "Attachment type: 'unlock' for social unlock or 'contest' for a contest attachment."
+          },
+          "platform": {
+            "enum": [
+              "facebook",
+              "facebook-messenger",
+              "email",
+              "soundcloud",
+              "spotify",
+              "spotify-pre-save",
+              "apple-music-playlist",
+              "apple-music-pre-add",
+              "spotify-save",
+              "twitch",
+              "twitter",
+              "twitter-tweet",
+              "spotify-stream",
+              "facebook-share",
+              "custom-url-visit"
+            ],
+            "type": "string",
+            "title": "Platform",
+            "default": null,
+            "nullable": true,
+            "description": "Social action for single-action attachments. Required when type='unlock' and only one social action."
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "facebook",
+                "facebook-messenger",
+                "email",
+                "soundcloud",
+                "spotify",
+                "spotify-pre-save",
+                "apple-music-playlist",
+                "apple-music-pre-add",
+                "spotify-save",
+                "twitch",
+                "twitter",
+                "twitter-tweet",
+                "spotify-stream",
+                "facebook-share",
+                "custom-url-visit"
+              ],
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Platforms",
+            "default": null,
+            "nullable": true,
+            "description": "List of social actions for multi-action attachments. Required when type='contest' or multiple unlock actions."
+          },
+          "unlock_text": {
+            "type": "string",
+            "title": "Unlock Text",
+            "default": null,
+            "examples": [
+              "DISCOUNT2021"
+            ],
+            "nullable": true,
+            "description": "Coupon code text to display. Required when unlock_type='coupon'."
+          },
+          "unlock_type": {
+            "enum": [
+              "download",
+              "coupon",
+              "link",
+              "stream"
+            ],
+            "type": "string",
+            "title": "Unlock Type",
+            "default": null,
+            "examples": [
+              "download"
+            ],
+            "nullable": true,
+            "description": "Reward type for social unlocks. Required when type='unlock'."
+          },
+          "download_url": {
+            "type": "string",
+            "title": "Download Url",
+            "default": null,
+            "examples": [
+              "https://example.com/file.mp3"
+            ],
+            "nullable": true,
+            "description": "URL of the file to download or link target. Required when unlock_type='download' or 'link'."
+          },
+          "messenger_page_id": {
+            "type": "string",
+            "title": "Messenger Page Id",
+            "default": null,
+            "examples": [
+              "123456789"
+            ],
+            "nullable": true,
+            "description": "Facebook Page ID to subscribe on Messenger. Required when platform='facebook-messenger'."
+          },
+          "stream_unlock_url": {
+            "type": "string",
+            "title": "Stream Unlock Url",
+            "default": null,
+            "examples": [
+              "https://youtube.com/watch?v=12345"
+            ],
+            "nullable": true,
+            "description": "URL of the unlisted video to stream. Required when unlock_type='stream'."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_CREATE_LINK",
+      "description": "Tool to create a ToneDen link. Use when you have the target_type and, if needed, the services array. Supports creation of links for music, podcast, livestream, event, tour, biglink, fundraiser, smartlink, and custom types.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateLinkRequest",
+        "required": [
+          "target_type"
+        ],
+        "properties": {
+          "services": {
+            "type": "array",
+            "items": {
+              "properties": {}
+            },
+            "title": "Services",
+            "default": null,
+            "nullable": true,
+            "description": "Conditionally required array of service-specific objects; required for target_types: music, podcast, livestream, tour, biglink; must be omitted for event, fundraiser, smartlink, custom."
+          },
+          "target_type": {
+            "enum": [
+              "music",
+              "podcast",
+              "livestream",
+              "event",
+              "tour",
+              "biglink",
+              "fundraiser",
+              "smartlink",
+              "custom"
+            ],
+            "type": "string",
+            "title": "Target Type",
+            "examples": [
+              "music"
+            ],
+            "description": "Determines the link landing page type."
+          }
+        },
+        "description": "Request model for creating a ToneDen link."
+      }
+    },
+    {
+      "name": "TONEDEN_DELETE_ADVERTISING_CAMPAIGN",
+      "description": "Deletes a ToneDen advertising campaign by ID using DELETE /advertising/campaigns/{campaignID}.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteAdvertisingCampaignRequest",
+        "required": [
+          "campaignID"
+        ],
+        "properties": {
+          "campaignID": {
+            "type": "string",
+            "title": "Campaign Id",
+            "examples": [
+              "12345",
+              12345
+            ],
+            "description": "ID of the advertising campaign to delete. Accepts string or int."
+          }
+        },
+        "description": "Request model for deleting a ToneDen advertising campaign by ID."
+      }
+    },
+    {
+      "name": "TONEDEN_DELETE_LINK",
+      "description": "Deletes a ToneDen link by ID using DELETE /links/{linkID}.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteLinkRequest",
+        "required": [
+          "link_id"
+        ],
+        "properties": {
+          "link_id": {
+            "type": "string",
+            "title": "Link Id",
+            "description": "ID of the link to delete. Accepts string or int."
+          }
+        },
+        "description": "Request model for deleting a ToneDen link by ID."
+      }
+    },
+    {
+      "name": "TONEDEN_DELETE_PLAYBOOK_CAMPAIGN",
+      "description": "Deletes a ToneDen playbook campaign by ID using DELETE /playbooks/campaigns/{campaignID}.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeletePlaybookCampaignRequest",
+        "required": [
+          "campaign_id"
+        ],
+        "properties": {
+          "campaign_id": {
+            "type": "string",
+            "title": "Campaign Id",
+            "description": "ID of the playbook campaign to delete. Accepts string or int."
+          }
+        },
+        "description": "Request model for deleting a ToneDen playbook campaign by ID."
+      }
+    },
+    {
+      "name": "TONEDEN_EXPAND_LINK_TEMPLATE",
+      "description": "Tool to expand a ToneDen link template. Use when you need to retrieve the full template link with your tracking pixels and optional service links. Provide a URL to generate platform services for music or podcast content.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ExpandLinkTemplateRequest",
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "default": null,
+            "examples": [
+              "https://open.spotify.com/track/12345"
+            ],
+            "nullable": true,
+            "description": "Optional source URL for music or podcast; when provided, the API generates a services array linking to that track across platforms."
+          }
+        },
+        "description": "Request model for expanding a ToneDen link template."
+      }
+    },
+    {
+      "name": "TONEDEN_GET_ADVERTISING_CAMPAIGN",
+      "description": "Retrieve a specific advertising campaign by its ID using ToneDen's API. Endpoint: GET /advertising/campaigns/{campaignID} Notes: - This endpoint does not require a userID in the path per official docs. - Some accounts may not have advertising access; in such cases, non-2xx responses are still returned here for observability instead of raising, so the caller can inspect the error object.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAdvertisingCampaignRequest",
+        "required": [
+          "campaignID"
+        ],
+        "properties": {
+          "campaignID": {
+            "type": "string",
+            "title": "Campaign Id",
+            "examples": [
+              "12345"
+            ],
+            "description": "The ID of the advertising campaign to retrieve."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_GET_ADVERTISING_CAMPAIGN_CREATIVE_INSIGHTS",
+      "description": "Retrieve creative performance insights for a specific advertising campaign using ToneDen's API. Endpoint: GET /advertising/campaigns/{campaignID}/creativeInsights. Note: Endpoint uses camelCase `creativeInsights` per official docs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAdvertisingCampaignCreativeInsightsRequest",
+        "required": [
+          "campaignID"
+        ],
+        "properties": {
+          "campaignID": {
+            "type": "string",
+            "title": "Campaign Id",
+            "examples": [
+              "12345"
+            ],
+            "description": "The ID of the advertising campaign to retrieve creative insights for."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_GET_ADVERTISING_CAMPAIGN_INSIGHTS",
+      "description": "Retrieve performance insights for a specific advertising campaign using ToneDen's API. Endpoint: GET /advertising/campaigns/{campaignID}/insights.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAdvertisingCampaignInsightsRequest",
+        "required": [
+          "campaignID"
+        ],
+        "properties": {
+          "campaignID": {
+            "type": "string",
+            "title": "Campaign Id",
+            "examples": [
+              "12345"
+            ],
+            "description": "The ID of the advertising campaign to retrieve insights for."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_GET_ATTACHMENT",
+      "description": "Tool to retrieve an attachment by ID. Use when you need to fetch details of an existing attachment by its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAttachmentRequest",
+        "required": [
+          "attachmentID"
+        ],
+        "properties": {
+          "attachmentID": {
+            "type": "string",
+            "title": "Attachment Id",
+            "examples": [
+              "5f8d0d55e3a8a30017e5b9c1"
+            ],
+            "description": "The unique identifier of the attachment to retrieve."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_GET_ATTACHMENT_ENTRIES_TIME_SERIES",
+      "description": "Tool to fetch time-series entry statistics for a specific attachment. Use when you need chronological entry data points for an attachment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAttachmentEntriesTimeSeriesRequest",
+        "required": [
+          "attachmentID"
+        ],
+        "properties": {
+          "attachmentID": {
+            "type": "string",
+            "title": "Attachment Id",
+            "examples": [
+              "5f8d0d55e3a8a30017e5b9c1",
+              "abc123"
+            ],
+            "description": "The unique identifier of the attachment for which to retrieve entry time-series data."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_GET_ATTACHMENT_ENTRIES_TOTALS",
+      "description": "Tool to fetch summary counts of entries for an attachment. Use when you need aggregate entry counts over day, week, month, and lifetime.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAttachmentEntriesTotalsRequest",
+        "required": [
+          "attachmentID"
+        ],
+        "properties": {
+          "attachmentID": {
+            "type": "string",
+            "title": "Attachment Id",
+            "examples": [
+              "5f8d0d55e3a8a30017e5b9c1"
+            ],
+            "description": "The unique identifier of the attachment for which to retrieve entry totals."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_GET_ATTACHMENT_UNLOCKS_BY_PLATFORM",
+      "description": "Tool to fetch counts of unlocks by platform for a specific attachment. Use when you need a breakdown of unlocks across platforms like Spotify, Twitter, etc.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAttachmentUnlocksByPlatformRequest",
+        "required": [
+          "attachmentID"
+        ],
+        "properties": {
+          "attachmentID": {
+            "type": "string",
+            "title": "Attachment Id",
+            "examples": [
+              "5f8d0d55e3a8a30017e5b9c1",
+              "abc123"
+            ],
+            "description": "The unique identifier of the attachment for which to retrieve unlock counts by platform."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_GET_ATTACHMENT_UNLOCKS_TIME_SERIES",
+      "description": "Tool to fetch time-series unlock statistics for a specific attachment. Use when you need chronological unlock data points for an attachment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAttachmentUnlocksTimeSeriesRequest",
+        "required": [
+          "attachmentID"
+        ],
+        "properties": {
+          "attachmentID": {
+            "type": "string",
+            "title": "Attachment Id",
+            "examples": [
+              "5f8d0d55e3a8a30017e5b9c1",
+              "abc123"
+            ],
+            "description": "The unique identifier of the attachment for which to retrieve unlock time-series data."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_GET_LINK_INSIGHTS",
+      "description": "Tool to retrieve detailed insights for a ToneDen link. Use when you have a link ID and need metrics such as clicks, clickthroughs, email clicks, etc.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetLinkInsightsRequest",
+        "required": [
+          "linkID"
+        ],
+        "properties": {
+          "linkID": {
+            "type": "string",
+            "title": "Link Id",
+            "examples": [
+              "abc123"
+            ],
+            "description": "The unique identifier of the link to retrieve insights for."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_GET_LINK_INSIGHTS_OVERVIEW",
+      "description": "Tool to retrieve a summary overview of a link's performance insights. Use when you have a link ID and need aggregated metrics across platforms.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetLinkInsightsOverviewRequest",
+        "required": [
+          "linkID"
+        ],
+        "properties": {
+          "linkID": {
+            "type": "string",
+            "title": "Link Id",
+            "examples": [
+              "abc123"
+            ],
+            "description": "The unique identifier of the link to retrieve insights for."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_LIST_PLAYBOOK_CAMPAIGNS",
+      "description": "Tool to list playbook campaigns. Use when you need to retrieve a paginated list of all playbook campaigns.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPlaybookCampaignsRequest",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              20
+            ],
+            "nullable": true,
+            "description": "Maximum number of campaigns to return; must be >= 1."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Number of campaigns to skip before starting to collect the result set; must be >= 0."
+          }
+        },
+        "description": "Optional pagination parameters for listing playbook campaigns."
+      }
+    },
+    {
+      "name": "TONEDEN_LIST_USER_ATTACHMENTS",
+      "description": "List User Attachments",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListUserAttachmentsRequest",
+        "required": [
+          "userID"
+        ],
+        "properties": {
+          "userID": {
+            "type": "string",
+            "title": "User Id",
+            "description": "ID of the user whose attachments to list. Use 'me' for current user."
+          }
+        }
+      }
+    },
+    {
+      "name": "TONEDEN_UPDATE_ATTACHMENT",
+      "description": "Tool to update an existing attachment. Use when you need to flexibly modify any attachment field (or add custom fields) after its creation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateAttachmentRequest",
+        "required": [
+          "attachmentID"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "unlock",
+              "contest"
+            ],
+            "type": "string",
+            "title": "Type",
+            "default": null,
+            "examples": [
+              "unlock"
+            ],
+            "nullable": true,
+            "description": "Attachment type: 'unlock' for social unlock or 'contest' for multi-action contest"
+          },
+          "update": {
+            "type": "object",
+            "title": "Update",
+            "description": "Additional arbitrary fields to merge into the update payload",
+            "additionalProperties": true
+          },
+          "platform": {
+            "enum": [
+              "facebook",
+              "facebook-messenger",
+              "email",
+              "soundcloud",
+              "spotify",
+              "spotify-pre-save",
+              "apple-music-playlist",
+              "apple-music-pre-add",
+              "spotify-save",
+              "twitch",
+              "twitter",
+              "twitter-tweet",
+              "spotify-stream",
+              "facebook-share",
+              "custom-url-visit"
+            ],
+            "type": "string",
+            "title": "Platform",
+            "default": null,
+            "examples": [
+              "facebook"
+            ],
+            "nullable": true,
+            "description": "Social action for single-action attachments. Required when type='unlock'"
+          },
+          "link_path": {
+            "type": "string",
+            "title": "Link Path",
+            "default": null,
+            "examples": [
+              "my-custom-link"
+            ],
+            "nullable": true,
+            "description": "Custom path segment for the attachment's landing page"
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "facebook",
+                "facebook-messenger",
+                "email",
+                "soundcloud",
+                "spotify",
+                "spotify-pre-save",
+                "apple-music-playlist",
+                "apple-music-pre-add",
+                "spotify-save",
+                "twitch",
+                "twitter",
+                "twitter-tweet",
+                "spotify-stream",
+                "facebook-share",
+                "custom-url-visit"
+              ],
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Platforms",
+            "default": null,
+            "examples": [
+              [
+                "facebook",
+                "twitter-tweet"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of social actions for multi-action attachments. Required when type='contest'"
+          },
+          "unlock_text": {
+            "type": "string",
+            "title": "Unlock Text",
+            "default": null,
+            "examples": [
+              "DISCOUNT2021"
+            ],
+            "nullable": true,
+            "description": "Coupon code text when unlock_type is 'coupon'"
+          },
+          "unlock_type": {
+            "enum": [
+              "download",
+              "coupon",
+              "link",
+              "stream"
+            ],
+            "type": "string",
+            "title": "Unlock Type",
+            "default": null,
+            "examples": [
+              "download"
+            ],
+            "nullable": true,
+            "description": "Type of unlock for social unlock attachments"
+          },
+          "attachmentID": {
+            "type": "string",
+            "title": "Attachment Id",
+            "description": "ID of the attachment to update"
+          },
+          "download_url": {
+            "type": "string",
+            "title": "Download Url",
+            "default": null,
+            "examples": [
+              "https://example.com/download/file.mp3"
+            ],
+            "nullable": true,
+            "description": "URL for download or link when unlock_type is 'download' or 'link'"
+          },
+          "messenger_page_id": {
+            "type": "string",
+            "title": "Messenger Page Id",
+            "default": null,
+            "examples": [
+              "1234567890"
+            ],
+            "nullable": true,
+            "description": "Facebook Page ID for Messenger subscriptions when platform='facebook-messenger'"
+          },
+          "stream_unlock_url": {
+            "type": "string",
+            "title": "Stream Unlock Url",
+            "default": null,
+            "examples": [
+              "https://youtube.com/watch?v=xyz"
+            ],
+            "nullable": true,
+            "description": "Streaming URL when unlock_type is 'stream'"
+          }
+        },
+        "description": "Parameters for updating an existing attachment. Fields not provided will be omitted."
+      }
+    },
+    {
+      "name": "TONEDEN_UPDATE_PLAYBOOK_CAMPAIGN",
+      "description": "Updates a ToneDen playbook campaign by ID using PUT /playbooks/campaigns/{campaignID}. Note: ToneDen's public docs do not expose the full request body schema for updates. This action sends a flexible JSON payload composed from provided fields and returns diagnostic information without raising on non-2xx responses, to aid real-world testing.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdatePlaybookCampaignRequest",
+        "required": [
+          "campaign_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "nullable": true,
+            "description": "Name of the playbook campaign"
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "nullable": true,
+            "description": "Optional notes or description for the campaign"
+          },
+          "budget": {
+            "type": "number",
+            "title": "Budget",
+            "default": null,
+            "nullable": true,
+            "description": "Optional budget value for the campaign"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "nullable": true,
+            "description": "Status of the campaign (if supported by API)"
+          },
+          "update": {
+            "type": "object",
+            "title": "Update",
+            "default": null,
+            "nullable": true,
+            "description": "Additional arbitrary fields for the update payload when not covered by explicit parameters",
+            "additionalProperties": true
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "default": null,
+            "nullable": true,
+            "description": "ISO8601 end date string (if supported by API)"
+          },
+          "metadata": {
+            "type": "object",
+            "title": "Metadata",
+            "default": null,
+            "nullable": true,
+            "description": "Arbitrary metadata dictionary to include in the update",
+            "additionalProperties": true
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "default": null,
+            "nullable": true,
+            "description": "ISO8601 start date string (if supported by API)"
+          },
+          "campaign_id": {
+            "type": "string",
+            "title": "Campaign Id",
+            "description": "ID of the playbook campaign to update. Accepts string or int."
+          }
+        },
+        "description": "Request model for updating a ToneDen playbook campaign by ID."
+      }
+    },
+    {
+      "name": "TONEDEN_UPDATE_USER",
+      "description": "Tool to update a ToneDen user's profile. Use when you need to modify user details (e.g., name, location, or settings) after fetching them.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateUserRequest",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "city": {
+            "type": "string",
+            "title": "City",
+            "default": null,
+            "nullable": true,
+            "description": "City where the user is located"
+          },
+          "about": {
+            "type": "string",
+            "title": "About",
+            "default": null,
+            "nullable": true,
+            "description": "Bio or about text for the user"
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "default": null,
+            "nullable": true,
+            "description": "State or province of the user"
+          },
+          "policy": {
+            "type": "string",
+            "title": "Policy",
+            "default": null,
+            "nullable": true,
+            "description": "Custom policy text for the user"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country",
+            "default": null,
+            "nullable": true,
+            "description": "Country code (e.g., 'US')"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "examples": [
+              "me"
+            ],
+            "description": "ID of the user to update; use 'me' to target the current authenticated user"
+          },
+          "profile_url": {
+            "type": "string",
+            "title": "Profile Url",
+            "default": null,
+            "examples": [
+              "https://example.com/myprofile"
+            ],
+            "nullable": true,
+            "description": "URL to the user's public profile page"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name",
+            "default": null,
+            "nullable": true,
+            "description": "New display name for the user"
+          },
+          "timezone_name": {
+            "type": "string",
+            "title": "Timezone Name",
+            "default": null,
+            "examples": [
+              "America/Los_Angeles"
+            ],
+            "nullable": true,
+            "description": "IANA timezone string (e.g., 'America/Los_Angeles')"
+          },
+          "additional_emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Additional Emails",
+            "default": null,
+            "nullable": true,
+            "description": "List of additional email addresses for the user"
+          },
+          "interface_settings": {
+            "type": "object",
+            "title": "Interface Settings",
+            "default": null,
+            "nullable": true,
+            "description": "User interface preference settings",
+            "additionalProperties": true
+          },
+          "advertising_settings": {
+            "type": "object",
+            "title": "Advertising Settings",
+            "default": null,
+            "nullable": true,
+            "description": "User advertising preference settings",
+            "additionalProperties": true
+          }
+        },
+        "description": "Request model for updating a ToneDen user. Any field left as None will be omitted from the patch operation."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:55:55.988746+00:00",
+    "source": "smithery"
+  }
+}

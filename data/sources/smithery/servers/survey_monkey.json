@@ -1,0 +1,518 @@
+{
+  "qualifiedName": "survey_monkey",
+  "displayName": "Survey monkey",
+  "description": "SurveyMonkey is an online survey development platform that enables users to create, distribute, and analyze surveys for various purposes.",
+  "iconUrl": "https://logos.composio.dev/api/survey_monkey",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/survey_monkey",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/survey_monkey/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "SURVEY_MONKEY_CREATE_SURVEY",
+      "description": "Tool to create a new survey. Use when you have a survey title and need an ID for follow-up operations. Example: \"Create a survey titled 'Customer Satisfaction'\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateSurveyRequest",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "Customer Satisfaction Survey"
+            ],
+            "description": "Title of the new survey."
+          },
+          "footer": {
+            "type": "boolean",
+            "title": "Footer",
+            "default": true,
+            "nullable": true,
+            "description": "Whether to display SurveyMonkey's footer in the survey."
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "en",
+            "examples": [
+              "en"
+            ],
+            "nullable": true,
+            "description": "Survey language code (e.g., 'en')."
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname",
+            "default": null,
+            "examples": [
+              "CustSat2023"
+            ],
+            "nullable": true,
+            "description": "Optional nickname for the survey."
+          }
+        },
+        "description": "Request model for creating a new survey."
+      }
+    },
+    {
+      "name": "SURVEY_MONKEY_DELETE_SURVEY",
+      "description": "Tool to delete a specific survey. Use when the survey ID is confirmed correct. Deletion is irreversible. Example prompt: \"Delete survey '123456789'.\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteSurveyRequest",
+        "required": [
+          "survey_id"
+        ],
+        "properties": {
+          "survey_id": {
+            "type": "string",
+            "title": "Survey Id",
+            "examples": [
+              "123456789"
+            ],
+            "description": "The unique identifier of the survey to be deleted."
+          }
+        },
+        "description": "Request model for deleting a survey."
+      }
+    },
+    {
+      "name": "SURVEY_MONKEY_GET_COLLECTORS",
+      "description": "Tool to retrieve a list of collectors for a specific survey. Use when you need collector URLs, counts, and statuses.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCollectorsRequest",
+        "required": [
+          "survey_id",
+          "sort_by",
+          "sort_order"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "nullable": true,
+            "description": "Partial match filter on collector name"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number to return (default=1)"
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "type",
+                "status",
+                "response_count",
+                "date_created",
+                "date_modified",
+                "url"
+              ],
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Include",
+            "default": null,
+            "nullable": true,
+            "description": "Additional fields to include per collector"
+          },
+          "sort_by": {
+            "enum": [
+              "id",
+              "date_modified",
+              "type",
+              "status",
+              "name"
+            ],
+            "type": "string",
+            "title": "Sort By",
+            "nullable": true
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "default": null,
+            "nullable": true,
+            "description": "Filter collectors created before this datetime (YYYY-MM-DDTHH:MM:SS)"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": 50,
+            "maximum": 1000,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Resources per page (default=50)"
+          },
+          "survey_id": {
+            "type": "string",
+            "title": "Survey Id",
+            "examples": [
+              "123456789"
+            ],
+            "description": "Survey ID to retrieve collectors for"
+          },
+          "sort_order": {
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "type": "string",
+            "title": "Sort Order",
+            "nullable": true
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "default": null,
+            "nullable": true,
+            "description": "Filter collectors created after this datetime (YYYY-MM-DDTHH:MM:SS)"
+          }
+        },
+        "description": "Request schema for GET_COLLECTORS:\n- survey_id: ID of the survey to list collectors for (path parameter).\n- page/per_page: pagination controls.\n- sort_by/sort_order: how to sort the returned collectors.\n- name: filter by collector name (partial match).\n- start_date/end_date: ISO datetimes to filter by creation date.\n- include: extra fields to include per collector."
+      }
+    },
+    {
+      "name": "SURVEY_MONKEY_GET_CONTACTS",
+      "description": "Tool to retrieve a list of contacts. Use after authenticating with SurveyMonkey. Call this to fetch all contacts associated with your account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetContactsRequest",
+        "properties": {},
+        "description": "Request schema for retrieving contacts. No parameters are required."
+      }
+    },
+    {
+      "name": "SURVEY_MONKEY_GET_GROUPS",
+      "description": "Tool to retrieve a list of groups. Use after authentication when you need to enumerate or paginate through all groups in your SurveyMonkey account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetGroupsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number to retrieve (1-based index)."
+          },
+          "include": {
+            "type": "string",
+            "title": "Include",
+            "default": null,
+            "examples": [
+              "member_count"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of additional fields to include in each group object, e.g., 'member_count'."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Number of groups to return per page."
+          }
+        },
+        "description": "Query parameters for GET_GROUPS."
+      }
+    },
+    {
+      "name": "SURVEY_MONKEY_GET_RESPONSES",
+      "description": "Tool to retrieve a list of responses for a specific survey. Use when you need to browse or filter responses after confirming the survey ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetResponsesRequest",
+        "required": [
+          "survey_id"
+        ],
+        "properties": {
+          "ip": {
+            "type": "string",
+            "title": "Ip",
+            "default": null,
+            "nullable": true,
+            "description": "Filter responses by IP address"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number to return (default=1)"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "default": null,
+            "nullable": true,
+            "description": "Filter responses by recipient's email"
+          },
+          "custom": {
+            "type": "string",
+            "title": "Custom",
+            "default": null,
+            "nullable": true,
+            "description": "Filter responses by custom value associated with the response"
+          },
+          "status": {
+            "enum": [
+              "completed",
+              "partial",
+              "overquota",
+              "disqualified"
+            ],
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "nullable": true,
+            "description": "Filter responses by status"
+          },
+          "sort_by": {
+            "type": "string",
+            "const": "date_modified",
+            "title": "Sort By",
+            "default": null,
+            "nullable": true,
+            "description": "Field to sort by"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": 50,
+            "maximum": 1000,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Number of responses per page (default=50)"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name",
+            "default": null,
+            "nullable": true,
+            "description": "Filter responses by recipient's last name"
+          },
+          "survey_id": {
+            "type": "string",
+            "title": "Survey Id",
+            "examples": [
+              "123456789"
+            ],
+            "description": "The unique identifier of the survey."
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name",
+            "default": null,
+            "nullable": true,
+            "description": "Filter responses by recipient's first name"
+          },
+          "sort_order": {
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "type": "string",
+            "title": "Sort Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort order"
+          },
+          "end_created_at": {
+            "type": "string",
+            "title": "End Created At",
+            "default": null,
+            "examples": [
+              "2021-12-31T23:59:59"
+            ],
+            "nullable": true,
+            "description": "Filter responses created before this datetime (ISO 8601)"
+          },
+          "total_time_max": {
+            "type": "integer",
+            "title": "Total Time Max",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Filter responses with total time less than or equal to this value (in seconds)"
+          },
+          "total_time_min": {
+            "type": "integer",
+            "title": "Total Time Min",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Filter responses with total time greater than or equal to this value (in seconds)"
+          },
+          "end_modified_at": {
+            "type": "string",
+            "title": "End Modified At",
+            "default": null,
+            "examples": [
+              "2021-12-31T23:59:59"
+            ],
+            "nullable": true,
+            "description": "Filter responses modified before this datetime (ISO 8601)"
+          },
+          "custom_variables": {
+            "type": "string",
+            "title": "Custom Variables",
+            "default": null,
+            "nullable": true,
+            "description": "Filter responses by custom variables as key:value pairs"
+          },
+          "start_created_at": {
+            "type": "string",
+            "title": "Start Created At",
+            "default": null,
+            "examples": [
+              "2021-01-01T00:00:00"
+            ],
+            "nullable": true,
+            "description": "Filter responses created after this datetime (ISO 8601)"
+          },
+          "total_time_units": {
+            "enum": [
+              "second",
+              "minute",
+              "hour"
+            ],
+            "type": "string",
+            "title": "Total Time Units",
+            "default": null,
+            "nullable": true,
+            "description": "Unit for total_time_min and total_time_max"
+          },
+          "start_modified_at": {
+            "type": "string",
+            "title": "Start Modified At",
+            "default": null,
+            "examples": [
+              "2021-01-01T00:00:00"
+            ],
+            "nullable": true,
+            "description": "Filter responses modified after this datetime (ISO 8601)"
+          }
+        },
+        "description": "Request schema for GET_RESPONSES."
+      }
+    },
+    {
+      "name": "SURVEY_MONKEY_GET_SURVEY_DETAILS",
+      "description": "Tool to retrieve metadata and counts for a specific survey. Use after confirming the survey ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSurveyDetailsRequest",
+        "required": [
+          "survey_id"
+        ],
+        "properties": {
+          "survey_id": {
+            "type": "string",
+            "title": "Survey Id",
+            "examples": [
+              "123456789"
+            ],
+            "description": "The unique identifier of the survey to fetch details for."
+          }
+        },
+        "description": "Request model for retrieving details of a single survey."
+      }
+    },
+    {
+      "name": "SURVEY_MONKEY_GET_SURVEYS",
+      "description": "Tool to retrieve a list of surveys. Use when you need to enumerate or paginate through all surveys.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSurveysRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page of resources to return (1-based index)"
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "response_count",
+                "date_modified",
+                "date_created",
+                "question_count",
+                "page_count",
+                "category",
+                "language",
+                "folder_id"
+              ],
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Include",
+            "default": null,
+            "examples": [
+              [
+                "response_count",
+                "date_created"
+              ]
+            ],
+            "nullable": true,
+            "description": "Additional fields to include per survey"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": 50,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Number of resources to return per page (max=100)"
+          }
+        },
+        "description": "Query parameters for GET_SURVEYS."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:47:46.987379+00:00",
+    "source": "smithery"
+  }
+}

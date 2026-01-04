@@ -1,0 +1,110 @@
+{
+  "qualifiedName": "@clarenous/veyrax-mcp",
+  "displayName": "VeyraX MCP",
+  "description": "Provide seamless access to all your integrated tools across multiple MCP-compatible environments with a single authentication. Connect once to the VeyraX platform and instantly use your tools in editors and AI assistants like Claude, Cursor, VS Code, and Windsurf. Simplify your workflow with a quick setup and unified tool management.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/www.veyrax.com.ico",
+  "remote": false,
+  "deploymentUrl": null,
+  "connections": [
+    {
+      "type": "stdio",
+      "bundleUrl": "https://backend.smithery.ai/storage/v1/object/public/bundles/@clarenous/veyrax-mcp/server.mcpb",
+      "runtime": "node",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "VEYRAX_API_KEY"
+        ],
+        "properties": {
+          "VEYRAX_API_KEY": {
+            "type": "string",
+            "description": "The VEYRAX API key from https://veyrax.com/agent"
+          }
+        }
+      }
+    }
+  ],
+  "security": {
+    "scanPassed": true
+  },
+  "tools": [
+    {
+      "name": "get_tools",
+      "description": "\n\"Use this tool to retrieve a list of available tools from the Veyrax API.\nThis will return dynamic tools that user has access to.\nYou can use this tool to get the list of tools, method names and parameters, and then use tool_call tool to call the tool with the provided parameters.\nThis method also returns all flows with name and id that user has access to (if any).\n\"\n",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "question",
+          "tool"
+        ],
+        "properties": {
+          "tool": {
+            "type": "string",
+            "description": "Guess the tool name. Use explicit information based on the user's request or make an educated guess. It will be used for vector search for identifying the most relevant tools."
+          },
+          "question": {
+            "type": "string",
+            "description": "Query question that you want find answer for. Try to ALWAYS provide this field based on conversation with user. Could be your reasoning for calling tool."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "tool_call",
+      "description": "\n\"Use this tool to execute a specific method of another tool with the provided parameters based on get-tools tool response.\nYou need to specify the tool name, method name, and any required parameters for that method.\"\n",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "tool",
+          "method"
+        ],
+        "properties": {
+          "tool": {
+            "type": "string",
+            "description": "The name of the tool to call (e.g., 'gmail', 'google-calendar', 'slack')"
+          },
+          "method": {
+            "type": "string",
+            "description": "The method of the tool to call (e.g., 'get_messages', 'send_message', 'list_events')"
+          },
+          "question": {
+            "type": "string",
+            "description": "User question that you want find answer for. Try to ALWAYS provide this field based on conversation with user. Could be your reasoning for calling tool."
+          },
+          "parameters": {
+            "type": "object",
+            "default": {},
+            "description": "The parameters required by the specific tool method being called, it is MUST HAVE field.",
+            "additionalProperties": {}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_flow",
+      "description": "\n\"Use this tool to retrieve a specific workflow by its ID.\n\nWorkflow is sequence of steps that are executed in order to get some result. Flow comes with description, steps and input schema of all methods to call.\n\nYou can call this tool once you have a flowId which usually you can get from: user directly OR using get-tools method.\"\n",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "flowId"
+        ],
+        "properties": {
+          "flowId": {
+            "type": "string",
+            "description": "The ID of the workflow to retrieve."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:21:29.400405+00:00",
+    "source": "smithery"
+  }
+}

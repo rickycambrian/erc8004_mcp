@@ -1,0 +1,355 @@
+{
+  "id": "gemini",
+  "name": "gemini",
+  "display_name": "Gemini",
+  "version": null,
+  "description": "Comprehensive Gemini integration supporting Veo 3 video generation, Gemini Flash text generation (Nano Banana), chat completions, and multimodal AI capabilities via the Google Gemini API.",
+  "icon_url": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/gemini.svg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "GEMINI_COUNT_TOKENS",
+      "description": "Counts the number of tokens in text using Gemini tokenization. Useful for estimating costs, checking input limits, and optimizing prompts before making API calls.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CountTokensRequest",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Text to count tokens for"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": "gemini-1.5-flash",
+            "nullable": true,
+            "description": "Model to use for token counting. Examples: 'gemini-1.5-flash', 'gemini-1.5-pro'"
+          }
+        }
+      }
+    },
+    {
+      "name": "GEMINI_EMBED_CONTENT",
+      "description": "Generates text embeddings using Gemini embedding models. Converts text into numerical vectors for semantic search, similarity comparison, clustering, and classification tasks.",
+      "inputSchema": {
+        "type": "object",
+        "title": "EmbedContentRequest",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Text to generate embeddings for"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": "text-embedding-004",
+            "nullable": true,
+            "description": "Embedding model to use. Examples: 'text-embedding-004', 'embedding-001'"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "nullable": true,
+            "description": "Optional title for the content (for document embeddings)"
+          },
+          "task_type": {
+            "type": "string",
+            "title": "Task Type",
+            "default": null,
+            "nullable": true,
+            "description": "Task type: 'RETRIEVAL_QUERY', 'RETRIEVAL_DOCUMENT', 'SEMANTIC_SIMILARITY', 'CLASSIFICATION', 'CLUSTERING'"
+          }
+        }
+      }
+    },
+    {
+      "name": "GEMINI_GENERATE_CONTENT",
+      "description": "Generates text content from prompts using Gemini models. Supports various models like Gemini Flash and Pro with configurable temperature, token limits, and safety settings for diverse text generation tasks.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GenerateContentRequest",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": "gemini-1.5-flash",
+            "nullable": true,
+            "description": "Model to use. Examples: 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'"
+          },
+          "top_k": {
+            "type": "integer",
+            "title": "Top K",
+            "default": null,
+            "nullable": true,
+            "description": "Top-k sampling parameter"
+          },
+          "top_p": {
+            "type": "number",
+            "title": "Top P",
+            "default": null,
+            "nullable": true,
+            "description": "Nucleus sampling parameter (0.0 to 1.0)"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for content generation"
+          },
+          "temperature": {
+            "type": "number",
+            "title": "Temperature",
+            "default": null,
+            "nullable": true,
+            "description": "Controls randomness (0.0 to 2.0)"
+          },
+          "stop_sequences": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Stop Sequences",
+            "default": null,
+            "nullable": true,
+            "description": "Sequences where generation should stop"
+          },
+          "safety_settings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Safety Settings",
+            "default": null,
+            "nullable": true,
+            "description": "Safety filter settings"
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "title": "Max Output Tokens",
+            "default": null,
+            "nullable": true,
+            "description": "Maximum number of tokens to generate"
+          },
+          "system_instruction": {
+            "type": "string",
+            "title": "System Instruction",
+            "default": null,
+            "nullable": true,
+            "description": "System instruction to guide the model's behavior"
+          }
+        }
+      }
+    },
+    {
+      "name": "GEMINI_GENERATE_IMAGE",
+      "description": "Generates images from text prompts using Gemini 2.5 Flash Image Preview model (Nano Banana). Supports creative image generation with customizable parameters like aspect ratio, safety settings, and optional local file saving. Generated images are automatically uploaded to S3 and gives you a downloadable link. NOTE NEVER EVER TRUE SYNC_TO_WORKBENCH IN RUBE_MULTI_EXECUTE_TOOL",
+      "inputSchema": {
+        "type": "object",
+        "title": "GenerateImageRequest",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": "gemini-2.5-flash-image-preview",
+            "nullable": true,
+            "description": "Model to use. Use 'gemini-2.5-flash-image-preview' for image generation"
+          },
+          "top_k": {
+            "type": "integer",
+            "title": "Top K",
+            "default": null,
+            "nullable": true,
+            "description": "Top-k sampling parameter"
+          },
+          "top_p": {
+            "type": "number",
+            "title": "Top P",
+            "default": null,
+            "nullable": true,
+            "description": "Nucleus sampling parameter (0.0 to 1.0)"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for image generation"
+          },
+          "save_path": {
+            "type": "string",
+            "title": "Save Path",
+            "default": null,
+            "nullable": true,
+            "description": "Optional local path to save the generated image"
+          },
+          "temperature": {
+            "type": "number",
+            "title": "Temperature",
+            "default": null,
+            "nullable": true,
+            "description": "Controls randomness (0.0 to 2.0)"
+          },
+          "safety_settings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Safety Settings",
+            "default": null,
+            "nullable": true,
+            "description": "Safety filter settings"
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "title": "Max Output Tokens",
+            "default": null,
+            "nullable": true,
+            "description": "Maximum number of tokens to generate (max 32,768)"
+          },
+          "system_instruction": {
+            "type": "string",
+            "title": "System Instruction",
+            "default": null,
+            "nullable": true,
+            "description": "System instruction to guide image generation behavior"
+          }
+        }
+      }
+    },
+    {
+      "name": "GEMINI_GENERATE_VIDEOS",
+      "description": "Generates videos from text prompts using Google's Veo models. Creates high-quality video content. Returns operation ID for tracking progress. After this, call GEMINI_WAIT_FOR_VIDEO to download the video using the operation ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GenerateVideosRequest",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": "veo-3.0-generate-preview",
+            "nullable": true,
+            "description": "Model to use. Examples: 'veo-3.0-generate-preview', 'veo-3.0-fast-generate-preview', 'veo-2.0-generate-001'"
+          },
+          "extras": {
+            "type": "object",
+            "title": "Extras",
+            "default": null,
+            "nullable": true,
+            "description": "Additional parameters passed through to API",
+            "additionalProperties": true
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for Veo video generation"
+          },
+          "person_generation": {
+            "type": "string",
+            "title": "Person Generation",
+            "default": null,
+            "nullable": true,
+            "description": "Controls person generation in videos. Values: 'allow_adult' or 'dont_allow'. IMPORTANT: Veo 3 models in EU/UK/CH/MENA regions ONLY support 'allow_adult'. Veo 2 models support both values in all regions."
+          }
+        }
+      }
+    },
+    {
+      "name": "GEMINI_GET_VIDEOS_OPERATION",
+      "description": "Checks the status of a Veo video generation operation. Use the operation name from GenerateVideos to track progress and get the download URL when complete.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetVideosOperationRequest",
+        "required": [
+          "operation_name"
+        ],
+        "properties": {
+          "operation_name": {
+            "type": "string",
+            "title": "Operation Name",
+            "description": "Operation resource name returned by predictLongRunning"
+          }
+        }
+      }
+    },
+    {
+      "name": "GEMINI_LIST_MODELS",
+      "description": "Lists available Gemini and Veo models with their capabilities and limits. Useful for discovering supported models and their features before making generation requests.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListModelsRequest",
+        "properties": {
+          "filter_prefix": {
+            "type": "string",
+            "title": "Filter Prefix",
+            "default": "",
+            "description": "Filter models by name prefix (client-side). Leave empty to get all models."
+          }
+        }
+      }
+    },
+    {
+      "name": "GEMINI_WAIT_FOR_VIDEO",
+      "description": "Polls a Veo video generation operation until completion, then downloads and returns the video as a FileDownloadable with public URL.",
+      "inputSchema": {
+        "type": "object",
+        "title": "WaitForVideoRequest",
+        "required": [
+          "operation_name"
+        ],
+        "properties": {
+          "operation_name": {
+            "type": "string",
+            "title": "Operation Name",
+            "description": "The operation name from video generation (e.g., 'models/...')"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 8,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/gemini/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "GEMINI_COUNT_TOKENS",
+    "GEMINI_EMBED_CONTENT",
+    "GEMINI_GENERATE_CONTENT",
+    "GEMINI_GENERATE_IMAGE",
+    "GEMINI_GENERATE_VIDEOS",
+    "GEMINI_GET_VIDEOS_OPERATION",
+    "GEMINI_LIST_MODELS",
+    "GEMINI_WAIT_FOR_VIDEO"
+  ]
+}

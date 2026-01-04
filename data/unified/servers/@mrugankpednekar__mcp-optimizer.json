@@ -1,0 +1,229 @@
+{
+  "id": "@mrugankpednekar/mcp-optimizer",
+  "name": "@mrugankpednekar/mcp-optimizer",
+  "display_name": "Crew Optimizer",
+  "version": null,
+  "description": "Optimize crew and workforce schedules, resource allocation, and routing with linear and mixed-integer programming. Parse natural-language problem statements into solvable models in seconds. Diagnose infeasibility and get actionable hints to fix constraints fast.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "solve_linear_program",
+      "description": "Solve a linear program and return the solution as JSON.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "model"
+        ],
+        "properties": {
+          "model": {
+            "$ref": "#/$defs/LPModel"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SolveOptions"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      }
+    },
+    {
+      "name": "solve_mixed_integer_program",
+      "description": "Solve a MILP using branch-and-bound or OR-Tools fallback.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "model"
+        ],
+        "properties": {
+          "model": {
+            "$ref": "#/$defs/LPModel"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SolveOptions"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "use_or_tools": {
+            "type": "boolean",
+            "title": "Use Or Tools",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "parse_natural_language",
+      "description": "Parse a natural-language LP specification into structured JSON.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "spec"
+        ],
+        "properties": {
+          "spec": {
+            "type": "string",
+            "title": "Spec"
+          }
+        }
+      }
+    },
+    {
+      "name": "diagnose_infeasibility",
+      "description": "Return heuristic infeasibility analysis for the given LP.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "model"
+        ],
+        "properties": {
+          "model": {
+            "$ref": "#/$defs/LPModel"
+          }
+        }
+      }
+    },
+    {
+      "name": "solve_word_problem_with_data",
+      "description": "\n    Solve an optimization word problem using data from a file.\n\n    This tool accepts a natural language problem description and optionally a data file.\n    It parses the data, incorporates it into the problem formulation, and solves the\n    resulting optimization problem.\n\n    Args:\n        problem_description: Natural language description of the optimization problem.\n            Example: \"Minimize total cost subject to demand constraints using the cost\n            and demand data from the file.\"\n        file_content: Content of the data file (CSV, JSON, Excel, etc.). Can be plain\n            text or base64 encoded.\n        file_format: Format of the file ('csv', 'json', 'excel', 'xlsx', 'auto').\n            Defaults to 'auto' for automatic detection.\n        encoding: Text encoding for the file (default: 'utf-8').\n        is_base64: Whether the file_content is base64 encoded (default: False).\n        use_mip: Whether to solve as a mixed-integer program (default: False).\n        use_or_tools: Whether to use OR-Tools for MIP solving (default: False).\n        options: Optional solver options.\n\n    Returns:\n        Dictionary containing:\n        - 'model': The parsed LP/MIP model\n        - 'solution': The solution to the optimization problem\n        - 'data_summary': Summary of the parsed data (if file was provided)\n    ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "problem_description"
+        ],
+        "properties": {
+          "options": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SolveOptions"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "use_mip": {
+            "type": "boolean",
+            "title": "Use Mip",
+            "default": false
+          },
+          "encoding": {
+            "type": "string",
+            "title": "Encoding",
+            "default": "utf-8"
+          },
+          "is_base64": {
+            "type": "boolean",
+            "title": "Is Base64",
+            "default": false
+          },
+          "file_format": {
+            "type": "string",
+            "title": "File Format",
+            "default": "auto"
+          },
+          "file_content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Content",
+            "default": null
+          },
+          "use_or_tools": {
+            "type": "boolean",
+            "title": "Use Or Tools",
+            "default": false
+          },
+          "problem_description": {
+            "type": "string",
+            "title": "Problem Description"
+          }
+        }
+      }
+    },
+    {
+      "name": "solve_assignment_problem",
+      "description": "\n    Solve a job assignment problem with energy consumption and machine capacity constraints.\n\n    This tool is specifically designed for assignment/transportation problems where:\n    - You have jobs that need to be assigned to machines\n    - Each job-machine pair has an energy consumption (or cost)\n    - Each machine has a capacity constraint\n    - The goal is to minimize total energy consumption while ensuring all jobs are processed\n\n    Args:\n        energy_file_content: CSV content with energy consumption matrix.\n            First column should be job identifier, remaining columns are machines.\n            Example: job,Machine 1,Machine 2,... with energy values in cells.\n        capacity_file_content: CSV content with machine capacities.\n            Should have columns for machine identifier and capacity.\n            Example: machine,capacity with one row per machine.\n        energy_file_format: Format of energy file (default: 'csv').\n        capacity_file_format: Format of capacity file (default: 'csv').\n        options: Optional solver options.\n\n    Returns:\n        Dictionary containing:\n        - 'model': The parsed LP model\n        - 'solution': The solution with optimal assignment\n        - 'summary': Summary statistics about the solution\n    ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "energy_file_content",
+          "capacity_file_content"
+        ],
+        "properties": {
+          "options": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SolveOptions"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "energy_file_format": {
+            "type": "string",
+            "title": "Energy File Format",
+            "default": "csv"
+          },
+          "energy_file_content": {
+            "type": "string",
+            "title": "Energy File Content"
+          },
+          "capacity_file_format": {
+            "type": "string",
+            "title": "Capacity File Format",
+            "default": "csv"
+          },
+          "capacity_file_content": {
+            "type": "string",
+            "title": "Capacity File Content"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 6,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@mrugankpednekar/mcp-optimizer/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "solve_linear_program",
+    "solve_mixed_integer_program",
+    "parse_natural_language",
+    "diagnose_infeasibility",
+    "solve_word_problem_with_data",
+    "solve_assignment_problem"
+  ]
+}

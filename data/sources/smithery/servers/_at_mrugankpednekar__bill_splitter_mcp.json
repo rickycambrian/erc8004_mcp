@@ -1,0 +1,268 @@
+{
+  "qualifiedName": "@mrugankpednekar/bill_splitter_mcp",
+  "displayName": "SplitFast",
+  "description": "Track and split shared expenses across trips, events, and groups. Create groups, add expenses, and get optimized settlement suggestions that minimize cash transfers. Settle up quickly and keep everyone square.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@mrugankpednekar/bill_splitter_mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@mrugankpednekar/bill_splitter_mcp/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "create_group",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Create a group and return {group_id, secret}.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name",
+          "members"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "record_debt",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Splitwise-style direct debt: 'debtor owes creditor amount'.\nImplementation: store one expense paid by creditor, with participants=[debtor] for full amount.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "group_id",
+          "secret",
+          "debtor",
+          "creditor",
+          "amount"
+        ],
+        "properties": {
+          "note": {
+            "type": "string",
+            "default": ""
+          },
+          "amount": {
+            "type": "number"
+          },
+          "debtor": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "creditor": {
+            "type": "string"
+          },
+          "group_id": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "add_split",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Equal split receipt. If include_payer=True, payer also owes a share (Splitwise default).\nExample: payer='Owen', amount=60, participants=['Owen','Mrugank','David'] -> shares=$20 each.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "group_id",
+          "secret",
+          "payer",
+          "amount",
+          "participants"
+        ],
+        "properties": {
+          "note": {
+            "type": "string",
+            "default": ""
+          },
+          "payer": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "group_id": {
+            "type": "string"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "include_payer": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "history",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Return recent raw entries for the group.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "group_id",
+          "secret"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 20
+          },
+          "secret": {
+            "type": "string"
+          },
+          "group_id": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "balances",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Return minimal settlement transfers: [{from, to, amount}].",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "group_id",
+          "secret"
+        ],
+        "properties": {
+          "secret": {
+            "type": "string"
+          },
+          "group_id": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "quick_settle",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Paste: 'owen owes mrugank 20, mrugank owes david 15, barath owes david 7, owen owes barath 14'\nReturns minimal settlement without writing to DB.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:16:45.326295+00:00",
+    "source": "smithery"
+  }
+}

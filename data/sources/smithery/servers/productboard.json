@@ -1,0 +1,1799 @@
+{
+  "qualifiedName": "productboard",
+  "displayName": "Productboard",
+  "description": "Productboard is a product management platform that gathers feedback, prioritizes features, and aligns roadmaps based on customer insights and strategic goals",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//productboard.jpg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/productboard",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/productboard/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "PRODUCTBOARD_ADD_NOTE_FOLLOWERS",
+      "description": "Tool to add multiple followers to a Productboard note. Use when you need to bulk-add existing users as followers to a specific note by their email addresses.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddNoteFollowersRequest",
+        "required": [
+          "noteId",
+          "emails"
+        ],
+        "properties": {
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email",
+              "properties": {}
+            },
+            "title": "Emails",
+            "examples": [
+              [
+                "user@example.com",
+                "other@example.com"
+              ]
+            ],
+            "description": "List of email addresses of existing users to add as followers"
+          },
+          "noteId": {
+            "type": "string",
+            "title": "Note Id",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "UUID of the note to which followers will be added"
+          }
+        },
+        "description": "Request model for adding multiple followers to a note by email."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_ADD_NOTE_TAG",
+      "description": "Tool to add a tag to a Productboard note. Use when categorizing a note after review; creates the tag if missing.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddNoteTagRequest",
+        "required": [
+          "noteId",
+          "tagName"
+        ],
+        "properties": {
+          "noteId": {
+            "type": "string",
+            "title": "Note Id",
+            "examples": [
+              "1234abcd"
+            ],
+            "description": "ID of the note to which the tag will be added"
+          },
+          "tagName": {
+            "type": "string",
+            "title": "Tag Name",
+            "examples": [
+              "Urgent"
+            ],
+            "description": "Name of the tag to add (will be created if it does not exist)"
+          }
+        },
+        "description": "Request model for adding a tag to a Productboard note."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_CREATE_COMPANY",
+      "description": "Tool to create a new company in Productboard. Use when you need to add a company record after gathering its details and optional metadata.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateCompanyRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Acme Corporation"
+            ],
+            "description": "Primary name of the company to create."
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain",
+            "default": null,
+            "examples": [
+              "example.com"
+            ],
+            "nullable": true,
+            "description": "Internet domain of the company (e.g., 'example.com')."
+          },
+          "source": {
+            "type": "object",
+            "title": "Source",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "record_id",
+              "origin"
+            ],
+            "properties": {
+              "origin": {
+                "type": "string",
+                "title": "Origin",
+                "examples": [
+                  "csv"
+                ],
+                "description": "Origin of the company record (e.g., 'csv')."
+              },
+              "record_id": {
+                "type": "string",
+                "title": "Record Id",
+                "examples": [
+                  "rec_123abc"
+                ],
+                "description": "External system's unique record identifier for this company."
+              }
+            },
+            "description": "Metadata about the external origin of this company record.",
+            "additionalProperties": false
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "examples": [
+              "A leading provider of AI solutions."
+            ],
+            "nullable": true,
+            "description": "Free-text description of the company."
+          }
+        }
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_CREATE_COMPANY_FIELD",
+      "description": "Tool to create a new custom field for companies. Use when you need to define custom company attributes in Productboard after confirming the field schema.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateCompanyFieldRequest",
+        "required": [
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "object",
+            "title": "Body",
+            "examples": [
+              {
+                "type": "rating",
+                "settings": {
+                  "max": 5,
+                  "min": 1
+                },
+                "displayName": "Priority"
+              }
+            ],
+            "description": "JSON body containing the custom field definition as per Productboard API schema",
+            "additionalProperties": true
+          }
+        },
+        "description": "Request model for creating a new custom field for companies in Productboard."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_CREATE_COMPONENT",
+      "description": "Tool to create a new (sub)component under a product or component. Use after determining the parent component ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateComponentRequest",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "title": "Data",
+            "required": [
+              "name",
+              "parent"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "examples": [
+                  "UI Library"
+                ],
+                "description": "Display name for the new component"
+              },
+              "parent": {
+                "type": "object",
+                "title": "Parent",
+                "required": [
+                  "component"
+                ],
+                "properties": {
+                  "component": {
+                    "type": "object",
+                    "title": "Component",
+                    "required": [
+                      "id"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "title": "Id",
+                        "examples": [
+                          "6c2f1b34-7a1f-40d9-9f35-3a2d8e4b5a10"
+                        ],
+                        "description": "UUID of the parent component under which to create the new component"
+                      }
+                    },
+                    "description": "Wrapper for the parent component identifier",
+                    "additionalProperties": false
+                  }
+                },
+                "description": "Specifies the parent entity (component) context",
+                "additionalProperties": false
+              },
+              "description": {
+                "type": "string",
+                "title": "Description",
+                "default": null,
+                "examples": [
+                  "<p>Shared UI components for mobile and web</p>"
+                ],
+                "nullable": true,
+                "description": "Rich-text or HTML description of the component"
+              }
+            },
+            "description": "Payload wrapper containing component details",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_CREATE_NOTE",
+      "description": "Tool to create a new note in Productboard. Use when you need to programmatically add a user or customer note to Productboard.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateNoteRequest",
+        "required": [
+          "title",
+          "content"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Tags",
+            "default": null,
+            "nullable": true,
+            "description": "Tags for categorization."
+          },
+          "user": {
+            "type": "object",
+            "title": "User",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "email"
+            ],
+            "properties": {
+              "email": {
+                "type": "string",
+                "title": "Email",
+                "format": "email",
+                "examples": [
+                  "user@example.com"
+                ],
+                "description": "Email of the user to attribute the note to."
+              }
+            },
+            "description": "User object containing the email to attribute the note to. Either user.email or customer_email must be provided.",
+            "additionalProperties": false
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "My note title"
+            ],
+            "description": "Note title or brief description."
+          },
+          "source": {
+            "type": "object",
+            "title": "Source",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "origin": {
+                "type": "string",
+                "title": "Origin",
+                "default": null,
+                "nullable": true,
+                "description": "Originating system (e.g., 'Salesforce')."
+              },
+              "record_id": {
+                "type": "string",
+                "title": "Record Id",
+                "default": null,
+                "nullable": true,
+                "description": "Identifier of the record in the originating system."
+              }
+            },
+            "description": "Source object containing origin and record_id of the originating system.",
+            "additionalProperties": false
+          },
+          "company": {
+            "type": "object",
+            "title": "Company",
+            "default": null,
+            "nullable": true,
+            "description": "Company object to associate with the note; structure should match Productboard's company schema.",
+            "additionalProperties": true
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "Detailed note content."
+            ],
+            "description": "Note body/content."
+          },
+          "display_url": {
+            "type": "string",
+            "title": "Display Url",
+            "format": "uri",
+            "default": null,
+            "nullable": true,
+            "maxLength": 2083,
+            "minLength": 1,
+            "description": "URL linked from the note\u2019s title."
+          },
+          "customer_email": {
+            "type": "string",
+            "title": "Customer Email",
+            "format": "email",
+            "default": null,
+            "examples": [
+              "customer@example.com"
+            ],
+            "nullable": true,
+            "description": "Email to attribute the note to a customer."
+          }
+        }
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_CREATE_NOTE_LINK",
+      "description": "Tool to create a link between a note and an entity. Use when associating a note with a productboard entity.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateNoteLinkRequest",
+        "required": [
+          "noteId",
+          "entityId"
+        ],
+        "properties": {
+          "noteId": {
+            "type": "string",
+            "title": "Note Id",
+            "format": "uuid",
+            "examples": [
+              "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            ],
+            "description": "UUID of the note to link"
+          },
+          "entityId": {
+            "type": "string",
+            "title": "Entity Id",
+            "format": "uuid",
+            "examples": [
+              "1b6c8c76-8f5d-4e1a-9f09-5efb6c4975c1"
+            ],
+            "description": "UUID of the entity (product, component, feature, or subfeature) to link"
+          }
+        }
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_CREATE_WEBHOOK",
+      "description": "Tool to create a new webhook subscription. Use when you need to register a public endpoint to receive webhooks from Productboard.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateWebhookRequest",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "format": "uri",
+            "examples": [
+              "https://example.com/webhook"
+            ],
+            "maxLength": 2083,
+            "minLength": 1,
+            "description": "Public URL where Productboard will send the subscriptionProbe (GET) and webhookNotification (POST) callbacks."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "My Webhook \u2013 Notes"
+            ],
+            "nullable": true,
+            "description": "Human-readable name for the webhook subscription."
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "WebhookEvent",
+              "required": [
+                "eventType"
+              ],
+              "properties": {
+                "eventType": {
+                  "type": "string",
+                  "title": "Event Type",
+                  "description": "Event type to subscribe to (e.g., 'insight.created', 'release.updated')"
+                }
+              }
+            },
+            "title": "Events",
+            "default": null,
+            "examples": [
+              [
+                {
+                  "eventType": "insight.created"
+                },
+                {
+                  "eventType": "release.updated"
+                }
+              ]
+            ],
+            "nullable": true,
+            "description": "List of events to subscribe to, each with eventType. Examples: insight.created, release.updated, key-result.updated, key-result.deleted."
+          },
+          "notification_headers": {
+            "type": "object",
+            "title": "NotificationHeaders",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "authorization": {
+                "type": "string",
+                "title": "Authorization",
+                "default": null,
+                "examples": [
+                  "Bearer webhook-secret-token"
+                ],
+                "nullable": true,
+                "description": "Authorization header value Productboard will include in callbacks."
+              }
+            },
+            "description": "Optional headers Productboard will include when sending callbacks.",
+            "additionalProperties": false
+          },
+          "notification_version": {
+            "type": "integer",
+            "title": "Notification Version",
+            "default": null,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Notification payload version for callbacks (e.g., 1)."
+          }
+        }
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_DELETE_COMPANY",
+      "description": "Tool to delete a specific company. Use when you have confirmed the company ID and need to remove it from Productboard.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteCompanyRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "12345"
+            ],
+            "description": "ID of the company to delete"
+          }
+        },
+        "description": "Request model for deleting a company."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_DELETE_COMPANY_FIELD",
+      "description": "Tool to delete a specific company custom field. Use after confirming the field ID and ensuring no dependencies remain.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteCompanyFieldRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "cf_12345"
+            ],
+            "description": "ID of the company custom field to delete"
+          }
+        },
+        "description": "Request model for deleting a company custom field."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_DELETE_FEATURE",
+      "description": "Tool to delete a specific feature. Use when you have confirmed the feature ID and deleted its subfeatures before removal.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteFeatureRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "UUID of the feature to delete; ensure subfeatures are deleted first"
+          }
+        },
+        "description": "Request model for deleting a feature."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_DELETE_NOTE",
+      "description": "Tool to delete a specific note. Use when you have confirmed the note ID and need to remove it from Productboard.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteNoteRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "12345"
+            ],
+            "description": "ID of the note to delete"
+          }
+        },
+        "description": "Request model for deleting a note."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_DELETE_NOTE_TAG",
+      "description": "Tool to remove a tag from a Productboard note. Use when you need to detach a specific tag from a note after tagging.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteNoteTagRequest",
+        "required": [
+          "noteId",
+          "tagName"
+        ],
+        "properties": {
+          "noteId": {
+            "type": "string",
+            "title": "Note Id",
+            "examples": [
+              "1234abcd"
+            ],
+            "description": "ID of the note from which to remove the tag"
+          },
+          "tagName": {
+            "type": "string",
+            "title": "Tag Name",
+            "examples": [
+              "Urgent"
+            ],
+            "description": "Name of the tag to remove"
+          }
+        },
+        "description": "Request model for removing a tag from a Productboard note."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_DELETE_USER",
+      "description": "Tool to delete a specific user. Use when you have confirmed the user ID and need to remove it from Productboard.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteUserRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "5e8f0b9c2d3a4b6f7d8e9a0c"
+            ],
+            "description": "ID of the user to delete"
+          }
+        },
+        "description": "Request model for deleting a user."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_COMPANIES",
+      "description": "Tool to list companies. Use when you need a paginated list of companies with optional filters.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListCompaniesRequest",
+        "properties": {
+          "term": {
+            "type": "string",
+            "title": "Term",
+            "default": null,
+            "nullable": true,
+            "description": "Filter companies by name search term."
+          },
+          "hasNotes": {
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string",
+            "title": "Has Notes",
+            "default": null,
+            "nullable": true,
+            "description": "\"true\" returns only companies with notes; \"false\" returns only companies without notes."
+          },
+          "featureId": {
+            "type": "string",
+            "title": "Feature Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter companies associated with the specified feature ID."
+          },
+          "pageLimit": {
+            "type": "integer",
+            "title": "Page Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Page size; default is 100."
+          },
+          "pageOffset": {
+            "type": "integer",
+            "title": "Page Offset",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Offset token for the next page; default is 0. Use the returned offset from a previous response to iterate."
+          }
+        },
+        "description": "Request parameters for listing companies."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_COMPANY_FIELDS",
+      "description": "Tool to list company custom fields. Use when you need to retrieve all custom field definitions for companies after authentication.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListCompanyFieldsRequest",
+        "properties": {},
+        "description": "Request model for listing company custom fields. No parameters required."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_COMPONENTS",
+      "description": "Tool to list productboard components. Use when you need to retrieve components in a paginated form. Follow 'links.next' for additional pages.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListComponentsRequest",
+        "properties": {
+          "page_limit": {
+            "type": "integer",
+            "title": "Page Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Maximum number of components to return (maps to 'pageLimit')."
+          },
+          "page_offset": {
+            "type": "integer",
+            "title": "Page Offset",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Offset for pagination (maps to 'pageOffset')."
+          }
+        },
+        "description": "Request parameters for listing components."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_CUSTOM_FIELDS",
+      "description": "Tool to list custom field definitions for hierarchy entities. Use after determining which field types to filter.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListCustomFieldsRequest",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Type",
+            "examples": [
+              [
+                "text",
+                "number"
+              ]
+            ],
+            "description": "One or more custom field types to include; filters which custom field definitions are returned."
+          }
+        },
+        "description": "Request model for listing custom field definitions."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_CUSTOM_FIELD_VALUES",
+      "description": "Tool to list non-empty custom field values. Use when you need to fetch set values across custom fields with optional filtering by type or field ID. Paginate using links.next if more results exist.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListCustomFieldValuesRequest",
+        "properties": {
+          "type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Type",
+            "default": null,
+            "examples": [
+              "text",
+              "number"
+            ],
+            "nullable": true,
+            "description": "Filter by custom field type(s). Possible values: 'text', 'number', etc. Provide a list for multiple types. Required if customFieldId is not provided."
+          },
+          "customField.id": {
+            "type": "string",
+            "title": "Custom Field.Id",
+            "default": null,
+            "examples": [
+              "4c6d7e8f-9a1b-2c3d-4e5f-6789012345ab"
+            ],
+            "nullable": true,
+            "description": "Filter by custom field (column) ID. Required if type is not provided."
+          },
+          "hierarchyEntity.id": {
+            "type": "string",
+            "title": "Hierarchy Entity.Id",
+            "default": null,
+            "examples": [
+              "5f8d1e2b-3a4c-4d1f-9e62-1234567890ab"
+            ],
+            "nullable": true,
+            "description": "Filter by hierarchy entity (row) ID."
+          }
+        },
+        "description": "Request model for listing non-empty custom field values with optional filters."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_FEATURE_INITIATIVES",
+      "description": "Tool to list initiatives linked to a given feature. Use when you need to retrieve all initiatives associated with a feature after confirming its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFeatureInitiativesRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "format": "uuid",
+            "examples": [
+              "1b6c8c76-8f5d-4e1a-9f09-5efb6c4975c1"
+            ],
+            "description": "UUID of the feature to list its linked initiatives"
+          }
+        },
+        "description": "Request model for listing initiatives linked to a feature."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_FEATURE_OBJECTIVES",
+      "description": "Tool to list objectives linked to a feature. Use when you need to retrieve all objectives connected to a given feature after confirming the feature ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFeatureObjectivesRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "01234567-89ab-cdef-0123-456789abcdef"
+            ],
+            "description": "UUID of the feature whose linked objectives to list"
+          },
+          "pageCursor": {
+            "type": "string",
+            "title": "Page Cursor",
+            "default": null,
+            "examples": [
+              "abcdef123456"
+            ],
+            "nullable": true,
+            "description": "Cursor token from the previous page's links.next for pagination"
+          }
+        },
+        "description": "Request model for listing objectives linked to a feature."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_FEATURE_RELEASE_ASSIGNMENTS",
+      "description": "Tool to list feature\u2013release assignments. Use when you need to retrieve assignments for a specific feature or release with optional state or date filters; paginate using links.next.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFeatureReleaseAssignmentsRequest",
+        "properties": {
+          "feature.id": {
+            "type": "string",
+            "title": "Feature.Id",
+            "default": null,
+            "examples": [
+              "d5f7c8a3-4e29-4d58-81fd-0ee234abcd12"
+            ],
+            "nullable": true,
+            "description": "ID of the feature to filter by."
+          },
+          "release.id": {
+            "type": "string",
+            "title": "Release.Id",
+            "default": null,
+            "examples": [
+              "a1b2c3d4-ef56-7890-abcd-1234567890ab"
+            ],
+            "nullable": true,
+            "description": "ID of the release to filter by."
+          },
+          "release.state": {
+            "type": "string",
+            "title": "Release.State",
+            "default": null,
+            "examples": [
+              "active"
+            ],
+            "nullable": true,
+            "description": "Filter assignments by release state (e.g., planned, active, closed)."
+          },
+          "release.timeframe.endDate.to": {
+            "type": "string",
+            "title": "Release.Timeframe.End Date.To",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-12-31"
+            ],
+            "nullable": true,
+            "description": "Filter assignments whose release end date is on or before this date (YYYY-MM-DD)."
+          },
+          "release.timeframe.endDate.from": {
+            "type": "string",
+            "title": "Release.Timeframe.End Date.From",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-01-01"
+            ],
+            "nullable": true,
+            "description": "Filter assignments whose release end date is on or after this date (YYYY-MM-DD)."
+          }
+        },
+        "description": "Request parameters for listing feature release assignments with optional filters."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_FEATURES",
+      "description": "Tool to list features and subfeatures. Use when you need a paginated list of all features in Productboard.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFeaturesRequest",
+        "properties": {
+          "pageLimit": {
+            "type": "integer",
+            "title": "Page Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Maximum number of features to return per page (default is 100)"
+          },
+          "pageOffset": {
+            "type": "integer",
+            "title": "Page Offset",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Offset token for pagination (default is 0). Use the returned pageOffset to iterate."
+          }
+        },
+        "description": "Request parameters for listing features and subfeatures."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_FEATURE_STATUSES",
+      "description": "Tool to list feature statuses. Use when you need to retrieve all feature status records in a paginated form. Follow 'links.next' for additional pages.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFeatureStatusesRequest",
+        "properties": {
+          "next_page_url": {
+            "type": "string",
+            "title": "Next Page Url",
+            "default": null,
+            "nullable": true,
+            "description": "Full URL for the next page of feature statuses; if omitted, the first page at '/feature-statuses' will be fetched"
+          }
+        },
+        "description": "Request parameters for listing feature statuses."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_FEEDBACK_FORM_CONFIGURATIONS",
+      "description": "Tool to list feedback form configurations. Use when you need a paginated list of feedback form configurations.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFeedbackFormConfigurationsRequest",
+        "properties": {
+          "pageLimit": {
+            "type": "integer",
+            "title": "Page Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Page size; default is 100. Must be \u2265 1."
+          },
+          "pageOffset": {
+            "type": "integer",
+            "title": "Page Offset",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Offset token for the next page; default is 0. Use the returned offset from a previous response to iterate."
+          }
+        },
+        "description": "Request parameters for listing feedback form configurations."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_INITIATIVES",
+      "description": "Tool to list initiatives. Use when you need a paginated list of initiatives with optional filters.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInitiativesRequest",
+        "properties": {
+          "archived": {
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string",
+            "title": "Archived",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by archived status: 'true' returns only archived initiatives, 'false' returns only unarchived initiatives."
+          },
+          "status.id": {
+            "type": "string",
+            "title": "Status.Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter initiatives by status ID."
+          },
+          "owner.email": {
+            "type": "string",
+            "title": "Owner.Email",
+            "default": null,
+            "nullable": true,
+            "description": "Filter initiatives by the owner's email address."
+          },
+          "status.name": {
+            "type": "string",
+            "title": "Status.Name",
+            "default": null,
+            "nullable": true,
+            "description": "Filter initiatives by status name."
+          }
+        },
+        "description": "Request parameters for listing initiatives."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_JIRA_INTEGRATIONS",
+      "description": "Tool to list Jira integrations. Use when you need to retrieve Productboard's connected Jira integrations with optional pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListJiraIntegrationsRequest",
+        "properties": {
+          "pageUrl": {
+            "type": "string",
+            "title": "Page Url",
+            "default": null,
+            "examples": [
+              "https://api.productboard.com/jira-integrations?page=2"
+            ],
+            "nullable": true,
+            "description": "URL for the next page, obtained from the previous response's links.next. If not set, the first page of integrations is returned."
+          }
+        },
+        "description": "Request parameters for listing Jira integrations."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_KEY_RESULTS",
+      "description": "Tool to list key results. Use when you need a paginated list of key results.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListKeyResultsRequest",
+        "properties": {
+          "archived": {
+            "type": "boolean",
+            "title": "Archived",
+            "default": null,
+            "examples": [
+              false
+            ],
+            "nullable": true,
+            "description": "Filter by whether key results are archived."
+          },
+          "parent.id": {
+            "type": "string",
+            "title": "Parent.Id",
+            "default": null,
+            "examples": [
+              "pb_PARENT_ID_123"
+            ],
+            "nullable": true,
+            "description": "Filter by the ID of the parent entity."
+          },
+          "status.id": {
+            "type": "string",
+            "title": "Status.Id",
+            "default": null,
+            "examples": [
+              "pb_STATUS_ID_456"
+            ],
+            "nullable": true,
+            "description": "Filter by status ID."
+          },
+          "owner.email": {
+            "type": "string",
+            "title": "Owner.Email",
+            "default": null,
+            "examples": [
+              "user@example.com"
+            ],
+            "nullable": true,
+            "description": "Filter by the email of the owning user."
+          },
+          "status.name": {
+            "type": "string",
+            "title": "Status.Name",
+            "default": null,
+            "examples": [
+              "In Progress"
+            ],
+            "nullable": true,
+            "description": "Filter by status name."
+          }
+        },
+        "description": "Request parameters for listing key results."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_NOTES",
+      "description": "Tool to list notes in Productboard. Use when you need to retrieve notes with optional filters and pagination. Follow links.next for additional pages.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListNotesRequest",
+        "properties": {
+          "last": {
+            "type": "string",
+            "title": "Last",
+            "default": null,
+            "nullable": true,
+            "description": "Relative time window (e.g., '6m', '10d', '24h'); cannot combine with createdFrom/createdTo."
+          },
+          "term": {
+            "type": "string",
+            "title": "Term",
+            "default": null,
+            "nullable": true,
+            "description": "Full-text search term."
+          },
+          "anyTag": {
+            "type": "string",
+            "title": "Any Tag",
+            "default": null,
+            "nullable": true,
+            "description": "Notes having any of the specified tags; cannot combine with allTags."
+          },
+          "dateTo": {
+            "type": "string",
+            "title": "Date To",
+            "default": null,
+            "nullable": true,
+            "description": "(Deprecated) Use createdTo instead; cannot combine with last."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "default": null,
+            "nullable": true,
+            "description": "Filter notes from a specific source origin."
+          },
+          "allTags": {
+            "type": "string",
+            "title": "All Tags",
+            "default": null,
+            "nullable": true,
+            "description": "Notes having all specified tags; cannot combine with anyTag."
+          },
+          "dateFrom": {
+            "type": "string",
+            "title": "Date From",
+            "default": null,
+            "nullable": true,
+            "description": "(Deprecated) Use createdFrom instead; cannot combine with last."
+          },
+          "companyId": {
+            "type": "string",
+            "title": "Company Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter notes associated with this company UUID."
+          },
+          "createdTo": {
+            "type": "string",
+            "title": "Created To",
+            "default": null,
+            "nullable": true,
+            "description": "ISO date string to filter notes created up to this time; cannot combine with last."
+          },
+          "featureId": {
+            "type": "string",
+            "title": "Feature Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter notes linked to this feature UUID."
+          },
+          "pageLimit": {
+            "type": "integer",
+            "title": "Page Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Page size; default is 100."
+          },
+          "updatedTo": {
+            "type": "string",
+            "title": "Updated To",
+            "default": null,
+            "nullable": true,
+            "description": "ISO date string to filter notes updated up to this time."
+          },
+          "ownerEmail": {
+            "type": "string",
+            "title": "Owner Email",
+            "default": null,
+            "nullable": true,
+            "description": "Filter notes by owner email."
+          },
+          "pageCursor": {
+            "type": "string",
+            "title": "Page Cursor",
+            "default": null,
+            "nullable": true,
+            "description": "Cursor for the next page of results."
+          },
+          "createdFrom": {
+            "type": "string",
+            "title": "Created From",
+            "default": null,
+            "nullable": true,
+            "description": "ISO date string to filter notes created since this time; cannot combine with last."
+          },
+          "updatedFrom": {
+            "type": "string",
+            "title": "Updated From",
+            "default": null,
+            "nullable": true,
+            "description": "ISO date string to filter notes updated since this time."
+          }
+        },
+        "description": "Request parameters for listing notes with optional pagination and filters."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_OBJECTIVES",
+      "description": "Tool to list objectives from Productboard. Use when you need a paginated list of objectives with optional filters; follow 'links.next' to retrieve additional pages.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListObjectivesRequest",
+        "properties": {
+          "archived": {
+            "type": "boolean",
+            "title": "Archived",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by archived state."
+          },
+          "parent.id": {
+            "type": "string",
+            "title": "Parent.Id",
+            "default": null,
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "nullable": true,
+            "description": "Filter by parent objective ID."
+          },
+          "status.id": {
+            "type": "string",
+            "title": "Status.Id",
+            "default": null,
+            "examples": [
+              "789e0123-e89b-98d7-a123-456789012345"
+            ],
+            "nullable": true,
+            "description": "Filter by status ID."
+          },
+          "owner.email": {
+            "type": "string",
+            "title": "Owner.Email",
+            "default": null,
+            "examples": [
+              "alice@example.com"
+            ],
+            "nullable": true,
+            "description": "Filter by the owner's email address."
+          },
+          "status.name": {
+            "type": "string",
+            "title": "Status.Name",
+            "default": null,
+            "examples": [
+              "In Progress"
+            ],
+            "nullable": true,
+            "description": "Filter by status name."
+          }
+        },
+        "description": "Request model for listing objectives with optional filters."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_PLUGIN_INTEGRATIONS",
+      "description": "Tool to list plugin integrations. Use when you need a paginated list of plugin integrations.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPluginIntegrationsRequest",
+        "properties": {
+          "pageUrl": {
+            "type": "string",
+            "title": "Page Url",
+            "default": null,
+            "examples": [
+              "https://api.productboard.com/plugin-integrations?page=2",
+              "/plugin-integrations?page=2",
+              "plugin-integrations?page=2"
+            ],
+            "nullable": true,
+            "description": "URL for the next page, obtained from the previous response's links.next. If not set, the first page of integrations is returned."
+          }
+        },
+        "description": "Request model for listing plugin integrations. Supports optional pagination via links.next."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_PRODUCTS",
+      "description": "Tool to list all products in a workspace. Use when you need to retrieve paginated product details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListProductsRequest",
+        "properties": {
+          "pageLimit": {
+            "type": "integer",
+            "title": "Page Limit",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Maximum number of products to return per page (default is 100)."
+          },
+          "pageOffset": {
+            "type": "integer",
+            "title": "Page Offset",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Offset token for pagination (default is 0). Use the returned pageOffset to iterate."
+          }
+        },
+        "description": "Request parameters for listing products."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_RELEASE_GROUPS",
+      "description": "Tool to list release groups. Use when you need a paginated list of release groups. Returns first page of results and link to next page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListReleaseGroupsRequest",
+        "properties": {},
+        "description": "Request parameters for listing release groups. No parameters required."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_RELEASES",
+      "description": "Tool to list all releases in Productboard. Use when you need a paginated list of releases; follow links.next for more pages.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListReleasesRequest",
+        "properties": {
+          "releaseGroup.id": {
+            "type": "string",
+            "title": "Release Group.Id",
+            "format": "uuid",
+            "default": null,
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "nullable": true,
+            "description": "UUID of a release group to filter releases by."
+          }
+        },
+        "description": "Request parameters for listing releases."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_LIST_USERS",
+      "description": "Tool to list users. Use when you need a paginated list of all users in Productboard.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListUsersRequest",
+        "properties": {
+          "next": {
+            "type": "string",
+            "title": "Next",
+            "default": null,
+            "nullable": true,
+            "description": "Full URL to the next page of results. If provided, this URL will be called directly; otherwise the /users endpoint is used."
+          }
+        },
+        "description": "Request parameters for listing users."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_REMOVE_NOTE_FOLLOWER",
+      "description": "Tool to remove a follower from a Productboard note. Use after confirming the note ID and follower email are correct.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RemoveNoteFollowerRequest",
+        "required": [
+          "noteId",
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "format": "email",
+            "examples": [
+              "user@example.com"
+            ],
+            "description": "Email address of the follower to remove"
+          },
+          "noteId": {
+            "type": "string",
+            "title": "Note Id",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426655440000"
+            ],
+            "description": "UUID of the note from which to remove the follower"
+          }
+        },
+        "description": "Request model for removing a follower from a note."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_RETRIEVE_COMPANY",
+      "description": "Tool to retrieve details of a specific company. Use when you have the company ID to fetch its full details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveCompanyRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "description": "Identifier of the company to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific company."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_RETRIEVE_COMPANY_FIELD",
+      "description": "Tool to retrieve details of a specific company custom field. Use when you have the custom field ID and need its metadata.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveCompanyFieldRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "cf_12345"
+            ],
+            "description": "UUID of the company custom field to retrieve"
+          }
+        },
+        "description": "Request model for retrieving a company custom field."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_RETRIEVE_COMPANY_FIELD_VALUE",
+      "description": "Tool to retrieve a specific company custom field value. Use when you need the current value of a custom field for a given company by its IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveCompanyFieldValueRequest",
+        "required": [
+          "companyId",
+          "companyCustomFieldId"
+        ],
+        "properties": {
+          "companyId": {
+            "type": "string",
+            "title": "Company Id",
+            "examples": [
+              "12345"
+            ],
+            "description": "ID of the company to retrieve the custom field value for"
+          },
+          "companyCustomFieldId": {
+            "type": "string",
+            "title": "Company Custom Field Id",
+            "examples": [
+              "67890"
+            ],
+            "description": "ID of the company custom field to retrieve"
+          }
+        },
+        "description": "Request model for retrieving the value of a specific company custom field."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_RETRIEVE_FEATURE",
+      "description": "Tool to retrieve details of a specific feature. Use when you need complete info on one feature.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveFeatureRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "format": "uuid",
+            "examples": [
+              "00000000-0000-0000-0000-000000000000"
+            ],
+            "description": "UUID of the feature to retrieve"
+          }
+        },
+        "description": "Request parameters for retrieving a specific feature."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_RETRIEVE_NOTE",
+      "description": "Tool to retrieve details of a specific note. Use when you have the note ID to fetch its full details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveNoteRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "12345"
+            ],
+            "description": "UUID of the note to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific note."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_RETRIEVE_PRODUCT",
+      "description": "Tool to retrieve details of a specific product. Use when you have the product ID to fetch its full details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveProductRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "description": "Identifier of the product to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific product."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_RETRIEVE_USER",
+      "description": "Tool to retrieve details of a specific user. Use when you have the user ID to fetch its full details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveUserRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "description": "Identifier of the user to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific user."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_SCIM_LIST_USERS",
+      "description": "Tool to list users via SCIM. Use when checking for existing users before creation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ScimListUsersRequest",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              25
+            ],
+            "nullable": true,
+            "description": "Number of items to return for pagination."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "userName eq \"alice@example.com\""
+            ],
+            "nullable": true,
+            "description": "Filter expression; supports 'eq' and 'and' on attributes id, externalId, userName, displayName, title, active."
+          },
+          "sortBy": {
+            "enum": [
+              "id",
+              "externalId",
+              "userName",
+              "displayName",
+              "title",
+              "active"
+            ],
+            "type": "string",
+            "title": "Sort By",
+            "default": null,
+            "examples": [
+              "userName"
+            ],
+            "nullable": true,
+            "description": "Attribute to sort by; one of id, externalId, userName, displayName, title, active."
+          },
+          "sortOrder": {
+            "enum": [
+              "ascending",
+              "descending"
+            ],
+            "type": "string",
+            "title": "Sort Order",
+            "default": null,
+            "examples": [
+              "ascending"
+            ],
+            "nullable": true,
+            "description": "Sort order; ascending or descending."
+          },
+          "startIndex": {
+            "type": "integer",
+            "title": "Start Index",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "1-based index for pagination; the first item is 1."
+          }
+        },
+        "description": "Request parameters for listing SCIM v2 users in Productboard."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_SET_COMPANY_FIELD_VALUE",
+      "description": "Tool to set or replace a specific company custom field's value. Use when you need to update a company's custom field after confirming the field ID and ensuring the new value matches the field type.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SetCompanyFieldValueRequest",
+        "required": [
+          "companyId",
+          "companyCustomFieldId",
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "examples": [
+              "Some text",
+              123,
+              123.45
+            ],
+            "description": "New custom field value. Must match the field type: string for text fields or number for number fields."
+          },
+          "companyId": {
+            "type": "string",
+            "title": "Company Id",
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "description": "UUID of the company to update."
+          },
+          "companyCustomFieldId": {
+            "type": "string",
+            "title": "Company Custom Field Id",
+            "examples": [
+              "cf_12345"
+            ],
+            "description": "UUID of the company custom field to set."
+          }
+        },
+        "description": "Request model for setting or replacing a specific company custom field's value."
+      }
+    },
+    {
+      "name": "PRODUCTBOARD_SET_CUSTOM_FIELD_VALUE",
+      "description": "Tool to set a custom field value on a hierarchy entity. Use when you need to update a product, component, or feature field with a specific value after confirming the field and entity IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SetCustomFieldValueRequest",
+        "required": [
+          "hierarchyEntity.id",
+          "customField.id",
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "examples": [
+              "Example text",
+              42,
+              true
+            ],
+            "description": "Value to assign to the custom field. Must match the field type (e.g., string, number, single-select key, list of keys for multi-select)."
+          },
+          "customField.id": {
+            "type": "string",
+            "title": "Custom Field.Id",
+            "examples": [
+              "4c6d7e8f-9a1b-2c3d-4e5f-6789012345ab"
+            ],
+            "description": "UUID of the custom field to set on the hierarchy entity."
+          },
+          "hierarchyEntity.id": {
+            "type": "string",
+            "title": "Hierarchy Entity.Id",
+            "examples": [
+              "5f8d1e2b-3a4c-4d1f-9e62-1234567890ab"
+            ],
+            "description": "UUID of the hierarchy entity (product, component, or feature) to update."
+          }
+        },
+        "description": "Request model for setting a custom field value on a hierarchy entity."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:51:55.677493+00:00",
+    "source": "smithery"
+  }
+}

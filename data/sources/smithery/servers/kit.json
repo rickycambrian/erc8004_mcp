@@ -1,0 +1,1262 @@
+{
+  "qualifiedName": "kit",
+  "displayName": "Kit",
+  "description": "Kit is a platform that allows creators to automate tasks and developers to build apps for the Kit App Store.",
+  "iconUrl": "https://logos.composio.dev/api/kit",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/kit",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/kit/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "KIT_ADD_SUBSCRIBER_TO_FORM",
+      "description": "Tool to add a subscriber to a specific form by ID. Use after confirming form and subscriber IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddSubscriberToFormRequest",
+        "required": [
+          "form_id",
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "minimum": 1,
+            "examples": [
+              456
+            ],
+            "description": "The ID of the subscriber to add to the form."
+          },
+          "form_id": {
+            "type": "integer",
+            "title": "Form Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "The ID of the form to which the subscriber will be added."
+          },
+          "referrer": {
+            "type": "string",
+            "title": "Referrer",
+            "default": null,
+            "examples": [
+              "https://example.com/page"
+            ],
+            "nullable": true,
+            "description": "The URL from which the subscriber was referred."
+          }
+        },
+        "description": "Request schema for adding an existing subscriber to a form by ID."
+      }
+    },
+    {
+      "name": "KIT_CREATE_CUSTOM_FIELD",
+      "description": "Tool to create a new custom field for subscriber data. Use when you need to store extra attributes for subscribers.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateCustomFieldRequest",
+        "required": [
+          "label"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "examples": [
+              "Favorite Color"
+            ],
+            "description": "The display label for the custom field (e.g., 'Favorite Color')."
+          }
+        },
+        "description": "Request schema for creating a new custom field in Kit."
+      }
+    },
+    {
+      "name": "KIT_CREATE_TAG",
+      "description": "Tool to create a new tag in the account. Use when you need a custom label to segment subscribers. Use after confirming tag uniqueness to avoid duplicates. Example: \"Create a tag called 'VIP' for premium customers.\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateTagRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "VIP"
+            ],
+            "description": "Name of the tag to be created."
+          }
+        },
+        "description": "Request model for creating a new tag"
+      }
+    },
+    {
+      "name": "KIT_CREATE_WEBHOOK",
+      "description": "Tool to create a new webhook subscription. Use when you need subscriber or purchase event notifications.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateWebhookRequest",
+        "required": [
+          "target_url",
+          "event"
+        ],
+        "properties": {
+          "event": {
+            "type": "object",
+            "title": "Event",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "enum": [
+                  "subscriber.subscriber_activate",
+                  "subscriber.subscriber_unsubscribe",
+                  "subscriber.subscriber_bounce",
+                  "subscriber.subscriber_complain",
+                  "subscriber.form_subscribe",
+                  "subscriber.course_subscribe",
+                  "subscriber.course_complete",
+                  "subscriber.link_click",
+                  "subscriber.product_purchase",
+                  "subscriber.tag_add",
+                  "subscriber.tag_remove",
+                  "purchase.purchase_create"
+                ],
+                "type": "string",
+                "title": "Name",
+                "description": "Event type to subscribe to."
+              },
+              "tag_id": {
+                "type": "integer",
+                "title": "Tag Id",
+                "default": null,
+                "examples": [
+                  456
+                ],
+                "nullable": true,
+                "description": "Tag ID required for 'subscriber.tag_add' or 'subscriber.tag_remove' events."
+              },
+              "form_id": {
+                "type": "integer",
+                "title": "Form Id",
+                "default": null,
+                "examples": [
+                  123
+                ],
+                "nullable": true,
+                "description": "Form ID required for 'subscriber.form_subscribe' event."
+              },
+              "product_id": {
+                "type": "integer",
+                "title": "Product Id",
+                "default": null,
+                "examples": [
+                  321
+                ],
+                "nullable": true,
+                "description": "Product ID required for 'subscriber.product_purchase' event."
+              },
+              "sequence_id": {
+                "type": "integer",
+                "title": "Sequence Id",
+                "default": null,
+                "examples": [
+                  789
+                ],
+                "nullable": true,
+                "description": "Sequence ID required for 'subscriber.course_subscribe' or 'subscriber.course_complete' events."
+              },
+              "initiator_value": {
+                "type": "string",
+                "title": "Initiator Value",
+                "default": null,
+                "examples": [
+                  "https://example.com/link"
+                ],
+                "nullable": true,
+                "description": "Initiator value (e.g., URL) required for 'subscriber.link_click' event."
+              }
+            },
+            "description": "Webhook event configuration.",
+            "additionalProperties": false
+          },
+          "target_url": {
+            "type": "string",
+            "title": "Target Url",
+            "examples": [
+              "https://example.com/webhook"
+            ],
+            "description": "URL to receive webhook POST notifications."
+          }
+        },
+        "description": "Request schema for creating a new webhook in Kit."
+      }
+    },
+    {
+      "name": "KIT_DELETE_BROADCAST",
+      "description": "Tool to delete a specific broadcast. Use when you need to permanently remove a broadcast by ID (after confirming the ID). Example prompt: \"Delete broadcast with ID 123\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteBroadcastRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "Unique identifier of the broadcast to delete"
+          }
+        },
+        "description": "Request schema for deleting a broadcast."
+      }
+    },
+    {
+      "name": "KIT_DELETE_CUSTOM_FIELD",
+      "description": "Tool to delete a specific custom field. Use after confirming the custom field ID is correct. Deletes the field permanently.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteCustomFieldRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "Unique identifier of the custom field to delete"
+          }
+        },
+        "description": "Request schema for deleting a custom field."
+      }
+    },
+    {
+      "name": "KIT_DELETE_SUBSCRIBER",
+      "description": "Tool to delete (unsubscribe) a subscriber by ID. Use when you need to remove a subscriber from all sequences and forms after confirming the subscriber exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteSubscriberRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "Unique identifier of the subscriber to delete"
+          }
+        },
+        "description": "Request schema for deleting (unsubscribing) a subscriber."
+      }
+    },
+    {
+      "name": "KIT_DELETE_TAG",
+      "description": "Tool to delete a tag by ID. Use when you need to remove obsolete or incorrect tags after confirming the tag exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTagRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "Unique identifier of the tag to delete"
+          }
+        },
+        "description": "Request schema for deleting a tag."
+      }
+    },
+    {
+      "name": "KIT_DELETE_WEBHOOK",
+      "description": "Tool to delete a webhook by ID. Use when you want to permanently remove a webhook after confirming its ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteWebhookRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "Unique identifier of the webhook to delete"
+          }
+        },
+        "description": "Request schema for deleting a webhook."
+      }
+    },
+    {
+      "name": "KIT_GET_ACCOUNT",
+      "description": "Tool to retrieve current account information. Use after validating API key to fetch account ID, plan type, primary email, and timezone details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAccountRequest",
+        "properties": {},
+        "description": "Request schema for retrieving current account information. No input parameters are required."
+      }
+    },
+    {
+      "name": "KIT_GET_ACCOUNT_COLORS",
+      "description": "Tool to retrieve list of colors associated with the account. Use after confirming authentication to fetch account-specific color palette.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAccountColorsRequest",
+        "properties": {},
+        "description": "Request schema for retrieving account colors. No parameters required."
+      }
+    },
+    {
+      "name": "KIT_GET_BROADCAST",
+      "description": "Tool to retrieve details of a specific broadcast by ID. Use when you have a valid broadcast ID and need its metadata.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetBroadcastRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "minimum": 1,
+            "examples": [
+              2786
+            ],
+            "description": "Unique identifier of the broadcast to retrieve"
+          }
+        },
+        "description": "Request schema for retrieving a specific broadcast by ID."
+      }
+    },
+    {
+      "name": "KIT_GET_BROADCAST_STATS",
+      "description": "Tool to retrieve statistics for a specific broadcast by ID. Use after a broadcast has been sent to monitor performance.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetBroadcastStatsRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "Unique identifier of the broadcast to fetch statistics for"
+          }
+        },
+        "description": "Request schema for retrieving statistics of a specific broadcast."
+      }
+    },
+    {
+      "name": "KIT_GET_CREATOR_PROFILE",
+      "description": "Tool to retrieve the creator profile information for the account. Use when you need creator metadata (bio, avatar, social links) before publishing or customizing content.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCreatorProfileRequest",
+        "properties": {},
+        "description": "Request schema for retrieving creator profile. No parameters required."
+      }
+    },
+    {
+      "name": "KIT_GET_EMAIL_STATS",
+      "description": "Tool to retrieve email statistics for the account. Use after confirming authentication to fetch metrics on emails (sent, opened, clicked) over the last 90 days.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetEmailStatsRequest",
+        "properties": {},
+        "description": "Request schema for retrieving email statistics. No parameters required."
+      }
+    },
+    {
+      "name": "KIT_LIST_BROADCASTS",
+      "description": "Tool to retrieve a paginated list of all broadcasts. Use when you need to enumerate or review broadcast summaries with cursor-based pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListBroadcastsRequest",
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "examples": [
+              "cursor_abc123"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results after the specified cursor."
+          },
+          "before": {
+            "type": "string",
+            "title": "Before",
+            "default": null,
+            "examples": [
+              "cursor_xyz789"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results before the specified cursor."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 500,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Number of results per page; must be between 1 and 500."
+          },
+          "include_total_count": {
+            "type": "string",
+            "const": "true",
+            "title": "Include Total Count",
+            "default": null,
+            "examples": [
+              "true"
+            ],
+            "nullable": true,
+            "description": "If set to 'true', includes the total count of records in the response."
+          }
+        },
+        "description": "Request schema for listing broadcasts with optional pagination."
+      }
+    },
+    {
+      "name": "KIT_LIST_CUSTOM_FIELDS",
+      "description": "Tool to retrieve a paginated list of custom fields. Use after confirming you need to enumerate or inspect all custom fields with cursor-based pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListCustomFieldsRequest",
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "examples": [
+              "cursor_abc123"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results after the specified cursor."
+          },
+          "before": {
+            "type": "string",
+            "title": "Before",
+            "default": null,
+            "examples": [
+              "cursor_xyz789"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results before the specified cursor."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Number of results per page; defaults to 500 if not specified."
+          },
+          "include_total_count": {
+            "type": "string",
+            "const": "true",
+            "title": "Include Total Count",
+            "default": null,
+            "examples": [
+              "true"
+            ],
+            "nullable": true,
+            "description": "If set to 'true', includes the total count of records in the response."
+          }
+        },
+        "description": "Request schema for listing custom fields with optional pagination."
+      }
+    },
+    {
+      "name": "KIT_LIST_FORMS",
+      "description": "Tool to list all forms. Use when you need to fetch forms with optional filters and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFormsRequest",
+        "properties": {
+          "type": {
+            "enum": [
+              "embed",
+              "hosted"
+            ],
+            "type": "string",
+            "title": "Type",
+            "default": null,
+            "examples": [
+              "embed"
+            ],
+            "nullable": true,
+            "description": "Filter forms by type."
+          },
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "examples": [
+              "cursor_abc123"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results after the specified cursor."
+          },
+          "before": {
+            "type": "string",
+            "title": "Before",
+            "default": null,
+            "examples": [
+              "cursor_xyz789"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results before the specified cursor."
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "examples": [
+              "active"
+            ],
+            "nullable": true,
+            "description": "Filter forms by status (e.g., 'active', 'archived')."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              25
+            ],
+            "nullable": true,
+            "description": "Number of forms to return per page."
+          },
+          "include_total_count": {
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string",
+            "title": "Include Total Count",
+            "default": null,
+            "examples": [
+              "true"
+            ],
+            "nullable": true,
+            "description": "If set to 'true', includes the total count of forms in the response."
+          }
+        },
+        "description": "Request schema for listing forms with optional pagination and filters."
+      }
+    },
+    {
+      "name": "KIT_LIST_SEGMENTS",
+      "description": "Tool to retrieve a paginated list of segments. Use when you need to enumerate segments with cursor-based pagination for further processing or display.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSegmentsRequest",
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "examples": [
+              "cursor_abc123"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results after this cursor."
+          },
+          "before": {
+            "type": "string",
+            "title": "Before",
+            "default": null,
+            "examples": [
+              "cursor_xyz789"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results before this cursor."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              25
+            ],
+            "nullable": true,
+            "description": "Number of segments to return per page (min 1)."
+          },
+          "include_total_count": {
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string",
+            "title": "Include Total Count",
+            "default": null,
+            "examples": [
+              "true"
+            ],
+            "nullable": true,
+            "description": "If set to 'true', includes the total count of segments in the response."
+          }
+        },
+        "description": "Request schema for listing segments with optional pagination."
+      }
+    },
+    {
+      "name": "KIT_LIST_SEQUENCES",
+      "description": "Tool to retrieve a paginated list of all sequences. Use when you need to enumerate sequences with pagination for further processing or display.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSequencesRequest",
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "examples": [
+              "cursor_abc123"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results after the specified cursor."
+          },
+          "before": {
+            "type": "string",
+            "title": "Before",
+            "default": null,
+            "examples": [
+              "cursor_xyz789"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results before the specified cursor."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "maximum": 500,
+            "minimum": 1,
+            "examples": [
+              100
+            ],
+            "nullable": true,
+            "description": "Number of results per page (max 500)."
+          },
+          "include_total_count": {
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string",
+            "title": "Include Total Count",
+            "default": null,
+            "examples": [
+              "true"
+            ],
+            "nullable": true,
+            "description": "If set to 'true', includes the total count in the pagination."
+          }
+        },
+        "description": "Request schema for listing sequences with optional pagination."
+      }
+    },
+    {
+      "name": "KIT_LIST_SUBSCRIBERS",
+      "description": "Tool to retrieve a list of subscribers. Use when you need to fetch subscriber records with optional filtering, sorting, and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSubscribersRequest",
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "examples": [
+              "cursor_abc123"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns subscribers after this cursor."
+          },
+          "before": {
+            "type": "string",
+            "title": "Before",
+            "default": null,
+            "examples": [
+              "cursor_xyz789"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns subscribers before this cursor."
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "examples": [
+              "active",
+              "inactive"
+            ],
+            "nullable": true,
+            "description": "Filter by subscriber status (e.g., 'active' or 'inactive')."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              25,
+              50
+            ],
+            "nullable": true,
+            "description": "Number of subscribers to return per page (min 1)."
+          },
+          "sort_field": {
+            "type": "string",
+            "title": "Sort Field",
+            "default": null,
+            "examples": [
+              "email_address"
+            ],
+            "nullable": true,
+            "description": "Field by which to sort the subscribers."
+          },
+          "sort_order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "title": "Sort Order",
+            "default": null,
+            "examples": [
+              "asc",
+              "desc"
+            ],
+            "nullable": true,
+            "description": "Order in which to sort the results."
+          },
+          "created_after": {
+            "type": "string",
+            "title": "Created After",
+            "default": null,
+            "examples": [
+              "2023-01-01"
+            ],
+            "nullable": true,
+            "description": "Filter to subscribers created after this date (YYYY-MM-DD)."
+          },
+          "email_address": {
+            "type": "string",
+            "title": "Email Address",
+            "default": null,
+            "examples": [
+              "user@example.com"
+            ],
+            "nullable": true,
+            "description": "Exact email address to filter by."
+          },
+          "updated_after": {
+            "type": "string",
+            "title": "Updated After",
+            "default": null,
+            "examples": [
+              "2023-01-01"
+            ],
+            "nullable": true,
+            "description": "Filter to subscribers updated after this date (YYYY-MM-DD)."
+          },
+          "created_before": {
+            "type": "string",
+            "title": "Created Before",
+            "default": null,
+            "examples": [
+              "2023-12-31"
+            ],
+            "nullable": true,
+            "description": "Filter to subscribers created before this date (YYYY-MM-DD)."
+          },
+          "updated_before": {
+            "type": "string",
+            "title": "Updated Before",
+            "default": null,
+            "examples": [
+              "2023-12-31"
+            ],
+            "nullable": true,
+            "description": "Filter to subscribers updated before this date (YYYY-MM-DD)."
+          },
+          "include_total_count": {
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string",
+            "title": "Include Total Count",
+            "default": null,
+            "examples": [
+              "true"
+            ],
+            "nullable": true,
+            "description": "If set to 'true', includes the total count of subscribers in the response."
+          }
+        },
+        "description": "Request schema for listing subscribers with optional filters, sorting, and pagination."
+      }
+    },
+    {
+      "name": "KIT_LIST_SUBSCRIBERS_FOR_FORM",
+      "description": "Tool to retrieve subscribers for a specific form by ID. Use when you need to page or filter subscribers of a form.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSubscribersForFormRequest",
+        "required": [
+          "form_id"
+        ],
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "examples": [
+              "cursor_abc123"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results after this cursor."
+          },
+          "before": {
+            "type": "string",
+            "title": "Before",
+            "default": null,
+            "examples": [
+              "cursor_xyz789"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns results before this cursor."
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "examples": [
+              "active"
+            ],
+            "nullable": true,
+            "description": "Filter subscribers by status (e.g., 'active')."
+          },
+          "form_id": {
+            "type": "integer",
+            "title": "Form Id",
+            "examples": [
+              123
+            ],
+            "description": "ID of the form whose subscribers you want to retrieve."
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              25,
+              50
+            ],
+            "nullable": true,
+            "description": "Number of results to return per page (min 1)."
+          },
+          "added_after": {
+            "type": "string",
+            "title": "Added After",
+            "default": null,
+            "examples": [
+              "2021-01-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Return subscribers added to the form after this date/time (ISO 8601)."
+          },
+          "added_before": {
+            "type": "string",
+            "title": "Added Before",
+            "default": null,
+            "examples": [
+              "2021-12-31T23:59:59Z"
+            ],
+            "nullable": true,
+            "description": "Return subscribers added to the form before this date/time (ISO 8601)."
+          },
+          "created_after": {
+            "type": "string",
+            "title": "Created After",
+            "default": null,
+            "examples": [
+              "2021-01-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Return subscribers created after this date/time (ISO 8601)."
+          },
+          "created_before": {
+            "type": "string",
+            "title": "Created Before",
+            "default": null,
+            "examples": [
+              "2021-12-31T23:59:59Z"
+            ],
+            "nullable": true,
+            "description": "Return subscribers created before this date/time (ISO 8601)."
+          },
+          "include_total_count": {
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string",
+            "title": "Include Total Count",
+            "default": null,
+            "examples": [
+              "true"
+            ],
+            "nullable": true,
+            "description": "If 'true', includes the total count of subscribers in the response."
+          }
+        },
+        "description": "Request schema for listing subscribers of a specific form by ID with optional filters and pagination."
+      }
+    },
+    {
+      "name": "KIT_LIST_TAGS",
+      "description": "Tool to retrieve a list of all tags. Use when you need a complete inventory of tags for the Kit account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTagsRequest",
+        "properties": {},
+        "description": "Request schema for listing tags. No parameters are required."
+      }
+    },
+    {
+      "name": "KIT_LIST_TAG_SUBSCRIBERS",
+      "description": "Tool to retrieve subscribers for a specific tag. Use after confirming the tag ID when you need to list subscribers associated with a tag.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTagSubscribersRequest",
+        "required": [
+          "tag_id"
+        ],
+        "properties": {
+          "after": {
+            "type": "string",
+            "title": "After",
+            "default": null,
+            "examples": [
+              "cursor_abc123"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns subscribers after this cursor."
+          },
+          "before": {
+            "type": "string",
+            "title": "Before",
+            "default": null,
+            "examples": [
+              "cursor_xyz789"
+            ],
+            "nullable": true,
+            "description": "Cursor for pagination; returns subscribers before this cursor."
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "examples": [
+              "active"
+            ],
+            "nullable": true,
+            "description": "Filter by subscriber status ('active' or 'inactive')."
+          },
+          "tag_id": {
+            "type": "integer",
+            "title": "Tag Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "Unique identifier of the tag to retrieve subscribers for"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              25,
+              50
+            ],
+            "nullable": true,
+            "description": "Number of subscribers to return per page (min 1)."
+          },
+          "tagged_after": {
+            "type": "string",
+            "title": "Tagged After",
+            "default": null,
+            "examples": [
+              "2023-01-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Filter to subscribers tagged after this timestamp (ISO 8601)."
+          },
+          "created_after": {
+            "type": "string",
+            "title": "Created After",
+            "default": null,
+            "examples": [
+              "2023-01-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Filter to subscribers created after this timestamp (ISO 8601)."
+          },
+          "tagged_before": {
+            "type": "string",
+            "title": "Tagged Before",
+            "default": null,
+            "examples": [
+              "2023-12-31T23:59:59Z"
+            ],
+            "nullable": true,
+            "description": "Filter to subscribers tagged before this timestamp (ISO 8601)."
+          },
+          "created_before": {
+            "type": "string",
+            "title": "Created Before",
+            "default": null,
+            "examples": [
+              "2023-12-31T23:59:59Z"
+            ],
+            "nullable": true,
+            "description": "Filter to subscribers created before this timestamp (ISO 8601)."
+          },
+          "include_total_count": {
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string",
+            "title": "Include Total Count",
+            "default": null,
+            "examples": [
+              "true"
+            ],
+            "nullable": true,
+            "description": "If set to 'true', includes total count of subscribers in the response."
+          }
+        },
+        "description": "Request schema for listing subscribers of a specific tag by ID."
+      }
+    },
+    {
+      "name": "KIT_TAG_SUBSCRIBER",
+      "description": "Tool to associate a subscriber with a specific tag by ID. Use after confirming tag and subscriber IDs when tagging a subscriber.",
+      "inputSchema": {
+        "type": "object",
+        "title": "TagSubscriberRequest",
+        "required": [
+          "tag_id",
+          "subscriber_id"
+        ],
+        "properties": {
+          "tag_id": {
+            "type": "integer",
+            "title": "Tag Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "ID of the tag to assign"
+          },
+          "subscriber_id": {
+            "type": "integer",
+            "title": "Subscriber Id",
+            "minimum": 1,
+            "examples": [
+              456
+            ],
+            "description": "ID of the subscriber to tag"
+          }
+        },
+        "description": "Request schema for tagging a subscriber by tag ID."
+      }
+    },
+    {
+      "name": "KIT_TAG_SUBSCRIBER_BY_EMAIL",
+      "description": "Tool to associate a subscriber with a tag using an email address. Use when you have a tag ID and subscriber email ready. Use after confirming both resources exist.",
+      "inputSchema": {
+        "type": "object",
+        "title": "TagSubscriberByEmailRequest",
+        "required": [
+          "tag_id",
+          "email_address"
+        ],
+        "properties": {
+          "tag_id": {
+            "type": "integer",
+            "title": "Tag Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "The ID of the tag to assign to the subscriber"
+          },
+          "email_address": {
+            "type": "string",
+            "title": "Email Address",
+            "examples": [
+              "user@example.com"
+            ],
+            "nullable": true,
+            "description": "The subscriber's email address"
+          }
+        },
+        "description": "Request schema for tagging a subscriber by email."
+      }
+    },
+    {
+      "name": "KIT_UPDATE_ACCOUNT_COLORS",
+      "description": "Tool to update the list of colors for the account. Use when customizing your Kit account's color palette for broadcasts and templates.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateAccountColorsRequest",
+        "required": [
+          "colors"
+        ],
+        "properties": {
+          "colors": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Colors",
+            "examples": [
+              [
+                "#008000",
+                "#FF0000"
+              ]
+            ],
+            "description": "List of hex color codes to set for the account (e.g., '#008000', '#FF0000')."
+          }
+        },
+        "description": "Request schema for updating the account colors."
+      }
+    },
+    {
+      "name": "KIT_UPDATE_CUSTOM_FIELD",
+      "description": "Tool to update a custom field's label. Use after listing or retrieving custom fields and confirming the field ID to rename.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateCustomFieldRequest",
+        "required": [
+          "id",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "Unique identifier of the custom field to update"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "examples": [
+              "New Custom Field Label"
+            ],
+            "description": "New label for the custom field"
+          }
+        },
+        "description": "Request schema for updating a specific custom field by ID."
+      }
+    },
+    {
+      "name": "KIT_UPDATE_TAG",
+      "description": "Tool to update a tag's name by ID. Use after retrieving tag ID and confirming the new name.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateTagRequest",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "minimum": 1,
+            "examples": [
+              123
+            ],
+            "description": "Unique identifier of the tag to update"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Summer Sale"
+            ],
+            "description": "New name for the tag"
+          }
+        },
+        "description": "Request schema for updating a tag by its ID."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:44:08.557658+00:00",
+    "source": "smithery"
+  }
+}

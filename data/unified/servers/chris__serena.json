@@ -1,0 +1,1375 @@
+{
+  "id": "chris/serena",
+  "name": "chris/serena",
+  "display_name": "serena",
+  "version": null,
+  "description": "Speed up development by navigating and modifying large codebases with IDE-like precision. Find and update the right symbols, references, and files across 30+ languages without scanning entire files. Reduce context usage and errors while implementing features, refactors, and fixes in your existing workflow.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "read_file",
+      "title": "Read File",
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Reads the given file or a chunk of it. Generally, symbolic operations\nlike find_symbol or find_referencing_symbols should be preferred if you know which symbols you are looking for. Returns the full text of the file at the given relative path.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "relative_path"
+        ],
+        "properties": {
+          "end_line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Line",
+            "default": null,
+            "description": "The 0-based index of the last line to be retrieved (inclusive). If None, read until the end of the file."
+          },
+          "start_line": {
+            "type": "integer",
+            "title": "Start Line",
+            "default": 0,
+            "description": "The 0-based index of the first line to be retrieved."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the file to read."
+          },
+          "max_answer_chars": {
+            "type": "integer",
+            "title": "Max Answer Chars",
+            "default": -1,
+            "description": "If the file (chunk) is longer than this number of characters,\nno content will be returned. Don't adjust unless there is really no other way to get the content\nrequired for the task."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_text_file",
+      "title": "Create Text File",
+      "annotations": {
+        "title": "Create Text File",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Write a new file or overwrite an existing file. Returns a message indicating success or failure.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "relative_path",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "The (appropriately encoded) content to write to the file."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the file to create."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_dir",
+      "title": "List Dir",
+      "annotations": {
+        "title": "List Dir",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Lists files and directories in the given directory (optionally with recursion). Returns a JSON object with the names of directories and files within the given directory.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "relative_path",
+          "recursive"
+        ],
+        "properties": {
+          "recursive": {
+            "type": "boolean",
+            "title": "Recursive",
+            "description": "Whether to scan subdirectories recursively."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the directory to list; pass \".\" to scan the project root."
+          },
+          "max_answer_chars": {
+            "type": "integer",
+            "title": "Max Answer Chars",
+            "default": -1,
+            "description": "If the output is longer than this number of characters,\nno content will be returned. -1 means the default value from the config will be used.\nDon't adjust unless there is really no other way to get the content required for the task."
+          },
+          "skip_ignored_files": {
+            "type": "boolean",
+            "title": "Skip Ignored Files",
+            "default": false,
+            "description": "Whether to skip files and directories that are ignored."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_file",
+      "title": "Find File",
+      "annotations": {
+        "title": "Find File",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Finds non-gitignored files matching the given file mask within the given relative path. Returns a JSON object with the list of matching files.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "file_mask",
+          "relative_path"
+        ],
+        "properties": {
+          "file_mask": {
+            "type": "string",
+            "title": "File Mask",
+            "description": "The filename or file mask (using the wildcards * or ?) to search for."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the directory to search in; pass \".\" to scan the project root."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "replace_content",
+      "title": "Replace Content",
+      "annotations": {
+        "title": "Replace Content",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Replaces one or more occurrences of a given pattern in a file with new content.\n\nThis is the preferred way to replace content in a file whenever the symbol-level\ntools are not appropriate.\n\nVERY IMPORTANT: The \"regex\" mode allows very large sections of code to be replaced without fully quoting them!\nUse a regex of the form \"beginning.*?end-of-text-to-be-replaced\" to be faster and more economical!\nALWAYS try to use wildcards to avoid specifying the exact content to be replaced,\nespecially if it spans several lines. Note that you cannot make mistakes, because if the regex should match\nmultiple occurrences while you disabled `allow_multiple_occurrences`, an error will be returned, and you can retry\nwith a revised regex.\nTherefore, using regex mode with suitable wildcards is usually the best choice!.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "relative_path",
+          "needle",
+          "repl",
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "literal",
+              "regex"
+            ],
+            "type": "string",
+            "title": "Mode",
+            "description": "Either \"literal\" or \"regex\", specifying how the `needle` parameter is to be interpreted."
+          },
+          "repl": {
+            "type": "string",
+            "title": "Repl",
+            "description": "The replacement string (verbatim).\nIf mode is \"regex\", the string can contain backreferences to matched groups in the needle regex,\nspecified using the syntax $!1, $!2, etc. for groups 1, 2, etc."
+          },
+          "needle": {
+            "type": "string",
+            "title": "Needle",
+            "description": "The string or regex pattern to search for.\nIf `mode` is \"literal\", this string will be matched exactly.\nIf `mode` is \"regex\", this string will be treated as a regular expression (syntax of Python's `re` module,\nwith flags DOTALL and MULTILINE enabled)."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the file."
+          },
+          "allow_multiple_occurrences": {
+            "type": "boolean",
+            "title": "Allow Multiple Occurrences",
+            "default": false,
+            "description": "If True, the regex may match multiple occurrences in the file\nand all of them will be replaced.\nIf this is set to False and the regex matches multiple occurrences, an error will be returned\n(and you may retry with a revised, more specific regex)."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_for_pattern",
+      "title": "Search For Pattern",
+      "annotations": {
+        "title": "Search For Pattern",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Offers a flexible search for arbitrary patterns in the codebase, including the\npossibility to search in non-code files.\nGenerally, symbolic operations like find_symbol or find_referencing_symbols\nshould be preferred if you know which symbols you are looking for.\n\nPattern Matching Logic:\n    For each match, the returned result will contain the full lines where the\n    substring pattern is found, as well as optionally some lines before and after it. The pattern will be compiled with\n    DOTALL, meaning that the dot will match all characters including newlines.\n    This also means that it never makes sense to have .* at the beginning or end of the pattern,\n    but it may make sense to have it in the middle for complex patterns.\n    If a pattern matches multiple lines, all those lines will be part of the match.\n    Be careful to not use greedy quantifiers unnecessarily, it is usually better to use non-greedy quantifiers like .*? to avoid\n    matching too much content.\n\nFile Selection Logic:\n    The files in which the search is performed can be restricted very flexibly.\n    Using `restrict_search_to_code_files` is useful if you are only interested in code symbols (i.e., those\n    symbols that can be manipulated with symbolic tools like find_symbol).\n    You can also restrict the search to a specific file or directory,\n    and provide glob patterns to include or exclude certain files on top of that.\n    The globs are matched against relative file paths from the project root (not to the `relative_path` parameter that\n    is used to further restrict the search).\n    Smartly combining the various restrictions allows you to perform very targeted searches. Returns A mapping of file paths to lists of matched consecutive lines.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "substring_pattern"
+        ],
+        "properties": {
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "default": "",
+            "description": "Only subpaths of this path (relative to the repo root) will be analyzed. If a path to a single\nfile is passed, only that will be searched. The path must exist, otherwise a `FileNotFoundError` is raised."
+          },
+          "max_answer_chars": {
+            "type": "integer",
+            "title": "Max Answer Chars",
+            "default": -1,
+            "description": "If the output is longer than this number of characters,\nno content will be returned.\n-1 means the default value from the config will be used.\nDon't adjust unless there is really no other way to get the content\nrequired for the task. Instead, if the output is too long, you should\nmake a stricter query."
+          },
+          "substring_pattern": {
+            "type": "string",
+            "title": "Substring Pattern",
+            "description": "Regular expression for a substring pattern to search for."
+          },
+          "paths_exclude_glob": {
+            "type": "string",
+            "title": "Paths Exclude Glob",
+            "default": "",
+            "description": "Optional glob pattern specifying files to exclude from the search.\nMatches against relative file paths from the project root (e.g., \"*test*\", \"**/*_generated.py\").\nSupports standard glob patterns (*, ?, [seq], **, etc.) and brace expansion {a,b,c}.\nTakes precedence over paths_include_glob. Only matches files, not directories. If left empty, no files are excluded."
+          },
+          "paths_include_glob": {
+            "type": "string",
+            "title": "Paths Include Glob",
+            "default": "",
+            "description": "Optional glob pattern specifying files to include in the search.\nMatches against relative file paths from the project root (e.g., \"*.py\", \"src/**/*.ts\").\nSupports standard glob patterns (*, ?, [seq], **, etc.) and brace expansion {a,b,c}.\nOnly matches files, not directories. If left empty, all non-ignored files will be included."
+          },
+          "context_lines_after": {
+            "type": "integer",
+            "title": "Context Lines After",
+            "default": 0,
+            "description": "Number of lines of context to include after each match."
+          },
+          "context_lines_before": {
+            "type": "integer",
+            "title": "Context Lines Before",
+            "default": 0,
+            "description": "Number of lines of context to include before each match."
+          },
+          "restrict_search_to_code_files": {
+            "type": "boolean",
+            "title": "Restrict Search To Code Files",
+            "default": false,
+            "description": "Whether to restrict the search to only those files where\nanalyzed code symbols can be found. Otherwise, will search all non-ignored files.\nSet this to True if your search is only meant to discover code that can be manipulated with symbolic tools.\nFor example, for finding classes or methods from a name pattern.\nSetting to False is a better choice if you also want to search in non-code files, like in html or yaml files,\nwhich is why it is the default."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_symbols_overview",
+      "title": "Get Symbols Overview",
+      "annotations": {
+        "title": "Get Symbols Overview",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Use this tool to get a high-level understanding of the code symbols in a file.\nThis should be the first tool to call when you want to understand a new file, unless you already know\nwhat you are looking for. Returns a JSON object containing info about top-level symbols in the file.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "relative_path"
+        ],
+        "properties": {
+          "depth": {
+            "type": "integer",
+            "title": "Depth",
+            "default": 0,
+            "description": "Depth up to which descendants of top-level symbols shall be retrieved\n(e.g. 1 retrieves immediate children). Default 0."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the file to get the overview of."
+          },
+          "max_answer_chars": {
+            "type": "integer",
+            "title": "Max Answer Chars",
+            "default": -1,
+            "description": "If the overview is longer than this number of characters,\nno content will be returned. -1 means the default value from the config will be used.\nDon't adjust unless there is really no other way to get the content required for the task."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_symbol",
+      "title": "Find Symbol",
+      "annotations": {
+        "title": "Find Symbol",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieves information on all symbols/code entities (classes, methods, etc.) based on the given name path pattern.\nThe returned symbol information can be used for edits or further queries.\nSpecify `depth > 0` to also retrieve children/descendants (e.g., methods of a class).\n\nA name path is a path in the symbol tree *within a source file*.\nFor example, the method `my_method` defined in class `MyClass` would have the name path `MyClass/my_method`.\nIf a symbol is overloaded (e.g., in Java), a 0-based index is appended (e.g. \"MyClass/my_method[0]\") to\nuniquely identify it.\n\nTo search for a symbol, you provide a name path pattern that is used to match against name paths.\nIt can be\n * a simple name (e.g. \"method\"), which will match any symbol with that name\n * a relative path like \"class/method\", which will match any symbol with that name path suffix\n * an absolute name path \"/class/method\" (absolute name path), which requires an exact match of the full name path within the source file.\nAppend an index `[i]` to match a specific overload only, e.g. \"MyClass/my_method[1]\". Returns a list of symbols (with locations) matching the name.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "name_path_pattern"
+        ],
+        "properties": {
+          "depth": {
+            "type": "integer",
+            "title": "Depth",
+            "default": 0,
+            "description": "Depth up to which descendants shall be retrieved (e.g. use 1 to also retrieve immediate children;\nfor the case where the symbol is a class, this will return its methods).\nDefault 0."
+          },
+          "include_body": {
+            "type": "boolean",
+            "title": "Include Body",
+            "default": false,
+            "description": "If True, include the symbol's source code. Use judiciously."
+          },
+          "exclude_kinds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Exclude Kinds",
+            "default": [],
+            "description": "Optional. List of LSP symbol kind integers to exclude. Takes precedence over `include_kinds`.\nIf not provided, no kinds are excluded."
+          },
+          "include_kinds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Include Kinds",
+            "default": [],
+            "description": "Optional. List of LSP symbol kind integers to include. (e.g., 5 for Class, 12 for Function).\nValid kinds: 1=file, 2=module, 3=namespace, 4=package, 5=class, 6=method, 7=property, 8=field, 9=constructor, 10=enum,\n11=interface, 12=function, 13=variable, 14=constant, 15=string, 16=number, 17=boolean, 18=array, 19=object,\n20=key, 21=null, 22=enum member, 23=struct, 24=event, 25=operator, 26=type parameter.\nIf not provided, all kinds are included."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "default": "",
+            "description": "Optional. Restrict search to this file or directory. If None, searches entire codebase.\nIf a directory is passed, the search will be restricted to the files in that directory.\nIf a file is passed, the search will be restricted to that file.\nIf you have some knowledge about the codebase, you should use this parameter, as it will significantly\nspeed up the search as well as reduce the number of results."
+          },
+          "max_answer_chars": {
+            "type": "integer",
+            "title": "Max Answer Chars",
+            "default": -1,
+            "description": "Max characters for the JSON result. If exceeded, no content is returned.\n-1 means the default value from the config will be used."
+          },
+          "name_path_pattern": {
+            "type": "string",
+            "title": "Name Path Pattern",
+            "description": "The name path matching pattern (see above)."
+          },
+          "substring_matching": {
+            "type": "boolean",
+            "title": "Substring Matching",
+            "default": false,
+            "description": "If True, use substring matching for the last element of the pattern, such that\n\"Foo/get\" would match \"Foo/getValue\" and \"Foo/getData\"."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_referencing_symbols",
+      "title": "Find Referencing Symbols",
+      "annotations": {
+        "title": "Find Referencing Symbols",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Finds references to the symbol at the given `name_path`. The result will contain metadata about the referencing symbols\nas well as a short code snippet around the reference. Returns a list of JSON objects with the symbols referencing the requested symbol.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "name_path",
+          "relative_path"
+        ],
+        "properties": {
+          "name_path": {
+            "type": "string",
+            "title": "Name Path",
+            "description": "For finding the symbol to find references for, same logic as in the `find_symbol` tool."
+          },
+          "exclude_kinds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Exclude Kinds",
+            "default": [],
+            "description": "Same as in the `find_symbol` tool."
+          },
+          "include_kinds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Include Kinds",
+            "default": [],
+            "description": "Same as in the `find_symbol` tool."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the file containing the symbol for which to find references.\nNote that here you can't pass a directory but must pass a file."
+          },
+          "max_answer_chars": {
+            "type": "integer",
+            "title": "Max Answer Chars",
+            "default": -1,
+            "description": "Same as in the `find_symbol` tool."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "replace_symbol_body",
+      "title": "Replace Symbol Body",
+      "annotations": {
+        "title": "Replace Symbol Body",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Replaces the body of the symbol with the given `name_path`.\n\nThe tool shall be used to replace symbol bodies that have been previously retrieved\n(e.g. via `find_symbol`).\nIMPORTANT: Do not use this tool if you do not know what exactly constitutes the body of the symbol.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "name_path",
+          "relative_path",
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "The new symbol body. The symbol body is the definition of a symbol\nin the programming language, including e.g. the signature line for functions.\nIMPORTANT: The body does NOT include any preceding docstrings/comments or imports, in particular."
+          },
+          "name_path": {
+            "type": "string",
+            "title": "Name Path",
+            "description": "For finding the symbol to replace, same logic as in the `find_symbol` tool."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the file containing the symbol."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "insert_after_symbol",
+      "title": "Insert After Symbol",
+      "annotations": {
+        "title": "Insert After Symbol",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Inserts the given body/content after the end of the definition of the given symbol (via the symbol's location).\nA typical use case is to insert a new class, function, method, field or variable assignment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "name_path",
+          "relative_path",
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "The body/content to be inserted. The inserted code shall begin with the next line after\nthe symbol."
+          },
+          "name_path": {
+            "type": "string",
+            "title": "Name Path",
+            "description": "Name path of the symbol after which to insert content (definitions in the `find_symbol` tool apply)."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the file containing the symbol."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "insert_before_symbol",
+      "title": "Insert Before Symbol",
+      "annotations": {
+        "title": "Insert Before Symbol",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Inserts the given content before the beginning of the definition of the given symbol (via the symbol's location).\nA typical use case is to insert a new class, function, method, field or variable assignment; or\na new import statement before the first symbol in the file.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "name_path",
+          "relative_path",
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "The body/content to be inserted before the line in which the referenced symbol is defined."
+          },
+          "name_path": {
+            "type": "string",
+            "title": "Name Path",
+            "description": "Name path of the symbol before which to insert content (definitions in the `find_symbol` tool apply)."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the file containing the symbol."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "rename_symbol",
+      "title": "Rename Symbol",
+      "annotations": {
+        "title": "Rename Symbol",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Renames the symbol with the given `name_path` to `new_name` throughout the entire codebase.\nNote: for languages with method overloading, like Java, name_path may have to include a method's\nsignature to uniquely identify a method. Returns result summary indicating success or failure.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "name_path",
+          "relative_path",
+          "new_name"
+        ],
+        "properties": {
+          "new_name": {
+            "type": "string",
+            "title": "New Name",
+            "description": "The new name for the symbol."
+          },
+          "name_path": {
+            "type": "string",
+            "title": "Name Path",
+            "description": "Name path of the symbol to rename (definitions in the `find_symbol` tool apply)."
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path",
+            "description": "The relative path to the file containing the symbol to rename."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "write_memory",
+      "title": "Write Memory",
+      "annotations": {
+        "title": "Write Memory",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Write some information (utf-8-encoded) about this project that can be useful for future tasks to a memory in md format.\nThe memory name should be meaningful.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "memory_file_name",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "max_answer_chars": {
+            "type": "integer",
+            "title": "Max Answer Chars",
+            "default": -1
+          },
+          "memory_file_name": {
+            "type": "string",
+            "title": "Memory File Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "read_memory",
+      "title": "Read Memory",
+      "annotations": {
+        "title": "Read Memory",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Read the content of a memory file. This tool should only be used if the information\nis relevant to the current task. You can infer whether the information\nis relevant from the memory file name.\nYou should not read the same memory file multiple times in the same conversation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "memory_file_name"
+        ],
+        "properties": {
+          "max_answer_chars": {
+            "type": "integer",
+            "title": "Max Answer Chars",
+            "default": -1
+          },
+          "memory_file_name": {
+            "type": "string",
+            "title": "Memory File Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_memories",
+      "title": "List Memories",
+      "annotations": {
+        "title": "List Memories",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "List available memories. Any memory can be read using the `read_memory` tool.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_memory",
+      "title": "Delete Memory",
+      "annotations": {
+        "title": "Delete Memory",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Delete a memory file. Should only happen if a user asks for it explicitly,\nfor example by saying that the information retrieved from a memory file is no longer correct\nor no longer relevant for the project.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "memory_file_name"
+        ],
+        "properties": {
+          "memory_file_name": {
+            "type": "string",
+            "title": "Memory File Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "edit_memory",
+      "title": "Edit Memory",
+      "annotations": {
+        "title": "Edit Memory",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Replaces content matching a regular expression in a memory.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "memory_file_name",
+          "needle",
+          "repl",
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "literal",
+              "regex"
+            ],
+            "type": "string",
+            "title": "Mode",
+            "description": "Either \"literal\" or \"regex\", specifying how the `needle` parameter is to be interpreted."
+          },
+          "repl": {
+            "type": "string",
+            "title": "Repl",
+            "description": "The replacement string (verbatim)."
+          },
+          "needle": {
+            "type": "string",
+            "title": "Needle",
+            "description": "The string or regex pattern to search for.\nIf `mode` is \"literal\", this string will be matched exactly.\nIf `mode` is \"regex\", this string will be treated as a regular expression (syntax of Python's `re` module,\nwith flags DOTALL and MULTILINE enabled)."
+          },
+          "memory_file_name": {
+            "type": "string",
+            "title": "Memory File Name",
+            "description": "The name of the memory."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "execute_shell_command",
+      "title": "Execute Shell Command",
+      "annotations": {
+        "title": "Execute Shell Command",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Execute a shell command and return its output. If there is a memory about suggested commands, read that first.\nNever execute unsafe shell commands!\nIMPORTANT: Do not use this tool to start\n  * long-running processes (e.g. servers) that are not intended to terminate quickly,\n  * processes that require user interaction. Returns a JSON object containing the command's stdout and optionally stderr output.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "command"
+        ],
+        "properties": {
+          "cwd": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cwd",
+            "default": null,
+            "description": "The working directory to execute the command in. If None, the project root will be used."
+          },
+          "command": {
+            "type": "string",
+            "title": "Command",
+            "description": "The shell command to execute."
+          },
+          "capture_stderr": {
+            "type": "boolean",
+            "title": "Capture Stderr",
+            "default": true,
+            "description": "Whether to capture and return stderr output."
+          },
+          "max_answer_chars": {
+            "type": "integer",
+            "title": "Max Answer Chars",
+            "default": -1,
+            "description": "If the output is longer than this number of characters,\nno content will be returned. -1 means using the default value, don't adjust unless there is no other way to get the content\nrequired for the task."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "activate_project",
+      "title": "Activate Project",
+      "annotations": {
+        "title": "Activate Project",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Activates the project with the given name or path.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "project"
+        ],
+        "properties": {
+          "project": {
+            "type": "string",
+            "title": "Project",
+            "description": "The name of a registered project to activate or a path to a project directory."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "switch_modes",
+      "title": "Switch Modes",
+      "annotations": {
+        "title": "Switch Modes",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Activates the desired modes, like [\"editing\", \"interactive\"] or [\"planning\", \"one-shot\"].",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "required": [
+          "modes"
+        ],
+        "properties": {
+          "modes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Modes",
+            "description": "The names of the modes to activate."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_current_config",
+      "title": "Get Current Config",
+      "annotations": {
+        "title": "Get Current Config",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Print the current configuration of the agent, including the active and available projects, tools, contexts, and modes.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "check_onboarding_performed",
+      "title": "Check Onboarding Performed",
+      "annotations": {
+        "title": "Check Onboarding Performed",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Checks whether project onboarding was already performed.\nYou should always call this tool before beginning to actually work on the project/after activating a project.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "onboarding",
+      "title": "Onboarding",
+      "annotations": {
+        "title": "Onboarding",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Call this tool if onboarding was not performed yet.\nYou will call this tool at most once per conversation. Returns instructions on how to create the onboarding information.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "think_about_collected_information",
+      "title": "Think About Collected Information",
+      "annotations": {
+        "title": "Think About Collected Information",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Think about the collected information and whether it is sufficient and relevant.\nThis tool should ALWAYS be called after you have completed a non-trivial sequence of searching steps like\nfind_symbol, find_referencing_symbols, search_files_for_pattern, read_file, etc.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "think_about_task_adherence",
+      "title": "Think About Task Adherence",
+      "annotations": {
+        "title": "Think About Task Adherence",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Think about the task at hand and whether you are still on track.\nEspecially important if the conversation has been going on for a while and there\nhas been a lot of back and forth.\n\nThis tool should ALWAYS be called before you insert, replace, or delete code.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "think_about_whether_you_are_done",
+      "title": "Think About Whether You Are Done",
+      "annotations": {
+        "title": "Think About Whether You Are Done",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Whenever you feel that you are done with what the user has asked for, it is important to call this tool.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "prepare_for_new_conversation",
+      "title": "Prepare For New Conversation",
+      "annotations": {
+        "title": "Prepare For New Conversation",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Instructions for preparing for a new conversation. This tool should only be called on explicit user request.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "initial_instructions",
+      "title": "Initial Instructions",
+      "annotations": {
+        "title": "Initial Instructions",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Provides the 'Serena Instructions Manual', which contains essential information on how to use the Serena toolbox.\nIMPORTANT: If you have not yet read the manual, call this tool immediately after you are given your task by the user,\nas it will critically inform you!.",
+      "inputSchema": {
+        "type": "object",
+        "title": "applyArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "applyOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 29,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/chris/serena/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "read_file",
+    "create_text_file",
+    "list_dir",
+    "find_file",
+    "replace_content",
+    "search_for_pattern",
+    "get_symbols_overview",
+    "find_symbol",
+    "find_referencing_symbols",
+    "replace_symbol_body",
+    "insert_after_symbol",
+    "insert_before_symbol",
+    "rename_symbol",
+    "write_memory",
+    "read_memory",
+    "list_memories",
+    "delete_memory",
+    "edit_memory",
+    "execute_shell_command",
+    "activate_project",
+    "switch_modes",
+    "get_current_config",
+    "check_onboarding_performed",
+    "onboarding",
+    "think_about_collected_information",
+    "think_about_task_adherence",
+    "think_about_whether_you_are_done",
+    "prepare_for_new_conversation",
+    "initial_instructions"
+  ]
+}

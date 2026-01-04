@@ -1,0 +1,2097 @@
+{
+  "id": "cameroncooke/xcodebuildmcp",
+  "name": "cameroncooke/xcodebuildmcp",
+  "display_name": "XcodeBuildMCP",
+  "version": null,
+  "description": "A Model Context Protocol (MCP) server that provides Xcode-related tools for integration with AI assistants and other MCP clients.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/46b91c1f-b0e3-4309-9158-c875fc1887ad.jpg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "build_device",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Build Device",
+        "destructiveHint": true
+      },
+      "description": "Builds an app for a connected device.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "extraArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional arguments to pass to xcodebuild"
+          },
+          "derivedDataPath": {
+            "type": "string",
+            "description": "Path to derived data directory"
+          },
+          "preferXcodebuild": {
+            "type": "boolean",
+            "description": "Prefer xcodebuild over faster alternatives"
+          }
+        }
+      }
+    },
+    {
+      "name": "clean",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Clean",
+        "destructiveHint": true
+      },
+      "description": "Cleans build products with xcodebuild.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "platform": {
+            "enum": [
+              "macOS",
+              "iOS",
+              "iOS Simulator",
+              "watchOS",
+              "watchOS Simulator",
+              "tvOS",
+              "tvOS Simulator",
+              "visionOS",
+              "visionOS Simulator"
+            ],
+            "type": "string",
+            "description": "Optional: Platform to clean for (defaults to iOS). Choose from macOS, iOS, iOS Simulator, watchOS, watchOS Simulator, tvOS, tvOS Simulator, visionOS, visionOS Simulator"
+          },
+          "extraArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional xcodebuild arguments"
+          },
+          "derivedDataPath": {
+            "type": "string",
+            "description": "Optional: Path where derived data might be located"
+          },
+          "preferXcodebuild": {
+            "type": "boolean",
+            "description": "If true, prefers xcodebuild over the experimental incremental build system, useful for when incremental build system fails."
+          }
+        }
+      }
+    },
+    {
+      "name": "discover_projs",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Discover Projects",
+        "readOnlyHint": true
+      },
+      "description": "Scans a directory (defaults to workspace root) to find Xcode project (.xcodeproj) and workspace (.xcworkspace) files.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "workspaceRoot"
+        ],
+        "properties": {
+          "maxDepth": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "description": "Optional: Maximum directory depth to scan. Defaults to 5."
+          },
+          "scanPath": {
+            "type": "string",
+            "description": "Optional: Path relative to workspace root to scan. Defaults to workspace root."
+          },
+          "workspaceRoot": {
+            "type": "string",
+            "description": "The absolute path of the workspace root to scan within."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_app_bundle_id",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Get App Bundle ID",
+        "readOnlyHint": true
+      },
+      "description": "Extracts the bundle identifier from an app bundle (.app) for any Apple platform (iOS, iPadOS, watchOS, tvOS, visionOS). IMPORTANT: You MUST provide the appPath parameter. Example: get_app_bundle_id({ appPath: '/path/to/your/app.app' })",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "appPath"
+        ],
+        "properties": {
+          "appPath": {
+            "type": "string",
+            "description": "Path to the .app bundle to extract bundle ID from (full path to the .app directory)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_device_app_path",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Get Device App Path",
+        "readOnlyHint": true
+      },
+      "description": "Retrieves the built app path for a connected device.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "platform": {
+            "enum": [
+              "iOS",
+              "watchOS",
+              "tvOS",
+              "visionOS"
+            ],
+            "type": "string",
+            "description": "Target platform (defaults to iOS)"
+          }
+        }
+      }
+    },
+    {
+      "name": "install_app_device",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Install App Device",
+        "destructiveHint": true
+      },
+      "description": "Installs an app on a connected device.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "appPath"
+        ],
+        "properties": {
+          "appPath": {
+            "type": "string",
+            "description": "Path to the .app bundle to install (full path to the .app directory)"
+          }
+        }
+      }
+    },
+    {
+      "name": "launch_app_device",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Launch App Device",
+        "destructiveHint": true
+      },
+      "description": "Launches an app on a connected device.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "bundleId"
+        ],
+        "properties": {
+          "bundleId": {
+            "type": "string",
+            "description": "Bundle identifier of the app to launch (e.g., \"com.example.MyApp\")"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_devices",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "List Devices",
+        "readOnlyHint": true
+      },
+      "description": "Lists connected physical Apple devices (iPhone, iPad, Apple Watch, Apple TV, Apple Vision Pro) with their UUIDs, names, and connection status. Use this to discover physical devices for testing.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "list_schemes",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "List Schemes",
+        "readOnlyHint": true
+      },
+      "description": "Lists schemes for a project or workspace.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "show_build_settings",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Show Build Settings",
+        "readOnlyHint": true
+      },
+      "description": "Shows xcodebuild build settings.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "start_device_log_cap",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Start Device Log Capture",
+        "destructiveHint": true
+      },
+      "description": "Starts log capture on a connected device.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "bundleId"
+        ],
+        "properties": {
+          "bundleId": {
+            "type": "string",
+            "description": "Bundle identifier of the app to launch and capture logs for."
+          }
+        }
+      }
+    },
+    {
+      "name": "stop_app_device",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Stop App Device",
+        "destructiveHint": true
+      },
+      "description": "Stops a running app on a connected device.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "processId"
+        ],
+        "properties": {
+          "processId": {
+            "type": "number",
+            "description": "Process ID (PID) of the app to stop"
+          }
+        }
+      }
+    },
+    {
+      "name": "stop_device_log_cap",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Stop Device Log Capture",
+        "destructiveHint": true
+      },
+      "description": "Stops an active Apple device log capture session and returns the captured logs.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "logSessionId"
+        ],
+        "properties": {
+          "logSessionId": {
+            "type": "string",
+            "description": "The session ID returned by start_device_log_cap."
+          }
+        }
+      }
+    },
+    {
+      "name": "test_device",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Test Device",
+        "destructiveHint": true
+      },
+      "description": "Runs tests on a physical Apple device.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "platform": {
+            "enum": [
+              "iOS",
+              "watchOS",
+              "tvOS",
+              "visionOS"
+            ],
+            "type": "string",
+            "description": "Target platform (defaults to iOS)"
+          },
+          "extraArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional arguments to pass to xcodebuild"
+          },
+          "testRunnerEnv": {
+            "type": "object",
+            "description": "Environment variables to pass to the test runner (TEST_RUNNER_ prefix added automatically)",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "derivedDataPath": {
+            "type": "string",
+            "description": "Path to derived data directory"
+          },
+          "preferXcodebuild": {
+            "type": "boolean",
+            "description": "Prefer xcodebuild over faster alternatives"
+          }
+        }
+      }
+    },
+    {
+      "name": "doctor",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Doctor",
+        "readOnlyHint": true
+      },
+      "description": "Provides comprehensive information about the MCP server environment, available dependencies, and configuration status.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Optional: dummy parameter to satisfy MCP protocol"
+          }
+        }
+      }
+    },
+    {
+      "name": "start_sim_log_cap",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Start Simulator Log Capture",
+        "destructiveHint": true
+      },
+      "description": "Starts capturing logs from a specified simulator. Returns a session ID. By default, captures only structured logs.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "bundleId"
+        ],
+        "properties": {
+          "bundleId": {
+            "type": "string",
+            "description": "Bundle identifier of the app to capture logs for."
+          },
+          "captureConsole": {
+            "type": "boolean",
+            "description": "Whether to capture console output (requires app relaunch)."
+          }
+        }
+      }
+    },
+    {
+      "name": "stop_sim_log_cap",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Stop Simulator Log Capture",
+        "destructiveHint": true
+      },
+      "description": "Stops an active simulator log capture session and returns the captured logs.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "logSessionId"
+        ],
+        "properties": {
+          "logSessionId": {
+            "type": "string",
+            "description": "The session ID returned by start_sim_log_cap."
+          }
+        }
+      }
+    },
+    {
+      "name": "build_macos",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Build macOS",
+        "destructiveHint": true
+      },
+      "description": "Builds a macOS app.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "extraArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional xcodebuild arguments"
+          },
+          "derivedDataPath": {
+            "type": "string",
+            "description": "Path where build products and other derived data will go"
+          },
+          "preferXcodebuild": {
+            "type": "boolean",
+            "description": "If true, prefers xcodebuild over the experimental incremental build system"
+          }
+        }
+      }
+    },
+    {
+      "name": "build_run_macos",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Build Run macOS",
+        "destructiveHint": true
+      },
+      "description": "Builds and runs a macOS app.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "extraArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional xcodebuild arguments"
+          },
+          "derivedDataPath": {
+            "type": "string",
+            "description": "Path where build products and other derived data will go"
+          },
+          "preferXcodebuild": {
+            "type": "boolean",
+            "description": "If true, prefers xcodebuild over the experimental incremental build system"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_mac_app_path",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Get macOS App Path",
+        "readOnlyHint": true
+      },
+      "description": "Retrieves the built macOS app bundle path.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "extraArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional arguments to pass to xcodebuild"
+          },
+          "derivedDataPath": {
+            "type": "string",
+            "description": "Path to derived data directory"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_mac_bundle_id",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Get Mac Bundle ID",
+        "readOnlyHint": true
+      },
+      "description": "Extracts the bundle identifier from a macOS app bundle (.app). IMPORTANT: You MUST provide the appPath parameter. Example: get_mac_bundle_id({ appPath: '/path/to/your/app.app' }) Note: In some environments, this tool may be prefixed as mcp0_get_macos_bundle_id.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "appPath"
+        ],
+        "properties": {
+          "appPath": {
+            "type": "string",
+            "description": "Path to the macOS .app bundle to extract bundle ID from (full path to the .app directory)"
+          }
+        }
+      }
+    },
+    {
+      "name": "launch_mac_app",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Launch macOS App",
+        "destructiveHint": true
+      },
+      "description": "Launches a macOS application. IMPORTANT: You MUST provide the appPath parameter. Example: launch_mac_app({ appPath: '/path/to/your/app.app' }) Note: In some environments, this tool may be prefixed as mcp0_launch_macos_app.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "appPath"
+        ],
+        "properties": {
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional arguments to pass to the app"
+          },
+          "appPath": {
+            "type": "string",
+            "description": "Path to the macOS .app bundle to launch (full path to the .app directory)"
+          }
+        }
+      }
+    },
+    {
+      "name": "stop_mac_app",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Stop macOS App",
+        "destructiveHint": true
+      },
+      "description": "Stops a running macOS application. Can stop by app name or process ID.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "appName": {
+            "type": "string",
+            "description": "Name of the application to stop (e.g., \"Calculator\" or \"MyApp\")"
+          },
+          "processId": {
+            "type": "number",
+            "description": "Process ID (PID) of the application to stop"
+          }
+        }
+      }
+    },
+    {
+      "name": "test_macos",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Test macOS",
+        "destructiveHint": true
+      },
+      "description": "Runs tests for a macOS target.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "extraArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional xcodebuild arguments"
+          },
+          "testRunnerEnv": {
+            "type": "object",
+            "description": "Environment variables to pass to the test runner (TEST_RUNNER_ prefix added automatically)",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "derivedDataPath": {
+            "type": "string",
+            "description": "Path where build products and other derived data will go"
+          },
+          "preferXcodebuild": {
+            "type": "boolean",
+            "description": "If true, prefers xcodebuild over the experimental incremental build system"
+          }
+        }
+      }
+    },
+    {
+      "name": "scaffold_ios_project",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Scaffold iOS Project",
+        "destructiveHint": true
+      },
+      "description": "Scaffold a new iOS project from templates. Creates a modern Xcode project with workspace structure, SPM package for features, and proper iOS configuration.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectName",
+          "outputPath"
+        ],
+        "properties": {
+          "outputPath": {
+            "type": "string",
+            "description": "Path where the project should be created"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "App display name (shown on home screen/dock). If not provided, will use projectName"
+          },
+          "projectName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the new project"
+          },
+          "customizeNames": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to customize project names and identifiers. Default is true."
+          },
+          "bundleIdentifier": {
+            "type": "string",
+            "description": "Bundle identifier (e.g., com.example.myapp). If not provided, will use com.example.projectname"
+          },
+          "deploymentTarget": {
+            "type": "string",
+            "description": "iOS deployment target (e.g., 18.4, 17.0). If not provided, will use 18.4"
+          },
+          "marketingVersion": {
+            "type": "string",
+            "description": "Marketing version (e.g., 1.0, 2.1.3). If not provided, will use 1.0"
+          },
+          "targetedDeviceFamily": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "iphone",
+                "ipad",
+                "universal"
+              ],
+              "type": "string"
+            },
+            "description": "Targeted device families"
+          },
+          "currentProjectVersion": {
+            "type": "string",
+            "description": "Build number (e.g., 1, 42, 100). If not provided, will use 1"
+          },
+          "supportedOrientations": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "portrait",
+                "landscape-left",
+                "landscape-right",
+                "portrait-upside-down"
+              ],
+              "type": "string"
+            },
+            "description": "Supported orientations for iPhone"
+          },
+          "supportedOrientationsIpad": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "portrait",
+                "landscape-left",
+                "landscape-right",
+                "portrait-upside-down"
+              ],
+              "type": "string"
+            },
+            "description": "Supported orientations for iPad"
+          }
+        }
+      }
+    },
+    {
+      "name": "scaffold_macos_project",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Scaffold macOS Project",
+        "destructiveHint": true
+      },
+      "description": "Scaffold a new macOS project from templates. Creates a modern Xcode project with workspace structure, SPM package for features, and proper macOS configuration.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectName",
+          "outputPath"
+        ],
+        "properties": {
+          "outputPath": {
+            "type": "string",
+            "description": "Path where the project should be created"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "App display name (shown on home screen/dock). If not provided, will use projectName"
+          },
+          "projectName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the new project"
+          },
+          "customizeNames": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to customize project names and identifiers. Default is true."
+          },
+          "bundleIdentifier": {
+            "type": "string",
+            "description": "Bundle identifier (e.g., com.example.myapp). If not provided, will use com.example.projectname"
+          },
+          "deploymentTarget": {
+            "type": "string",
+            "description": "macOS deployment target (e.g., 15.4, 14.0). If not provided, will use 15.4"
+          },
+          "marketingVersion": {
+            "type": "string",
+            "description": "Marketing version (e.g., 1.0, 2.1.3). If not provided, will use 1.0"
+          },
+          "currentProjectVersion": {
+            "type": "string",
+            "description": "Build number (e.g., 1, 42, 100). If not provided, will use 1"
+          }
+        }
+      }
+    },
+    {
+      "name": "session-clear-defaults",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Clear Session Defaults",
+        "destructiveHint": true
+      },
+      "description": "Clear selected or all session defaults.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "all": {
+            "type": "boolean"
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "projectPath",
+                "workspacePath",
+                "scheme",
+                "configuration",
+                "simulatorName",
+                "simulatorId",
+                "deviceId",
+                "useLatestOS",
+                "arch"
+              ],
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "session-set-defaults",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Set Session Defaults",
+        "destructiveHint": true
+      },
+      "description": "Set the session defaults needed by many tools. Most tools require one or more session defaults to be set before they can be used. Agents should set all relevant defaults up front in a single call (e.g., project/workspace, scheme, simulator or device ID, useLatestOS) to avoid iterative prompts; only set the keys your workflow needs.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "arch": {
+            "enum": [
+              "arm64",
+              "x86_64"
+            ],
+            "type": "string"
+          },
+          "scheme": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string"
+          },
+          "projectPath": {
+            "type": "string"
+          },
+          "simulatorId": {
+            "type": "string"
+          },
+          "useLatestOS": {
+            "type": "boolean"
+          },
+          "configuration": {
+            "type": "string"
+          },
+          "simulatorName": {
+            "type": "string"
+          },
+          "workspacePath": {
+            "type": "string"
+          },
+          "suppressWarnings": {
+            "type": "boolean",
+            "description": "When true, warning messages are filtered from build output to conserve context"
+          }
+        }
+      }
+    },
+    {
+      "name": "session-show-defaults",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Show Session Defaults",
+        "readOnlyHint": true
+      },
+      "description": "Show current session defaults.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "boot_sim",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Boot Simulator",
+        "destructiveHint": true
+      },
+      "description": "Boots an iOS simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "build_run_sim",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Build Run Simulator",
+        "destructiveHint": true
+      },
+      "description": "Builds and runs an app on an iOS simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "extraArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional xcodebuild arguments"
+          },
+          "derivedDataPath": {
+            "type": "string",
+            "description": "Path where build products and other derived data will go"
+          },
+          "preferXcodebuild": {
+            "type": "boolean",
+            "description": "If true, prefers xcodebuild over the experimental incremental build system, useful for when incremental build system fails."
+          }
+        }
+      }
+    },
+    {
+      "name": "build_sim",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Build Simulator",
+        "destructiveHint": true
+      },
+      "description": "Builds an app for an iOS simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "extraArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional xcodebuild arguments"
+          },
+          "derivedDataPath": {
+            "type": "string",
+            "description": "Path where build products and other derived data will go"
+          },
+          "preferXcodebuild": {
+            "type": "boolean",
+            "description": "If true, prefers xcodebuild over the experimental incremental build system, useful for when incremental build system fails."
+          }
+        }
+      }
+    },
+    {
+      "name": "describe_ui",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Describe UI",
+        "readOnlyHint": true
+      },
+      "description": "Gets entire view hierarchy with precise frame coordinates (x, y, width, height) for all visible elements. Use this before UI interactions or after layout changes - do NOT guess coordinates from screenshots. Returns JSON tree with frame data for accurate automation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_sim_app_path",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Get Simulator App Path",
+        "readOnlyHint": true
+      },
+      "description": "Retrieves the built app path for an iOS simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "platform"
+        ],
+        "properties": {
+          "platform": {
+            "enum": [
+              "iOS Simulator",
+              "watchOS Simulator",
+              "tvOS Simulator",
+              "visionOS Simulator"
+            ],
+            "type": "string",
+            "description": "Target simulator platform (Required)"
+          }
+        }
+      }
+    },
+    {
+      "name": "install_app_sim",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Install App Simulator",
+        "destructiveHint": true
+      },
+      "description": "Installs an app in an iOS simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "appPath"
+        ],
+        "properties": {
+          "appPath": {
+            "type": "string",
+            "description": "Path to the .app bundle to install (full path to the .app directory)"
+          }
+        }
+      }
+    },
+    {
+      "name": "launch_app_logs_sim",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Launch App Logs Simulator",
+        "destructiveHint": true
+      },
+      "description": "Launches an app in an iOS simulator and captures its logs.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "bundleId"
+        ],
+        "properties": {
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional arguments to pass to the app"
+          },
+          "bundleId": {
+            "type": "string",
+            "description": "Bundle identifier of the app to launch (e.g., 'com.example.MyApp')"
+          }
+        }
+      }
+    },
+    {
+      "name": "launch_app_sim",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Launch App Simulator",
+        "destructiveHint": true
+      },
+      "description": "Launches an app in an iOS simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "bundleId"
+        ],
+        "properties": {
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional arguments to pass to the app"
+          },
+          "bundleId": {
+            "type": "string",
+            "description": "Bundle identifier of the app to launch (e.g., 'com.example.MyApp')"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_sims",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "List Simulators",
+        "readOnlyHint": true
+      },
+      "description": "Lists available iOS simulators with their UUIDs. ",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Optional flag to enable the listing operation."
+          }
+        }
+      }
+    },
+    {
+      "name": "open_sim",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Open Simulator",
+        "destructiveHint": true
+      },
+      "description": "Opens the iOS Simulator app.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "record_sim_video",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Record Simulator Video",
+        "destructiveHint": true
+      },
+      "description": "Starts or stops video capture for an iOS simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "fps": {
+            "type": "integer",
+            "maximum": 120,
+            "minimum": 1,
+            "description": "Frames per second (default 30)"
+          },
+          "stop": {
+            "type": "boolean",
+            "description": "Stop recording if true"
+          },
+          "start": {
+            "type": "boolean",
+            "description": "Start recording if true"
+          },
+          "outputFile": {
+            "type": "string",
+            "description": "Destination MP4 path to move the recorded video to on stop"
+          }
+        }
+      }
+    },
+    {
+      "name": "screenshot",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Screenshot",
+        "readOnlyHint": true
+      },
+      "description": "Captures screenshot for visual verification. For UI coordinates, use describe_ui instead (don't determine coordinates from screenshots).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "stop_app_sim",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Stop App Simulator",
+        "destructiveHint": true
+      },
+      "description": "Stops an app running in an iOS simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "bundleId"
+        ],
+        "properties": {
+          "bundleId": {
+            "type": "string",
+            "description": "Bundle identifier of the app to stop (e.g., 'com.example.MyApp')"
+          }
+        }
+      }
+    },
+    {
+      "name": "test_sim",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Test Simulator",
+        "destructiveHint": true
+      },
+      "description": "Runs tests on an iOS simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "extraArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional xcodebuild arguments"
+          },
+          "testRunnerEnv": {
+            "type": "object",
+            "description": "Environment variables to pass to the test runner (TEST_RUNNER_ prefix added automatically)",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "derivedDataPath": {
+            "type": "string",
+            "description": "Path where build products and other derived data will go"
+          },
+          "preferXcodebuild": {
+            "type": "boolean",
+            "description": "If true, prefers xcodebuild over the experimental incremental build system, useful for when incremental build system fails."
+          }
+        }
+      }
+    },
+    {
+      "name": "erase_sims",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Erase Simulators",
+        "destructiveHint": true
+      },
+      "description": "Erases a simulator by UDID.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "shutdownFirst": {
+            "type": "boolean",
+            "description": "If true, shuts down the simulator before erasing."
+          }
+        }
+      }
+    },
+    {
+      "name": "reset_sim_location",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Reset Simulator Location",
+        "destructiveHint": true
+      },
+      "description": "Resets the simulator's location to default.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "set_sim_appearance",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Set Simulator Appearance",
+        "destructiveHint": true
+      },
+      "description": "Sets the appearance mode (dark/light) of an iOS simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "dark",
+              "light"
+            ],
+            "type": "string",
+            "description": "The appearance mode to set (either \"dark\" or \"light\")"
+          }
+        }
+      }
+    },
+    {
+      "name": "set_sim_location",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Set Simulator Location",
+        "destructiveHint": true
+      },
+      "description": "Sets a custom GPS location for the simulator.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "description": "The latitude for the custom location."
+          },
+          "longitude": {
+            "type": "number",
+            "description": "The longitude for the custom location."
+          }
+        }
+      }
+    },
+    {
+      "name": "sim_statusbar",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Simulator Statusbar",
+        "destructiveHint": true
+      },
+      "description": "Sets the data network indicator in the iOS simulator status bar. Use \"clear\" to reset all overrides, or specify a network type (hide, wifi, 3g, 4g, lte, lte-a, lte+, 5g, 5g+, 5g-uwb, 5g-uc).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "dataNetwork"
+        ],
+        "properties": {
+          "dataNetwork": {
+            "enum": [
+              "clear",
+              "hide",
+              "wifi",
+              "3g",
+              "4g",
+              "lte",
+              "lte-a",
+              "lte+",
+              "5g",
+              "5g+",
+              "5g-uwb",
+              "5g-uc"
+            ],
+            "type": "string",
+            "description": "Data network type to display in status bar. Use \"clear\" to reset all overrides. Valid values: clear, hide, wifi, 3g, 4g, lte, lte-a, lte+, 5g, 5g+, 5g-uwb, 5g-uc."
+          }
+        }
+      }
+    },
+    {
+      "name": "swift_package_build",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Swift Package Build",
+        "destructiveHint": true
+      },
+      "description": "Builds a Swift Package with swift build",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "packagePath"
+        ],
+        "properties": {
+          "targetName": {
+            "type": "string",
+            "description": "Optional target to build"
+          },
+          "packagePath": {
+            "type": "string",
+            "description": "Path to the Swift package root (Required)"
+          },
+          "architectures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Target architectures to build for"
+          },
+          "configuration": {
+            "enum": [
+              "debug",
+              "release"
+            ],
+            "type": "string",
+            "description": "Swift package configuration (debug, release)"
+          },
+          "parseAsLibrary": {
+            "type": "boolean",
+            "description": "Build as library instead of executable"
+          }
+        }
+      }
+    },
+    {
+      "name": "swift_package_clean",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Swift Package Clean",
+        "destructiveHint": true
+      },
+      "description": "Cleans Swift Package build artifacts and derived data",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "packagePath"
+        ],
+        "properties": {
+          "packagePath": {
+            "type": "string",
+            "description": "Path to the Swift package root (Required)"
+          }
+        }
+      }
+    },
+    {
+      "name": "swift_package_list",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Swift Package List",
+        "readOnlyHint": true
+      },
+      "description": "Lists currently running Swift Package processes",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "swift_package_run",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Swift Package Run",
+        "destructiveHint": true
+      },
+      "description": "Runs an executable target from a Swift Package with swift run",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "packagePath"
+        ],
+        "properties": {
+          "timeout": {
+            "type": "number",
+            "description": "Timeout in seconds (default: 30, max: 300)"
+          },
+          "arguments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Arguments to pass to the executable"
+          },
+          "background": {
+            "type": "boolean",
+            "description": "Run in background and return immediately (default: false)"
+          },
+          "packagePath": {
+            "type": "string",
+            "description": "Path to the Swift package root (Required)"
+          },
+          "configuration": {
+            "enum": [
+              "debug",
+              "release"
+            ],
+            "type": "string",
+            "description": "Build configuration: 'debug' (default) or 'release'"
+          },
+          "executableName": {
+            "type": "string",
+            "description": "Name of executable to run (defaults to package name)"
+          },
+          "parseAsLibrary": {
+            "type": "boolean",
+            "description": "Add -parse-as-library flag for @main support (default: false)"
+          }
+        }
+      }
+    },
+    {
+      "name": "swift_package_stop",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Swift Package Stop",
+        "destructiveHint": true
+      },
+      "description": "Stops a running Swift Package executable started with swift_package_run",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pid"
+        ],
+        "properties": {
+          "pid": {
+            "type": "number",
+            "description": "Process ID (PID) of the running executable"
+          }
+        }
+      }
+    },
+    {
+      "name": "swift_package_test",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Swift Package Test",
+        "destructiveHint": true
+      },
+      "description": "Runs tests for a Swift Package with swift test",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "packagePath"
+        ],
+        "properties": {
+          "filter": {
+            "type": "string",
+            "description": "Filter tests by name (regex pattern)"
+          },
+          "parallel": {
+            "type": "boolean",
+            "description": "Run tests in parallel (default: true)"
+          },
+          "packagePath": {
+            "type": "string",
+            "description": "Path to the Swift package root (Required)"
+          },
+          "showCodecov": {
+            "type": "boolean",
+            "description": "Show code coverage (default: false)"
+          },
+          "testProduct": {
+            "type": "string",
+            "description": "Optional specific test product to run"
+          },
+          "configuration": {
+            "enum": [
+              "debug",
+              "release"
+            ],
+            "type": "string",
+            "description": "Swift package configuration (debug, release)"
+          },
+          "parseAsLibrary": {
+            "type": "boolean",
+            "description": "Add -parse-as-library flag for @main support (default: false)"
+          }
+        }
+      }
+    },
+    {
+      "name": "button",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Hardware Button",
+        "destructiveHint": true
+      },
+      "description": "Press hardware button on iOS simulator. Supported buttons: apple-pay, home, lock, side-button, siri",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "buttonType"
+        ],
+        "properties": {
+          "duration": {
+            "type": "number",
+            "minimum": 0
+          },
+          "buttonType": {
+            "enum": [
+              "apple-pay",
+              "home",
+              "lock",
+              "side-button",
+              "siri"
+            ],
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "gesture",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Gesture",
+        "destructiveHint": true
+      },
+      "description": "Perform gesture on iOS simulator using preset gestures: scroll-up, scroll-down, scroll-left, scroll-right, swipe-from-left-edge, swipe-from-right-edge, swipe-from-top-edge, swipe-from-bottom-edge",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "preset"
+        ],
+        "properties": {
+          "delta": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Optional: Distance to move in pixels."
+          },
+          "preset": {
+            "enum": [
+              "scroll-up",
+              "scroll-down",
+              "scroll-left",
+              "scroll-right",
+              "swipe-from-left-edge",
+              "swipe-from-right-edge",
+              "swipe-from-top-edge",
+              "swipe-from-bottom-edge"
+            ],
+            "type": "string",
+            "description": "The gesture preset to perform. Must be one of: scroll-up, scroll-down, scroll-left, scroll-right, swipe-from-left-edge, swipe-from-right-edge, swipe-from-top-edge, swipe-from-bottom-edge."
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Optional: Duration of the gesture in seconds."
+          },
+          "preDelay": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Optional: Delay before starting the gesture in seconds."
+          },
+          "postDelay": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Optional: Delay after completing the gesture in seconds."
+          },
+          "screenWidth": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "description": "Optional: Screen width in pixels. Used for gesture calculations. Auto-detected if not provided."
+          },
+          "screenHeight": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "description": "Optional: Screen height in pixels. Used for gesture calculations. Auto-detected if not provided."
+          }
+        }
+      }
+    },
+    {
+      "name": "key_press",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Key Press",
+        "destructiveHint": true
+      },
+      "description": "Press a single key by keycode on the simulator. Common keycodes: 40=Return, 42=Backspace, 43=Tab, 44=Space, 58-67=F1-F10.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "keyCode"
+        ],
+        "properties": {
+          "keyCode": {
+            "type": "integer",
+            "maximum": 255,
+            "minimum": 0
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "key_sequence",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Key Sequence",
+        "destructiveHint": true
+      },
+      "description": "Press key sequence using HID keycodes on iOS simulator with configurable delay",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "keyCodes"
+        ],
+        "properties": {
+          "delay": {
+            "type": "number",
+            "minimum": 0
+          },
+          "keyCodes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "maximum": 255,
+              "minimum": 0
+            },
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "long_press",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Long Press",
+        "destructiveHint": true
+      },
+      "description": "Long press at specific coordinates for given duration (ms). Use describe_ui for precise coordinates (don't guess from screenshots).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "x",
+          "y",
+          "duration"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991
+          },
+          "y": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991
+          },
+          "duration": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "swipe",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Swipe",
+        "destructiveHint": true
+      },
+      "description": "Swipe from one point to another. Use describe_ui for precise coordinates (don't guess from screenshots). Supports configurable timing.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "x1",
+          "y1",
+          "x2",
+          "y2"
+        ],
+        "properties": {
+          "x1": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991
+          },
+          "x2": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991
+          },
+          "y1": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991
+          },
+          "y2": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991
+          },
+          "delta": {
+            "type": "number",
+            "minimum": 0
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0
+          },
+          "preDelay": {
+            "type": "number",
+            "minimum": 0
+          },
+          "postDelay": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "tap",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Tap",
+        "destructiveHint": true
+      },
+      "description": "Tap at specific coordinates or target elements by accessibility id or label. Use describe_ui to get precise element coordinates prior to using x/y parameters (don't guess from screenshots). Supports optional timing delays.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "x": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991
+          },
+          "y": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "preDelay": {
+            "type": "number",
+            "minimum": 0
+          },
+          "postDelay": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "touch",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Touch",
+        "destructiveHint": true
+      },
+      "description": "Perform touch down/up events at specific coordinates. Use describe_ui for precise coordinates (don't guess from screenshots).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "x",
+          "y"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991
+          },
+          "y": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991
+          },
+          "up": {
+            "type": "boolean"
+          },
+          "down": {
+            "type": "boolean"
+          },
+          "delay": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "type_text",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "title": "Type Text",
+        "destructiveHint": true
+      },
+      "description": "Type text (supports US keyboard characters). Use describe_ui to find text field, tap to focus, then type.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 63,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": null,
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": false,
+  "has_tools": true,
+  "tool_names": [
+    "build_device",
+    "clean",
+    "discover_projs",
+    "get_app_bundle_id",
+    "get_device_app_path",
+    "install_app_device",
+    "launch_app_device",
+    "list_devices",
+    "list_schemes",
+    "show_build_settings",
+    "start_device_log_cap",
+    "stop_app_device",
+    "stop_device_log_cap",
+    "test_device",
+    "doctor",
+    "start_sim_log_cap",
+    "stop_sim_log_cap",
+    "build_macos",
+    "build_run_macos",
+    "get_mac_app_path",
+    "get_mac_bundle_id",
+    "launch_mac_app",
+    "stop_mac_app",
+    "test_macos",
+    "scaffold_ios_project",
+    "scaffold_macos_project",
+    "session-clear-defaults",
+    "session-set-defaults",
+    "session-show-defaults",
+    "boot_sim",
+    "build_run_sim",
+    "build_sim",
+    "describe_ui",
+    "get_sim_app_path",
+    "install_app_sim",
+    "launch_app_logs_sim",
+    "launch_app_sim",
+    "list_sims",
+    "open_sim",
+    "record_sim_video",
+    "screenshot",
+    "stop_app_sim",
+    "test_sim",
+    "erase_sims",
+    "reset_sim_location",
+    "set_sim_appearance",
+    "set_sim_location",
+    "sim_statusbar",
+    "swift_package_build",
+    "swift_package_clean",
+    "swift_package_list",
+    "swift_package_run",
+    "swift_package_stop",
+    "swift_package_test",
+    "button",
+    "gesture",
+    "key_press",
+    "key_sequence",
+    "long_press",
+    "swipe",
+    "tap",
+    "touch",
+    "type_text"
+  ]
+}

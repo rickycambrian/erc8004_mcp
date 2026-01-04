@@ -1,0 +1,860 @@
+{
+  "id": "@rashforddamion/rivalsearch",
+  "name": "@rashforddamion/rivalsearch",
+  "display_name": "rivalsearch",
+  "version": null,
+  "description": "",
+  "icon_url": null,
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "retrieve_content",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Enhanced content retrieval with support for single/multiple resources and image extraction.\n\nArgs:\n    resource: Single URL, list of URLs, or search query (e.g., \"search:python\")\n    limit: Maximum number of results for batch operations\n    extract_images: Whether to extract and process images with OCR",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "resource"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 5
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "title": "Resource"
+          },
+          "extract_images": {
+            "type": "boolean",
+            "title": "Extract Images",
+            "default": false
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "stream_content",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieve streaming content from WebSocket URLs.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "google_search",
+      "_meta": {
+        "version": "2.0",
+        "_fastmcp": {
+          "tags": [
+            "google",
+            "primary",
+            "search",
+            "web"
+          ]
+        },
+        "category": "Search",
+        "rate_limit": "10/second",
+        "performance": "high",
+        "rich_snippets": true,
+        "anti_detection": true,
+        "traffic_estimation": true
+      },
+      "title": "Google Search",
+      "annotations": {
+        "title": "Google Search",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Advanced Google Search with Cloudflare bypass, rich snippets detection, and multi-engine fallback",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "lang": {
+            "type": "string",
+            "title": "Lang",
+            "default": "en",
+            "description": "Language for search results"
+          },
+          "safe": {
+            "type": "string",
+            "title": "Safe",
+            "default": "active",
+            "description": "Safe search setting"
+          },
+          "proxy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proxy",
+            "default": null,
+            "description": "Proxy server to use for requests"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "maxLength": 500,
+            "minLength": 2,
+            "description": "Search query string"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region",
+            "default": null,
+            "description": "Geographic region for search"
+          },
+          "unique": {
+            "type": "boolean",
+            "title": "Unique",
+            "default": false,
+            "description": "Return only unique results"
+          },
+          "timeout": {
+            "type": "integer",
+            "title": "Timeout",
+            "default": 5,
+            "maximum": 60,
+            "minimum": 1,
+            "description": "Request timeout in seconds"
+          },
+          "advanced": {
+            "type": "boolean",
+            "title": "Advanced",
+            "default": true,
+            "description": "Enable advanced features like rich snippets detection"
+          },
+          "start_num": {
+            "type": "integer",
+            "title": "Start Num",
+            "default": 0,
+            "minimum": 0,
+            "description": "Starting position for results"
+          },
+          "ssl_verify": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ssl Verify",
+            "default": null,
+            "description": "SSL verification setting"
+          },
+          "num_results": {
+            "type": "integer",
+            "title": "Num Results",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of results to return"
+          },
+          "sleep_interval": {
+            "type": "number",
+            "title": "Sleep Interval",
+            "default": 0,
+            "maximum": 10,
+            "minimum": 0,
+            "description": "Delay between requests in seconds"
+          },
+          "use_multi_engine": {
+            "type": "boolean",
+            "title": "Use Multi Engine",
+            "default": false,
+            "description": "Use multi-engine search as fallback if direct scraping fails"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "traverse_website",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Comprehensive website traversal with different modes for different use cases.\n\nArgs:\n    url: Website URL to traverse\n    mode: Traversal mode - \"research\" (general), \"docs\" (documentation), \"map\" (structure)\n    max_pages: Maximum number of pages to traverse\n    max_depth: Maximum depth for mapping mode",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "mode": {
+            "enum": [
+              "research",
+              "docs",
+              "map"
+            ],
+            "type": "string",
+            "title": "Mode",
+            "default": "research"
+          },
+          "max_depth": {
+            "type": "integer",
+            "title": "Max Depth",
+            "default": 2
+          },
+          "max_pages": {
+            "type": "integer",
+            "title": "Max Pages",
+            "default": 5
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "analyze_content",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Analyze content and extract insights.\n\nArgs:\n    content: Content to analyze\n    analysis_type: Type of analysis - \"general\", \"sentiment\", \"technical\", \"business\"\n    extract_key_points: Whether to extract key points\n    summarize: Whether to create a summary",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "summarize": {
+            "type": "boolean",
+            "title": "Summarize",
+            "default": true
+          },
+          "analysis_type": {
+            "type": "string",
+            "title": "Analysis Type",
+            "default": "general"
+          },
+          "extract_key_points": {
+            "type": "boolean",
+            "title": "Extract Key Points",
+            "default": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "research_topic",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "End-to-end research workflow for a topic.\n\nArgs:\n    topic: Research topic\n    sources: Optional list of specific sources to use\n    max_sources: Maximum number of sources to research\n    include_analysis: Whether to include content analysis",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "sources": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sources",
+            "default": null
+          },
+          "max_sources": {
+            "type": "integer",
+            "title": "Max Sources",
+            "default": 5
+          },
+          "include_analysis": {
+            "type": "boolean",
+            "title": "Include Analysis",
+            "default": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "search_trends",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Search for Google Trends data for given keywords.\n\nArgs:\n    keywords: List of search terms to analyze\n    timeframe: Time range (e.g., 'today 12-m', 'today 5-y', 'now 1-d')\n    geo: Geographic location (e.g., 'US', 'GB', 'CA')\n\nReturns:\n    List of trend data for each keyword",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "keywords"
+        ],
+        "properties": {
+          "geo": {
+            "type": "string",
+            "title": "Geo",
+            "default": "US"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Keywords"
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe",
+            "default": "today 12-m"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_related_queries",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get related queries for a keyword.\n\nArgs:\n    keyword: Search term to analyze\n    timeframe: Time range for analysis\n    geo: Geographic location\n\nReturns:\n    List of related queries with interest values",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "keyword"
+        ],
+        "properties": {
+          "geo": {
+            "type": "string",
+            "title": "Geo",
+            "default": "US"
+          },
+          "keyword": {
+            "type": "string",
+            "title": "Keyword"
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe",
+            "default": "today 12-m"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_interest_by_region",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get interest by geographic region for a keyword.\n\nArgs:\n    keyword: Search term to analyze\n    resolution: Geographic resolution ('COUNTRY', 'REGION', 'CITY', 'DMA')\n    timeframe: Time range for analysis\n    geo: Geographic location filter\n\nReturns:\n    List of regions with interest values",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "keyword"
+        ],
+        "properties": {
+          "geo": {
+            "type": "string",
+            "title": "Geo",
+            "default": ""
+          },
+          "keyword": {
+            "type": "string",
+            "title": "Keyword"
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe",
+            "default": "today 12-m"
+          },
+          "resolution": {
+            "type": "string",
+            "title": "Resolution",
+            "default": "COUNTRY"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_trending_searches",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get trending searches for a location.\n\nArgs:\n    geo: Geographic location (e.g., 'US', 'GB', 'CA')\n\nReturns:\n    List of trending search terms",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "geo": {
+            "type": "string",
+            "title": "Geo",
+            "default": "US"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "export_trends_to_csv",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Export Google Trends data to CSV format (returns data instead of writing to file).\n\nArgs:\n    keywords: List of search terms\n    timeframe: Time range for data\n    geo: Geographic location\n    filename: Optional custom filename (for reference only)\n\nReturns:\n    Export result with data content",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "keywords"
+        ],
+        "properties": {
+          "geo": {
+            "type": "string",
+            "title": "Geo",
+            "default": "US"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filename",
+            "default": null
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Keywords"
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe",
+            "default": "today 12-m"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "export_trends_to_json",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Export Google Trends data to JSON format (returns data instead of writing to file).\n\nArgs:\n    keywords: List of search terms\n    timeframe: Time range for data\n    geo: Geographic location\n    filename: Optional custom filename (for reference only)\n\nReturns:\n    Export result with data content",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "keywords"
+        ],
+        "properties": {
+          "geo": {
+            "type": "string",
+            "title": "Geo",
+            "default": "US"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filename",
+            "default": null
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Keywords"
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe",
+            "default": "today 12-m"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "create_sql_table",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Create SQLite table structure with Google Trends data (returns schema instead of creating files).\n\nArgs:\n    keywords: List of search terms\n    timeframe: Time range for data\n    geo: Geographic location\n    table_name: Optional custom table name\n\nReturns:\n    SQL table creation result with schema and sample data",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "keywords"
+        ],
+        "properties": {
+          "geo": {
+            "type": "string",
+            "title": "Geo",
+            "default": "US"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Keywords"
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe",
+            "default": "today 12-m"
+          },
+          "table_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Table Name",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_available_timeframes",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of available timeframes for Google Trends queries.\n\nReturns:\n    List of available timeframe options",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_available_regions",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get list of available geographic regions.\n\nReturns:\n    List of available region codes",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "compare_keywords_comprehensive",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Comprehensive comparison of multiple keywords including trends, related queries, and regional interest.\n\nArgs:\n    keywords: List of keywords to compare\n    timeframe: Time range for analysis\n    geo: Geographic location\n\nReturns:\n    Comprehensive comparison data",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "keywords"
+        ],
+        "properties": {
+          "geo": {
+            "type": "string",
+            "title": "Geo",
+            "default": "US"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Keywords"
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe",
+            "default": "today 12-m"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "generate_llms_txt",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Generate LLMs.txt files for a website following the llmstxt.org specification.\n\nArgs:\n    url: Website URL to generate LLMs.txt for (supports various formats: https://example.com, example.com, @https://example.com, local file paths)\n\nReturns:\n    Generation result with file content and details",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "comprehensive_research",
+      "_meta": {
+        "version": "2.0",
+        "_fastmcp": {
+          "tags": [
+            "comprehensive",
+            "orchestration",
+            "research",
+            "workflow"
+          ]
+        },
+        "category": "Research",
+        "workflow": true,
+        "multi_tool": true,
+        "performance": "high"
+      },
+      "title": "Comprehensive Research",
+      "annotations": {
+        "title": "Comprehensive Research",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Perform comprehensive research using multiple tools and workflows",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic",
+            "maxLength": 500,
+            "minLength": 3,
+            "description": "Research topic to investigate"
+          },
+          "max_sources": {
+            "type": "integer",
+            "title": "Max Sources",
+            "default": 15,
+            "maximum": 50,
+            "minimum": 5,
+            "description": "Maximum number of sources to analyze"
+          },
+          "include_trends": {
+            "type": "boolean",
+            "title": "Include Trends",
+            "default": true,
+            "description": "Whether to include trends analysis"
+          },
+          "research_depth": {
+            "enum": [
+              "basic",
+              "comprehensive",
+              "expert"
+            ],
+            "type": "string",
+            "title": "Research Depth",
+            "default": "comprehensive",
+            "description": "Depth of research to perform"
+          },
+          "include_website_analysis": {
+            "type": "boolean",
+            "title": "Include Website Analysis",
+            "default": true,
+            "description": "Whether to include website traversal and analysis"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "tool_count": 18,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@rashforddamion/rivalsearch/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "retrieve_content",
+    "stream_content",
+    "google_search",
+    "traverse_website",
+    "analyze_content",
+    "research_topic",
+    "search_trends",
+    "get_related_queries",
+    "get_interest_by_region",
+    "get_trending_searches",
+    "export_trends_to_csv",
+    "export_trends_to_json",
+    "create_sql_table",
+    "get_available_timeframes",
+    "get_available_regions",
+    "compare_keywords_comprehensive",
+    "generate_llms_txt",
+    "comprehensive_research"
+  ]
+}

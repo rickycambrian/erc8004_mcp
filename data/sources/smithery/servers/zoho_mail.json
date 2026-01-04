@@ -1,0 +1,778 @@
+{
+  "qualifiedName": "zoho_mail",
+  "displayName": "Zoho mail",
+  "description": "Zoho Mail is a secure and ad-free email hosting platform with collaboration tools, calendar integration, and extensive administrative controls",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//zoho.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/zoho_mail",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/zoho_mail/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "ZOHO_MAIL_DOMAIN_OPERATIONS",
+      "description": "Tool to perform domain operations like verify, set primary domain, hosting, aliases, MX/SPF checks, DKIM management, and notifications. Use after creating or retrieving a domain.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DomainsDomainOperationsRequest",
+        "required": [
+          "zoid",
+          "domainName",
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "setPrimaryDomain",
+              "enableMailHosting",
+              "disableMailHosting",
+              "verifyDomainByTXT",
+              "verifyDomainByCName",
+              "verifyDomainByHTML",
+              "verifySpfRecord",
+              "verifyMxRecord",
+              "makeDomainAsAlias",
+              "removeDomainAlias",
+              "addDkimDetail",
+              "makeDkimDefault",
+              "deleteDkimDetail",
+              "regenerateDkimKey",
+              "verifyDkimKey",
+              "enableSubDomainStripping",
+              "disableSubDomainStripping",
+              "addCatchAllAddress",
+              "deleteCatchAllAddress",
+              "addNotificationAddress",
+              "deleteNotificationAddress"
+            ],
+            "type": "string",
+            "title": "Mode",
+            "examples": [
+              "setPrimaryDomain"
+            ],
+            "description": "Operation to perform on the domain"
+          },
+          "zoid": {
+            "type": "integer",
+            "title": "Zoid",
+            "examples": [
+              1234567890
+            ],
+            "description": "Organization ID (ZOID)"
+          },
+          "dkimId": {
+            "type": "integer",
+            "title": "Dkim Id",
+            "default": null,
+            "examples": [
+              98765
+            ],
+            "nullable": true,
+            "description": "DKIM record ID; required for certain DKIM operations"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region",
+            "default": null,
+            "examples": [
+              "com",
+              "eu",
+              "in",
+              "com.au",
+              "jp",
+              "ca"
+            ],
+            "nullable": true,
+            "description": "Optional Zoho data center domain to target. One of: 'com', 'eu', 'in', 'com.au', 'jp', 'ca'."
+          },
+          "keySize": {
+            "type": "integer",
+            "title": "Key Size",
+            "default": null,
+            "examples": [
+              1024,
+              2048
+            ],
+            "nullable": true,
+            "description": "DKIM key size (1024 or 2048); required for addDkimDetail"
+          },
+          "selector": {
+            "type": "string",
+            "title": "Selector",
+            "default": null,
+            "examples": [
+              "zoho"
+            ],
+            "nullable": true,
+            "description": "DKIM selector; required for addDkimDetail"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "title": "Is Default",
+            "default": null,
+            "examples": [
+              true
+            ],
+            "nullable": true,
+            "description": "Make this DKIM record the default; optional for addDkimDetail"
+          },
+          "domainName": {
+            "type": "string",
+            "title": "Domain Name",
+            "examples": [
+              "example.com"
+            ],
+            "description": "Fully qualified domain name to operate on"
+          },
+          "domainAlias": {
+            "type": "string",
+            "title": "Domain Alias",
+            "default": null,
+            "examples": [
+              "alias.example.com"
+            ],
+            "nullable": true,
+            "description": "Alias domain name; required for alias operations"
+          },
+          "accept_language": {
+            "type": "string",
+            "title": "Accept Language",
+            "default": null,
+            "examples": [
+              "en-US",
+              "en-GB"
+            ],
+            "nullable": true,
+            "description": "Optional Accept-Language header value (e.g., 'en-US', 'en-GB')."
+          },
+          "catchAllAddress": {
+            "type": "string",
+            "title": "Catch All Address",
+            "default": null,
+            "examples": [
+              "catchall@example.com"
+            ],
+            "nullable": true,
+            "description": "Catch-all address; required for addCatchAllAddress"
+          },
+          "use_bearer_auth": {
+            "type": "boolean",
+            "title": "Use Bearer Auth",
+            "default": false,
+            "nullable": true,
+            "description": "If true, keeps 'Bearer <token>' Authorization header; otherwise converts to 'Zoho-oauthtoken <token>'."
+          },
+          "notificationAddress": {
+            "type": "string",
+            "title": "Notification Address",
+            "default": null,
+            "examples": [
+              "notify@example.com"
+            ],
+            "nullable": true,
+            "description": "Notification address; required for addNotificationAddress"
+          }
+        },
+        "description": "Tool to perform domain operations like verify, set primary, hosting, aliases,\nMX/SPF checks, DKIM management, and notifications. Use after creating or retrieving a domain."
+      }
+    },
+    {
+      "name": "ZOHO_MAIL_GROUPS_DELETE_GROUP_BULK",
+      "description": "Tool to bulk delete multiple groups. Use when you need to remove several groups in one API call.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GroupsDeleteGroupBulkRequest",
+        "required": [
+          "zoid",
+          "groupList"
+        ],
+        "properties": {
+          "zoid": {
+            "type": "integer",
+            "title": "Zoid",
+            "minimum": 1,
+            "examples": [
+              1234567890123456
+            ],
+            "description": "Unique Zoho Organization Identifier; fetch via Get Organization Details API."
+          },
+          "region": {
+            "type": "string",
+            "title": "Region",
+            "default": null,
+            "examples": [
+              "com",
+              "eu",
+              "in",
+              "com.au",
+              "jp",
+              "ca"
+            ],
+            "nullable": true,
+            "description": "Optional Zoho data center domain to target. One of: 'com', 'eu', 'in', 'com.au', 'jp', 'ca'."
+          },
+          "groupList": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "properties": {}
+            },
+            "title": "Group List",
+            "examples": [
+              [
+                1111111,
+                2222222,
+                3333333
+              ]
+            ],
+            "description": "Array of zgid values (group IDs) to delete."
+          },
+          "accept_language": {
+            "type": "string",
+            "title": "Accept Language",
+            "default": null,
+            "examples": [
+              "en-US",
+              "en-GB"
+            ],
+            "nullable": true,
+            "description": "Optional Accept-Language header value (e.g., 'en-US', 'en-GB')."
+          },
+          "use_bearer_auth": {
+            "type": "boolean",
+            "title": "Use Bearer Auth",
+            "default": false,
+            "nullable": true,
+            "description": "If true, keeps 'Bearer <token>' Authorization header; otherwise converts to 'Zoho-oauthtoken <token>'."
+          }
+        },
+        "description": "Request model for bulk deleting groups in Zoho Mail."
+      }
+    },
+    {
+      "name": "ZOHO_MAIL_GROUPS_DELETE_GROUP_BY_ZGID",
+      "description": "Tool to delete a specific mail group by its zgid. Use when you need to remove a group from your organization after confirming the IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GroupsDeleteGroupByZgidRequest",
+        "required": [
+          "zoid",
+          "zgid"
+        ],
+        "properties": {
+          "zgid": {
+            "type": "integer",
+            "title": "Zgid",
+            "minimum": 1,
+            "examples": [
+              9876543210123456
+            ],
+            "description": "Zoho Group ID to delete"
+          },
+          "zoid": {
+            "type": "integer",
+            "title": "Zoid",
+            "minimum": 1,
+            "examples": [
+              1234567890123456
+            ],
+            "description": "Unique Zoho Organization ID"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region",
+            "default": null,
+            "examples": [
+              "com",
+              "eu",
+              "in",
+              "com.au",
+              "jp",
+              "ca"
+            ],
+            "nullable": true,
+            "description": "Optional Zoho data center domain to target. One of: 'com', 'eu', 'in', 'com.au', 'jp', 'ca'."
+          },
+          "accept_language": {
+            "type": "string",
+            "title": "Accept Language",
+            "default": null,
+            "examples": [
+              "en-US",
+              "en-GB"
+            ],
+            "nullable": true,
+            "description": "Optional Accept-Language header value (e.g., 'en-US', 'en-GB')."
+          },
+          "use_bearer_auth": {
+            "type": "boolean",
+            "title": "Use Bearer Auth",
+            "default": false,
+            "nullable": true,
+            "description": "If true, keeps 'Bearer <token>' Authorization header; otherwise converts to 'Zoho-oauthtoken <token>'."
+          }
+        },
+        "description": "Request model for deleting a specific mail group by its zgid."
+      }
+    },
+    {
+      "name": "ZOHO_MAIL_ORGANIZATION_GET_USER_STORAGE_DETAILS",
+      "description": "Tool to retrieve storage details for a specific user in the organization. Use when you need to know a user\u2019s total and used storage quotas.",
+      "inputSchema": {
+        "type": "object",
+        "title": "OrganizationGetUserStorageDetailsRequest",
+        "required": [
+          "zoid",
+          "zuid"
+        ],
+        "properties": {
+          "zoid": {
+            "type": "integer",
+            "title": "Zoid",
+            "minimum": 1,
+            "examples": [
+              123456789
+            ],
+            "description": "Unique Zoho Organization ID (path parameter)"
+          },
+          "zuid": {
+            "type": "integer",
+            "title": "Zuid",
+            "minimum": 1,
+            "examples": [
+              987654321
+            ],
+            "description": "Unique Zoho User ID (path parameter)"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region",
+            "default": null,
+            "examples": [
+              "com",
+              "eu",
+              "in",
+              "com.au",
+              "jp",
+              "ca"
+            ],
+            "nullable": true,
+            "description": "Optional Zoho data center domain to target. One of: 'com', 'eu', 'in', 'com.au', 'jp', 'ca'."
+          },
+          "accept_language": {
+            "type": "string",
+            "title": "Accept Language",
+            "default": null,
+            "examples": [
+              "en-US",
+              "en-GB"
+            ],
+            "nullable": true,
+            "description": "Optional Accept-Language header value (e.g., 'en-US', 'en-GB')."
+          },
+          "use_bearer_auth": {
+            "type": "boolean",
+            "title": "Use Bearer Auth",
+            "default": false,
+            "nullable": true,
+            "description": "If true, keeps 'Bearer <token>' Authorization header; otherwise converts to 'Zoho-oauthtoken <token>'."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZOHO_MAIL_ORGANIZATION_UPDATE_SPAM_PROCESS_TYPE",
+      "description": "Tool to update organization spam processing type. Use when changing the spam filtering strategy for an organization.",
+      "inputSchema": {
+        "type": "object",
+        "title": "OrganizationUpdateSpamProcessTypeRequest",
+        "required": [
+          "zoid",
+          "spamVO"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "const": "updateSpamProcessType",
+            "title": "Mode",
+            "default": "updateSpamProcessType",
+            "examples": [
+              "updateSpamProcessType"
+            ],
+            "description": "Operation indicator; must be 'updateSpamProcessType'"
+          },
+          "zoid": {
+            "type": "integer",
+            "title": "Zoid",
+            "minimum": 1,
+            "examples": [
+              123456789
+            ],
+            "description": "Unique Zoho Organization Identifier"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region",
+            "default": null,
+            "examples": [
+              "com",
+              "eu",
+              "in",
+              "com.au",
+              "jp",
+              "ca"
+            ],
+            "nullable": true,
+            "description": "Optional Zoho data center domain to target. One of: 'com', 'eu', 'in', 'com.au', 'jp', 'ca'."
+          },
+          "spamVO": {
+            "type": "object",
+            "title": "Spam Vo",
+            "required": [
+              "spamProcessType"
+            ],
+            "properties": {
+              "spamProcessType": {
+                "enum": [
+                  "Off",
+                  "complete",
+                  "content",
+                  "sender",
+                  "sender_header"
+                ],
+                "type": "string",
+                "title": "Spam Process Type",
+                "examples": [
+                  "sender_header"
+                ],
+                "description": "Spam filtering level; one of Off, complete, content, sender, sender_header"
+              }
+            },
+            "description": "Container for spam settings",
+            "additionalProperties": false
+          },
+          "accept_language": {
+            "type": "string",
+            "title": "Accept Language",
+            "default": null,
+            "examples": [
+              "en-US",
+              "en-GB"
+            ],
+            "nullable": true,
+            "description": "Optional Accept-Language header value (e.g., 'en-US', 'en-GB')."
+          },
+          "use_bearer_auth": {
+            "type": "boolean",
+            "title": "Use Bearer Auth",
+            "default": false,
+            "nullable": true,
+            "description": "If true, keeps 'Bearer <token>' Authorization header; otherwise converts to 'Zoho-oauthtoken <token>'."
+          }
+        }
+      }
+    },
+    {
+      "name": "ZOHO_MAIL_ORGANIZATION_UPDATE_USER_STORAGE",
+      "description": "Tool to modify a user's base or add-on storage allocation. Use when adjusting storage plan for a user within an organization after confirming the IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "OrganizationUpdateUserStorageRequest",
+        "required": [
+          "zoid",
+          "zuid",
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "updateBaseStorage",
+              "updateExtraStorage"
+            ],
+            "type": "string",
+            "title": "Mode",
+            "description": "Operation type: 'updateBaseStorage' or 'updateExtraStorage'."
+          },
+          "zoid": {
+            "type": "integer",
+            "title": "Zoid",
+            "description": "Organization (tenant) ID."
+          },
+          "zuid": {
+            "type": "integer",
+            "title": "Zuid",
+            "description": "Mailbox user ID to update storage for."
+          },
+          "region": {
+            "type": "string",
+            "title": "Region",
+            "default": null,
+            "examples": [
+              "com",
+              "eu",
+              "in",
+              "com.au",
+              "jp",
+              "ca"
+            ],
+            "nullable": true,
+            "description": "Optional Zoho data center domain to target. One of: 'com', 'eu', 'in', 'com.au', 'jp', 'ca'."
+          },
+          "planType": {
+            "enum": [
+              "newMail5gb",
+              "newMail10gb",
+              "mailPremium",
+              "basic",
+              "professional"
+            ],
+            "type": "string",
+            "title": "Plan Type",
+            "default": null,
+            "nullable": true,
+            "description": "Base plan to set; required when mode='updateBaseStorage'."
+          },
+          "addonType": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Addon Type",
+            "default": null,
+            "nullable": true,
+            "description": "Extra storage add-on(s); required when mode='updateExtraStorage'. Each item must be '<size>:<units>' where size is one of 5gb,25gb,50gb,100gb,200gb."
+          },
+          "accept_language": {
+            "type": "string",
+            "title": "Accept Language",
+            "default": null,
+            "examples": [
+              "en-US",
+              "en-GB"
+            ],
+            "nullable": true,
+            "description": "Optional Accept-Language header value (e.g., 'en-US', 'en-GB')."
+          },
+          "use_bearer_auth": {
+            "type": "boolean",
+            "title": "Use Bearer Auth",
+            "default": false,
+            "nullable": true,
+            "description": "If true, keeps 'Bearer <token>' Authorization header; otherwise converts to 'Zoho-oauthtoken <token>'."
+          }
+        },
+        "description": "Request schema for updating a user's base or extra storage allocation within an organization."
+      }
+    },
+    {
+      "name": "ZOHO_MAIL_UPDATE_GROUP_SETTINGS",
+      "description": "Tool to update group settings. Use after group creation to adjust general or text settings.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateGroupSettingsRequest",
+        "required": [
+          "zoid",
+          "zgid",
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "const": "updateMailGroupOptions",
+            "title": "Mode",
+            "description": "Operation mode, must be 'updateMailGroupOptions'"
+          },
+          "zgid": {
+            "type": "integer",
+            "title": "Zgid",
+            "description": "Group ID to update settings for"
+          },
+          "zoid": {
+            "type": "integer",
+            "title": "Zoid",
+            "description": "Organization ID"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region",
+            "default": null,
+            "examples": [
+              "com",
+              "eu",
+              "in",
+              "com.au",
+              "jp",
+              "ca"
+            ],
+            "nullable": true,
+            "description": "Optional Zoho data center domain to target. One of: 'com', 'eu', 'in', 'com.au', 'jp', 'ca'."
+          },
+          "accept_language": {
+            "type": "string",
+            "title": "Accept Language",
+            "default": null,
+            "examples": [
+              "en-US",
+              "en-GB"
+            ],
+            "nullable": true,
+            "description": "Optional Accept-Language header value (e.g., 'en-US', 'en-GB')."
+          },
+          "use_bearer_auth": {
+            "type": "boolean",
+            "title": "Use Bearer Auth",
+            "default": false,
+            "nullable": true,
+            "description": "If true, keeps 'Bearer <token>' Authorization header; otherwise converts to 'Zoho-oauthtoken <token>'."
+          },
+          "groupTextSettings": {
+            "type": "object",
+            "title": "GroupTextSettings",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "mailboxId"
+            ],
+            "properties": {
+              "mailboxId": {
+                "type": "integer",
+                "title": "Mailbox Id",
+                "description": "Mailbox ID to apply text settings for the group"
+              },
+              "bounceText": {
+                "type": "string",
+                "title": "Bounce Text",
+                "default": null,
+                "nullable": true,
+                "description": "Bounce message for rejected emails during moderation"
+              },
+              "rejectText": {
+                "type": "string",
+                "title": "Reject Text",
+                "default": null,
+                "nullable": true,
+                "description": "Message sent when an email to the group is rejected"
+              },
+              "ackStatusText": {
+                "type": "string",
+                "title": "Ack Status Text",
+                "default": null,
+                "nullable": true,
+                "description": "Acknowledgement when an email is held for moderation"
+              },
+              "isNotToOrCcText": {
+                "type": "string",
+                "title": "Is Not To Or Cc Text",
+                "default": null,
+                "nullable": true,
+                "description": "Message when mail is bounced because group isn't in To/Cc"
+              },
+              "autoResponseText": {
+                "type": "string",
+                "title": "Auto Response Text",
+                "default": null,
+                "nullable": true,
+                "description": "Auto-response text for incoming emails to the group"
+              },
+              "spamApprovalText": {
+                "type": "string",
+                "title": "Spam Approval Text",
+                "default": null,
+                "nullable": true,
+                "description": "Notification when suspected spam is approved"
+              },
+              "subscriptionText": {
+                "type": "string",
+                "title": "Subscription Text",
+                "default": null,
+                "nullable": true,
+                "description": "Message sent when a user is added to the group"
+              },
+              "memberApprovalText": {
+                "type": "string",
+                "title": "Member Approval Text",
+                "default": null,
+                "nullable": true,
+                "description": "Message sent when a member's email is approved"
+              },
+              "unSubscriptionText": {
+                "type": "string",
+                "title": "Un Subscription Text",
+                "default": null,
+                "nullable": true,
+                "description": "Message sent when a user is removed or unsubscribes"
+              },
+              "adminMemberApprovalText": {
+                "type": "string",
+                "title": "Admin Member Approval Text",
+                "default": null,
+                "nullable": true,
+                "description": "Notification sent to admin when an email is held"
+              }
+            },
+            "description": "Text settings object for the group",
+            "additionalProperties": false
+          },
+          "groupGeneralSettings": {
+            "type": "object",
+            "title": "GroupGeneralSettings",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "mailboxId"
+            ],
+            "properties": {
+              "replyTo": {
+                "type": "string",
+                "title": "Reply To",
+                "default": null,
+                "nullable": true,
+                "description": "Reply-To address for the group"
+              },
+              "mailboxId": {
+                "type": "integer",
+                "title": "Mailbox Id",
+                "description": "Mailbox ID to update the group settings for"
+              },
+              "subjectPrefix": {
+                "type": "string",
+                "title": "Subject Prefix",
+                "default": null,
+                "nullable": true,
+                "description": "Subject prefix for emails sent to the group"
+              },
+              "bounceThreshold": {
+                "type": "integer",
+                "title": "Bounce Threshold",
+                "default": null,
+                "minimum": 0,
+                "nullable": true,
+                "description": "Bounce count after which delivery is disabled for a user"
+              },
+              "notifSubscription": {
+                "type": "boolean",
+                "title": "Notif Subscription",
+                "default": null,
+                "nullable": true,
+                "description": "Enable or disable notifications for the group"
+              }
+            },
+            "description": "General settings object for the group",
+            "additionalProperties": false
+          }
+        },
+        "description": "Request model for updating group settings."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:47:48.506871+00:00",
+    "source": "smithery"
+  }
+}

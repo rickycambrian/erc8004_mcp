@@ -1,0 +1,415 @@
+{
+  "qualifiedName": "@slamai/mcp-server",
+  "displayName": "SLAMai MCP Server (Base & Ethereum DeFi)",
+  "description": "A unified DeFi data server for Ethereum and Base, delivering real-time token prices, market analytics, and historical on-chain activity. Built for traders, analysts, and developers, it powers dashboards, monitoring, and automation with reliable access to token dynamics and blockchain insights.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/2d54e017-5123-4ac2-8dfb-3ed1fa6957d3.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@slamai/mcp-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@slamai/mcp-server/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "tools": [
+          {
+            "name": "TokenDiscovery",
+            "description": "Discover tokens based on trending, popular, or newest activity within a time window.",
+            "inputSchema": {
+              "type": "object",
+              "required": [
+                "mode",
+                "activityWindow"
+              ],
+              "properties": {
+                "num": {
+                  "type": "string",
+                  "description": "Number of results"
+                },
+                "mode": {
+                  "enum": [
+                    "trending",
+                    "popular",
+                    "newest"
+                  ],
+                  "type": "string",
+                  "description": "Discovery mode"
+                },
+                "category": {
+                  "type": "string",
+                  "description": "Category of token (e.g., 'virtuals')"
+                },
+                "blockchain": {
+                  "type": "string",
+                  "default": "ethereum"
+                },
+                "estimateCost": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "activityWindow": {
+                  "enum": [
+                    "5min",
+                    "15min",
+                    "1h",
+                    "3h",
+                    "6h",
+                    "1d",
+                    "MM-DD-YYYY"
+                  ],
+                  "type": "string",
+                  "description": "Time window or historical date (MM-DD-YYYY)"
+                }
+              }
+            }
+          },
+          {
+            "name": "TokenPrice",
+            "description": "Fetch price information for one or more tokens, with optional block or time anchoring.",
+            "inputSchema": {
+              "type": "object",
+              "oneOf": [
+                {
+                  "required": [
+                    "symbols"
+                  ]
+                },
+                {
+                  "required": [
+                    "addresses"
+                  ]
+                }
+              ],
+              "properties": {
+                "atUtc": {
+                  "type": "string",
+                  "description": "Optional timestamp in MM-DD-YYYY hh:mm:ss"
+                },
+                "symbols": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Token symbols (use instead of addresses)"
+                },
+                "addresses": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Token addresses (use instead of symbols)"
+                },
+                "blockchain": {
+                  "type": "string",
+                  "default": "ethereum"
+                },
+                "quoteSymbol": {
+                  "type": "string",
+                  "description": "Optional quote symbol"
+                },
+                "estimateCost": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "quoteAddress": {
+                  "type": "string",
+                  "description": "Optional quote address"
+                },
+                "atBlockNumber": {
+                  "type": "string",
+                  "description": "Optional block number"
+                },
+                "lookbackWindows": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "1min",
+                      "3min",
+                      "5min",
+                      "15min",
+                      "30min",
+                      "45min",
+                      "1h",
+                      "2h",
+                      "3h"
+                    ],
+                    "type": "string"
+                  },
+                  "description": "Lookback windows for price snapshots"
+                }
+              }
+            }
+          },
+          {
+            "name": "TokenTransfers",
+            "description": "Fetch token transfer activity by filters such as address, direction, or block range.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "num": {
+                  "type": "string",
+                  "description": "Number of transfers to return"
+                },
+                "order": {
+                  "enum": [
+                    "asc",
+                    "desc"
+                  ],
+                  "type": "string",
+                  "default": "desc"
+                },
+                "startUtc": {
+                  "type": "string",
+                  "description": "Start time MM-DD-YYYY hh:mm:ss"
+                },
+                "direction": {
+                  "enum": [
+                    "sent",
+                    "received",
+                    "all"
+                  ],
+                  "type": "string",
+                  "default": "all"
+                },
+                "blockchain": {
+                  "type": "string",
+                  "default": "ethereum"
+                },
+                "includeDna": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "estimateCost": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "tokenAddress": {
+                  "type": "string",
+                  "description": "Token contract address"
+                },
+                "startLogIndex": {
+                  "type": "string",
+                  "description": "Start log index"
+                },
+                "walletAddress": {
+                  "type": "string",
+                  "description": "Wallet address"
+                },
+                "startBlockNumber": {
+                  "type": "string",
+                  "description": "Start block number"
+                },
+                "counterpartyAddress": {
+                  "type": "string",
+                  "description": "Counterparty wallet address"
+                }
+              }
+            }
+          }
+        ],
+        "required": [
+          "apiKey"
+        ],
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "title": "API Key",
+            "description": "Your service API key for authentication. Passed as a query parameter (?apiKey=YOUR_API_KEY)."
+          }
+        },
+        "description": "Configuration for connecting to this MCP server",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "TokenPrice",
+      "description": "Get prices across timeframes. Defaults to USD if no quote token given. Use ERC20 for custom quotes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "atUtc": {
+            "type": "string",
+            "format": "MM-DD-YYYY hh:mm:ss"
+          },
+          "symbols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blockchain": {
+            "type": "string",
+            "default": "ethereum"
+          },
+          "quoteSymbol": {
+            "type": "string"
+          },
+          "estimateCost": {
+            "type": "boolean",
+            "description": "False unless requesting SLAM cost to complete this call"
+          },
+          "quoteAddress": {
+            "type": "string"
+          },
+          "atBlockNumber": {
+            "type": "string"
+          },
+          "lookbackWindows": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "1min",
+                "3min",
+                "5min",
+                "15min",
+                "30min",
+                "45min",
+                "1h",
+                "2h",
+                "3h",
+                "4h",
+                "6h",
+                "12h",
+                "1d",
+                "3d",
+                "1w",
+                "2w",
+                "1month",
+                "3month",
+                "6month",
+                "1y"
+              ],
+              "type": "string",
+              "description": "Calculated from now or atUtc/atBlockNumber (if supplied)"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "TokenTransfers",
+      "description": "Get transfer details. Defaults to entire chain if no filters given. Use cursor from response to paginate.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "num": {
+            "max": "1000",
+            "type": "string",
+            "default": "25"
+          },
+          "order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "default": "desc"
+          },
+          "startUtc": {
+            "type": "string",
+            "format": "MM-DD-YYYY hh:mm:ss"
+          },
+          "direction": {
+            "enum": [
+              "sent",
+              "received",
+              "all"
+            ],
+            "type": "string"
+          },
+          "blockchain": {
+            "type": "string",
+            "default": "ethereum"
+          },
+          "includeDna": {
+            "type": "boolean",
+            "description": "Optionally return sender & receiver size tiers, labels, current token & USD balances, and share of supply. Also token FDV & price at time of transfer"
+          },
+          "estimateCost": {
+            "type": "boolean",
+            "description": "False unless requesting SLAM cost to complete this call"
+          },
+          "tokenAddress": {
+            "type": "string"
+          },
+          "startLogIndex": {
+            "type": "string"
+          },
+          "walletAddress": {
+            "type": "string",
+            "description": "When supplied provides transfers for this wallet"
+          },
+          "startBlockNumber": {
+            "type": "string"
+          },
+          "counterpartyAddress": {
+            "type": "string",
+            "description": "When supplied provides transfers between walletAddress & this counterparty"
+          }
+        }
+      }
+    },
+    {
+      "name": "TokenDiscovery",
+      "description": "List of popular (current or historical), trending or newest tokens.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "num": {
+            "max": "250",
+            "type": "string",
+            "default": "25"
+          },
+          "mode": {
+            "enum": [
+              "trending",
+              "popular",
+              "newest"
+            ],
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "description": "Only supported category is 'virtual' on Base. Don't use otherwise."
+          },
+          "blockchain": {
+            "type": "string",
+            "default": "ethereum"
+          },
+          "estimateCost": {
+            "type": "boolean",
+            "description": "False unless requesting SLAM cost to complete this call"
+          },
+          "actvityWindow": {
+            "enum": [
+              "5min",
+              "15min",
+              "1h",
+              "3h",
+              "6h",
+              "1d",
+              "MM-DD-YYYY"
+            ],
+            "type": "string",
+            "description": "Replace MM-DD-YYYY with desired date when querying historical, else choose a window for current."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:16:27.971105+00:00",
+    "source": "smithery"
+  }
+}

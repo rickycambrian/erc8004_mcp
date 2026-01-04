@@ -1,0 +1,223 @@
+{
+  "qualifiedName": "@TerryZ282/mcp-word-sheet",
+  "displayName": "Word Memory Tool",
+  "description": "Manage and review vocabulary efficiently using spaced repetition and AI-powered translation. Store your data securely in Google Sheets and enjoy seamless synchronization between a React frontend and AI chat integration. Enhance your language learning with automated reminders and detailed word management features.",
+  "iconUrl": null,
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@TerryZ282/mcp-word-sheet",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@TerryZ282/mcp-word-sheet/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "spreadsheetId",
+          "googleServiceAccountEmail",
+          "googlePrivateKey"
+        ],
+        "properties": {
+          "sheetName": {
+            "type": "string",
+            "default": "mcp-memory-word",
+            "description": "Sheet name (default: mcp-memory-word)"
+          },
+          "spreadsheetId": {
+            "type": "string",
+            "description": "Google Sheets Spreadsheet ID"
+          },
+          "googlePrivateKey": {
+            "type": "string",
+            "description": "Google Service Account Private Key"
+          },
+          "enableAutoReviewReminder": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable automatic daily review reminder"
+          },
+          "googleServiceAccountEmail": {
+            "type": "string",
+            "description": "Google Service Account Email"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-mcp-version": "1.0",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "word_manager",
+      "description": "\u7edf\u4e00\u7684\u5355\u8bcd\u7ba1\u7406\u5de5\u5177\uff0c\u652f\u6301\u4ee5\u4e0b\u64cd\u4f5c\uff1a\n- add\uff1a\u6dfb\u52a0\u5355\u8bcd\uff08\u652f\u6301\u6279\u91cf\uff0c\u652f\u6301 context/example/translation \u5b57\u6bb5\uff0c\u82e5\u5355\u8bcd\u5df2\u5b58\u5728\u5219\u8986\u76d6\uff09\n- remove\uff1a\u79fb\u9664\u5355\u8bcd\uff08\u652f\u6301\u6279\u91cf\uff09\n- list\uff1a\u5206\u9875\u5217\u51fa\u6240\u6709\u5355\u8bcd\u53ca\u5176\u8be6\u7ec6\u4fe1\u606f\n- mark_reviewed\uff1a\u6807\u8bb0\u5355\u8bcd\u4e3a\u5df2\u590d\u4e60\n- get_detail\uff1a\u67e5\u8be2\u4e00\u4e2a\u6216\u591a\u4e2a\u5355\u8bcd\u7684\u8be6\u7ec6\u4fe1\u606f\uff08\u8fd4\u56de markdown \u5361\u7247\uff0c\u5efa\u8bae\u76f4\u63a5\u6e32\u67d3\uff09",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "action",
+          "words"
+        ],
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "\u9875\u7801\uff08\u5217\u8868\u65f6\u9700\u8981\uff0c\u4ece0\u5f00\u59cb\uff09"
+          },
+          "words": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "word"
+                  ],
+                  "properties": {
+                    "row": {
+                      "type": "number"
+                    },
+                    "word": {
+                      "type": "string"
+                    },
+                    "context": {
+                      "type": "string"
+                    },
+                    "example": {
+                      "type": "string"
+                    },
+                    "translation": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "description": "\u8981\u64cd\u4f5c\u7684\u5355\u8bcd\u5217\u8868\uff08\u53ef\u5e26 row\u3001context\u3001example\u3001translation\uff09"
+          },
+          "action": {
+            "enum": [
+              "add",
+              "remove",
+              "list",
+              "mark_reviewed",
+              "get_detail"
+            ],
+            "type": "string",
+            "description": "\u64cd\u4f5c\u7c7b\u578b"
+          },
+          "reason": {
+            "type": "string",
+            "description": "\u79fb\u9664\u539f\u56e0\uff08\u5220\u9664\u65f6\u9700\u8981\uff09"
+          },
+          "context": {
+            "type": "string",
+            "description": "\u4e0a\u4e0b\u6587\uff08\u6dfb\u52a0\u65f6\u9700\u8981\uff09"
+          },
+          "example": {
+            "type": "string",
+            "description": "\u4f8b\u53e5\uff08\u6dfb\u52a0\u65f6\u9700\u8981\uff09"
+          },
+          "translation": {
+            "type": "string",
+            "description": "\u7ffb\u8bd1\uff08\u6dfb\u52a0\u65f6\u53ef\u9009\uff09"
+          },
+          "expand_index": {
+            "type": "number",
+            "description": "\u5c55\u5f00\u8be6\u60c5\u7684\u5355\u8bcd\u7d22\u5f15\uff08\u5217\u8868\u65f6\u4f7f\u7528\uff09"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "translation_tool",
+      "description": "\u8bc6\u522b\u7528\u6237\u662f\u5426\u5728\u7ffb\u8bd1\u4e00\u4e2a\u82f1\u6587\u5355\u8bcd\uff08\u5982 'benevolent \u662f\u4ec0\u4e48\u610f\u601d' \u6216 'translate regret'\uff09\uff0c\u5e76\u5224\u65ad\u662f\u5426\u9700\u8981\u5c06\u5176\u52a0\u5165\u8bcd\u6c47\u8bb0\u5fc6",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "input"
+        ],
+        "properties": {
+          "input": {
+            "type": "string",
+            "description": "\u7528\u6237\u8f93\u5165"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reminder_manager",
+      "description": "\u63d0\u9192\u7ba1\u7406\u5de5\u5177\uff0c\u652f\u6301\u67e5\u770b\u548c\u5f00\u5173\u81ea\u52a8\u590d\u4e60\u63d0\u9192\u529f\u80fd",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "action": {
+            "enum": [
+              "check",
+              "toggle"
+            ],
+            "type": "string",
+            "description": "\u64cd\u4f5c\u7c7b\u578b"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "\u662f\u5426\u5f00\u542f\u63d0\u9192\uff08toggle \u65f6\u9700\u8981\uff09"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "review_words_detail",
+      "description": "\u83b7\u53d6\u4eca\u65e5\u9700\u8981\u590d\u4e60\u7684\u5355\u8bcd\u8be6\u7ec6\u4fe1\u606f\uff0c\u5361\u7247\u98ce\u683c",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "action": {
+            "enum": [
+              "get_words"
+            ],
+            "type": "string",
+            "description": "\u64cd\u4f5c\u7c7b\u578b\uff1a\u83b7\u53d6\u5355\u8bcd\u5217\u8868"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "view_history",
+      "description": "\u67e5\u770b\u5df2\u79fb\u9664\u7684\u5355\u8bcd\u5386\u53f2\u8bb0\u5f55",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "\u9875\u7801\uff08\u53ef\u9009\uff0c\u4ece0\u5f00\u59cb\uff09"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:48:13.943808+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,2478 @@
+{
+  "qualifiedName": "contextstream/mcp-server",
+  "displayName": "ContextStream",
+  "description": "Unify workspace memory, project context, and code intelligence to deliver the right details instantly. Index repos, track decisions, and explore dependency relationships to speed up onboarding and change impact analysis. Stay organized with recall and reminders that capture and surface what matters when you need it.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/17dbd486-71ca-42fd-9150-f44f36fd46df.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/contextstream/mcp-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/contextstream/mcp-server/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "ContextStream MCP Session Configuration",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "title": "API Key or JWT",
+            "description": "Optional ContextStream API key or JWT (required for authenticated tool calls)."
+          },
+          "projectId": {
+            "type": "string",
+            "title": "Project ID",
+            "format": "uuid",
+            "description": "Optional project ID to scope requests."
+          },
+          "workspaceId": {
+            "type": "string",
+            "title": "Workspace ID",
+            "format": "uuid",
+            "description": "Optional workspace ID to scope requests."
+          }
+        },
+        "description": "Configuration for connecting to the ContextStream MCP HTTP gateway.",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "mcp_server_version",
+      "title": "Get MCP server version (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Return the running ContextStream MCP server package version\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "auth_me",
+      "title": "Get current user (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Fetch authenticated user profile\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "workspaces_list",
+      "title": "List workspaces (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List accessible workspaces (paginated list: items, total, page, per_page, has_next, has_prev).\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination."
+          },
+          "page_size": {
+            "type": "number",
+            "description": "Results per page."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "projects_list",
+      "title": "List projects (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List projects (optionally by workspace; paginated list: items, total, page, per_page, has_next, has_prev).\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination."
+          },
+          "page_size": {
+            "type": "number",
+            "description": "Results per page."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "projects_create",
+      "title": "Create project (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a new project within a workspace.\nUse this when you need to create a project for a specific folder/codebase.\nIf workspace_id is not provided, uses the current session's workspace.\nOptionally associates a local folder and generates AI editor rules.\n\nAccess: Free\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Project name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Project description"
+          },
+          "folder_path": {
+            "type": "string",
+            "description": "Optional: Local folder path to associate with this project"
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (uses current session workspace if not provided)"
+          },
+          "generate_editor_rules": {
+            "type": "boolean",
+            "description": "Generate AI editor rules in folder_path (requires folder_path)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "projects_update",
+      "title": "Update project (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Update a project (rename or change description)\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name for the resource."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "description": {
+            "type": "string",
+            "description": "Short description."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "projects_index",
+      "title": "Index project (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Trigger indexing for a project\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_semantic",
+      "title": "Semantic search (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Semantic vector search\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return."
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query string."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_hybrid",
+      "title": "Hybrid search (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Hybrid search (semantic + keyword)\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return."
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query string."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_keyword",
+      "title": "Keyword search (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Keyword search\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return."
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query string."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_create_event",
+      "title": "Create memory event (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a memory event for a workspace/project\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "event_type",
+          "title",
+          "content"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Short descriptive title."
+          },
+          "content": {
+            "type": "string",
+            "description": "Full content/body."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Input parameter: metadata.",
+            "additionalProperties": {}
+          },
+          "event_type": {
+            "type": "string",
+            "description": "Input parameter: event type."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_list_events",
+      "title": "List memory events (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List memory events (optionally scoped)\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_create_node",
+      "title": "Create knowledge node (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a knowledge node with optional relations\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "node_type",
+          "title",
+          "content"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Short descriptive title."
+          },
+          "content": {
+            "type": "string",
+            "description": "Full content/body."
+          },
+          "node_type": {
+            "type": "string",
+            "description": "Input parameter: node type."
+          },
+          "relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "target_id"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "target_id": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Input parameter: relations."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_list_nodes",
+      "title": "List knowledge nodes (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List knowledge graph nodes\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_search",
+      "title": "Memory-aware search (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search memory events/notes\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return."
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query string."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_decisions",
+      "title": "Decision summaries (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List decision summaries from workspace memory\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return."
+          },
+          "category": {
+            "type": "string",
+            "description": "Optional category filter. If not specified, returns all decisions regardless of category."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "graph_related",
+      "title": "Related knowledge nodes (Elite/Team (Full Graph))",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Find related nodes in the knowledge graph\n\nAccess: Elite/Team (Full Graph) (upgrade: https://contextstream.io/pricing)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "node_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return."
+          },
+          "node_id": {
+            "type": "string",
+            "description": "Node ID (UUID)."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "graph_path",
+      "title": "Knowledge path (Elite/Team (Full Graph))",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Find path between two nodes\n\nAccess: Elite/Team (Full Graph) (upgrade: https://contextstream.io/pricing)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "source_id",
+          "target_id"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID for the source."
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID for the target."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "graph_decisions",
+      "title": "Decision graph (Elite/Team (Full Graph))",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Decision history in the knowledge graph\n\nAccess: Elite/Team (Full Graph) (upgrade: https://contextstream.io/pricing)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "graph_dependencies",
+      "title": "Code dependencies (Pro (Graph-Lite))",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Dependency graph query\n\nAccess: Pro (Graph-Lite) (upgrade: https://contextstream.io/pricing)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "target"
+        ],
+        "properties": {
+          "target": {
+            "type": "object",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Element identifier. For module type, use file path (e.g., \"src/auth.rs\"). For function/type/variable, use the element id."
+              },
+              "type": {
+                "type": "string",
+                "description": "Code element type. Accepted values: module (aliases: file, path), function (alias: method), type (aliases: struct, enum, trait, class), variable (aliases: data, const, constant). For knowledge/memory nodes, use graph_path with UUID ids instead."
+              }
+            },
+            "description": "Input parameter: target.",
+            "additionalProperties": false
+          },
+          "max_depth": {
+            "type": "number",
+            "description": "Maximum traversal depth."
+          },
+          "include_transitive": {
+            "type": "boolean",
+            "description": "Include transitive dependencies."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "graph_call_path",
+      "title": "Call path (Elite/Team (Full Graph))",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Find call path between two targets\n\nAccess: Elite/Team (Full Graph) (upgrade: https://contextstream.io/pricing)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "source",
+          "target"
+        ],
+        "properties": {
+          "source": {
+            "type": "object",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Source function identifier."
+              },
+              "type": {
+                "type": "string",
+                "description": "Must be \"function\" (alias: method). Only function types are supported for call path analysis. For knowledge/memory nodes, use graph_path with UUID ids instead."
+              }
+            },
+            "description": "Input parameter: source.",
+            "additionalProperties": false
+          },
+          "target": {
+            "type": "object",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Target function identifier."
+              },
+              "type": {
+                "type": "string",
+                "description": "Must be \"function\" (alias: method). Only function types are supported for call path analysis."
+              }
+            },
+            "description": "Input parameter: target.",
+            "additionalProperties": false
+          },
+          "max_depth": {
+            "type": "number",
+            "description": "Maximum traversal depth."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "graph_impact",
+      "title": "Impact analysis (Pro (Graph-Lite))",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze impact of a target node\n\nAccess: Pro (Graph-Lite) (upgrade: https://contextstream.io/pricing)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "target"
+        ],
+        "properties": {
+          "target": {
+            "type": "object",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Element identifier. For module type, use file path (e.g., \"src/auth.rs\"). For function/type/variable, use the element id."
+              },
+              "type": {
+                "type": "string",
+                "description": "Code element type. Accepted values: module (aliases: file, path), function (alias: method), type (aliases: struct, enum, trait, class), variable (aliases: data, const, constant). For knowledge/memory nodes, use graph_path with UUID ids instead."
+              }
+            },
+            "description": "Input parameter: target.",
+            "additionalProperties": false
+          },
+          "max_depth": {
+            "type": "number",
+            "description": "Maximum traversal depth."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "graph_ingest",
+      "title": "Ingest code graph (Elite/Team (Full Graph))",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Build and persist the dependency graph for a project. Runs async by default (wait=false) and can take a few minutes for larger repos.\n\nAccess: Elite/Team (Full Graph) (upgrade: https://contextstream.io/pricing)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "wait": {
+            "type": "boolean",
+            "description": "If true, wait for ingestion to finish before returning. Defaults to false (async)."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "projects_get",
+      "title": "Get project (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get project details by ID\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "projects_overview",
+      "title": "Project overview (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get project overview with summary information\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "projects_statistics",
+      "title": "Project statistics (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get project statistics (files, lines, complexity)\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "projects_files",
+      "title": "List project files (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List all indexed files in a project\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "projects_index_status",
+      "title": "Index status (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get project indexing status\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "projects_ingest_local",
+      "title": "Ingest local files (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Read ALL files from a local directory and ingest them for indexing.\nThis indexes your entire project by reading files in batches.\nAutomatically detects code files and skips ignored directories like node_modules, target, dist, etc.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Local directory path to read files from"
+          },
+          "overwrite": {
+            "type": "boolean",
+            "description": "Allow overwriting existing files when write_to_disk is enabled"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project to ingest files into (defaults to current session project)"
+          },
+          "write_to_disk": {
+            "type": "boolean",
+            "description": "When true, write files to disk under QA_FILE_WRITE_ROOT before indexing (for testing/QA)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "workspaces_get",
+      "title": "Get workspace (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get workspace details by ID\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_get_event",
+      "title": "Get memory event (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a specific memory event by ID with FULL content (not truncated). Use this when you need the complete content of a memory event, not just the preview returned by search/recall.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "event_id"
+        ],
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The UUID of the memory event to retrieve"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_update_event",
+      "title": "Update memory event (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Update a memory event\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "event_id"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Short descriptive title."
+          },
+          "content": {
+            "type": "string",
+            "description": "Full content/body."
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Event ID (UUID)."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Input parameter: metadata.",
+            "additionalProperties": {}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_delete_event",
+      "title": "Delete memory event (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Delete a memory event\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "event_id"
+        ],
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Event ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_timeline",
+      "title": "Memory timeline (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get chronological timeline of memory events for a workspace\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory_summary",
+      "title": "Memory summary (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get condensed summary of workspace memory\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "graph_circular_dependencies",
+      "title": "Find circular dependencies (Elite/Team (Full Graph))",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Detect circular dependencies in project code\n\nAccess: Elite/Team (Full Graph) (upgrade: https://contextstream.io/pricing)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "graph_unused_code",
+      "title": "Find unused code (Elite/Team (Full Graph))",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Detect unused code in project\n\nAccess: Elite/Team (Full Graph) (upgrade: https://contextstream.io/pricing)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_init",
+      "title": "Initialize conversation session (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Initialize a new conversation session and automatically retrieve relevant context.\nThis is the FIRST tool AI assistants should call when starting a conversation.\nReturns: workspace info, project info, recent memory, recent decisions, relevant context, and high-priority lessons.\nAutomatically detects the IDE workspace/project path and can auto-index code.\n\nIMPORTANT: Pass the user's FIRST MESSAGE as context_hint to get semantically relevant context!\nExample: session_init(folder_path=\"/path/to/project\", context_hint=\"how do I implement auth?\")\n\nThis does semantic search on the first message. You only need context_smart on subsequent messages.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "auto_index": {
+            "type": "boolean",
+            "description": "Automatically create and index project from IDE workspace (default: true)"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project to initialize context for"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Custom session ID (auto-generated if not provided)"
+          },
+          "folder_path": {
+            "type": "string",
+            "description": "Current workspace/project folder path (absolute). Use this when IDE roots are not available."
+          },
+          "context_hint": {
+            "type": "string",
+            "description": "RECOMMENDED: Pass the user's first message here for semantic search. This finds relevant context from ANY time, not just recent items."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace to initialize context for"
+          },
+          "include_decisions": {
+            "type": "boolean",
+            "description": "Include recent decisions (default: true)"
+          },
+          "allow_no_workspace": {
+            "type": "boolean",
+            "description": "If true, allow session_init to return connected even if no workspace is resolved (workspace-level tools may not work)."
+          },
+          "include_recent_memory": {
+            "type": "boolean",
+            "description": "Include recent memory events (default: true)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_tools",
+      "title": "Get available ContextStream tools (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get an ultra-compact list of all available ContextStream MCP tools.\nUse this when you need to know what tools are available without reading full descriptions.\n\nReturns a token-efficient tool catalog (~120 tokens) organized by category.\n\nFormat options:\n- 'grouped' (default): Category: tool(hint) tool(hint) - best for quick reference\n- 'minimal': Category:tool|tool|tool - most compact\n- 'full': Detailed list with descriptions\n\nExample output (grouped):\nSession: init(start-conv) smart(each-msg) capture(save) recall(find) remember(quick)\nSearch: semantic(meaning) hybrid(combo) keyword(exact)\nMemory: events(crud) nodes(knowledge) search(find) decisions(choices)\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "format": {
+            "enum": [
+              "grouped",
+              "minimal",
+              "full"
+            ],
+            "type": "string",
+            "default": "grouped",
+            "description": "Output format: grouped (default, ~120 tokens), minimal (~80 tokens), or full (~200 tokens)"
+          },
+          "category": {
+            "type": "string",
+            "description": "Filter to specific category: Session, Search, Memory, Knowledge, Graph, Workspace, Project, AI"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_get_user_context",
+      "title": "Get user context and preferences (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve user preferences, coding style, and persona from memory.\nUse this to understand how the user likes to work and adapt your responses accordingly.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace to get user context from"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "workspace_associate",
+      "title": "Associate folder with workspace (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Associate a folder/repo with a workspace after user selection.\nCall this after session_init returns status='requires_workspace_selection' and the user has chosen a workspace.\nThis persists the selection to .contextstream/config.json so future sessions auto-connect.\nOptionally creates a parent folder mapping (e.g., all repos under /dev/company/* map to the same workspace).\nOptionally generates AI editor rules for automatic ContextStream usage.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "folder_path",
+          "workspace_id"
+        ],
+        "properties": {
+          "folder_path": {
+            "type": "string",
+            "description": "Absolute path to the folder/repo to associate"
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID to associate with"
+          },
+          "workspace_name": {
+            "type": "string",
+            "description": "Workspace name for reference"
+          },
+          "create_parent_mapping": {
+            "type": "boolean",
+            "description": "Also create a parent folder mapping (e.g., /dev/maker/* -> workspace)"
+          },
+          "generate_editor_rules": {
+            "type": "boolean",
+            "description": "Generate AI editor rules for Windsurf, Cursor, Cline, Kilo Code, Roo Code, Claude Code, and Aider"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "workspace_bootstrap",
+      "title": "Create workspace + project from folder (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a new workspace (user-provided name) and onboard the current folder as a project.\nThis is useful when session_init returns status='requires_workspace_name' (no workspaces exist yet) or when you want to create a new workspace for a repo.\n\nBehavior:\n- Creates a workspace with the given name\n- Associates the folder to that workspace (writes .contextstream/config.json)\n- Initializes a session for the folder, which creates the project (folder name) and starts indexing (if enabled)\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "workspace_name"
+        ],
+        "properties": {
+          "auto_index": {
+            "type": "boolean",
+            "description": "Automatically create and index project from folder (default: true)"
+          },
+          "visibility": {
+            "enum": [
+              "private",
+              "public"
+            ],
+            "type": "string",
+            "description": "Workspace visibility (default: private)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional workspace description"
+          },
+          "folder_path": {
+            "type": "string",
+            "description": "Absolute folder path (defaults to IDE root/cwd)"
+          },
+          "context_hint": {
+            "type": "string",
+            "description": "Optional context hint for session initialization"
+          },
+          "workspace_name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name for the new workspace (ask the user)"
+          },
+          "create_parent_mapping": {
+            "type": "boolean",
+            "description": "Also create a parent folder mapping (e.g., /dev/company/* -> workspace)"
+          },
+          "generate_editor_rules": {
+            "type": "boolean",
+            "description": "Generate AI editor rules in the folder for automatic ContextStream usage"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_capture",
+      "title": "Capture context to memory (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Automatically capture and store important context from the conversation.\nUse this to persist decisions, insights, preferences, or important information.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "event_type",
+          "title",
+          "content"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for categorization"
+          },
+          "title": {
+            "type": "string",
+            "description": "Brief title for the captured context"
+          },
+          "content": {
+            "type": "string",
+            "description": "Full content/details to capture"
+          },
+          "event_type": {
+            "enum": [
+              "conversation",
+              "decision",
+              "insight",
+              "preference",
+              "task",
+              "bug",
+              "feature",
+              "correction",
+              "lesson",
+              "warning",
+              "frustration"
+            ],
+            "type": "string",
+            "description": "Type of context being captured"
+          },
+          "importance": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "string",
+            "description": "Importance level"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Session ID to associate with this capture"
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_capture_lesson",
+      "title": "Capture a lesson learned (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Capture a lesson learned from a mistake or correction.\nUse this when the user corrects you, expresses frustration, or points out an error.\nThese lessons are surfaced in future sessions to prevent repeating the same mistakes.\n\nExample triggers:\n- User says \"No, you should...\" or \"That's wrong\"\n- User expresses frustration (caps, \"COME ON\", \"WTF\")\n- Code breaks due to a preventable mistake\n\nThe lesson will be tagged with 'lesson' and stored with structured metadata for easy retrieval.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "title",
+          "category",
+          "trigger",
+          "impact",
+          "prevention"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Lesson title - what to remember (e.g., \"Always verify assets in git before pushing\")"
+          },
+          "impact": {
+            "type": "string",
+            "description": "What went wrong (e.g., \"Production 404 errors - broken landing page\")"
+          },
+          "trigger": {
+            "type": "string",
+            "description": "What action caused the problem (e.g., \"Pushed code referencing images without committing them\")"
+          },
+          "category": {
+            "enum": [
+              "workflow",
+              "code_quality",
+              "verification",
+              "communication",
+              "project_specific"
+            ],
+            "type": "string",
+            "description": "Category of the lesson"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keywords for matching in future contexts (e.g., [\"git\", \"images\", \"assets\", \"push\"])"
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "string",
+            "default": "medium",
+            "description": "Severity: critical for production issues, high for breaking changes, medium for workflow, low for minor"
+          },
+          "prevention": {
+            "type": "string",
+            "description": "How to prevent in future (e.g., \"Run git status to check untracked files before pushing\")"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_get_lessons",
+      "title": "Get lessons learned (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve lessons learned from past mistakes and corrections.\nUse this to check for relevant warnings before taking actions that have caused problems before.\n\nReturns lessons filtered by:\n- Query: semantic search for relevant lessons\n- Category: workflow, code_quality, verification, communication, project_specific\n- Severity: low, medium, high, critical\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum lessons to return"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search for relevant lessons (e.g., \"git push images\")"
+          },
+          "category": {
+            "enum": [
+              "workflow",
+              "code_quality",
+              "verification",
+              "communication",
+              "project_specific"
+            ],
+            "type": "string",
+            "description": "Filter by category"
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "string",
+            "description": "Filter by minimum severity"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_smart_search",
+      "title": "Smart context search (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search memory with automatic context enrichment.\nReturns memory matches, relevant code, and related decisions in one call.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "What to search for"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          },
+          "include_related": {
+            "type": "boolean",
+            "description": "Include related context (default: true)"
+          },
+          "include_decisions": {
+            "type": "boolean",
+            "description": "Include related decisions (default: true)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_remember",
+      "title": "Remember this (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Quick way to store something in memory. Use natural language.\nExample: \"Remember that I prefer TypeScript strict mode\" or \"Remember we decided to use PostgreSQL\"\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "What to remember (natural language)"
+          },
+          "importance": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "type": "string",
+            "description": "Input parameter: importance."
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          },
+          "await_indexing": {
+            "type": "boolean",
+            "description": "If true, wait for indexing to complete before returning. This ensures the content is immediately searchable."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_recall",
+      "title": "Recall from memory (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Quick way to recall relevant context. Use natural language.\nExample: \"What were the auth decisions?\" or \"What are my TypeScript preferences?\"\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "What to recall (natural language)"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_editor_rules",
+      "title": "Generate editor AI rules (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Generate AI rule files for editors (Windsurf, Cursor, Cline, Kilo Code, Roo Code, Claude Code, Aider).\nThese rules instruct the AI to automatically use ContextStream for memory and context.\nSupported editors: codex, windsurf, cursor, cline, kilo, roo, claude, aider\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "folder_path"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "minimal",
+              "full"
+            ],
+            "type": "string",
+            "description": "Rule verbosity mode (default: minimal)"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "If true, return content without writing files"
+          },
+          "editors": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "codex",
+                "windsurf",
+                "cursor",
+                "cline",
+                "kilo",
+                "roo",
+                "claude",
+                "aider",
+                "all"
+              ],
+              "type": "string"
+            },
+            "description": "Which editors to generate rules for. Defaults to all."
+          },
+          "folder_path": {
+            "type": "string",
+            "description": "Absolute path to the project folder"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "Project name to include in rules"
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID to include in rules"
+          },
+          "workspace_name": {
+            "type": "string",
+            "description": "Workspace name to include in rules"
+          },
+          "additional_rules": {
+            "type": "string",
+            "description": "Additional project-specific rules to append"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_summary",
+      "title": "Get compact context summary (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a compact, token-efficient summary of workspace context (~500 tokens).\nThis is designed to replace loading full chat history in AI prompts.\nReturns: workspace/project info, top decisions (titles only), preferences, memory count.\nUse this at conversation start instead of loading everything.\nFor specific details, use session_recall or session_smart_search.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "max_tokens": {
+            "type": "number",
+            "description": "Maximum tokens for summary (default: 500)"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_compress",
+      "title": "Compress chat history to memory (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Extract and store key information from chat history as memory events.\nThis allows clearing chat history while preserving important context.\nUse at conversation end or when context window is getting full.\n\nExtracts:\n- Decisions made\n- User preferences learned\n- Insights discovered\n- Tasks/action items\n- Code patterns established\n\nAfter compression, the AI can use session_recall to retrieve this context in future conversations.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "chat_history"
+        ],
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "chat_history": {
+            "type": "string",
+            "description": "The chat history to compress and extract from"
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          },
+          "extract_types": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "decisions",
+                "preferences",
+                "insights",
+                "tasks",
+                "code_patterns"
+              ],
+              "type": "string"
+            },
+            "description": "Types of information to extract (default: all)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "session_delta",
+      "title": "Get context changes since timestamp (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get new context added since a specific timestamp.\nUseful for efficient context synchronization without reloading everything.\n\nReturns:\n- Count of new decisions and memory events\n- List of new items with titles and timestamps\n\nUse case: AI can track what's new since last session_init.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "since"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum items to return (default: 20)"
+          },
+          "since": {
+            "type": "string",
+            "description": "ISO timestamp to get changes since (e.g., \"2025-12-05T00:00:00Z\")"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "context_smart",
+      "title": "Get smart context for user query (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "**CALL THIS BEFORE EVERY AI RESPONSE** to get relevant context.\n\nThis is the KEY tool for token-efficient AI interactions. It:\n1. Analyzes the user's message to understand what context is needed\n2. Retrieves only relevant context in a minified, token-efficient format\n3. Replaces the need to include full chat history in prompts\n\nFormat options:\n- 'minified': Ultra-compact D:decision|P:preference|M:memory (default, ~200 tokens)\n- 'readable': Line-separated with labels\n- 'structured': JSON-like grouped format\n\nType codes: W=Workspace, P=Project, D=Decision, M=Memory, I=Insight, T=Task, L=Lesson\n\nExample usage:\n1. User asks \"how should I implement auth?\"\n2. AI calls context_smart(user_message=\"how should I implement auth?\")\n3. Gets: \"W:Maker|P:contextstream|D:Use JWT for auth|D:No session cookies|M:Auth API at /auth/...\"\n4. AI responds with relevant context already loaded\n\nThis saves ~80% tokens compared to including full chat history.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "user_message"
+        ],
+        "properties": {
+          "format": {
+            "enum": [
+              "minified",
+              "readable",
+              "structured"
+            ],
+            "type": "string",
+            "description": "Context format (default: minified)"
+          },
+          "max_tokens": {
+            "type": "number",
+            "description": "Maximum tokens for context (default: 800)"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "user_message": {
+            "type": "string",
+            "description": "The user message to analyze and get context for"
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reminders_list",
+      "title": "List reminders (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List all reminders for the current user.\nReturns: reminders with title, content, remind_at, priority, status, and keywords.\nCan filter by status (pending, completed, dismissed, snoozed) and priority (low, normal, high, urgent).\n\nUse this to see what reminders you have set.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum reminders to return (default: 20)"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "completed",
+              "dismissed",
+              "snoozed"
+            ],
+            "type": "string",
+            "description": "Filter by status"
+          },
+          "priority": {
+            "enum": [
+              "low",
+              "normal",
+              "high",
+              "urgent"
+            ],
+            "type": "string",
+            "description": "Filter by priority"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reminders_active",
+      "title": "Get active reminders (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get active reminders that are pending, overdue, or due soon.\nReturns: reminders with urgency levels (overdue, due_soon, today, upcoming).\nOptionally provide context (e.g., current task description) to get contextually relevant reminders.\n\nUse this to see what reminders need attention now.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum reminders to return (default: 10)"
+          },
+          "context": {
+            "type": "string",
+            "description": "Optional context to match relevant reminders (e.g., current task)"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reminders_create",
+      "title": "Create a reminder (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a new reminder for a specific date/time.\nSet reminders to be notified about tasks, follow-ups, or important dates.\n\nPriority levels: low, normal, high, urgent\nRecurrence: daily, weekly, monthly (optional)\n\nExample: Create a reminder to \"Review PR #123\" for tomorrow at 10am with high priority.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "title",
+          "content",
+          "remind_at"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Reminder title (brief, descriptive)"
+          },
+          "content": {
+            "type": "string",
+            "description": "Reminder details/description"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keywords for contextual surfacing"
+          },
+          "priority": {
+            "enum": [
+              "low",
+              "normal",
+              "high",
+              "urgent"
+            ],
+            "type": "string",
+            "description": "Priority level (default: normal)"
+          },
+          "remind_at": {
+            "type": "string",
+            "description": "When to remind (ISO 8601 datetime, e.g., \"2025-01-15T10:00:00Z\")"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID (UUID)."
+          },
+          "recurrence": {
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "type": "string",
+            "description": "Recurrence pattern"
+          },
+          "workspace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Workspace ID (UUID)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reminders_snooze",
+      "title": "Snooze a reminder (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Snooze a reminder until a later time.\nUse this to postpone a reminder without dismissing it.\n\nCommon snooze durations:\n- 1 hour: add 1 hour to current time\n- 4 hours: add 4 hours\n- Tomorrow: next day at 9am\n- Next week: 7 days from now\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "reminder_id",
+          "until"
+        ],
+        "properties": {
+          "until": {
+            "type": "string",
+            "description": "When to resurface the reminder (ISO 8601 datetime)"
+          },
+          "reminder_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the reminder to snooze"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reminders_complete",
+      "title": "Complete a reminder (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Mark a reminder as completed.\nUse this when the task or action associated with the reminder is done.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "reminder_id"
+        ],
+        "properties": {
+          "reminder_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the reminder to complete"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reminders_dismiss",
+      "title": "Dismiss a reminder (Free)",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "Dismiss a reminder without completing it.\nUse this to remove a reminder that is no longer relevant.\n\nAccess: Free",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "reminder_id"
+        ],
+        "properties": {
+          "reminder_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the reminder to dismiss"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:20:11.259291+00:00",
+    "source": "smithery"
+  }
+}

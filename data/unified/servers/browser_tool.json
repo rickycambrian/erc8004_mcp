@@ -1,0 +1,649 @@
+{
+  "id": "browser_tool",
+  "name": "browser_tool",
+  "display_name": "Browser tool",
+  "version": null,
+  "description": "Composio enables AI Agents and LLMs to authenticate and integrate with various tools via function calling.",
+  "icon_url": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//composio-logo.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "BROWSER_TOOL_COPY_SELECTED_TEXT",
+      "description": "Copy currently selected text on the page to clipboard - ideal for extracting highlighted content, copying form data, or harvesting visible text selections.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CopySelectedTextRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_DRAG_AND_DROP",
+      "description": "Execute precise drag and drop operations - essential for file uploads, list reordering, element moving, and complex UI interactions that require drag-based manipulation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DragAndDropRequest",
+        "required": [
+          "startX",
+          "startY",
+          "endX",
+          "endY"
+        ],
+        "properties": {
+          "endX": {
+            "type": "integer",
+            "title": "End X",
+            "minimum": 0,
+            "description": "Ending X coordinate for drop operation (where to release the element)"
+          },
+          "endY": {
+            "type": "integer",
+            "title": "End Y",
+            "minimum": 0,
+            "description": "Ending Y coordinate for drop operation (where to release the element)"
+          },
+          "button": {
+            "type": "string",
+            "title": "Button",
+            "default": "left",
+            "pattern": "^(left|middle|right)$",
+            "description": "Mouse button for drag operation (almost always 'left' for standard drag-drop, 'right' for special contexts)"
+          },
+          "startX": {
+            "type": "integer",
+            "title": "Start X",
+            "minimum": 0,
+            "description": "Starting X coordinate for drag operation (where to grab the element)"
+          },
+          "startY": {
+            "type": "integer",
+            "title": "Start Y",
+            "minimum": 0,
+            "description": "Starting Y coordinate for drag operation (where to grab the element)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_FETCH_WEBPAGE",
+      "description": "DECISION BRAIN: Essential for analysis, planning, and information gathering. PRIMARY USES: Understand page state, locate elements, verify changes, plan next actions FALLBACK ROLE: When screenshot blocked/fails, use this diligently for information FORMAT: html=element discovery & coordinates | markdown=content analysis HYBRID WORKFLOW: Use for decisions \u2192 AI agent for precision clicking",
+      "inputSchema": {
+        "type": "object",
+        "title": "FetchWebpageRequest",
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "default": null,
+            "nullable": true,
+            "description": "URL to fetch content from. If not provided, uses current page"
+          },
+          "wait": {
+            "type": "integer",
+            "title": "Wait",
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 0,
+            "description": "Time to wait for dynamic content to load (milliseconds)"
+          },
+          "format": {
+            "type": "string",
+            "title": "Format",
+            "default": "markdown",
+            "pattern": "^(markdown|html)$",
+            "description": "Output format for content (markdown or html)"
+          },
+          "newPage": {
+            "type": "boolean",
+            "title": "New Page",
+            "default": false,
+            "description": "Whether to create a new page for the content"
+          },
+          "idleTtlSec": {
+            "type": "integer",
+            "title": "Idle Ttl Sec",
+            "default": null,
+            "maximum": 86400,
+            "minimum": 60,
+            "nullable": true,
+            "description": "Optional idle TTL for new sessions (seconds)"
+          },
+          "returnPartialOnTimeout": {
+            "type": "boolean",
+            "title": "Return Partial On Timeout",
+            "default": true,
+            "description": "Whether to return partial content if timeout occurs"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_GET_CLIPBOARD",
+      "description": "Read current content from the system clipboard - essential for data transfer workflows, extracting copied text, and reading user-copied data for processing.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetClipboardRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_KEYBOARD_SHORTCUT",
+      "description": "Execute keyboard shortcuts and key combinations - essential for copy/paste, navigation, and application commands that agents need for efficient browser automation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "KeyboardShortcutRequest",
+        "required": [
+          "keys"
+        ],
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Keys",
+            "minItems": 1,
+            "description": "Array of keys to press simultaneously (e.g., ['Ctrl', 'c'] for copy, ['Alt', 'Tab'] for window switching, ['Ctrl', 'Shift', 'I'] for dev tools)"
+          },
+          "holdTime": {
+            "type": "integer",
+            "title": "Hold Time",
+            "default": 0,
+            "maximum": 5000,
+            "minimum": 0,
+            "description": "Milliseconds to hold keys down (0=quick press like normal shortcuts, 100+=sustained press for special actions)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_MOUSE_CLICK",
+      "description": "MANUAL PRECISION: Coordinate-based clicking - less efficient than AI agent for complex clicks. WHEN TO USE: Simple single clicks when you have exact coordinates BETTER ALTERNATIVE: Use PerformWebTask AI agent for complex/precise clicking PATTERN: FetchWebpage(html) \u2192 estimate coordinates \u2192 click \u2192 verify HINTS: Center ~(640,350) | Header ~y=150 | Content ~y=300-500 | SUCCESS RATE: 85%",
+      "inputSchema": {
+        "type": "object",
+        "title": "MouseClickRequest",
+        "required": [
+          "x",
+          "y"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "title": "X",
+            "minimum": 0,
+            "description": "X coordinate to click"
+          },
+          "y": {
+            "type": "integer",
+            "title": "Y",
+            "minimum": 0,
+            "description": "Y coordinate to click"
+          },
+          "button": {
+            "type": "string",
+            "title": "Button",
+            "default": "left",
+            "pattern": "^(left|middle|right)$",
+            "description": "Mouse button to use for clicking"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_MOUSE_DOUBLE_CLICK",
+      "description": "Execute a precise double click at specified screen coordinates - ideal for opening files, selecting text, or activating UI elements that require double click gestures.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MouseDoubleClickRequest",
+        "required": [
+          "x",
+          "y"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "title": "X",
+            "minimum": 0,
+            "description": "Horizontal pixel position for double click (0 = left edge, increases rightward)"
+          },
+          "y": {
+            "type": "integer",
+            "title": "Y",
+            "minimum": 0,
+            "description": "Vertical pixel position for double click (0 = top edge, increases downward)"
+          },
+          "button": {
+            "type": "string",
+            "title": "Button",
+            "default": "left",
+            "pattern": "^(left|middle|right)$",
+            "description": "Mouse button for double click action - use 'left' for most UI elements, 'right' for context menus"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_MOUSE_DOWN",
+      "description": "Press and hold mouse button at coordinates - use for starting custom drag operations, text selections, or long-press interactions. Must be followed by MouseUp action to complete.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MouseDownRequest",
+        "required": [
+          "x",
+          "y"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "title": "X",
+            "minimum": 0,
+            "description": "X coordinate to press mouse button down (where to start the press-and-hold operation)"
+          },
+          "y": {
+            "type": "integer",
+            "title": "Y",
+            "minimum": 0,
+            "description": "Y coordinate to press mouse button down (where to start the press-and-hold operation)"
+          },
+          "button": {
+            "type": "string",
+            "title": "Button",
+            "default": "left",
+            "pattern": "^(left|middle|right)$",
+            "description": "Mouse button to press and hold (usually 'left' for selections and drags, 'right' for context menus)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_MOUSE_MOVE",
+      "description": "Move mouse cursor to precise coordinates without clicking - perfect for triggering hover effects, revealing tooltips, and positioning for subsequent interactions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MouseMoveRequest",
+        "required": [
+          "x",
+          "y"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "title": "X",
+            "minimum": 0,
+            "description": "Target X coordinate for mouse cursor (0 = left edge, increases rightward, typical screen: 0-1440px)"
+          },
+          "y": {
+            "type": "integer",
+            "title": "Y",
+            "minimum": 0,
+            "description": "Target Y coordinate for mouse cursor (0 = top edge, increases downward, typical screen: 0-900px)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_MOUSE_UP",
+      "description": "Release mouse button at coordinates - completes drag operations, text selections, and long-press interactions. Should be used after MouseDown to finish mouse button sequences.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MouseUpRequest",
+        "required": [
+          "x",
+          "y"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "title": "X",
+            "minimum": 0,
+            "description": "X coordinate to release mouse button (where to end the press-and-hold operation or complete a drag)"
+          },
+          "y": {
+            "type": "integer",
+            "title": "Y",
+            "minimum": 0,
+            "description": "Y coordinate to release mouse button (where to end the press-and-hold operation or complete a drag)"
+          },
+          "button": {
+            "type": "string",
+            "title": "Button",
+            "default": "left",
+            "pattern": "^(left|middle|right)$",
+            "description": "Mouse button to release (should match the button used in previous MouseDown action)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_NAVIGATE",
+      "description": "SESSION FOUNDATION: Always start here - creates browser session and navigates to URL. WORKFLOW: Navigate() \u2192 FetchWebpage() \u2192 Analysis/Planning \u2192 AI Agent or Manual interactions \u2192 Verify PROVIDES: Live debugUrl for user, initial page snapshot, persistent session TIP: Always show debugUrl to user before proceeding",
+      "inputSchema": {
+        "type": "object",
+        "title": "NavigateRequest",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "URL to navigate the cloud browser to"
+          },
+          "idleTtlSec": {
+            "type": "integer",
+            "title": "Idle Ttl Sec",
+            "default": null,
+            "maximum": 86400,
+            "minimum": 60,
+            "nullable": true,
+            "description": "Optional idle TTL for the session (seconds)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_PASTE_TEXT",
+      "description": "Paste text content at the current cursor position - perfect for filling forms, inserting data into text fields, or quick content insertion at focused elements.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PasteTextRequest",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "minLength": 1,
+            "description": "Text content to paste at current cursor location (form data, URLs, structured content)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_PERFORM_WEB_TASK",
+      "description": "AI AGENT: BEST for precise clicking and complex interactions. PREFERRED FOR: Button clicks, form interactions, precise targeting (coordinates handled well) HYBRID WORKFLOW: Use after FetchWebpage analysis for informed AI interactions WHEN TO USE: Any clicking task, multi-step workflows, dynamic content STRATEGY: AI handles precision \u2192 regular tools for verification",
+      "inputSchema": {
+        "type": "object",
+        "title": "PerformWebTaskRequest",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "default": null,
+            "nullable": true,
+            "description": "Optional URL to perform task on (if not provided, uses current page in existing session)"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "minLength": 10,
+            "description": "Natural language description of the web task to perform autonomously (e.g., 'Log into Gmail and send an email', 'Fill out contact form', 'Find and download the PDF')"
+          },
+          "aiAgent": {
+            "type": "string",
+            "title": "Ai Agent",
+            "default": "browser-use",
+            "pattern": "^(browser-use|openai-cua)$",
+            "description": "AI agent engine to use ('browser-use'=robust multi-step automation, 'openai-cua'=OpenAI-optimized tasks)"
+          },
+          "aiModel": {
+            "type": "string",
+            "title": "Ai Model",
+            "default": "gpt-5-nano",
+            "nullable": true,
+            "description": "Specific AI model to use ('gpt-5'=latest flagship, 'gpt-5-mini'=efficient flagship, 'gpt-5-nano'=ultra-fast, 'gpt-4o'=advanced OpenAI, 'gpt-4o-mini'=efficient, 'gpt-4.1'=enhanced, 'gpt-4.1-mini'=compact enhanced)"
+          },
+          "aiProvider": {
+            "type": "string",
+            "title": "Ai Provider",
+            "default": "openai",
+            "pattern": "^(openai|gemini|groq|azure|xai)$",
+            "nullable": true,
+            "description": "AI provider for task execution ('openai'=GPT models, 'gemini'=Google AI, 'groq'=fast inference, 'azure'=enterprise, 'xai'=experimental)"
+          },
+          "idleTtlSec": {
+            "type": "integer",
+            "title": "Idle Ttl Sec",
+            "default": null,
+            "maximum": 86400,
+            "minimum": 60,
+            "nullable": true,
+            "description": "Optional idle TTL for new sessions if sessionId not provided (seconds)"
+          },
+          "outputSchema": {
+            "type": "object",
+            "title": "Output Schema",
+            "default": null,
+            "nullable": true,
+            "description": "Optional JSON Schema to structure the output for data extraction tasks (provides structured data instead of text description)",
+            "additionalProperties": true
+          },
+          "highlightElements": {
+            "type": "boolean",
+            "title": "Highlight Elements",
+            "default": true,
+            "description": "Show visual highlights during task execution for transparency and debugging (True=show interaction highlights, False=hidden execution)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_SCREENSHOT_WEBPAGE",
+      "description": "Capture high-quality screenshot of any webpage with extensive customization options - perfect for archiving, visual documentation, full-page captures, and cross-device viewport testing.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ScreenshotWebpageRequest",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "URL of the webpage to capture (can be any publicly accessible website)"
+          },
+          "wait": {
+            "type": "integer",
+            "title": "Wait",
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 0,
+            "description": "Milliseconds to wait after page load for JS/animations (1000=default, 3000+=heavy sites, 5000+=very dynamic)"
+          },
+          "width": {
+            "type": "integer",
+            "title": "Width",
+            "default": 1280,
+            "maximum": 1920,
+            "minimum": 320,
+            "description": "Browser viewport width in pixels for capture (1280=standard desktop, 1440=large desktop, 375=mobile)"
+          },
+          "height": {
+            "type": "integer",
+            "title": "Height",
+            "default": 720,
+            "maximum": 1080,
+            "minimum": 240,
+            "description": "Browser viewport height in pixels for capture (720=standard, 900=tall desktop, 667=mobile)"
+          },
+          "idleTtlSec": {
+            "type": "integer",
+            "title": "Idle Ttl Sec",
+            "default": null,
+            "maximum": 86400,
+            "minimum": 60,
+            "nullable": true,
+            "description": "Optional idle TTL for new sessions if sessionId not provided (seconds)"
+          },
+          "imageQuality": {
+            "type": "integer",
+            "title": "Image Quality",
+            "default": 80,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Image quality percentage (100=no compression/max quality, 80=good balance, 50=smaller file size)"
+          },
+          "scrollAllContent": {
+            "type": "boolean",
+            "title": "Scroll All Content",
+            "default": false,
+            "description": "Scroll through entire page to capture all content (True=captures everything, False=viewport only)"
+          },
+          "captureFullHeight": {
+            "type": "boolean",
+            "title": "Capture Full Height",
+            "default": false,
+            "description": "Capture entire page height ignoring viewport (True=full page length, False=viewport height only)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_SCROLL",
+      "description": "PAGE NAVIGATION: Smooth scrolling. USE: When target element not visible after FetchWebpage() DISTANCE: 200px=fine | 400px=sections | 800px=quick traverse ALWAYS: Scroll \u2192 FetchWebpage() \u2192 verify | SUCCESS RATE: 99%",
+      "inputSchema": {
+        "type": "object",
+        "title": "ScrollRequest",
+        "required": [
+          "deltaY"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "title": "X",
+            "default": 640,
+            "minimum": 0,
+            "description": "X coordinate where scroll originates (center of viewport recommended: 640 for 1280px width, 720 for 1440px width)"
+          },
+          "y": {
+            "type": "integer",
+            "title": "Y",
+            "default": 360,
+            "minimum": 0,
+            "description": "Y coordinate where scroll originates (center of viewport recommended: 360 for 720px height, 400 for 800px height)"
+          },
+          "steps": {
+            "type": "integer",
+            "title": "Steps",
+            "default": 1,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Number of steps to break scroll into for smoothness (1=instant jump, 3-5=smooth animation, 10+=very smooth but slower)"
+          },
+          "useOs": {
+            "type": "boolean",
+            "title": "Use Os",
+            "default": true,
+            "description": "Use OS-level scrolling (True=more reliable, works with all apps) vs browser scrolling (False=web-specific, may fail on some sites)"
+          },
+          "deltaX": {
+            "type": "integer",
+            "title": "Delta X",
+            "default": 0,
+            "description": "Horizontal scroll distance in pixels (positive=scroll right, negative=scroll left, usually 0 for vertical scrolling)"
+          },
+          "deltaY": {
+            "type": "integer",
+            "title": "Delta Y",
+            "description": "Vertical scroll distance in pixels (positive=scroll down toward bottom, negative=scroll up toward top, typical range: 100-500px per scroll)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_SET_CLIPBOARD",
+      "description": "Store text content in the system clipboard for later paste operations - perfect for preparing data transfers, staging content for forms, or cross-application data sharing.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SetClipboardRequest",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "minLength": 1,
+            "description": "Text content to store in system clipboard (URLs, data, structured text, form content)"
+          }
+        }
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_TAKE_SCREENSHOT",
+      "description": "VISUAL VERIFICATION: Capture screenshot - MUST BE CALLED ALONE in multi_execute. \ud83d\udea8 CRITICAL: Screenshot cannot be combined with other tools in same multi_execute call FALLBACK: If screenshot blocked/fails, use FetchWebpage diligently for information USE: Debug UI, verify states, document results after page changes RENDERS: Inline visual feedback | SUCCESS RATE: 99%",
+      "inputSchema": {
+        "type": "object",
+        "title": "TakeScreenshotRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "BROWSER_TOOL_TYPE_TEXT",
+      "description": "CONTROLLED INPUT: Human-like typing. PATTERN: Click to focus \u2192 TypeText() \u2192 verify SPEED: delay=0 (fast) | delay=50 (human-like) | delay=100+ (careful) Must focus input field first | SUCCESS RATE: 95%",
+      "inputSchema": {
+        "type": "object",
+        "title": "TypeTextRequest",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "minLength": 1,
+            "description": "Text content to type into the browser (supports unicode, special characters, newlines, form data)"
+          },
+          "delay": {
+            "type": "integer",
+            "title": "Delay",
+            "default": 0,
+            "maximum": 1000,
+            "minimum": 0,
+            "description": "Milliseconds delay between each keystroke for natural human-like typing (0=instant, 50-100=realistic human speed, 200+=slow deliberate typing)"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 18,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/browser_tool/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "BROWSER_TOOL_COPY_SELECTED_TEXT",
+    "BROWSER_TOOL_DRAG_AND_DROP",
+    "BROWSER_TOOL_FETCH_WEBPAGE",
+    "BROWSER_TOOL_GET_CLIPBOARD",
+    "BROWSER_TOOL_KEYBOARD_SHORTCUT",
+    "BROWSER_TOOL_MOUSE_CLICK",
+    "BROWSER_TOOL_MOUSE_DOUBLE_CLICK",
+    "BROWSER_TOOL_MOUSE_DOWN",
+    "BROWSER_TOOL_MOUSE_MOVE",
+    "BROWSER_TOOL_MOUSE_UP",
+    "BROWSER_TOOL_NAVIGATE",
+    "BROWSER_TOOL_PASTE_TEXT",
+    "BROWSER_TOOL_PERFORM_WEB_TASK",
+    "BROWSER_TOOL_SCREENSHOT_WEBPAGE",
+    "BROWSER_TOOL_SCROLL",
+    "BROWSER_TOOL_SET_CLIPBOARD",
+    "BROWSER_TOOL_TAKE_SCREENSHOT",
+    "BROWSER_TOOL_TYPE_TEXT"
+  ]
+}

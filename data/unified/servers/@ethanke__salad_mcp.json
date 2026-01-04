@@ -1,0 +1,808 @@
+{
+  "id": "@ethanke/salad_mcp",
+  "name": "@ethanke/salad_mcp",
+  "display_name": "salad_mcp",
+  "version": null,
+  "description": "Manage GPU workloads on SaladCloud, including container groups and inference endpoints. Operate queues, jobs, logs, and quotas to run and monitor deployments. Check CPU/GPU availability to plan capacity and scale efficiently.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "list_container_groups",
+      "description": "List all container groups in a SaladCloud organization and project. Container groups represent scalable sets of identical containers running as distributed services.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name"
+        ],
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_container_group",
+      "description": "Get detailed information about a specific container group including its configuration, status, and instances.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name"
+        ],
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_container_group",
+      "description": "Create a new container group with specified configuration including image, resources (CPU, memory, GPU), networking, and other settings.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group"
+        ],
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group": {
+            "type": "object",
+            "description": "The container group configuration including name, container image, resources, replicas, networking, etc."
+          }
+        }
+      }
+    },
+    {
+      "name": "update_container_group",
+      "description": "Update an existing container group. You can modify replicas, resources, networking, environment variables, and other configuration.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name",
+          "updates"
+        ],
+        "properties": {
+          "updates": {
+            "type": "object",
+            "description": "The fields to update"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name to update"
+          }
+        }
+      }
+    },
+    {
+      "name": "start_container_group",
+      "description": "Start a stopped container group. This will allocate resources and begin running the containers.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name"
+        ],
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name to start"
+          }
+        }
+      }
+    },
+    {
+      "name": "stop_container_group",
+      "description": "Stop a running container group. This will deallocate resources and stop all running containers.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name"
+        ],
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name to stop"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_container_group",
+      "description": "Delete a container group permanently. This action cannot be undone.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name"
+        ],
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_inference_endpoints",
+      "description": "List all available inference endpoints in an organization. Inference endpoints provide ready-to-use AI model APIs.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_inference_endpoint",
+      "description": "Get detailed information about a specific inference endpoint including its configuration and metadata.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "inference_endpoint_name"
+        ],
+        "properties": {
+          "inference_endpoint_name": {
+            "type": "string",
+            "description": "The inference endpoint name"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_queues",
+      "description": "List all message queues in a project. Queues enable asynchronous workload processing.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name"
+        ],
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_queue",
+      "description": "Get detailed information about a specific message queue.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "queue_name"
+        ],
+        "properties": {
+          "queue_name": {
+            "type": "string",
+            "description": "The queue name"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_queue",
+      "description": "Create a new message queue for asynchronous workload processing.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "queue"
+        ],
+        "properties": {
+          "queue": {
+            "type": "object",
+            "description": "The queue configuration including name and description"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_queue",
+      "description": "Delete a message queue permanently. This action cannot be undone.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "queue_name"
+        ],
+        "properties": {
+          "queue_name": {
+            "type": "string",
+            "description": "The queue name to delete"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_quotas",
+      "description": "Get organization resource quotas including limits on container groups, instances, and reallocations.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_system_logs",
+      "description": "Get system logs for a container group. Returns logs from container group system events.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name"
+        ],
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_container_group_instances",
+      "description": "List all instances of a container group. Instances represent individual running containers within a group.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name"
+        ],
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_container_group_instance",
+      "description": "Get detailed information about a specific container group instance.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name",
+          "instance_id"
+        ],
+        "properties": {
+          "instance_id": {
+            "type": "string",
+            "description": "The instance ID"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_container_group_instance",
+      "description": "Update a container group instance. Can be used to modify instance settings like deletion cost.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name",
+          "instance_id",
+          "updates"
+        ],
+        "properties": {
+          "updates": {
+            "type": "object",
+            "description": "The fields to update"
+          },
+          "instance_id": {
+            "type": "string",
+            "description": "The instance ID"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name"
+          }
+        }
+      }
+    },
+    {
+      "name": "reallocate_container_group_instance",
+      "description": "Reallocate a container group instance to a different machine.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name",
+          "instance_id"
+        ],
+        "properties": {
+          "instance_id": {
+            "type": "string",
+            "description": "The instance ID"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name"
+          }
+        }
+      }
+    },
+    {
+      "name": "recreate_container_group_instance",
+      "description": "Recreate a container group instance on the same machine.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name",
+          "instance_id"
+        ],
+        "properties": {
+          "instance_id": {
+            "type": "string",
+            "description": "The instance ID"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name"
+          }
+        }
+      }
+    },
+    {
+      "name": "restart_container_group_instance",
+      "description": "Restart a container group instance.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "container_group_name",
+          "instance_id"
+        ],
+        "properties": {
+          "instance_id": {
+            "type": "string",
+            "description": "The instance ID"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          },
+          "container_group_name": {
+            "type": "string",
+            "description": "The container group name"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_queue",
+      "description": "Update a message queue configuration.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "queue_name",
+          "updates"
+        ],
+        "properties": {
+          "updates": {
+            "type": "object",
+            "description": "The fields to update"
+          },
+          "queue_name": {
+            "type": "string",
+            "description": "The queue name"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_queue_jobs",
+      "description": "List all jobs in a message queue.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "queue_name"
+        ],
+        "properties": {
+          "queue_name": {
+            "type": "string",
+            "description": "The queue name"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_queue_job",
+      "description": "Create a new job in a message queue.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "queue_name",
+          "job"
+        ],
+        "properties": {
+          "job": {
+            "type": "object",
+            "description": "The job data including input and optional metadata"
+          },
+          "queue_name": {
+            "type": "string",
+            "description": "The queue name"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_queue_job",
+      "description": "Get detailed information about a specific queue job.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "queue_name",
+          "job_id"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "The job ID"
+          },
+          "queue_name": {
+            "type": "string",
+            "description": "The queue name"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_queue_job",
+      "description": "Delete a job from a message queue.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "project_name",
+          "queue_name",
+          "job_id"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "The job ID"
+          },
+          "queue_name": {
+            "type": "string",
+            "description": "The queue name"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "The project name"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_inference_endpoint_jobs",
+      "description": "List all jobs for a specific inference endpoint.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "inference_endpoint_name"
+        ],
+        "properties": {
+          "inference_endpoint_name": {
+            "type": "string",
+            "description": "The inference endpoint name"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_inference_endpoint_job",
+      "description": "Create a new inference job for an endpoint.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "inference_endpoint_name",
+          "job"
+        ],
+        "properties": {
+          "job": {
+            "type": "object",
+            "description": "The job data including input and optional metadata"
+          },
+          "inference_endpoint_name": {
+            "type": "string",
+            "description": "The inference endpoint name"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_inference_endpoint_job",
+      "description": "Get detailed information about a specific inference job.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "inference_endpoint_name",
+          "job_id"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "The job ID"
+          },
+          "inference_endpoint_name": {
+            "type": "string",
+            "description": "The inference endpoint name"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_inference_endpoint_job",
+      "description": "Delete an inference job.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "inference_endpoint_name",
+          "job_id"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "The job ID"
+          },
+          "inference_endpoint_name": {
+            "type": "string",
+            "description": "The inference endpoint name"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_gpu_classes",
+      "description": "List all available GPU classes for an organization. GPU classes define the types of GPUs available for container groups.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_webhook_secret_key",
+      "description": "Get the webhook secret key for an organization. Used to verify webhook payloads.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "update_webhook_secret_key",
+      "description": "Regenerate the webhook secret key for an organization.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "query_log_entries",
+      "description": "Query log entries for an organization. Retrieve logs matching a query string within a specified time range. Supports pagination and sorting.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "object",
+            "required": [
+              "query",
+              "start_time",
+              "end_time"
+            ],
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "The query string for filtering logs (max 20,000 characters)"
+              },
+              "end_time": {
+                "type": "string",
+                "description": "The end time of the time range (ISO 8601 format, e.g., \"2023-11-07T05:31:56Z\")"
+              },
+              "page_size": {
+                "type": "number",
+                "description": "The maximum number of items per page (1-100, default varies)"
+              },
+              "sort_order": {
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
+                "type": "string",
+                "description": "The sort order of log entries: \"asc\" for chronological, \"desc\" for reverse chronological (default: \"desc\")"
+              },
+              "start_time": {
+                "type": "string",
+                "description": "The start time of the time range (ISO 8601 format, e.g., \"2023-11-07T05:31:56Z\")"
+              }
+            },
+            "description": "Log query object with query string, time range, and optional pagination/sorting parameters"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_cpu_availability",
+      "description": "Get CPU availability information for an organization. Returns available CPU resources.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "request": {
+            "type": "object",
+            "description": "Optional availability request parameters"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_gpu_availability",
+      "description": "Get GPU availability information for an organization. Returns available GPU resources by class.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "request": {
+            "type": "object",
+            "description": "Optional availability request parameters including gpu_classes and quantity"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 36,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@ethanke/salad_mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "list_container_groups",
+    "get_container_group",
+    "create_container_group",
+    "update_container_group",
+    "start_container_group",
+    "stop_container_group",
+    "delete_container_group",
+    "list_inference_endpoints",
+    "get_inference_endpoint",
+    "list_queues",
+    "get_queue",
+    "create_queue",
+    "delete_queue",
+    "get_quotas",
+    "get_system_logs",
+    "list_container_group_instances",
+    "get_container_group_instance",
+    "update_container_group_instance",
+    "reallocate_container_group_instance",
+    "recreate_container_group_instance",
+    "restart_container_group_instance",
+    "update_queue",
+    "list_queue_jobs",
+    "create_queue_job",
+    "get_queue_job",
+    "delete_queue_job",
+    "list_inference_endpoint_jobs",
+    "create_inference_endpoint_job",
+    "get_inference_endpoint_job",
+    "delete_inference_endpoint_job",
+    "list_gpu_classes",
+    "get_webhook_secret_key",
+    "update_webhook_secret_key",
+    "query_log_entries",
+    "get_cpu_availability",
+    "get_gpu_availability"
+  ]
+}

@@ -1,0 +1,411 @@
+{
+  "id": "@sk1122/gmail-osiris",
+  "name": "@sk1122/gmail-osiris",
+  "display_name": "gmail-osiris",
+  "version": null,
+  "description": "",
+  "icon_url": null,
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "fetchEmails",
+      "description": "Fetch emails from Gmail inbox with optional search query and filters",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Gmail search query"
+          },
+          "maxResults": {
+            "type": "number",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_latest_emails",
+      "description": "Get the most recent emails from Gmail, optionally including read emails",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "maxResults": {
+            "type": "number",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          },
+          "includeRead": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include read emails in results"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_emails_from_user",
+      "description": "Get emails from a specific sender email address",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "fromEmail"
+        ],
+        "properties": {
+          "fromEmail": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address of the sender to filter by"
+          },
+          "maxResults": {
+            "type": "number",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          },
+          "includeRead": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include read emails in results"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_unread_emails",
+      "description": "Get all unread emails, optionally filtered by date",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "fromDate": {
+            "type": "string",
+            "description": "ISO date string to filter emails from this date onwards (e.g., \"2023-01-01\")"
+          },
+          "maxResults": {
+            "type": "number",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_emails_by_thread",
+      "description": "Get all emails in a specific Gmail thread",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "threadId"
+        ],
+        "properties": {
+          "threadId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Gmail thread ID to fetch emails from"
+          },
+          "maxResults": {
+            "type": "number",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_starred_emails",
+      "description": "Get all starred emails, optionally filtered by date",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "fromDate": {
+            "type": "string",
+            "description": "ISO date string to filter emails from this date onwards"
+          },
+          "maxResults": {
+            "type": "number",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_emails_by_context",
+      "description": "Search emails by context or keywords in subject, body, or both",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "context"
+        ],
+        "properties": {
+          "context": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Context or keywords to search for in emails"
+          },
+          "searchIn": {
+            "enum": [
+              "subject",
+              "body",
+              "all"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Where to search for the context"
+          },
+          "maxResults": {
+            "type": "number",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_emails_by_date",
+      "description": "Get emails within a specific date range",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "fromDate"
+        ],
+        "properties": {
+          "toDate": {
+            "type": "string",
+            "description": "End date in ISO format (e.g., \"2023-01-31\"). If not provided, searches to current date"
+          },
+          "fromDate": {
+            "type": "string",
+            "description": "Start date in ISO format (e.g., \"2023-01-01\")"
+          },
+          "maxResults": {
+            "type": "number",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          },
+          "includeRead": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include read emails in results"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "send_email",
+      "description": "Send an email through Gmail with support for CC, BCC, and HTML content",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "to",
+          "subject",
+          "body"
+        ],
+        "properties": {
+          "cc": {
+            "type": "string",
+            "description": "CC recipients (comma-separated email addresses)"
+          },
+          "to": {
+            "type": "string",
+            "format": "email",
+            "description": "Recipient email address"
+          },
+          "bcc": {
+            "$ref": "#/properties/cc",
+            "description": "BCC recipients (comma-separated email addresses)"
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Email body content - can be plain text or HTML"
+          },
+          "isHtml": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the body content is HTML format"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Email subject line"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "send_email_reply",
+      "description": "Reply to an existing email message",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "messageId",
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Reply body content - can be plain text or HTML"
+          },
+          "isHtml": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the body content is HTML format"
+          },
+          "messageId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ID of the email message to reply to"
+          },
+          "replyToAll": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to reply to all recipients or just the sender"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_email",
+      "description": "Advanced Gmail search using Gmail search operators. Supports complex queries like \"from:example@gmail.com has:attachment after:2023/01/01\"",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Advanced Gmail search query (supports Gmail search operators)"
+          },
+          "maxResults": {
+            "type": "number",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          },
+          "includeBody": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include email body content in results (may slow down search)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_draft_email",
+      "description": "Create a draft email that can be reviewed and sent later",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "to",
+          "subject",
+          "body"
+        ],
+        "properties": {
+          "cc": {
+            "type": "string",
+            "description": "CC recipients (comma-separated email addresses)"
+          },
+          "to": {
+            "type": "string",
+            "format": "email",
+            "description": "Recipient email address"
+          },
+          "bcc": {
+            "$ref": "#/properties/cc",
+            "description": "BCC recipients (comma-separated email addresses)"
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Email body content - can be plain text or HTML"
+          },
+          "isHtml": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the body content is HTML format"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Email subject line"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 12,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@sk1122/gmail-osiris/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "fetchEmails",
+    "get_latest_emails",
+    "get_emails_from_user",
+    "get_unread_emails",
+    "get_emails_by_thread",
+    "get_starred_emails",
+    "get_emails_by_context",
+    "get_emails_by_date",
+    "send_email",
+    "send_email_reply",
+    "search_email",
+    "create_draft_email"
+  ]
+}

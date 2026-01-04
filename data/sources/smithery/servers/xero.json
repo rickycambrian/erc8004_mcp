@@ -1,0 +1,2450 @@
+{
+  "qualifiedName": "xero",
+  "displayName": "Xero",
+  "description": "Xero is a cloud-based accounting software for small businesses, providing invoicing, bank reconciliation, bookkeeping, and financial reporting in real time",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//xero.svg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/xero",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/xero/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "XERO_CREATE_BANK_TRANSACTION",
+      "description": "Create a bank transaction in Xero. Use SPEND for payments out or RECEIVE for money received.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateBankTransactionRequest",
+        "required": [
+          "Type",
+          "ContactID",
+          "LineItems",
+          "BankAccountCode"
+        ],
+        "properties": {
+          "Date": {
+            "type": "string",
+            "title": "Date",
+            "default": null,
+            "nullable": true,
+            "description": "Transaction date in YYYY-MM-DD format."
+          },
+          "Type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Transaction type: SPEND (payment out) or RECEIVE (money in)."
+          },
+          "Status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "nullable": true,
+            "description": "Transaction status: AUTHORISED or DELETED."
+          },
+          "ContactID": {
+            "type": "string",
+            "title": "Contact Id",
+            "description": "Xero Contact ID for the transaction."
+          },
+          "LineItems": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "BankTransactionLineItem",
+              "required": [
+                "Description",
+                "UnitAmount",
+                "AccountCode"
+              ],
+              "properties": {
+                "TaxType": {
+                  "type": "string",
+                  "title": "Tax Type",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Tax type for the line item (e.g., OUTPUT, INPUT, NONE)."
+                },
+                "Quantity": {
+                  "type": "number",
+                  "title": "Quantity",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Quantity of the item (default 1)."
+                },
+                "Tracking": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "title": "Tracking",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Tracking categories for the line item."
+                },
+                "UnitAmount": {
+                  "type": "number",
+                  "title": "Unit Amount",
+                  "description": "Unit price of the item."
+                },
+                "AccountCode": {
+                  "type": "string",
+                  "title": "Account Code",
+                  "description": "Account code for the line item."
+                },
+                "Description": {
+                  "type": "string",
+                  "title": "Description",
+                  "description": "Description of the line item."
+                }
+              },
+              "description": "Line item for a bank transaction."
+            },
+            "title": "Line Items",
+            "description": "List of line items for the bank transaction."
+          },
+          "Reference": {
+            "type": "string",
+            "title": "Reference",
+            "default": null,
+            "nullable": true,
+            "description": "Reference or transaction description."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "CurrencyCode": {
+            "type": "string",
+            "title": "Currency Code",
+            "default": null,
+            "nullable": true,
+            "description": "Currency code (e.g., USD, EUR)."
+          },
+          "BankAccountCode": {
+            "type": "string",
+            "title": "Bank Account Code",
+            "description": "Bank account code (from chart of accounts)."
+          }
+        },
+        "description": "Request schema for creating a bank transaction in Xero."
+      }
+    },
+    {
+      "name": "XERO_CREATE_CONTACT",
+      "description": "Create a new contact in Xero. Contacts can be customers, suppliers, or both.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateContactRequest",
+        "required": [
+          "Name"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Full name of the contact or organization."
+          },
+          "Website": {
+            "type": "string",
+            "title": "Website",
+            "default": null,
+            "nullable": true,
+            "description": "Website URL of the contact."
+          },
+          "LastName": {
+            "type": "string",
+            "title": "Last Name",
+            "default": null,
+            "nullable": true,
+            "description": "Last name of the contact person."
+          },
+          "FirstName": {
+            "type": "string",
+            "title": "First Name",
+            "default": null,
+            "nullable": true,
+            "description": "First name of the contact person."
+          },
+          "TaxNumber": {
+            "type": "string",
+            "title": "Tax Number",
+            "default": null,
+            "nullable": true,
+            "description": "Tax number (VAT/ABN/GST number)."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "IsCustomer": {
+            "type": "boolean",
+            "title": "Is Customer",
+            "default": null,
+            "nullable": true,
+            "description": "Mark as customer when true."
+          },
+          "IsSupplier": {
+            "type": "boolean",
+            "title": "Is Supplier",
+            "default": null,
+            "nullable": true,
+            "description": "Mark as supplier when true."
+          },
+          "EmailAddress": {
+            "type": "string",
+            "title": "Email Address",
+            "default": null,
+            "nullable": true,
+            "description": "Email address of the contact."
+          },
+          "phone_number": {
+            "type": "string",
+            "title": "Phone Number",
+            "default": null,
+            "nullable": true,
+            "description": "Primary phone number (will be added as DEFAULT phone type)."
+          },
+          "AccountNumber": {
+            "type": "string",
+            "title": "Account Number",
+            "default": null,
+            "nullable": true,
+            "description": "Account reference number for the contact."
+          },
+          "mobile_number": {
+            "type": "string",
+            "title": "Mobile Number",
+            "default": null,
+            "nullable": true,
+            "description": "Mobile phone number (will be added as MOBILE phone type)."
+          },
+          "DefaultCurrency": {
+            "type": "string",
+            "title": "Default Currency",
+            "default": null,
+            "nullable": true,
+            "description": "Default currency code (e.g., USD, EUR)."
+          },
+          "BankAccountDetails": {
+            "type": "string",
+            "title": "Bank Account Details",
+            "default": null,
+            "nullable": true,
+            "description": "Bank account details for the contact."
+          }
+        },
+        "description": "Request schema for creating a contact in Xero."
+      }
+    },
+    {
+      "name": "XERO_CREATE_INVOICE",
+      "description": "Create a new invoice in Xero. Supports both sales invoices (ACCREC) and bills (ACCPAY).",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateInvoiceRequest",
+        "required": [
+          "ContactID",
+          "Type",
+          "LineItems"
+        ],
+        "properties": {
+          "Date": {
+            "type": "string",
+            "title": "Date",
+            "default": null,
+            "nullable": true,
+            "description": "Invoice date in YYYY-MM-DD format."
+          },
+          "Type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Invoice type: ACCREC (accounts receivable/sales) or ACCPAY (accounts payable/bills)."
+          },
+          "Status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "nullable": true,
+            "description": "Invoice status: DRAFT, SUBMITTED, or AUTHORISED."
+          },
+          "DueDate": {
+            "type": "string",
+            "title": "Due Date",
+            "default": null,
+            "nullable": true,
+            "description": "Due date in YYYY-MM-DD format."
+          },
+          "ContactID": {
+            "type": "string",
+            "title": "Contact Id",
+            "description": "Xero Contact ID for the invoice."
+          },
+          "LineItems": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "InvoiceLineItem",
+              "required": [
+                "Description",
+                "Quantity",
+                "UnitAmount"
+              ],
+              "properties": {
+                "TaxType": {
+                  "type": "string",
+                  "title": "Tax Type",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Tax type for the line item (e.g., OUTPUT, NONE)."
+                },
+                "ItemCode": {
+                  "type": "string",
+                  "title": "Item Code",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Item code if using inventory items."
+                },
+                "Quantity": {
+                  "type": "number",
+                  "title": "Quantity",
+                  "description": "Quantity of the item."
+                },
+                "LineAmount": {
+                  "type": "number",
+                  "title": "Line Amount",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Total line amount (quantity * unit_amount)."
+                },
+                "UnitAmount": {
+                  "type": "number",
+                  "title": "Unit Amount",
+                  "description": "Unit price of the item."
+                },
+                "AccountCode": {
+                  "type": "string",
+                  "title": "Account Code",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Account code for the line item."
+                },
+                "Description": {
+                  "type": "string",
+                  "title": "Description",
+                  "description": "Description of the line item."
+                }
+              },
+              "description": "Line item for an invoice."
+            },
+            "title": "Line Items",
+            "description": "List of line items for the invoice."
+          },
+          "Reference": {
+            "type": "string",
+            "title": "Reference",
+            "default": null,
+            "nullable": true,
+            "description": "Reference or purchase order number."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "CurrencyCode": {
+            "type": "string",
+            "title": "Currency Code",
+            "default": null,
+            "nullable": true,
+            "description": "Currency code (e.g., USD, EUR)."
+          },
+          "InvoiceNumber": {
+            "type": "string",
+            "title": "Invoice Number",
+            "default": null,
+            "nullable": true,
+            "description": "Invoice number (auto-generated if not provided)."
+          }
+        },
+        "description": "Request schema for creating an invoice in Xero."
+      }
+    },
+    {
+      "name": "XERO_CREATE_ITEM",
+      "description": "Create an inventory item in Xero. Items can be tracked for sales and/or purchases.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateItemRequest",
+        "required": [
+          "Code",
+          "Name"
+        ],
+        "properties": {
+          "Code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Unique item code (SKU)."
+          },
+          "Name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Item name/description."
+          },
+          "IsSold": {
+            "type": "boolean",
+            "title": "Is Sold",
+            "default": null,
+            "nullable": true,
+            "description": "Item can be sold when true."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "IsPurchased": {
+            "type": "boolean",
+            "title": "Is Purchased",
+            "default": null,
+            "nullable": true,
+            "description": "Item can be purchased when true."
+          },
+          "SalesDetails.UnitPrice": {
+            "type": "number",
+            "title": "Sales Details.Unit Price",
+            "default": null,
+            "nullable": true,
+            "description": "Unit price for sales."
+          },
+          "SalesDetails.AccountCode": {
+            "type": "string",
+            "title": "Sales Details.Account Code",
+            "default": null,
+            "nullable": true,
+            "description": "Account code for sales."
+          },
+          "PurchaseDetails.UnitPrice": {
+            "type": "number",
+            "title": "Purchase Details.Unit Price",
+            "default": null,
+            "nullable": true,
+            "description": "Unit price for purchases."
+          },
+          "PurchaseDetails.AccountCode": {
+            "type": "string",
+            "title": "Purchase Details.Account Code",
+            "default": null,
+            "nullable": true,
+            "description": "Account code for purchases."
+          }
+        },
+        "description": "Request schema for creating an item in Xero."
+      }
+    },
+    {
+      "name": "XERO_CREATE_PAYMENT",
+      "description": "Create a payment in Xero to link an invoice with a bank account transaction.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreatePaymentRequest",
+        "required": [
+          "InvoiceID",
+          "AccountID",
+          "Amount"
+        ],
+        "properties": {
+          "Date": {
+            "type": "string",
+            "title": "Date",
+            "default": null,
+            "nullable": true,
+            "description": "Payment date in YYYY-MM-DD format."
+          },
+          "Amount": {
+            "type": "number",
+            "title": "Amount",
+            "description": "Payment amount."
+          },
+          "AccountID": {
+            "type": "string",
+            "title": "Account Id",
+            "description": "Xero Account ID (bank account) for the payment."
+          },
+          "InvoiceID": {
+            "type": "string",
+            "title": "Invoice Id",
+            "description": "Xero Invoice ID that this payment is for."
+          },
+          "Reference": {
+            "type": "string",
+            "title": "Reference",
+            "default": null,
+            "nullable": true,
+            "description": "Payment reference or description."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "CurrencyRate": {
+            "type": "number",
+            "title": "Currency Rate",
+            "default": null,
+            "nullable": true,
+            "description": "Exchange rate for foreign currency payments."
+          }
+        },
+        "description": "Request schema for creating a payment in Xero."
+      }
+    },
+    {
+      "name": "XERO_CREATE_PURCHASE_ORDER",
+      "description": "Create a purchase order in Xero to order goods/services from suppliers.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreatePurchaseOrderRequest",
+        "required": [
+          "ContactID",
+          "LineItems"
+        ],
+        "properties": {
+          "Date": {
+            "type": "string",
+            "title": "Date",
+            "default": null,
+            "nullable": true,
+            "description": "Purchase order date in YYYY-MM-DD format."
+          },
+          "Status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "nullable": true,
+            "description": "Purchase order status: DRAFT, SUBMITTED, AUTHORISED, BILLED."
+          },
+          "ContactID": {
+            "type": "string",
+            "title": "Contact Id",
+            "description": "Xero Contact ID for the purchase order."
+          },
+          "LineItems": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "PurchaseOrderLineItem",
+              "required": [
+                "Description",
+                "Quantity",
+                "UnitAmount"
+              ],
+              "properties": {
+                "TaxType": {
+                  "type": "string",
+                  "title": "Tax Type",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Tax type for the line item (e.g., INPUT, NONE)."
+                },
+                "ItemCode": {
+                  "type": "string",
+                  "title": "Item Code",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Item code if using inventory items."
+                },
+                "Quantity": {
+                  "type": "number",
+                  "title": "Quantity",
+                  "description": "Quantity of the item."
+                },
+                "UnitAmount": {
+                  "type": "number",
+                  "title": "Unit Amount",
+                  "description": "Unit price of the item."
+                },
+                "AccountCode": {
+                  "type": "string",
+                  "title": "Account Code",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Account code for the line item."
+                },
+                "Description": {
+                  "type": "string",
+                  "title": "Description",
+                  "description": "Description of the line item."
+                }
+              },
+              "description": "Line item for a purchase order."
+            },
+            "title": "Line Items",
+            "description": "List of line items for the purchase order."
+          },
+          "Reference": {
+            "type": "string",
+            "title": "Reference",
+            "default": null,
+            "nullable": true,
+            "description": "Reference or purchase order number."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "DeliveryDate": {
+            "type": "string",
+            "title": "Delivery Date",
+            "default": null,
+            "nullable": true,
+            "description": "Expected delivery date in YYYY-MM-DD format."
+          }
+        },
+        "description": "Request schema for creating a purchase order in Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_ACCOUNT",
+      "description": "Retrieve a specific account from the chart of accounts by ID. Returns account code, name, type, and settings.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAccountRequest",
+        "required": [
+          "account_id"
+        ],
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "description": "Xero Account ID to retrieve."
+          }
+        },
+        "description": "Request schema for retrieving a specific account from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_ASSET",
+      "description": "Retrieve a specific asset by ID from Xero. Returns depreciation details and book value.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAssetRequest",
+        "required": [
+          "asset_id"
+        ],
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "title": "Asset Id",
+            "description": "Xero Asset ID to retrieve."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          }
+        },
+        "description": "Request schema for retrieving a specific asset from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_BALANCE_SHEET_REPORT",
+      "description": "Retrieve Balance Sheet report from Xero. Shows assets, liabilities, and equity at a specific date.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetBalanceSheetReportRequest",
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "default": null,
+            "nullable": true,
+            "description": "Balance sheet as of this date in YYYY-MM-DD format."
+          },
+          "periods": {
+            "type": "integer",
+            "title": "Periods",
+            "default": null,
+            "nullable": true,
+            "description": "Number of periods to compare."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe",
+            "default": null,
+            "nullable": true,
+            "description": "Timeframe period: MONTH, QUARTER, or YEAR."
+          },
+          "paymentsOnly": {
+            "type": "boolean",
+            "title": "Payments Only",
+            "default": null,
+            "nullable": true,
+            "description": "Show only cash transactions when true (cash basis)."
+          },
+          "standardLayout": {
+            "type": "boolean",
+            "title": "Standard Layout",
+            "default": null,
+            "nullable": true,
+            "description": "Use standard layout when true."
+          },
+          "trackingOptionID": {
+            "type": "string",
+            "title": "Tracking Option Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by tracking option ID."
+          }
+        },
+        "description": "Request schema for retrieving Balance Sheet report from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_BUDGET",
+      "description": "Retrieve a budget from Xero. Budgets track planned vs actual spending by account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetBudgetRequest",
+        "required": [
+          "budget_id"
+        ],
+        "properties": {
+          "DateTo": {
+            "type": "string",
+            "title": "Date To",
+            "default": null,
+            "nullable": true,
+            "description": "End date for budget data in YYYY-MM-DD format."
+          },
+          "DateFrom": {
+            "type": "string",
+            "title": "Date From",
+            "default": null,
+            "nullable": true,
+            "description": "Start date for budget data in YYYY-MM-DD format."
+          },
+          "budget_id": {
+            "type": "string",
+            "title": "Budget Id",
+            "description": "Xero Budget ID to retrieve."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          }
+        },
+        "description": "Request schema for retrieving a budget from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_CONNECTIONS",
+      "description": "Tool to list active Xero connections. Use when you need to retrieve all current tenant connections for the authenticated user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetConnectionsRequest",
+        "properties": {},
+        "description": "Request model for GetConnections action. No parameters required."
+      }
+    },
+    {
+      "name": "XERO_GET_CONTACT",
+      "description": "Retrieve a specific contact by ID from Xero. Returns full contact details including addresses and phone numbers.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetContactRequest",
+        "required": [
+          "contact_id"
+        ],
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "contact_id": {
+            "type": "string",
+            "title": "Contact Id",
+            "description": "Xero Contact ID to retrieve."
+          }
+        },
+        "description": "Request schema for retrieving a specific contact from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_CONTACTS",
+      "description": "Tool to retrieve a list of contacts. Use when you need up-to-date contact information with filtering, paging, or incremental updates.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetContactsRequest",
+        "properties": {
+          "IDs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "I Ds",
+            "default": null,
+            "examples": [
+              "uuid1,uuid2,uuid3"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of ContactIDs to filter by."
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number for paginated results (requires pageSize)."
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. UpdatedDateUTC DESC."
+          },
+          "where": {
+            "type": "string",
+            "title": "Where",
+            "default": null,
+            "nullable": true,
+            "description": "OData-style filter on optimised fields, e.g. Name=\"ABC\"."
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Number of contacts per page (requires page)."
+          },
+          "ContactID": {
+            "type": "string",
+            "title": "Contact Id",
+            "default": null,
+            "examples": [
+              "bd2270c3-8706-4c11-9cfb-000b551c3f51"
+            ],
+            "nullable": true,
+            "description": "Xero ContactID. If provided, fetches a single contact at /Contacts/{ContactID}."
+          },
+          "searchTerm": {
+            "type": "string",
+            "title": "Search Term",
+            "default": null,
+            "examples": [
+              "peter"
+            ],
+            "nullable": true,
+            "description": "Case-insensitive search across Name, FirstName, LastName, ContactNumber, CompanyNumber, EmailAddress."
+          },
+          "summaryOnly": {
+            "type": "boolean",
+            "title": "Summary Only",
+            "default": null,
+            "nullable": true,
+            "description": "Return a lightweight summary-only response when true."
+          },
+          "includeArchived": {
+            "type": "boolean",
+            "title": "Include Archived",
+            "default": null,
+            "nullable": true,
+            "description": "Include archived contacts when true."
+          },
+          "If-Modified-Since": {
+            "type": "string",
+            "title": "If Modified Since",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2009-11-12T00:00:00"
+            ],
+            "nullable": true,
+            "description": "UTC timestamp (YYYY-MM-DDThh:mm:ss) to set as the If-Modified-Since header; returns only contacts created or modified since this timestamp."
+          }
+        },
+        "description": "Request schema for retrieving contacts from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_INVOICE",
+      "description": "Retrieve a specific invoice by ID from Xero. Returns full invoice details including line items and status.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetInvoiceRequest",
+        "required": [
+          "invoice_id"
+        ],
+        "properties": {
+          "unitdp": {
+            "type": "integer",
+            "title": "Unitdp",
+            "default": null,
+            "nullable": true,
+            "description": "Number of decimal places for unit amounts (default 4)."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "invoice_id": {
+            "type": "string",
+            "title": "Invoice Id",
+            "description": "Xero Invoice ID to retrieve."
+          }
+        },
+        "description": "Request schema for retrieving a specific invoice from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_ITEM",
+      "description": "Retrieve a specific item by ID from Xero. Returns item code, name, pricing, and tax details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetItemRequest",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "description": "Xero Item ID to retrieve."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          }
+        },
+        "description": "Request schema for retrieving a specific item from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_MANUAL_JOURNAL",
+      "description": "Retrieve a specific manual journal by ID from Xero. Returns full details including journal lines.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetManualJournalRequest",
+        "required": [
+          "manual_journal_id"
+        ],
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "manual_journal_id": {
+            "type": "string",
+            "title": "Manual Journal Id",
+            "description": "Xero Manual Journal ID to retrieve."
+          }
+        },
+        "description": "Request schema for retrieving a specific manual journal from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_ORGANISATION",
+      "description": "Retrieve organisation details from Xero. Returns company info, base currency, timezone, financial year settings, etc.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetOrganisationRequest",
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          }
+        },
+        "description": "Request schema for retrieving organisation information from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_PROFIT_LOSS_REPORT",
+      "description": "Retrieve Profit & Loss report from Xero. Shows income, expenses, and net profit for a specified period.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetProfitLossReportRequest",
+        "properties": {
+          "toDate": {
+            "type": "string",
+            "title": "To Date",
+            "default": null,
+            "nullable": true,
+            "description": "End date for the report in YYYY-MM-DD format."
+          },
+          "periods": {
+            "type": "integer",
+            "title": "Periods",
+            "default": null,
+            "nullable": true,
+            "description": "Number of periods to compare (e.g., for month-on-month comparison)."
+          },
+          "fromDate": {
+            "type": "string",
+            "title": "From Date",
+            "default": null,
+            "nullable": true,
+            "description": "Start date for the report in YYYY-MM-DD format."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe",
+            "default": null,
+            "nullable": true,
+            "description": "Timeframe period: MONTH, QUARTER, or YEAR."
+          },
+          "paymentsOnly": {
+            "type": "boolean",
+            "title": "Payments Only",
+            "default": null,
+            "nullable": true,
+            "description": "Show only cash transactions when true (cash basis)."
+          },
+          "standardLayout": {
+            "type": "boolean",
+            "title": "Standard Layout",
+            "default": null,
+            "nullable": true,
+            "description": "Use standard layout when true."
+          },
+          "trackingOptionID": {
+            "type": "string",
+            "title": "Tracking Option Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by tracking option ID."
+          },
+          "trackingOptionID2": {
+            "type": "string",
+            "title": "Tracking Option Id2",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by second tracking option ID."
+          },
+          "trackingCategoryID": {
+            "type": "string",
+            "title": "Tracking Category Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by tracking category ID."
+          },
+          "trackingCategoryID2": {
+            "type": "string",
+            "title": "Tracking Category Id2",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by second tracking category ID."
+          }
+        },
+        "description": "Request schema for retrieving Profit & Loss report from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_PROJECT",
+      "description": "Retrieve a specific project by ID from Xero. Returns project details, deadlines, and status.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetProjectRequest",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "description": "Xero Project ID to retrieve."
+          }
+        },
+        "description": "Request schema for retrieving a specific project from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_PURCHASE_ORDER",
+      "description": "Retrieve a specific purchase order by ID from Xero. Returns full details including line items and status.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetPurchaseOrderRequest",
+        "required": [
+          "purchase_order_id"
+        ],
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "purchase_order_id": {
+            "type": "string",
+            "title": "Purchase Order Id",
+            "description": "Xero Purchase Order ID to retrieve."
+          }
+        },
+        "description": "Request schema for retrieving a specific purchase order from Xero."
+      }
+    },
+    {
+      "name": "XERO_GET_QUOTES",
+      "description": "Tool to retrieve a list of quotes. Use when you need to list, filter, or page through sales quotes. Use after obtaining the tenant ID via connections.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetQuotesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for paginated results (1-based)."
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "examples": [
+              "ExpiryDate DESC"
+            ],
+            "nullable": true,
+            "description": "Order by any element, e.g., ExpiryDate ASC."
+          },
+          "DateTo": {
+            "type": "string",
+            "title": "Date To",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-12-31"
+            ],
+            "nullable": true,
+            "description": "Filter for quotes on or before this date (YYYY-MM-DD)."
+          },
+          "Status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "examples": [
+              "DRAFT",
+              "SENT",
+              "ACCEPTED",
+              "DECLINED"
+            ],
+            "nullable": true,
+            "description": "Filter for quotes of a particular status."
+          },
+          "DateFrom": {
+            "type": "string",
+            "title": "Date From",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-01-01"
+            ],
+            "nullable": true,
+            "description": "Filter for quotes on or after this date (YYYY-MM-DD)."
+          },
+          "ContactID": {
+            "type": "string",
+            "title": "Contact Id",
+            "default": null,
+            "examples": [
+              "bd2270c3-8706-4c11-9cfb-000b551c3f51"
+            ],
+            "nullable": true,
+            "description": "Filter for quotes belonging to a particular contact by ContactID."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "examples": [
+              "213bd52c-ee3b-4ae7-8175-aa58c6720f28"
+            ],
+            "nullable": true,
+            "description": "Xero Tenant ID. Optional - will auto-fetch from connections if not provided."
+          },
+          "QuoteNumber": {
+            "type": "string",
+            "title": "Quote Number",
+            "default": null,
+            "examples": [
+              "QU-0001"
+            ],
+            "nullable": true,
+            "description": "Filter by quote number."
+          },
+          "ExpiryDateTo": {
+            "type": "string",
+            "title": "Expiry Date To",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-12-31"
+            ],
+            "nullable": true,
+            "description": "Filter for quotes expiring on or before this date (YYYY-MM-DD)."
+          },
+          "ExpiryDateFrom": {
+            "type": "string",
+            "title": "Expiry Date From",
+            "format": "date",
+            "default": null,
+            "examples": [
+              "2023-01-01"
+            ],
+            "nullable": true,
+            "description": "Filter for quotes expiring on or after this date (YYYY-MM-DD)."
+          },
+          "If-Modified-Since": {
+            "type": "string",
+            "title": "If Modified Since",
+            "default": null,
+            "examples": [
+              "2023-01-02T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Only return quotes modified after this UTC timestamp in RFC3339 format."
+          }
+        },
+        "description": "Request schema for retrieving quotes from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_ACCOUNTS",
+      "description": "Retrieve chart of accounts from Xero. Returns all accounting codes used for categorizing transactions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAccountsRequest",
+        "properties": {
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. Code ASC or Name DESC."
+          },
+          "where": {
+            "type": "string",
+            "title": "Where",
+            "default": null,
+            "nullable": true,
+            "description": "OData-style filter, e.g. Status==\"ACTIVE\" AND Type==\"EXPENSE\""
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          }
+        },
+        "description": "Request schema for listing chart of accounts from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_ASSETS",
+      "description": "Retrieve fixed assets from Xero. Assets track depreciation and book value of capital equipment.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAssetsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number for paginated results."
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by asset status: DRAFT, REGISTERED, DISPOSED."
+          },
+          "orderBy": {
+            "type": "string",
+            "title": "Order By",
+            "default": null,
+            "nullable": true,
+            "description": "Sort field: AssetName, AssetNumber, PurchaseDate."
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "nullable": true,
+            "description": "Number of assets per page."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "sortDirection": {
+            "type": "string",
+            "title": "Sort Direction",
+            "default": null,
+            "nullable": true,
+            "description": "Sort direction: ASC or DESC."
+          }
+        },
+        "description": "Request schema for listing assets from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_ATTACHMENTS",
+      "description": "List all attachments for a specific entity in Xero (invoice, contact, etc.).",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAttachmentsRequest",
+        "required": [
+          "entity_type",
+          "entity_id"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id",
+            "description": "ID of the entity to list attachments for."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type",
+            "description": "Entity type: Invoices, Contacts, BankTransactions, CreditNotes, PurchaseOrders, etc."
+          }
+        },
+        "description": "Request schema for listing attachments from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_BANK_TRANSACTIONS",
+      "description": "Retrieve bank transactions from Xero. Includes spend (payments) and receive (receipts) transactions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListBankTransactionsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number for paginated results."
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. Date DESC or UpdatedDateUTC ASC."
+          },
+          "where": {
+            "type": "string",
+            "title": "Where",
+            "default": null,
+            "nullable": true,
+            "description": "OData-style filter, e.g. Status==\"AUTHORISED\" AND Type==\"SPEND\""
+          },
+          "unitdp": {
+            "type": "integer",
+            "title": "Unitdp",
+            "default": null,
+            "nullable": true,
+            "description": "Decimal places for unit amounts (default 4)."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "If-Modified-Since": {
+            "type": "string",
+            "title": "If Modified Since",
+            "format": "date-time",
+            "default": null,
+            "nullable": true,
+            "description": "UTC timestamp to return only bank transactions modified since this date."
+          }
+        },
+        "description": "Request schema for listing bank transactions from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_CREDIT_NOTES",
+      "description": "Retrieve list of credit notes from Xero. Credit notes are issued to reduce amounts owed by customers.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListCreditNotesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number for paginated results."
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. Date DESC or CreditNoteNumber ASC."
+          },
+          "where": {
+            "type": "string",
+            "title": "Where",
+            "default": null,
+            "nullable": true,
+            "description": "OData-style filter, e.g. Status==\"AUTHORISED\""
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "If-Modified-Since": {
+            "type": "string",
+            "title": "If Modified Since",
+            "format": "date-time",
+            "default": null,
+            "nullable": true,
+            "description": "UTC timestamp to return only credit notes modified since this date."
+          }
+        },
+        "description": "Request schema for listing credit notes from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_FILES",
+      "description": "Retrieve files from Xero Files. Lists documents stored in Xero's file management system.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFilesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number for paginated results."
+          },
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "default": null,
+            "nullable": true,
+            "description": "Sort field: Name, Size, CreatedDateUTC."
+          },
+          "folderId": {
+            "type": "string",
+            "title": "Folder Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter files by folder ID."
+          },
+          "pagesize": {
+            "type": "integer",
+            "title": "Pagesize",
+            "default": null,
+            "nullable": true,
+            "description": "Number of files per page (max 100)."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          }
+        },
+        "description": "Request schema for listing files from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_FOLDERS",
+      "description": "Retrieve folders from Xero Files. Lists document folders in Xero's file management system.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFoldersRequest",
+        "properties": {
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "default": null,
+            "nullable": true,
+            "description": "Sort field: Name, CreatedDateUTC."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          }
+        },
+        "description": "Request schema for listing folders from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_INVOICES",
+      "description": "Retrieve a list of invoices from Xero. Supports filtering by status, contact, date range, and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInvoicesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number for paginated results."
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. Date DESC or InvoiceNumber ASC."
+          },
+          "where": {
+            "type": "string",
+            "title": "Where",
+            "default": null,
+            "nullable": true,
+            "description": "OData-style filter, e.g. Status==\"AUTHORISED\" AND Total>100"
+          },
+          "Statuses": {
+            "type": "string",
+            "title": "Statuses",
+            "default": null,
+            "nullable": true,
+            "description": "Comma-separated list of invoice statuses to filter by (e.g., DRAFT, SUBMITTED, AUTHORISED, PAID)."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "ContactIDs": {
+            "type": "string",
+            "title": "Contact I Ds",
+            "default": null,
+            "nullable": true,
+            "description": "Comma-separated list of Contact IDs to filter invoices by contact."
+          },
+          "InvoiceIDs": {
+            "type": "string",
+            "title": "Invoice I Ds",
+            "default": null,
+            "nullable": true,
+            "description": "Comma-separated list of Invoice IDs to filter by."
+          },
+          "createdByMyApp": {
+            "type": "boolean",
+            "title": "Created By My App",
+            "default": null,
+            "nullable": true,
+            "description": "Filter to invoices created by your app when true."
+          },
+          "includeArchived": {
+            "type": "boolean",
+            "title": "Include Archived",
+            "default": null,
+            "nullable": true,
+            "description": "Include archived invoices when true."
+          },
+          "If-Modified-Since": {
+            "type": "string",
+            "title": "If Modified Since",
+            "format": "date-time",
+            "default": null,
+            "nullable": true,
+            "description": "UTC timestamp to return only invoices modified since this date."
+          }
+        },
+        "description": "Request schema for listing invoices from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_ITEMS",
+      "description": "Retrieve items (inventory/products) from Xero. Items can be tracked for sales and/or purchases.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListItemsRequest",
+        "properties": {
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. Code ASC or Name DESC."
+          },
+          "where": {
+            "type": "string",
+            "title": "Where",
+            "default": null,
+            "nullable": true,
+            "description": "OData-style filter, e.g. IsSold==true AND IsPurchased==true"
+          },
+          "unitdp": {
+            "type": "integer",
+            "title": "Unitdp",
+            "default": null,
+            "nullable": true,
+            "description": "Number of decimal places for unit amounts (default 4)."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          }
+        },
+        "description": "Request schema for listing items (inventory) from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_JOURNALS",
+      "description": "Retrieve journals from Xero. Journals show the accounting entries for all transactions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListJournalsRequest",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Offset for pagination."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "paymentsOnly": {
+            "type": "boolean",
+            "title": "Payments Only",
+            "default": null,
+            "nullable": true,
+            "description": "Filter to payment journals only when true."
+          },
+          "If-Modified-Since": {
+            "type": "string",
+            "title": "If Modified Since",
+            "format": "date-time",
+            "default": null,
+            "nullable": true,
+            "description": "UTC timestamp to return only journals modified since this date."
+          }
+        },
+        "description": "Request schema for listing journals from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_MANUAL_JOURNALS",
+      "description": "Retrieve manual journals from Xero. Manual journals are used for period-end adjustments and corrections.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListManualJournalsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number for paginated results."
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. Date DESC."
+          },
+          "where": {
+            "type": "string",
+            "title": "Where",
+            "default": null,
+            "nullable": true,
+            "description": "OData-style filter, e.g. Status==\"POSTED\""
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "If-Modified-Since": {
+            "type": "string",
+            "title": "If Modified Since",
+            "format": "date-time",
+            "default": null,
+            "nullable": true,
+            "description": "UTC timestamp to return only manual journals modified since this date."
+          }
+        },
+        "description": "Request schema for listing manual journals from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_PAYMENTS",
+      "description": "Retrieve list of payments from Xero. Payments link invoices to bank transactions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPaymentsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number for paginated results."
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. Date DESC or Amount ASC."
+          },
+          "where": {
+            "type": "string",
+            "title": "Where",
+            "default": null,
+            "nullable": true,
+            "description": "OData-style filter, e.g. Status==\"AUTHORISED\""
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "If-Modified-Since": {
+            "type": "string",
+            "title": "If Modified Since",
+            "format": "date-time",
+            "default": null,
+            "nullable": true,
+            "description": "UTC timestamp to return only payments modified since this date."
+          }
+        },
+        "description": "Request schema for listing payments from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_PROJECTS",
+      "description": "Retrieve projects from Xero. Projects track time and costs for client work.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListProjectsRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number for paginated results."
+          },
+          "states": {
+            "type": "string",
+            "title": "States",
+            "default": null,
+            "nullable": true,
+            "description": "Comma-separated project states: INPROGRESS, CLOSED."
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": null,
+            "nullable": true,
+            "description": "Number of projects per page."
+          },
+          "contactID": {
+            "type": "string",
+            "title": "Contact Id",
+            "default": null,
+            "nullable": true,
+            "description": "Filter projects by contact ID."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "projectIds": {
+            "type": "string",
+            "title": "Project Ids",
+            "default": null,
+            "nullable": true,
+            "description": "Comma-separated list of project IDs to filter by."
+          }
+        },
+        "description": "Request schema for listing projects from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_PURCHASE_ORDERS",
+      "description": "Retrieve list of purchase orders from Xero. Purchase orders track goods/services ordered from suppliers.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPurchaseOrdersRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Page number for paginated results."
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. Date DESC or PurchaseOrderNumber ASC."
+          },
+          "DateTo": {
+            "type": "string",
+            "title": "Date To",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by date to (YYYY-MM-DD)."
+          },
+          "Status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by status: DRAFT, SUBMITTED, AUTHORISED, BILLED, DELETED."
+          },
+          "DateFrom": {
+            "type": "string",
+            "title": "Date From",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by date from (YYYY-MM-DD)."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "If-Modified-Since": {
+            "type": "string",
+            "title": "If Modified Since",
+            "format": "date-time",
+            "default": null,
+            "nullable": true,
+            "description": "UTC timestamp to return only purchase orders modified since this date."
+          }
+        },
+        "description": "Request schema for listing purchase orders from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_TAX_RATES",
+      "description": "Retrieve tax rates from Xero. Shows available tax codes and rates for the organization.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTaxRatesRequest",
+        "properties": {
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. Name ASC."
+          },
+          "where": {
+            "type": "string",
+            "title": "Where",
+            "default": null,
+            "nullable": true,
+            "description": "OData-style filter, e.g. Status==\"ACTIVE\""
+          },
+          "TaxType": {
+            "type": "string",
+            "title": "Tax Type",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by specific tax type."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          }
+        },
+        "description": "Request schema for listing tax rates from Xero."
+      }
+    },
+    {
+      "name": "XERO_LIST_TRACKING_CATEGORIES",
+      "description": "Retrieve tracking categories from Xero. Tracking categories are used to segment data for reporting (e.g., departments, regions).",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTrackingCategoriesRequest",
+        "properties": {
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort by field, e.g. Name ASC."
+          },
+          "where": {
+            "type": "string",
+            "title": "Where",
+            "default": null,
+            "nullable": true,
+            "description": "OData-style filter, e.g. Status==\"ACTIVE\""
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "includeArchived": {
+            "type": "boolean",
+            "title": "Include Archived",
+            "default": null,
+            "nullable": true,
+            "description": "Include archived tracking categories when true."
+          }
+        },
+        "description": "Request schema for listing tracking categories from Xero."
+      }
+    },
+    {
+      "name": "XERO_POST_INVOICE_UPDATE",
+      "description": "Tool to update an existing invoice. Use when you need to modify the details of an invoice after it's been created.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PostInvoiceUpdateRequest",
+        "required": [
+          "Invoices"
+        ],
+        "properties": {
+          "unitdp": {
+            "type": "integer",
+            "title": "Unitdp",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Number of decimal places for unit amounts."
+          },
+          "Invoices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "InvoiceUpdate",
+              "properties": {
+                "Url": {
+                  "type": "string",
+                  "title": "Url",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Reference URL for the invoice."
+                },
+                "Date": {
+                  "type": "string",
+                  "title": "Date",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Issue date for the invoice (YYYY-MM-DD)."
+                },
+                "Status": {
+                  "enum": [
+                    "DRAFT",
+                    "SUBMITTED",
+                    "AUTHORISED",
+                    "DELETED",
+                    "VOIDED"
+                  ],
+                  "type": "string",
+                  "title": "Status",
+                  "default": null,
+                  "nullable": true,
+                  "description": "New status for the invoice."
+                },
+                "Contact": {
+                  "type": "object",
+                  "title": "ContactUpdate",
+                  "default": null,
+                  "nullable": true,
+                  "required": [
+                    "ContactID"
+                  ],
+                  "properties": {
+                    "ContactID": {
+                      "type": "string",
+                      "title": "Contact Id",
+                      "description": "Xero identifier for the contact."
+                    }
+                  },
+                  "description": "Contact reference for updating an invoice.",
+                  "additionalProperties": false
+                },
+                "DueDate": {
+                  "type": "string",
+                  "title": "Due Date",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Due date for the invoice (YYYY-MM-DD)."
+                },
+                "LineItems": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "LineItemUpdate",
+                    "properties": {
+                      "TaxType": {
+                        "type": "string",
+                        "title": "Tax Type",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Tax type for the line item."
+                      },
+                      "Quantity": {
+                        "type": "number",
+                        "title": "Quantity",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Quantity of the line item."
+                      },
+                      "Tracking": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "title": "TrackingCategoryUpdate",
+                          "required": [
+                            "Name",
+                            "Option"
+                          ],
+                          "properties": {
+                            "Name": {
+                              "type": "string",
+                              "title": "Name",
+                              "description": "Name of the tracking category."
+                            },
+                            "Option": {
+                              "type": "string",
+                              "title": "Option",
+                              "description": "Tracking option name."
+                            }
+                          },
+                          "description": "Tracking category update details."
+                        },
+                        "title": "Tracking",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Tracking categories for the line item."
+                      },
+                      "LineItemID": {
+                        "type": "string",
+                        "title": "Line Item Id",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Xero identifier for the line item. Include to update existing items."
+                      },
+                      "UnitAmount": {
+                        "type": "number",
+                        "title": "Unit Amount",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Unit amount for the line item."
+                      },
+                      "AccountCode": {
+                        "type": "string",
+                        "title": "Account Code",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Account code for the line item."
+                      },
+                      "Description": {
+                        "type": "string",
+                        "title": "Description",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Description of the line item."
+                      },
+                      "DiscountRate": {
+                        "type": "number",
+                        "title": "Discount Rate",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Discount rate (%) for the line item."
+                      },
+                      "DiscountAmount": {
+                        "type": "number",
+                        "title": "Discount Amount",
+                        "default": null,
+                        "nullable": true,
+                        "description": "Discount amount for the line item."
+                      }
+                    },
+                    "description": "Line item details for updating an invoice."
+                  },
+                  "title": "Line Items",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Line items for the invoice."
+                },
+                "CurrencyCode": {
+                  "type": "string",
+                  "title": "Currency Code",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Currency code (3-letter)."
+                },
+                "CurrencyRate": {
+                  "type": "number",
+                  "title": "Currency Rate",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Currency exchange rate."
+                },
+                "InvoiceNumber": {
+                  "type": "string",
+                  "title": "Invoice Number",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Invoice number identifier (if using number path)."
+                },
+                "SentToContact": {
+                  "type": "boolean",
+                  "title": "Sent To Contact",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Mark invoice as sent to contact."
+                },
+                "BrandingThemeID": {
+                  "type": "string",
+                  "title": "Branding Theme Id",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Branding theme identifier."
+                },
+                "LineAmountTypes": {
+                  "enum": [
+                    "Exclusive",
+                    "Inclusive",
+                    "NoTax"
+                  ],
+                  "type": "string",
+                  "title": "Line Amount Types",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Line amount calculation method."
+                },
+                "PlannedPaymentDate": {
+                  "type": "string",
+                  "title": "Planned Payment Date",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Planned payment date (YYYY-MM-DD)."
+                },
+                "ExpectedPaymentDate": {
+                  "type": "string",
+                  "title": "Expected Payment Date",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Expected payment date (YYYY-MM-DD)."
+                }
+              },
+              "description": "Invoice details for update operation."
+            },
+            "title": "Invoices",
+            "description": "List containing invoice update definitions (one item)."
+          },
+          "InvoiceID": {
+            "type": "string",
+            "title": "Invoice Id",
+            "default": null,
+            "nullable": true,
+            "description": "Unique identifier (UUID) of the invoice."
+          },
+          "InvoiceNumber": {
+            "type": "string",
+            "title": "Invoice Number",
+            "default": null,
+            "nullable": true,
+            "description": "Invoice number identifier."
+          }
+        },
+        "description": "Request schema for updating an existing invoice."
+      }
+    },
+    {
+      "name": "XERO_UPDATE_CONTACT",
+      "description": "Update an existing contact in Xero. Only provided fields will be updated.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateContactRequest",
+        "required": [
+          "contact_id"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "nullable": true,
+            "description": "Full name of the contact or organization."
+          },
+          "LastName": {
+            "type": "string",
+            "title": "Last Name",
+            "default": null,
+            "nullable": true,
+            "description": "Last name of the contact person."
+          },
+          "FirstName": {
+            "type": "string",
+            "title": "First Name",
+            "default": null,
+            "nullable": true,
+            "description": "First name of the contact person."
+          },
+          "TaxNumber": {
+            "type": "string",
+            "title": "Tax Number",
+            "default": null,
+            "nullable": true,
+            "description": "Tax number (VAT/ABN/GST number)."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "contact_id": {
+            "type": "string",
+            "title": "Contact Id",
+            "description": "Xero Contact ID to update."
+          },
+          "EmailAddress": {
+            "type": "string",
+            "title": "Email Address",
+            "default": null,
+            "nullable": true,
+            "description": "Email address of the contact."
+          },
+          "phone_number": {
+            "type": "string",
+            "title": "Phone Number",
+            "default": null,
+            "nullable": true,
+            "description": "Primary phone number (will update DEFAULT phone type)."
+          },
+          "AccountNumber": {
+            "type": "string",
+            "title": "Account Number",
+            "default": null,
+            "nullable": true,
+            "description": "Account reference number for the contact."
+          },
+          "mobile_number": {
+            "type": "string",
+            "title": "Mobile Number",
+            "default": null,
+            "nullable": true,
+            "description": "Mobile phone number (will update MOBILE phone type)."
+          },
+          "DefaultCurrency": {
+            "type": "string",
+            "title": "Default Currency",
+            "default": null,
+            "nullable": true,
+            "description": "Default currency code (e.g., USD, EUR)."
+          },
+          "BankAccountDetails": {
+            "type": "string",
+            "title": "Bank Account Details",
+            "default": null,
+            "nullable": true,
+            "description": "Bank account details for the contact."
+          }
+        },
+        "description": "Request schema for updating a contact in Xero."
+      }
+    },
+    {
+      "name": "XERO_UPLOAD_ATTACHMENT",
+      "description": "Upload a file attachment to a Xero entity (invoice, contact, etc.). Supports PDF, images, and documents.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UploadAttachmentRequest",
+        "required": [
+          "entity_type",
+          "entity_id",
+          "file_to_upload",
+          "filename"
+        ],
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename",
+            "description": "Filename for the attachment."
+          },
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id",
+            "description": "ID of the entity to attach the file to."
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": null,
+            "nullable": true,
+            "description": "Xero tenant/organization ID. If not provided, uses the first connected tenant."
+          },
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type",
+            "description": "Entity type to attach to: Invoices, Contacts, BankTransactions, CreditNotes, etc."
+          },
+          "file_to_upload": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "File to upload as attachment.",
+            "file_uploadable": true
+          },
+          "include_online": {
+            "type": "boolean",
+            "title": "Include Online",
+            "default": null,
+            "nullable": true,
+            "description": "Include online invoice in attachment."
+          }
+        },
+        "description": "Request schema for uploading an attachment to Xero."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:58:55.721776+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,1954 @@
+{
+  "qualifiedName": "boring/boring",
+  "displayName": "boring",
+  "description": "Automate planning, implementation, and verification of code across your projects. Ensure reliable outcomes with spec-driven workflows, rigorous checks, and iterative auto-fix. Work seamlessly inside Cursor, VS Code, and Claude Desktop with a consistent, privacy-first experience.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/0989e1e3-d942-4cf1-a549-4bee5fb2aecf.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/boring/boring",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/boring/boring/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "properties": {
+          "LOG_LEVEL": {
+            "type": "string",
+            "default": "INFO",
+            "description": "Logging level (DEBUG, INFO, WARNING, ERROR)."
+          },
+          "GOOGLE_API_KEY": {
+            "type": "string",
+            "description": "Set your Google Gemini API Key (optional if using environment variable or Vertex AI)."
+          },
+          "BORING_MCP_MODE": {
+            "type": "string",
+            "default": "1",
+            "description": "Enable MCP mode. Set to '1' for enabled, '0' for disabled."
+          },
+          "PROJECT_ROOT_DEFAULT": {
+            "type": "string",
+            "default": ".",
+            "description": "Default path for new projects if not specified."
+          },
+          "BORING_ALLOW_DANGEROUS": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allow dangerous operations without prompt (NOT RECOMMENDED)."
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "run_boring",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true
+      },
+      "description": "Run autonomous development loop",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "task_description"
+        ],
+        "properties": {
+          "use_cli": {
+            "type": "boolean",
+            "default": null,
+            "description": "Whether to use Gemini CLI (supports extensions). Defaults to auto-detect."
+          },
+          "max_loops": {
+            "type": "integer",
+            "default": 5,
+            "description": "Maximum number of loop iterations (1-20)"
+          },
+          "interactive": {
+            "type": "boolean",
+            "default": null,
+            "description": "Whether to run in interactive mode (auto-detected usually)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          },
+          "task_description": {
+            "type": "string",
+            "description": "Description of the development task to complete (e.g., 'Fix login validation bug')"
+          },
+          "verification_level": {
+            "type": "string",
+            "default": "STANDARD",
+            "description": "Verification level: BASIC (syntax), STANDARD (lint), FULL (tests), SEMANTIC (judge)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_health_check",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Check system health",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_quickstart",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Get quick start guide",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_status",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Get project status",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_done",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false
+      },
+      "description": "Report completion with notification",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "The completion message to display to the user"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_verify",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Verify project code",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "default": "STANDARD",
+            "description": "Verification level: BASIC (syntax), STANDARD (lint), FULL (tests), SEMANTIC (judge)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_verify_file",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Verify single file",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "file_path"
+        ],
+        "properties": {
+          "level": {
+            "type": "string",
+            "default": "STANDARD",
+            "description": "Verification level: BASIC, STANDARD, FULL"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "Relative path to the file to verify (from project root)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "speckit_plan",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Create implementation plan",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string",
+            "default": null,
+            "description": "Optional additional context about requirements or constraints"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "speckit_tasks",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Create task checklist",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string",
+            "default": null,
+            "description": "Optional context about the implementation plan"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "speckit_analyze",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Analyze spec consistency",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string",
+            "default": null,
+            "description": "Optional focus areas or specific files to analyze"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "speckit_clarify",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Clarify requirements",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string",
+            "default": null,
+            "description": "Optional specific areas that need clarification"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "speckit_constitution",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Create project constitution",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string",
+            "default": null,
+            "description": "Optional project vision or constraints"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "speckit_checklist",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Create quality checklist",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string",
+            "default": null,
+            "description": "Optional specific feature or requirement to check"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "speckit_evolve_workflow",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false
+      },
+      "description": "Evolve a workflow template",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow_name",
+          "new_content",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Why this evolution is needed"
+          },
+          "new_content": {
+            "type": "string",
+            "description": "Complete new workflow content (markdown) with frontmatter"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          },
+          "workflow_name": {
+            "type": "string",
+            "description": "Workflow to modify (without .md extension, e.g. 'speckit-plan')"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "speckit_reset_workflow",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false
+      },
+      "description": "Reset workflow to default",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow_name"
+        ],
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          },
+          "workflow_name": {
+            "type": "string",
+            "description": "Workflow to reset (e.g., 'speckit-plan')"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "speckit_backup_workflows",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "description": "Backup all workflows",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "speckit_workflow_status",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Check workflow status",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow_name"
+        ],
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          },
+          "workflow_name": {
+            "type": "string",
+            "description": "Workflow to check"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_install_workflow",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false
+      },
+      "description": "Install workflow from file/URL",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "source"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Local .bwf.json file path OR a URL (http/https)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_export_workflow",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false
+      },
+      "description": "Export workflow to file",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Workflow name (e.g., 'speckit-plan' without extension)"
+          },
+          "author": {
+            "type": "string",
+            "default": "Anonymous",
+            "description": "Name of the creator"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_list_workflows",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "List available workflows",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_learn",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false
+      },
+      "description": "Learn patterns from memory",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_create_rubrics",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false
+      },
+      "description": "Create evaluation rubrics",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_brain_summary",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Show knowledge base summary",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_apply_patch",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false
+      },
+      "description": "Apply text patch to file",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "file_path",
+          "search_text",
+          "replace_text"
+        ],
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Relative path to the file (from project root)"
+          },
+          "search_text": {
+            "type": "string",
+            "description": "Exact text to search for (must match exactly)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          },
+          "replace_text": {
+            "type": "string",
+            "description": "Text to replace with"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_extract_patches",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false
+      },
+      "description": "Extract patches from AI output",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ai_output"
+        ],
+        "properties": {
+          "dry_run": {
+            "type": "boolean",
+            "default": false,
+            "description": "If True, only parse and report patches without applying"
+          },
+          "ai_output": {
+            "type": "string",
+            "description": "The raw AI output containing patches"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_hooks_install",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "description": "Install Git hooks",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_hooks_uninstall",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "description": "Uninstall Git hooks",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_hooks_status",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Check Git hooks status",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_setup_extensions",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "description": "Install recommended extensions",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_notebooklm_guide",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Get NotebookLM setup guide",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_evaluate",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Evaluate code quality (LLM Judge)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "properties": {
+          "level": {
+            "type": "string",
+            "default": "DIRECT",
+            "description": "Evaluation technique: DIRECT (score 1-5), PAIRWISE (comparison)"
+          },
+          "target": {
+            "type": "string",
+            "description": "File path or content to evaluate"
+          },
+          "context": {
+            "type": "string",
+            "default": "",
+            "description": "Optional context or requirements"
+          },
+          "interactive": {
+            "type": "boolean",
+            "default": false,
+            "description": "If True, returns the PROMPT instead of executing it. Useful for IDE AI."
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_list_plugins",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "description": "List all available plugins locally and globally",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Path to project root (default: current directory)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_run_plugin",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true
+      },
+      "description": "Execute a specific plugin by name",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "args": {
+            "type": "object",
+            "default": null,
+            "description": "Arguments to pass to the plugin",
+            "additionalProperties": true
+          },
+          "name": {
+            "type": "string",
+            "description": "Plugin name to execute"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Path to project root (default: current directory)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_reload_plugins",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "description": "Reload all plugins from disk",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Path to project root (default: current directory)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_workspace_add",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false
+      },
+      "description": "Register a new project in the workspace",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name",
+          "path"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique project name"
+          },
+          "path": {
+            "type": "string",
+            "description": "Path to project root"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": null,
+            "description": "Optional tags for filtering"
+          },
+          "description": {
+            "type": "string",
+            "default": "",
+            "description": "Optional description"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_workspace_remove",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Unregister a project from the workspace",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of project to remove"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_workspace_list",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "description": "List all registered projects",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "string",
+            "default": null,
+            "description": "Optional filter by tag"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_workspace_switch",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "description": "Switch active project context",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the project to switch context to"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_auto_fix",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Run automated fix loop",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional project root path"
+          },
+          "max_iterations": {
+            "type": "integer",
+            "default": 3,
+            "description": "Maximum fix attempts (default: 3)"
+          },
+          "verification_level": {
+            "type": "string",
+            "default": "STANDARD",
+            "description": "BASIC, STANDARD, or FULL"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_suggest_next",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "description": "Get AI suggestions for next steps",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 3,
+            "description": "Maximum suggestions to return"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional project root path"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_get_progress",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "description": "Check status of long-running task",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "description": "ID of the task to check"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_rag_index",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "description": "Index codebase for RAG",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "force": {
+            "type": "boolean",
+            "default": false,
+            "description": "If True, rebuild index even if it exists"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_rag_search",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "description": "Semantic code search",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "What you're looking for (e.g., 'authentication error handling')"
+          },
+          "file_filter": {
+            "type": "string",
+            "default": null,
+            "description": "Filter by file path substring (e.g., 'auth' or 'src/api')"
+          },
+          "max_results": {
+            "type": "integer",
+            "default": 10,
+            "description": "Maximum number of results (default 10)"
+          },
+          "expand_graph": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include related code via dependency graph (default True)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_rag_status",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "description": "Check RAG index health and statistics",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_rag_context",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "description": "Get code context (callers/callees)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "file_path"
+        ],
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Path to the file (relative to project root)"
+          },
+          "class_name": {
+            "type": "string",
+            "default": null,
+            "description": "Name of the class (if getting class context)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          },
+          "function_name": {
+            "type": "string",
+            "default": null,
+            "description": "Name of the function to get context for"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_rag_expand",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "description": "Recursively expand code dependencies",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "chunk_id"
+        ],
+        "properties": {
+          "depth": {
+            "type": "integer",
+            "default": 2,
+            "description": "How many layers to expand (default 2)"
+          },
+          "chunk_id": {
+            "type": "string",
+            "description": "The chunk ID to expand from (from search results)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_multi_agent",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Run full multi-agent workflow (Architect -> Coder -> Reviewer)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "task"
+        ],
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "What to build/fix (detailed description)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          },
+          "auto_approve_plans": {
+            "type": "boolean",
+            "default": false,
+            "description": "Skip human approval for plans (default False)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_agent_plan",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Run Architect agent to create implementation plan",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "task"
+        ],
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "What to build/fix"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_agent_review",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Run Reviewer agent on existing code",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file_paths": {
+            "type": "string",
+            "default": null,
+            "description": "Comma-separated list of files to review"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "boring_shadow_status",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "description": "Get Shadow Mode status and pending operations",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_shadow_approve",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "description": "Approve a pending Shadow Mode operation",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "operation_id"
+        ],
+        "properties": {
+          "note": {
+            "type": "string",
+            "default": null,
+            "description": "Optional note explaining the approval"
+          },
+          "operation_id": {
+            "type": "string",
+            "description": "ID of the operation to approve (from shadow_status)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_shadow_reject",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "description": "Reject a pending Shadow Mode operation",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "operation_id"
+        ],
+        "properties": {
+          "note": {
+            "type": "string",
+            "default": null,
+            "description": "Optional note explaining the rejection"
+          },
+          "operation_id": {
+            "type": "string",
+            "description": "ID of the operation to reject"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_shadow_mode",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "description": "Change Shadow Mode protection level",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "description": "New mode (DISABLED, ENABLED, or STRICT)"
+          },
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "boring_shadow_clear",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Clear all pending Shadow Mode operations",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "default": null,
+            "description": "Optional explicit path to project root"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:15:47.826142+00:00",
+    "source": "smithery"
+  }
+}

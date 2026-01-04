@@ -1,0 +1,871 @@
+{
+  "qualifiedName": "zoho_invoice",
+  "displayName": "Zoho invoice",
+  "description": "Zoho Invoice simplifies billing, recurring payments, and expense management, helping freelancers and small businesses send professional invoices",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//zoho.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/zoho_invoice",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/zoho_invoice/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "ZOHO_INVOICE_GET_ITEM",
+      "description": "Tool to retrieve the details of a specific item by item_id. Use when you need to fetch an item's data after confirming its existence.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetItemRequest",
+        "required": [
+          "organization_id",
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "903000000045027"
+            ],
+            "description": "Unique ID of the item to retrieve"
+          },
+          "organization_id": {
+            "type": "string",
+            "title": "Organization Id",
+            "examples": [
+              "10234695"
+            ],
+            "description": "The Zoho Invoice organization ID (X-com-zoho-invoice-organizationid header)"
+          }
+        },
+        "description": "Request parameters for GetItem."
+      }
+    },
+    {
+      "name": "ZOHO_INVOICE_LIST_CONTACTS",
+      "description": "Tool to list contacts. Use after obtaining the organization ID to retrieve contacts with optional filters and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListContactsRequest",
+        "required": [
+          "organization_id"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination, starts at 1"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by email ID of the contact person (exact match)"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Phone",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by phone number of the contact person (exact match)"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by any of the address fields (exact match)"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Number of contacts per page, max 200"
+          },
+          "filter_by": {
+            "enum": [
+              "Status.All",
+              "Status.Active",
+              "Status.Inactive",
+              "Status.Duplicate",
+              "Status.Crm"
+            ],
+            "type": "string",
+            "title": "Filter By",
+            "default": null,
+            "nullable": true,
+            "description": "Filter contacts by status"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by last name (exact match)"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by first name (exact match)"
+          },
+          "search_text": {
+            "type": "string",
+            "title": "Search Text",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by contact name or notes"
+          },
+          "sort_column": {
+            "enum": [
+              "contact_name",
+              "first_name",
+              "last_name",
+              "email",
+              "outstanding_receivable_amount",
+              "created_time",
+              "last_modified_time"
+            ],
+            "type": "string",
+            "title": "Sort Column",
+            "default": null,
+            "nullable": true,
+            "description": "Sort contacts by the specified column"
+          },
+          "company_name": {
+            "type": "string",
+            "title": "Company Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by company name (exact match)"
+          },
+          "contact_name": {
+            "type": "string",
+            "title": "Contact Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by contact name (exact match)"
+          },
+          "email_contains": {
+            "type": "string",
+            "title": "Email Contains",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by email ID of the contact person (substring match)"
+          },
+          "phone_contains": {
+            "type": "string",
+            "title": "Phone Contains",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by phone number of the contact person (substring match)"
+          },
+          "organization_id": {
+            "type": "string",
+            "title": "Organization Id",
+            "examples": [
+              "60000000002"
+            ],
+            "description": "The Zoho organization ID. Must be passed as query parameter 'organization_id'."
+          },
+          "zcrm_account_id": {
+            "type": "string",
+            "title": "Zcrm Account Id",
+            "default": null,
+            "nullable": true,
+            "description": "CRM Account ID for the contact"
+          },
+          "zcrm_contact_id": {
+            "type": "string",
+            "title": "Zcrm Contact Id",
+            "default": null,
+            "nullable": true,
+            "description": "CRM Contact ID for the contact"
+          },
+          "address_contains": {
+            "type": "string",
+            "title": "Address Contains",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by any of the address fields (substring match)"
+          },
+          "email_startswith": {
+            "type": "string",
+            "title": "Email Startswith",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by email ID of the contact person (prefix match)"
+          },
+          "phone_startswith": {
+            "type": "string",
+            "title": "Phone Startswith",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by phone number of the contact person (prefix match)"
+          },
+          "address_startswith": {
+            "type": "string",
+            "title": "Address Startswith",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by any of the address fields (prefix match)"
+          },
+          "last_name_contains": {
+            "type": "string",
+            "title": "Last Name Contains",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by last name (substring match)"
+          },
+          "first_name_contains": {
+            "type": "string",
+            "title": "First Name Contains",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by first name (substring match)"
+          },
+          "last_name_startswith": {
+            "type": "string",
+            "title": "Last Name Startswith",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by last name (prefix match)"
+          },
+          "company_name_contains": {
+            "type": "string",
+            "title": "Company Name Contains",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by company name (substring match)"
+          },
+          "contact_name_contains": {
+            "type": "string",
+            "title": "Contact Name Contains",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by contact name (substring match)"
+          },
+          "first_name_startswith": {
+            "type": "string",
+            "title": "First Name Startswith",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by first name (prefix match)"
+          },
+          "company_name_startswith": {
+            "type": "string",
+            "title": "Company Name Startswith",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by company name (prefix match)"
+          },
+          "contact_name_startswith": {
+            "type": "string",
+            "title": "Contact Name Startswith",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search contacts by contact name (prefix match)"
+          }
+        },
+        "description": "Request parameters for listing contacts with optional filters and pagination."
+      }
+    },
+    {
+      "name": "ZOHO_INVOICE_LIST_EXPENSES",
+      "description": "Tool to list all expenses with optional pagination. Use when you need to retrieve expenses with simple pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListExpensesRequest",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination, starts at 1"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Number of records per page; must be \u2265 1"
+          }
+        },
+        "description": "Request parameters for listing expenses with optional pagination.\npage and per_page control pagination; if omitted, returns first page."
+      }
+    },
+    {
+      "name": "ZOHO_INVOICE_LIST_INVOICES",
+      "description": "Tool to list invoices. Use when you need to retrieve all invoices with optional filters and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListInvoicesRequest",
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "nullable": true,
+            "description": "Invoice date (yyyy-mm-dd)"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination, starts at 1"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by email ID of the contact person"
+          },
+          "total": {
+            "type": "number",
+            "title": "Total",
+            "default": null,
+            "nullable": true,
+            "description": "Total amount of the invoice"
+          },
+          "status": {
+            "enum": [
+              "sent",
+              "draft",
+              "overdue",
+              "paid",
+              "void",
+              "unpaid",
+              "partially_paid",
+              "viewed"
+            ],
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "nullable": true,
+            "description": "Status of the invoice"
+          },
+          "balance": {
+            "type": "number",
+            "title": "Balance",
+            "default": null,
+            "nullable": true,
+            "description": "Unpaid balance of the invoice"
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "default": null,
+            "nullable": true,
+            "description": "Unique identifier for the item"
+          },
+          "date_end": {
+            "type": "string",
+            "title": "Date End",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "nullable": true,
+            "description": "End date for invoice date range"
+          },
+          "due_date": {
+            "type": "string",
+            "title": "Due Date",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "nullable": true,
+            "description": "Due date of the invoice (yyyy-mm-dd)"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "nullable": true,
+            "description": "Number of items per page for pagination"
+          },
+          "filter_by": {
+            "enum": [
+              "Status.All",
+              "Status.Sent",
+              "Status.Draft",
+              "Status.OverDue",
+              "Status.Paid",
+              "Status.Void",
+              "Status.Unpaid",
+              "Status.PartiallyPaid",
+              "Status.Viewed",
+              "Date.PaymentExpectedDate"
+            ],
+            "type": "string",
+            "title": "Filter By",
+            "default": null,
+            "nullable": true,
+            "description": "Filter invoices by status or payment expected date"
+          },
+          "item_name": {
+            "type": "string",
+            "title": "Item Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by item name (exact match)"
+          },
+          "date_after": {
+            "type": "string",
+            "title": "Date After",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "nullable": true,
+            "description": "Fetch invoices after this date"
+          },
+          "date_start": {
+            "type": "string",
+            "title": "Date Start",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "nullable": true,
+            "description": "Start date for invoice date range"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id",
+            "default": null,
+            "nullable": true,
+            "description": "ID of the customer"
+          },
+          "date_before": {
+            "type": "string",
+            "title": "Date Before",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "nullable": true,
+            "description": "Fetch invoices before this date"
+          },
+          "search_text": {
+            "type": "string",
+            "title": "Search Text",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by invoice number, purchase order, or customer name"
+          },
+          "sort_column": {
+            "enum": [
+              "customer_name",
+              "invoice_number",
+              "date",
+              "due_date",
+              "total",
+              "balance",
+              "created_time"
+            ],
+            "type": "string",
+            "title": "Sort Column",
+            "default": null,
+            "nullable": true,
+            "description": "Sort invoices by specified column"
+          },
+          "custom_field": {
+            "type": "string",
+            "title": "Custom Field",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by custom field (exact match)"
+          },
+          "due_date_end": {
+            "type": "string",
+            "title": "Due Date End",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "nullable": true,
+            "description": "End date for due date range"
+          },
+          "customer_name": {
+            "type": "string",
+            "title": "Customer Name",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by customer name (exact match)"
+          },
+          "due_date_after": {
+            "type": "string",
+            "title": "Due Date After",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "nullable": true,
+            "description": "Fetch invoices due after this date"
+          },
+          "due_date_start": {
+            "type": "string",
+            "title": "Due Date Start",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "nullable": true,
+            "description": "Start date for due date range"
+          },
+          "invoice_number": {
+            "type": "string",
+            "title": "Invoice Number",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Unique number assigned to the invoice (exact match)"
+          },
+          "due_date_before": {
+            "type": "string",
+            "title": "Due Date Before",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "nullable": true,
+            "description": "Fetch invoices due before this date"
+          },
+          "item_description": {
+            "type": "string",
+            "title": "Item Description",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by item description (exact match)"
+          },
+          "reference_number": {
+            "type": "string",
+            "title": "Reference Number",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Reference number of the invoice"
+          },
+          "zcrm_potential_id": {
+            "type": "string",
+            "title": "Zcrm Potential Id",
+            "default": null,
+            "nullable": true,
+            "description": "CRM Deal potential ID"
+          },
+          "item_name_contains": {
+            "type": "string",
+            "title": "Item Name Contains",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by item name (substring match)"
+          },
+          "item_name_startswith": {
+            "type": "string",
+            "title": "Item Name Startswith",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by item name (prefix match)"
+          },
+          "recurring_invoice_id": {
+            "type": "string",
+            "title": "Recurring Invoice Id",
+            "default": null,
+            "nullable": true,
+            "description": "ID of the recurring invoice"
+          },
+          "custom_field_contains": {
+            "type": "string",
+            "title": "Custom Field Contains",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by custom field (substring match)"
+          },
+          "custom_field_startswith": {
+            "type": "string",
+            "title": "Custom Field Startswith",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by custom field (prefix match)"
+          },
+          "item_description_contains": {
+            "type": "string",
+            "title": "Item Description Contains",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by item description (substring match)"
+          },
+          "item_description_startswith": {
+            "type": "string",
+            "title": "Item Description Startswith",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Search by item description (prefix match)"
+          }
+        },
+        "description": "Request parameters for listing invoices with optional filters and pagination."
+      }
+    },
+    {
+      "name": "ZOHO_INVOICE_LIST_ITEMS",
+      "description": "Tool to list all items. Use when you need to retrieve your item catalog with optional pagination and filtering after specifying the organization ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListItemsRequest",
+        "required": [
+          "organization_id"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination, starts at 1"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Number of items per page, must be \u2265 1"
+          },
+          "filter_by": {
+            "type": "string",
+            "title": "Filter By",
+            "default": null,
+            "examples": [
+              "active"
+            ],
+            "nullable": true,
+            "description": "Filter items by status or type (e.g., 'active')"
+          },
+          "search_text": {
+            "type": "string",
+            "title": "Search Text",
+            "default": null,
+            "examples": [
+              "software"
+            ],
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Free-text search to filter items by name or description"
+          },
+          "organization_id": {
+            "type": "string",
+            "title": "Organization Id",
+            "examples": [
+              "60000000002"
+            ],
+            "description": "The Zoho Invoice organization ID. Must be passed as query parameter 'organization_id'."
+          }
+        },
+        "description": "Request parameters to list items with optional pagination and filtering. Only provided parameters will be sent."
+      }
+    },
+    {
+      "name": "ZOHO_INVOICE_LIST_PAYMENTS",
+      "description": "Tool to list payments. Use when you need to retrieve all payments with optional filters like customer, invoice, date range, and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListPaymentsRequest",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": null,
+            "examples": [
+              "Cash"
+            ],
+            "nullable": true,
+            "description": "Filter by payment mode (e.g., 'Cash', 'Credit Card')"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Page number for pagination, starts at 1"
+          },
+          "date_end": {
+            "type": "string",
+            "title": "Date End",
+            "default": null,
+            "examples": [
+              "2021-12-31"
+            ],
+            "nullable": true,
+            "description": "Filter payments made on or before this date (YYYY-MM-DD)"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Number of payments per page, maximum 200"
+          },
+          "filter_by": {
+            "enum": [
+              "Status.All",
+              "Status.Success",
+              "Status.Refunded",
+              "Status.Void"
+            ],
+            "type": "string",
+            "title": "Filter By",
+            "default": null,
+            "nullable": true,
+            "description": "Filter payments by status"
+          },
+          "date_start": {
+            "type": "string",
+            "title": "Date Start",
+            "default": null,
+            "examples": [
+              "2021-01-01"
+            ],
+            "nullable": true,
+            "description": "Filter payments made on or after this date (YYYY-MM-DD)"
+          },
+          "invoice_id": {
+            "type": "string",
+            "title": "Invoice Id",
+            "default": null,
+            "examples": [
+              "1714406000000099002"
+            ],
+            "nullable": true,
+            "description": "Filter payments for a specific invoice by ID"
+          },
+          "sort_order": {
+            "enum": [
+              "A",
+              "D"
+            ],
+            "type": "string",
+            "title": "Sort Order",
+            "default": null,
+            "nullable": true,
+            "description": "Sort order: 'A' for ascending, 'D' for descending"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id",
+            "default": null,
+            "examples": [
+              "1714406000000099001"
+            ],
+            "nullable": true,
+            "description": "Filter payments for a specific customer by ID"
+          },
+          "sort_column": {
+            "enum": [
+              "payment_number",
+              "amount",
+              "date",
+              "mode",
+              "reference_number"
+            ],
+            "type": "string",
+            "title": "Sort Column",
+            "default": null,
+            "nullable": true,
+            "description": "Column to sort by"
+          },
+          "payment_number": {
+            "type": "string",
+            "title": "Payment Number",
+            "default": null,
+            "examples": [
+              "P-0001"
+            ],
+            "nullable": true,
+            "description": "Filter by payment number"
+          },
+          "reference_number": {
+            "type": "string",
+            "title": "Reference Number",
+            "default": null,
+            "examples": [
+              "REF1234"
+            ],
+            "nullable": true,
+            "description": "Filter by reference number"
+          }
+        },
+        "description": "Request parameters for listing payments with optional filters and pagination."
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:40:54.952980+00:00",
+    "source": "smithery"
+  }
+}

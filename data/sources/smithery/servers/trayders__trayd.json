@@ -1,0 +1,191 @@
+{
+  "qualifiedName": "trayders/trayd",
+  "displayName": "trayd",
+  "description": "Connect your Robinhood account to view your portfolio, latest quotes, and positions. Place, track, and cancel stock orders right from your workflow. Check login status and manage your connection in seconds.",
+  "iconUrl": null,
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/trayders/trayd",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/trayders/trayd/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "check_login_status",
+      "description": "Check if user's Robinhood account is linked. If not linked, guide them to use link_robinhood tool.\n\nAUTHENTICATION HELP: If you get an authentication error or this tool doesn't work:\n1. Tell the user to type /mcp in Claude Code\n2. Select 'trayd' from the list\n3. Click 'Authorize' to open browser for Google sign-in\n4. After successful sign-in, retry this tool\n\nSecurity note: Tokens are stored in server memory only (never on disk). Server restarts clear all tokens - users will need to re-link after maintenance.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "link_robinhood",
+      "description": "Link user's Robinhood brokerage account. IMPORTANT FLOW:\n1. ASK the user for their Robinhood email and password\n2. Call this tool with their credentials\n3. This triggers a PHONE NOTIFICATION to the user's Robinhood app\n4. Tell the user: \"Please check your phone and tap APPROVE on the Robinhood notification\"\n5. IMPORTANT: The notification will show 'Suspicious login from Ashburn, VA' - this is EXPECTED! Our server runs on AWS us-east-1 (Northern Virginia). Tell the user this is normal and safe to approve.\n6. After user confirms they approved, call complete_robinhood_link to finish\nNEVER store or log the user's password - it's sent directly to Robinhood's servers.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's Robinhood account email"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's Robinhood account password"
+          }
+        }
+      }
+    },
+    {
+      "name": "complete_robinhood_link",
+      "description": "Complete Robinhood account linking after user approved on their phone.\nCall this AFTER the user confirms they tapped APPROVE on the Robinhood phone notification.\nIf it returns 'pending', the user hasn't approved yet - ask them to check their phone again.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's Robinhood account email (same as link_robinhood)"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's Robinhood account password (same as link_robinhood)"
+          }
+        }
+      }
+    },
+    {
+      "name": "logout",
+      "description": "Logout user from Robinhood (delete stored token).\nIMPORTANT: This permanently deletes your Robinhood access token from our secure server memory.\n- Your token is ONLY stored in memory (never on disk)\n- After logout, you'll need to re-link your Robinhood account to trade again\n- Server restarts also clear all tokens (security feature)\nTell the user: \"Your Robinhood connection has been removed. Your access token was securely wiped from memory and is not stored anywhere. You'll need to re-link if you want to trade again.\"",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_portfolio",
+      "description": "Get user's portfolio summary including equity, cash, and buying power",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_positions",
+      "description": "Get user's current stock positions",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_open_orders",
+      "description": "Get user's open orders",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_quote",
+      "description": "Get stock quote for a ticker",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticker"
+        ],
+        "properties": {
+          "ticker": {
+            "type": "string",
+            "description": "Stock ticker symbol (e.g., 'AAPL')"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_price",
+      "description": "Get latest price for a ticker",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticker"
+        ],
+        "properties": {
+          "ticker": {
+            "type": "string",
+            "description": "Stock ticker symbol (e.g., 'AAPL')"
+          }
+        }
+      }
+    },
+    {
+      "name": "place_order",
+      "description": "Place a buy or sell order",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticker",
+          "quantity",
+          "side"
+        ],
+        "properties": {
+          "side": {
+            "enum": [
+              "buy",
+              "sell"
+            ],
+            "type": "string",
+            "description": "Order side"
+          },
+          "price": {
+            "type": "number",
+            "description": "Limit price (optional, None for market order)"
+          },
+          "ticker": {
+            "type": "string",
+            "description": "Stock ticker symbol"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Number of shares"
+          }
+        }
+      }
+    },
+    {
+      "name": "cancel_order",
+      "description": "Cancel an open order",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "order_id"
+        ],
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "description": "Order ID to cancel"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:56:02.647415+00:00",
+    "source": "smithery"
+  }
+}

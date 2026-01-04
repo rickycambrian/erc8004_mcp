@@ -1,0 +1,230 @@
+{
+  "qualifiedName": "codeinterpreter",
+  "displayName": "Codeinterpreter",
+  "description": "CodeInterpreter extends Python-based coding environments with integrated data analysis, enabling developers to run scripts, visualize results, and prototype solutions inside supported platforms",
+  "iconUrl": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master//code-interpreter.webp",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/codeinterpreter",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/codeinterpreter/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "CODEINTERPRETER_CREATE_SANDBOX",
+      "description": "Create a sandbox to execute python code in a Jupyter notebook cell. This is useful for agents to communicate, execute code, see output, read files, write files, etc. It's like you own personal computer, but in the cloud. Use /home/user folder to write/read files.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateSandboxRequest",
+        "properties": {
+          "keep_alive": {
+            "type": "integer",
+            "title": "Keep Alive",
+            "default": 300,
+            "description": "The number of seconds to keep the sandbox alive after creation. Default is 300 seconds (5 minutes). Can be in between 0 and 3600."
+          }
+        }
+      }
+    },
+    {
+      "name": "CODEINTERPRETER_EXECUTE_CODE",
+      "description": "Execute python code in a sandbox and return any result, stdout, stderr, and error. Use /home/user folder to write/read files. Try to not use plt.show() as the code is executed remotely. Use files for image/chart output instead.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ExecuteCodeRequest",
+        "required": [
+          "code_to_execute"
+        ],
+        "properties": {
+          "timeout": {
+            "type": "integer",
+            "title": "Timeout",
+            "default": 60,
+            "examples": [
+              60,
+              120,
+              300
+            ],
+            "description": "The timeout in seconds for the execution of the code."
+          },
+          "keep_alive": {
+            "type": "integer",
+            "title": "Keep Alive",
+            "default": 300,
+            "examples": [
+              600,
+              1200,
+              3600
+            ],
+            "description": "The number of seconds to keep the sandbox alive after execution. Default is 300 seconds (5 minutes). Can be between 0 and 3600."
+          },
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "default": null,
+            "examples": [
+              "sandbox-123"
+            ],
+            "nullable": true,
+            "description": "The ID of the sandbox to execute the code in. Try to find an existing sandbox ID from context in order to access the previous modification session. In case not found, this value might be omitted, a new sandbox will be created."
+          },
+          "code_to_execute": {
+            "type": "string",
+            "title": "Code To Execute",
+            "examples": [
+              "print('Hello, world!')"
+            ],
+            "description": "The python code to execute in a single cell. If a file is to be saved, it should be saved under /home/user/ directory. At the end of the code, a success message print is good to have."
+          }
+        }
+      }
+    },
+    {
+      "name": "CODEINTERPRETER_GET_FILE_CMD",
+      "description": "Get a file from the sandbox and returns the file. The files should be read from /home/user folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetFileCmdRequest",
+        "required": [
+          "sandbox_id",
+          "file_path"
+        ],
+        "properties": {
+          "timeout": {
+            "type": "integer",
+            "title": "Timeout",
+            "default": null,
+            "examples": [
+              60
+            ],
+            "nullable": true,
+            "description": "The timeout in seconds for the command to run."
+          },
+          "file_path": {
+            "type": "string",
+            "title": "File Path",
+            "examples": [
+              "/home/user/test.txt"
+            ],
+            "description": "The path(on the sandbox) of the file to get. Give absolute path. Should start with /home/user/"
+          },
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "examples": [
+              "sandbox-123"
+            ],
+            "description": "The ID of the sandbox where the file has been created."
+          }
+        }
+      }
+    },
+    {
+      "name": "CODEINTERPRETER_RUN_TERMINAL_CMD",
+      "description": "Run a command in the terminal and returns the stdout, stderr, and error code. Use /home/user folder to write/read files.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RunTerminalCmdRequest",
+        "required": [
+          "command"
+        ],
+        "properties": {
+          "command": {
+            "type": "string",
+            "title": "Command",
+            "examples": [
+              "echo 'Hello, world!'"
+            ],
+            "description": "The command to run in the terminal."
+          },
+          "timeout": {
+            "type": "integer",
+            "title": "Timeout",
+            "default": null,
+            "examples": [
+              60
+            ],
+            "nullable": true,
+            "description": "The timeout in seconds for the command to run."
+          },
+          "keep_alive": {
+            "type": "integer",
+            "title": "Keep Alive",
+            "default": 300,
+            "examples": [
+              600,
+              1200,
+              3600
+            ],
+            "description": "The number of seconds to keep the sandbox alive after execution. Default is 300 seconds (5 minutes)."
+          },
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "default": null,
+            "examples": [
+              "sandbox-123"
+            ],
+            "nullable": true,
+            "description": "The ID of the sandbox to execute the code in. Try to find an existing sandbox ID from contextinorder to access the previous modification session. In case not found, this value might be omitted, a new sandbox will be created."
+          }
+        }
+      }
+    },
+    {
+      "name": "CODEINTERPRETER_UPLOAD_FILE_CMD",
+      "description": "Upload a file to the sandbox environment. The files should be uploaded to the /home/user folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UploadFileCmdRequest",
+        "required": [
+          "sandbox_id",
+          "file",
+          "destination_path"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "The file to upload, containing the file name and base64-encoded content.",
+            "file_uploadable": true
+          },
+          "overwrite": {
+            "type": "boolean",
+            "title": "Overwrite",
+            "default": false,
+            "examples": [
+              true
+            ],
+            "description": "Whether to overwrite the file if it already exists."
+          },
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "examples": [
+              "sandbox-123"
+            ],
+            "description": "The ID of the sandbox where the file will be uploaded."
+          },
+          "destination_path": {
+            "type": "string",
+            "title": "Destination Path",
+            "examples": [
+              "/home/user/uploads/"
+            ],
+            "description": "The destination path in the sandbox where the file will be saved. Provide an absolute path starting with /home/user/. The file name from 'file' will be appended if destination_path is a directory."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:19:57.976212+00:00",
+    "source": "smithery"
+  }
+}

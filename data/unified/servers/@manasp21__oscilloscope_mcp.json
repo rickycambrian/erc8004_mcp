@@ -1,0 +1,272 @@
+{
+  "id": "@manasp21/oscilloscope_mcp",
+  "name": "@manasp21/oscilloscope_mcp",
+  "display_name": "Oscilloscope and Function Generator Server",
+  "version": null,
+  "description": "Provide advanced oscilloscope and function generator capabilities to AI agents, enabling multi-channel signal acquisition, real-time analysis, and waveform generation. Automate measurement workflows and protocol decoding with over 40 integrated tools. Seamlessly integrate with AI platforms like Claude Desktop and VS Code extensions for enhanced test and measurement automation.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/oscilloscope-mcp.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "get_acquisition_status",
+      "description": "Get current acquisition status and available data",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "acquire_waveform",
+      "description": "Wait for new ADC data acquisition",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "timeout": {
+            "type": "number",
+            "default": 5,
+            "description": "Timeout in seconds"
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Specific channels to acquire"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "measure_parameters",
+      "description": "Perform automated measurements on acquired data",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "acquisition_id",
+          "measurements"
+        ],
+        "properties": {
+          "channel": {
+            "type": "number",
+            "default": 0,
+            "description": "Channel to analyze"
+          },
+          "statistics": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include statistical analysis"
+          },
+          "measurements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of measurements to perform"
+          },
+          "acquisition_id": {
+            "type": "string",
+            "description": "ID of the acquisition to analyze"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_spectrum",
+      "description": "Perform FFT analysis on acquired data",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "acquisition_id"
+        ],
+        "properties": {
+          "window": {
+            "type": "string",
+            "default": "hamming",
+            "description": "Windowing function"
+          },
+          "channel": {
+            "type": "number",
+            "default": 0,
+            "description": "Channel to analyze"
+          },
+          "resolution": {
+            "type": "number",
+            "default": 1024,
+            "description": "FFT resolution"
+          },
+          "acquisition_id": {
+            "type": "string",
+            "description": "ID of the acquisition to analyze"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_test_signal",
+      "description": "Generate a test signal and inject it as ADC data",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "channel": {
+            "type": "number",
+            "default": 0,
+            "description": "Target channel"
+          },
+          "duration": {
+            "type": "number",
+            "default": 1,
+            "description": "Duration in seconds"
+          },
+          "amplitude": {
+            "type": "number",
+            "default": 1,
+            "description": "Signal amplitude"
+          },
+          "frequency": {
+            "type": "number",
+            "default": 1000,
+            "description": "Signal frequency in Hz"
+          },
+          "sample_rate": {
+            "type": "number",
+            "default": 44100,
+            "description": "Sample rate in Hz"
+          },
+          "signal_type": {
+            "type": "string",
+            "default": "sine",
+            "description": "Signal type: sine, square, triangle, sawtooth, noise"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "decode_protocol",
+      "description": "Decode digital communication protocols from acquired data",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "acquisition_id",
+          "protocol",
+          "settings",
+          "channels"
+        ],
+        "properties": {
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Channels to use for protocol decoding"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol to decode: uart, spi, i2c, can"
+          },
+          "settings": {
+            "type": "object",
+            "description": "Protocol-specific settings",
+            "additionalProperties": {}
+          },
+          "acquisition_id": {
+            "type": "string",
+            "description": "ID of the acquisition to analyze"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_audio_devices",
+      "description": "List available audio input devices for microphone capture",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "configure_hardware",
+      "description": "Configure hardware interface and device settings",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "hardware_interface"
+        ],
+        "properties": {
+          "debug": {
+            "type": "boolean",
+            "description": "Enable debug logging"
+          },
+          "channels": {
+            "type": "number",
+            "description": "Number of channels"
+          },
+          "audio_sample_rate": {
+            "type": "number",
+            "description": "Audio sample rate (Hz)"
+          },
+          "microphone_device": {
+            "type": "string",
+            "description": "Microphone device name"
+          },
+          "hardware_interface": {
+            "type": "string",
+            "description": "Hardware interface: simulation, microphone, usb, ethernet, pcie"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_hardware_status",
+      "description": "Get current hardware configuration and status",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 9,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@manasp21/oscilloscope_mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "get_acquisition_status",
+    "acquire_waveform",
+    "measure_parameters",
+    "analyze_spectrum",
+    "generate_test_signal",
+    "decode_protocol",
+    "list_audio_devices",
+    "configure_hardware",
+    "get_hardware_status"
+  ]
+}

@@ -1,0 +1,488 @@
+{
+  "qualifiedName": "@kemalersin/fonparam-mcp",
+  "displayName": "FonParam Investment Funds Data Server",
+  "description": "Provide real-time and historical data on Turkish investment funds, including fund listings, performance analysis, company details, and inflation statistics. Enable detailed fund comparisons and investment analysis to support informed financial decisions. Access daily market statistics and inflation rates to stay updated with the latest economic indicators.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/5f893631-2d45-4573-a8ab-a143488864ba.png",
+  "remote": false,
+  "deploymentUrl": null,
+  "connections": [
+    {
+      "type": "stdio",
+      "bundleUrl": "https://backend.smithery.ai/storage/v1/object/public/bundles/@kemalersin/fonparam-mcp/server.mcpb",
+      "runtime": "node",
+      "configSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "list_funds",
+      "description": "Yat\u0131r\u0131m fonlar\u0131n\u0131 listeler ve filtreleme imkan\u0131 sunar",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Fon kodu veya kodlar\u0131 (virg\u00fclle ayr\u0131lm\u0131\u015f)"
+          },
+          "page": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Sayfa numaras\u0131 (varsay\u0131lan: 1)"
+          },
+          "sort": {
+            "type": "string",
+            "description": "S\u0131ralama alan\u0131 (code, title, yield_1y, vb.)"
+          },
+          "type": {
+            "enum": [
+              "altin",
+              "borclanma_araclari",
+              "degisken",
+              "fon_sepeti",
+              "gumus",
+              "hisse_senedi",
+              "hisse_senedi_yogun",
+              "karma",
+              "katilim",
+              "kiymetli_madenler",
+              "para_piyasasi",
+              "serbest",
+              "yabanci",
+              "diger"
+            ],
+            "type": "string",
+            "description": "Fon tipi"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Sayfa ba\u015f\u0131na kay\u0131t say\u0131s\u0131 (varsay\u0131lan: 20, maksimum: 100)"
+          },
+          "order": {
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "type": "string",
+            "description": "S\u0131ralama y\u00f6n\u00fc"
+          },
+          "tefas": {
+            "type": "boolean",
+            "description": "TEFAS'ta i\u015flem g\u00f6rme durumu"
+          },
+          "search": {
+            "type": "string",
+            "description": "Fon ad\u0131, kodu, \u015firket ad\u0131 ile arama"
+          },
+          "max_risk_value": {
+            "type": "number",
+            "maximum": 7,
+            "minimum": 1,
+            "description": "Maksimum risk seviyesi (1-7)"
+          },
+          "min_risk_value": {
+            "type": "number",
+            "maximum": 7,
+            "minimum": 1,
+            "description": "Minimum risk seviyesi (1-7)"
+          },
+          "management_company": {
+            "type": "string",
+            "description": "Portf\u00f6y y\u00f6netim \u015firketi kodu"
+          }
+        }
+      }
+    },
+    {
+      "name": "top_performing_funds",
+      "description": "En iyi performans g\u00f6steren fonlar\u0131 getirir",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reference_funds": {
+            "type": "string",
+            "description": "Referans fon kodlar\u0131 (virg\u00fclle ayr\u0131lm\u0131\u015f, opsiyonel)"
+          }
+        }
+      }
+    },
+    {
+      "name": "compare_funds",
+      "description": "Fonlar\u0131 kar\u015f\u0131la\u015ft\u0131r\u0131r (2-5 fon)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "codes"
+        ],
+        "properties": {
+          "codes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 2,
+            "description": "Kar\u015f\u0131la\u015ft\u0131r\u0131lacak fon kodlar\u0131"
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_fund",
+      "description": "Fon i\u00e7in yat\u0131r\u0131m analizi yapar",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "code",
+          "startDate",
+          "initialInvestment"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Fon kodu"
+          },
+          "startDate": {
+            "enum": [
+              "last_1_day",
+              "last_1_week",
+              "last_1_month",
+              "last_3_months",
+              "last_6_months",
+              "year_start",
+              "last_1_year",
+              "last_3_years",
+              "last_5_years"
+            ],
+            "type": "string",
+            "description": "Ba\u015flang\u0131\u00e7 tarihi"
+          },
+          "initialInvestment": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Ba\u015flang\u0131\u00e7 yat\u0131r\u0131m\u0131 (TL)"
+          },
+          "monthlyInvestment": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Ayl\u0131k yat\u0131r\u0131m tutar\u0131 (TL, opsiyonel)"
+          },
+          "yearlyIncreaseType": {
+            "enum": [
+              "percentage",
+              "amount"
+            ],
+            "type": "string",
+            "description": "Y\u0131ll\u0131k art\u0131\u015f tipi (opsiyonel)"
+          },
+          "yearlyIncreaseValue": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Y\u0131ll\u0131k art\u0131\u015f de\u011feri (opsiyonel)"
+          },
+          "includeMonthlyDetails": {
+            "type": "boolean",
+            "description": "Ayl\u0131k detaylar\u0131 getir (varsay\u0131lan: true)"
+          }
+        }
+      }
+    },
+    {
+      "name": "fund_historical_data",
+      "description": "Fonun ge\u00e7mi\u015f de\u011ferlerini getirir",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Fon kodu"
+          },
+          "sort": {
+            "type": "string",
+            "description": "S\u0131ralama alan\u0131"
+          },
+          "order": {
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "type": "string",
+            "description": "S\u0131ralama y\u00f6n\u00fc"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "Biti\u015f tarihi (YYYY-MM-DD)"
+          },
+          "interval": {
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "type": "string",
+            "description": "Veri aral\u0131\u011f\u0131"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Ba\u015flang\u0131\u00e7 tarihi (YYYY-MM-DD)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_companies",
+      "description": "Portf\u00f6y y\u00f6netim \u015firketlerini listeler",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Sayfa numaras\u0131"
+          },
+          "sort": {
+            "type": "string",
+            "description": "S\u0131ralama alan\u0131"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Sayfa ba\u015f\u0131na kay\u0131t say\u0131s\u0131"
+          },
+          "order": {
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "type": "string",
+            "description": "S\u0131ralama y\u00f6n\u00fc"
+          },
+          "search": {
+            "type": "string",
+            "description": "\u015eirket ad\u0131 veya kodu ile arama"
+          },
+          "max_total_funds": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Maksimum fon say\u0131s\u0131"
+          },
+          "min_total_funds": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Minimum fon say\u0131s\u0131"
+          }
+        }
+      }
+    },
+    {
+      "name": "company_details",
+      "description": "Portf\u00f6y y\u00f6netim \u015firketi detaylar\u0131n\u0131 getirir",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "\u015eirket kodu"
+          },
+          "include_funds": {
+            "type": "boolean",
+            "description": "\u015eirketin fonlar\u0131n\u0131 da getir (varsay\u0131lan: true)"
+          }
+        }
+      }
+    },
+    {
+      "name": "statistics",
+      "description": "G\u00fcnl\u00fck istatistikleri listeler",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Sayfa numaras\u0131"
+          },
+          "sort": {
+            "type": "string",
+            "description": "S\u0131ralama alan\u0131"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Sayfa ba\u015f\u0131na kay\u0131t say\u0131s\u0131"
+          },
+          "order": {
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "type": "string",
+            "description": "S\u0131ralama y\u00f6n\u00fc"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "Biti\u015f tarihi (YYYY-MM-DD)"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Ba\u015flang\u0131\u00e7 tarihi (YYYY-MM-DD)"
+          }
+        }
+      }
+    },
+    {
+      "name": "latest_statistics",
+      "description": "Son istatistikleri getirir",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "statistics_by_date",
+      "description": "Belirli bir g\u00fcn\u00fcn istatistiklerini getirir",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "date"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "\u0130statistik tarihi (YYYY-MM-DD)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_fund_types",
+      "description": "Fon tiplerini listeler",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sort": {
+            "type": "string",
+            "description": "S\u0131ralama alan\u0131"
+          },
+          "order": {
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "type": "string",
+            "description": "S\u0131ralama y\u00f6n\u00fc"
+          },
+          "max_total_funds": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Maksimum fon say\u0131s\u0131"
+          },
+          "min_total_funds": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Minimum fon say\u0131s\u0131"
+          }
+        }
+      }
+    },
+    {
+      "name": "fund_type_details",
+      "description": "Belirli bir fon tipinin detaylar\u0131n\u0131 getirir",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "altin",
+              "borclanma_araclari",
+              "degisken",
+              "fon_sepeti",
+              "gumus",
+              "hisse_senedi",
+              "hisse_senedi_yogun",
+              "karma",
+              "katilim",
+              "kiymetli_madenler",
+              "para_piyasasi",
+              "serbest",
+              "yabanci",
+              "diger"
+            ],
+            "type": "string",
+            "description": "Fon tipi kodu"
+          }
+        }
+      }
+    },
+    {
+      "name": "inflation_rates",
+      "description": "Enflasyon verilerini listeler",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "end_date": {
+            "type": "string",
+            "description": "Biti\u015f tarihi (YYYY-MM-DD)"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Ba\u015flang\u0131\u00e7 tarihi (YYYY-MM-DD)"
+          }
+        }
+      }
+    },
+    {
+      "name": "latest_inflation_rate",
+      "description": "Son enflasyon verisini getirir",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "monthly_inflation_rate",
+      "description": "Belirli bir ay ve y\u0131ldaki enflasyon verisini getirir",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "year",
+          "month"
+        ],
+        "properties": {
+          "year": {
+            "type": "number",
+            "minimum": 2000,
+            "description": "Y\u0131l"
+          },
+          "month": {
+            "type": "number",
+            "maximum": 12,
+            "minimum": 1,
+            "description": "Ay (1-12)"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:27:43.404593+00:00",
+    "source": "smithery"
+  }
+}

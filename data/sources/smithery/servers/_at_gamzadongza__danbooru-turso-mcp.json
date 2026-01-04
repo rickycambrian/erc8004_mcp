@@ -1,0 +1,70 @@
+{
+  "qualifiedName": "@gamzadongza/danbooru-turso-mcp",
+  "displayName": "Danbooru Turso Sync",
+  "description": "Sync Danbooru character data to your Turso database. Keep your dataset complete and up to date automatically. Power search, analytics, or app features with fresh data.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@gamzadongza/danbooru-turso-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@gamzadongza/danbooru-turso-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "TURSO_DATABASE_URL",
+          "TURSO_AUTH_TOKEN"
+        ],
+        "properties": {
+          "PORT": {
+            "type": "string",
+            "default": "3000",
+            "description": "Server port (default: 3000)"
+          },
+          "TURSO_AUTH_TOKEN": {
+            "type": "string",
+            "description": "Your Turso authentication token"
+          },
+          "TURSO_DATABASE_URL": {
+            "type": "string",
+            "description": "Your Turso database URL (e.g., libsql://danbooru-posts-xxx.turso.io)"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "collect_and_save",
+      "description": "**[DATA COLLECTION]** Collect character posts from Danbooru API and save to Turso database with automatic pagination and upserts (updates existing posts).\n\n**IMPORTANT: Before collecting, check post count first!**\n1. Use danbooru-tags-mcp.get_post_count(tag) to see total posts and get collection strategy\n2. If get_post_count is unavailable, scrape Danbooru website for post count\n3. Plan your collection batches using start_page parameter based on the count\n\nUse this when:\n- You want to BUILD a dataset for later analysis\n- You need to save posts for offline or repeated queries\n- You want to collect large amounts of data (100+ posts) efficiently\n- You need to keep the database updated with new posts\n\nFor large datasets (5000+ posts):\n- Use start_page parameter to collect in batches\n- Each page = 200 posts, so start_page=11 begins at post 2001\n- Example: 9000 posts = 5 batches (pages 1, 11, 21, 31, 41)\n\nAfter collection, use Turso SQL tools to query and analyze the saved data.\nFor real-time exploration without saving, use Danbooru Tags tools.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tag"
+        ],
+        "properties": {
+          "tag": {
+            "type": "string",
+            "description": "Character tag to collect (e.g., \"yatogami_tenka\")"
+          },
+          "max_posts": {
+            "type": "number",
+            "description": "Maximum number of posts to collect (optional)"
+          },
+          "start_page": {
+            "type": "number",
+            "description": "Starting page number for pagination (default: 1, each page has 200 posts)"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:27:27.263757+00:00",
+    "source": "smithery"
+  }
+}

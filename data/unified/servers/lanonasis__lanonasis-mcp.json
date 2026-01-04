@@ -1,0 +1,480 @@
+{
+  "id": "lanonasis/lanonasis-mcp",
+  "name": "lanonasis/lanonasis-mcp",
+  "display_name": "lanonasis-mcp",
+  "version": null,
+  "description": "Manage long-term memory across projects with fast semantic search and retrieval. Create, update, and organize memories, then query them to ground your workflows with relevant context. Control API keys and configuration, monitor system status, and instantly search the LanOnasis docs when you need guidance.",
+  "icon_url": null,
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "create_memory",
+      "description": "Create a new memory with vector embedding",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "title",
+          "content",
+          "type"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for organizing and searching memories. Use lowercase, hyphenated tags (e.g., \"api-design\", \"security\")"
+          },
+          "type": {
+            "enum": [
+              "context",
+              "project",
+              "knowledge",
+              "reference",
+              "personal",
+              "workflow"
+            ],
+            "type": "string",
+            "description": "Type of memory: context (conversation), project (project-specific), knowledge (general info), reference (docs), personal (notes), workflow (processes)"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the memory (max 500 characters). Should be concise and descriptive."
+          },
+          "content": {
+            "type": "string",
+            "description": "Content of the memory. Supports plain text, markdown, and code. Will be automatically chunked and vectorized."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Additional metadata like project_id, priority, source, custom fields, etc."
+          }
+        }
+      }
+    },
+    {
+      "name": "search_memories",
+      "description": "Search memories using semantic vector search",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "context",
+              "project",
+              "knowledge",
+              "reference",
+              "personal",
+              "workflow"
+            ],
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "threshold": {
+            "type": "number",
+            "maximum": 1,
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "search_lanonasis_docs",
+      "description": "Search LanOnasis documentation for Memory as a Service (MaaS) platform",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum number of results to return"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query for documentation"
+          },
+          "section": {
+            "enum": [
+              "all",
+              "api",
+              "guides",
+              "sdks"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Filter by section: api, guides, sdks, or all"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_memory",
+      "description": "Get a specific memory by ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Memory ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_memory",
+      "description": "Update an existing memory",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Memory ID"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "enum": [
+              "context",
+              "project",
+              "knowledge",
+              "reference",
+              "personal",
+              "workflow"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_memory",
+      "description": "Delete a memory by ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Memory ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_memories",
+      "description": "List memories with pagination and filters",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "enum": [
+              "context",
+              "project",
+              "knowledge",
+              "reference",
+              "personal",
+              "workflow"
+            ],
+            "type": "string"
+          },
+          "limit": {
+            "type": "number",
+            "default": 20
+          },
+          "offset": {
+            "type": "number",
+            "default": 0
+          },
+          "sortBy": {
+            "type": "string",
+            "default": "updated_at"
+          },
+          "sortOrder": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "default": "desc"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_api_key",
+      "description": "Create a new API key",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "API key name"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "access_level": {
+            "enum": [
+              "public",
+              "authenticated",
+              "team",
+              "admin",
+              "enterprise"
+            ],
+            "type": "string"
+          },
+          "expires_in_days": {
+            "type": "number",
+            "default": 365
+          }
+        }
+      }
+    },
+    {
+      "name": "list_api_keys",
+      "description": "List API keys",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "description": "Filter API keys by project ID. Omit to see all keys."
+          },
+          "active_only": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true, only return active (non-revoked, non-expired) API keys"
+          }
+        }
+      }
+    },
+    {
+      "name": "rotate_api_key",
+      "description": "Rotate an API key",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "key_id"
+        ],
+        "properties": {
+          "key_id": {
+            "type": "string",
+            "description": "API key ID to rotate"
+          }
+        }
+      }
+    },
+    {
+      "name": "revoke_api_key",
+      "description": "Revoke (deactivate) an API key without deleting it",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "key_id"
+        ],
+        "properties": {
+          "key_id": {
+            "type": "string",
+            "description": "API key ID to revoke"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_api_key",
+      "description": "Delete an API key",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "key_id"
+        ],
+        "properties": {
+          "key_id": {
+            "type": "string",
+            "description": "API key ID to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_health_status",
+      "description": "Get system health status",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "description": "No parameters required. Returns system health including database, cache, and memory status."
+      }
+    },
+    {
+      "name": "get_auth_status",
+      "description": "Get authentication status",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "description": "No parameters required. Returns authentication status for the current user including token expiration and permissions."
+      }
+    },
+    {
+      "name": "get_organization_info",
+      "description": "Get organization information",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "description": "No parameters required. Returns organization information for the authenticated user including plan limits and features."
+      }
+    },
+    {
+      "name": "create_project",
+      "description": "Create a new project",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Project name"
+          },
+          "description": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_projects",
+      "description": "List projects",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "description": "Organization ID to filter projects. Defaults to current user's organization."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_config",
+      "description": "Get configuration settings",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Specific config key to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "set_config",
+      "description": "Set configuration setting",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Configuration key"
+          },
+          "value": {
+            "type": "string",
+            "description": "Configuration value"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 19,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/lanonasis/lanonasis-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "create_memory",
+    "search_memories",
+    "search_lanonasis_docs",
+    "get_memory",
+    "update_memory",
+    "delete_memory",
+    "list_memories",
+    "create_api_key",
+    "list_api_keys",
+    "rotate_api_key",
+    "revoke_api_key",
+    "delete_api_key",
+    "get_health_status",
+    "get_auth_status",
+    "get_organization_info",
+    "create_project",
+    "list_projects",
+    "get_config",
+    "set_config"
+  ]
+}

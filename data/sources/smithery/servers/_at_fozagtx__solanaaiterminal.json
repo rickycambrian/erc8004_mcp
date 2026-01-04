@@ -1,0 +1,265 @@
+{
+  "qualifiedName": "@fozagtx/solanaaiterminal",
+  "displayName": "Solana Dev Essentials",
+  "description": "Search Solana documentation to quickly find concepts, guides, and examples. Inspect on-chain state by fetching balances, accounts, transactions, blocks, and slots. Create and manage wallets, sign messages, and request testnet airdrops to speed up development.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@fozagtx/solanaaiterminal",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@fozagtx/solanaaiterminal/mcp",
+      "configSchema": {
+        "title": "MCP Session Configuration",
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_documentation",
+      "title": "search_documentation",
+      "description": "Search across the Solana documentation to find relevant information, code examples, API references, and guides. Use this tool when you need to answer questions about Solana, find specific documentation, understand how features work, or locate implementation details. The search returns contextual content with titles and direct links to the documentation pages.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search query string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_account_info",
+      "title": "get_account_info",
+      "description": "Get information about a Solana account by its public key. Returns account balance, owner, data, and executable status.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "address"
+        ],
+        "properties": {
+          "address": {
+            "type": "string",
+            "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$",
+            "description": "Solana account public key (base58-encoded)"
+          },
+          "commitment": {
+            "enum": [
+              "processed",
+              "confirmed",
+              "finalized"
+            ],
+            "type": "string",
+            "default": "confirmed",
+            "description": "Commitment level (processed | confirmed | finalized)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_balance",
+      "title": "get_balance",
+      "description": "Get the SOL balance of a Solana account in both lamports and SOL.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "address"
+        ],
+        "properties": {
+          "address": {
+            "type": "string",
+            "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$",
+            "description": "Solana account public key (base58-encoded)"
+          },
+          "commitment": {
+            "enum": [
+              "processed",
+              "confirmed",
+              "finalized"
+            ],
+            "type": "string",
+            "default": "confirmed",
+            "description": "Commitment level (processed | confirmed | finalized)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_transaction",
+      "title": "get_transaction",
+      "description": "Retrieve details of a Solana transaction by its signature.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "signature"
+        ],
+        "properties": {
+          "signature": {
+            "type": "string",
+            "pattern": "^[1-9A-HJ-NP-Za-km-z]{87,88}$",
+            "description": "Transaction signature (base58-encoded)"
+          },
+          "commitment": {
+            "enum": [
+              "processed",
+              "confirmed",
+              "finalized"
+            ],
+            "type": "string",
+            "default": "confirmed",
+            "description": "Commitment level"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_block",
+      "title": "get_block",
+      "description": "Retrieve information about a Solana block by slot number.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "slot"
+        ],
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Slot number"
+          },
+          "commitment": {
+            "enum": [
+              "processed",
+              "confirmed",
+              "finalized"
+            ],
+            "type": "string",
+            "default": "finalized",
+            "description": "Commitment level"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_slot",
+      "title": "get_slot",
+      "description": "Get the current slot that the node is processing.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "commitment": {
+            "enum": [
+              "processed",
+              "confirmed",
+              "finalized"
+            ],
+            "type": "string",
+            "default": "finalized",
+            "description": "Commitment level"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_wallet",
+      "title": "create_wallet",
+      "description": "Generate a new Solana wallet with mnemonic phrase (12/24 words). Returns mnemonic, private key (base58), and public key.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "wordCount": {
+            "enum": [
+              12,
+              24
+            ],
+            "type": "number",
+            "default": 12,
+            "description": "Number of words in mnemonic (12 or 24)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_wallet_address",
+      "title": "get_wallet_address",
+      "description": "Get the public key of the currently configured wallet.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "sign_message",
+      "title": "sign_message",
+      "description": "Sign an arbitrary message with the wallet's private key.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message to sign"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "request_airdrop",
+      "title": "request_airdrop",
+      "description": "Request an airdrop of SOL tokens on Devnet or Testnet. Not available on Mainnet.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "address",
+          "amount"
+        ],
+        "properties": {
+          "amount": {
+            "type": "number",
+            "maximum": 5,
+            "description": "Amount of SOL to request (max 5 SOL per request)",
+            "exclusiveMinimum": 0
+          },
+          "address": {
+            "type": "string",
+            "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$",
+            "description": "Recipient address (base58-encoded public key)"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:27:41.920656+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,2019 @@
+{
+  "qualifiedName": "@garfield-bb/hap_paas2025",
+  "displayName": "FlowSheets",
+  "description": "Trigger workflows, manage worksheets, and collaborate on record discussions. Create, update, and delete records in bulk, generate share links, and get instant pivot summaries for insights. Administer roles, departments, and optionsets to control access and standardize data across your apps.",
+  "iconUrl": null,
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@garfield-bb/hap_paas2025",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@garfield-bb/hap_paas2025/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "trigger_workflow",
+      "description": "Trigger a workflow. When calling, in addition to providing the `process_id`, you should also pass the input parameters returned by `get_workflow_details`. Use the parameter's `id` as the key and its corresponding value as the value, passed directly as top-level parameters.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "process_id",
+          "ai_description"
+        ],
+        "properties": {
+          "process_id": {
+            "type": "string",
+            "description": "The ID of the workflow to trigger"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Workflow: <Workflow Name>. Response in user's language."
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_record_relations",
+      "description": "Get a list of related records, including source worksheet information, row record information, detailed row record information, and creator information.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "row_id",
+          "field",
+          "ai_description"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Field ID/alias"
+          },
+          "row_id": {
+            "type": "string",
+            "description": "Row record ID"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Number of rows"
+          },
+          "pageIndex": {
+            "type": "integer",
+            "description": "Page number"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>, Record: <Record Title>, Field: <Field Name>. Response in user's language."
+          },
+          "isReturnSystemFields": {
+            "type": "boolean",
+            "description": "Whether to get system fields"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_record_discussions",
+      "description": "Get row record discussions.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "row_id",
+          "ai_description"
+        ],
+        "properties": {
+          "row_id": {
+            "type": "string",
+            "description": "Row record ID"
+          },
+          "search": {
+            "type": "string",
+            "description": ""
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": ""
+          },
+          "pageIndex": {
+            "type": "integer",
+            "description": ""
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>, Record: <Record Title>. Response in user's language."
+          },
+          "onlyWithAttachments": {
+            "type": "boolean",
+            "description": "Whether to only return discussions with attachments"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_worksheet",
+      "description": "Delete a worksheet.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "ai_description"
+        ],
+        "properties": {
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "update_worksheet",
+      "description": "Edit a worksheet.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "ai_description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Worksheet name"
+          },
+          "alias": {
+            "type": "string",
+            "description": "Worksheet alias"
+          },
+          "addFields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "max": {
+                  "type": "integer",
+                  "description": "Provide when type=Rating. Represents the maximum rating value (0-10)."
+                },
+                "name": {
+                  "type": "string",
+                  "title": "",
+                  "description": "Field name"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Field type"
+                },
+                "alias": {
+                  "type": "string",
+                  "title": "",
+                  "description": "Field alias"
+                },
+                "isTitle": {
+                  "type": "boolean",
+                  "description": "Whether it is a title field"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "value",
+                      "index"
+                    ],
+                    "properties": {
+                      "index": {
+                        "type": "integer",
+                        "description": "Option sort order"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Option name"
+                      }
+                    }
+                  },
+                  "description": "Provide when type=SingleSelect|MultipleSelect. 11 for single-select, 10 for multi-select."
+                },
+                "subType": {
+                  "type": "string",
+                  "description": "When type=Collaborator, it represents the number of members. Rules: 0 for single selection, 1 for multiple selections.\nWhen type=Relation, it represents the number of related records. Rules: 1 for a single record, 2 for multiple records.\nWhen type=Time, it represents time format. 1 for hour:minute, 6 for hour:minute:second.\nWhen type=Date|DateTime, it represents date format. 5 for year, 4 for year-month, 3 for year-month-day, 2 for year-month-day-hour, 1 for year-month-day-hour-minute, 6 for year-month-day-hour-minute-second."
+                },
+                "isHidden": {
+                  "type": "boolean",
+                  "description": "Whether it is hidden"
+                },
+                "isUnique": {
+                  "type": "boolean",
+                  "description": "Whether it is unique"
+                },
+                "relation": {
+                  "type": "object",
+                  "properties": {
+                    "showFields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of field IDs to display in the relation card."
+                    },
+                    "bidirectional": {
+                      "type": "boolean",
+                      "description": "Whether it is a bidirectional relation. true: bidirectional, false: unidirectional. Implemented by providing sourceField."
+                    }
+                  },
+                  "description": "Detailed configuration for relation fields when type='Relation'."
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether it is required"
+                },
+                "precision": {
+                  "type": "integer",
+                  "description": "When type=Number, it represents the number of decimal places to keep (0-14)."
+                },
+                "dataSource": {
+                  "type": "string",
+                  "description": "Provide when type=Relation. The ID of the related worksheet."
+                },
+                "isReadOnly": {
+                  "type": "boolean",
+                  "description": "Whether it is read-only"
+                },
+                "isHiddenOnCreate": {
+                  "type": "boolean",
+                  "description": "Whether to hide when creating a new record"
+                }
+              }
+            },
+            "description": "Fields to add"
+          },
+          "sectionId": {
+            "type": "string",
+            "description": "Group ID"
+          },
+          "editFields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Field ID/alias"
+                },
+                "max": {
+                  "type": "integer",
+                  "description": "Provide when type=Rating. Represents the maximum rating value (0-10)."
+                },
+                "name": {
+                  "type": "string",
+                  "title": "",
+                  "description": "Field name"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Field type"
+                },
+                "alias": {
+                  "type": "string",
+                  "title": "",
+                  "description": "Field alias"
+                },
+                "isTitle": {
+                  "type": "boolean",
+                  "description": "Whether it is a title field"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "value",
+                      "index"
+                    ],
+                    "properties": {
+                      "index": {
+                        "type": "integer",
+                        "description": "Option sort order"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Option name"
+                      }
+                    }
+                  },
+                  "description": "Provide when type=SingleSelect|MultipleSelect. 11 for single-select, 10 for multi-select."
+                },
+                "subType": {
+                  "type": "string",
+                  "description": "When type=Collaborator, it represents the number of members. Rules: 0 for single selection, 1 for multiple selections.\nWhen type=Relation, it represents the number of related records. Rules: 1 for a single record, 2 for multiple records.\nWhen type=Time, it represents time format. 1 for hour:minute, 6 for hour:minute:second.\nWhen type=Date|DateTime, it represents date format. 5 for year, 4 for year-month, 3 for year-month-day, 2 for year-month-day-hour, 1 for year-month-day-hour-minute, 6 for year-month-day-hour-minute-second."
+                },
+                "isHidden": {
+                  "type": "boolean",
+                  "description": "Whether it is hidden"
+                },
+                "isUnique": {
+                  "type": "boolean",
+                  "description": "Whether it is unique"
+                },
+                "relation": {
+                  "type": "object",
+                  "properties": {
+                    "showFields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of field IDs to display in the relation card."
+                    }
+                  },
+                  "description": "Detailed configuration for relation fields when type='Relation'."
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether it is required"
+                },
+                "precision": {
+                  "type": "integer",
+                  "description": "When type=Number, it represents the number of decimal places to keep (0-14)."
+                },
+                "dataSource": {
+                  "type": "string",
+                  "description": "Provide when type=Relation. The ID of the related worksheet."
+                },
+                "isReadOnly": {
+                  "type": "boolean",
+                  "description": "Whether it is read-only"
+                },
+                "isHiddenOnCreate": {
+                  "type": "boolean",
+                  "description": "Whether to hide when creating a new record"
+                }
+              }
+            },
+            "description": "Fields to edit"
+          },
+          "removeFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of field IDs to remove"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>, add fields (if any), modify fields (if any), delete fields (if any). Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_time",
+      "description": "\u83b7\u53d6\u5f53\u524d\u65f6\u95f4",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "batch_delete_records",
+      "description": "Batch delete row records.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "rowIds",
+          "ai_description"
+        ],
+        "properties": {
+          "rowIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of row record IDs to delete"
+          },
+          "permanent": {
+            "type": "boolean",
+            "description": "Whether to permanently delete (true: permanently delete, false: logical delete, default is false). Permanently deleted data does not go to the recycle bin and cannot be recovered. Please operate with caution!"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>. Response in user's language."
+          },
+          "triggerWorkflow": {
+            "type": "boolean",
+            "description": "Whether to trigger workflow"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_role",
+      "description": "Create a role. Information includes: role name, description, permission information.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "permissionScope",
+          "type",
+          "ai_description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Role name"
+          },
+          "type": {
+            "type": "string",
+            "description": "Role type. 0: custom role."
+          },
+          "description": {
+            "type": "string",
+            "description": "Role description"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Role: <Role Name>. Response in user's language."
+          },
+          "pagePermissions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Custom page ID"
+                },
+                "enable": {
+                  "type": "boolean",
+                  "description": "Whether the custom page can be viewed."
+                }
+              }
+            },
+            "required": [
+              "id",
+              "enable"
+            ],
+            "description": "Detailed custom page permissions, effective only when permissionScope is 0."
+          },
+          "permissionScope": {
+            "type": "string",
+            "description": "Distribute all application items. 80: Can view, edit, delete all records; 60: Can view all records, but can only edit, delete own records; 30: Can view joined records, can only edit, delete own records; 20: Read-only access to all records; 0: Distribute permissioned application items."
+          },
+          "globalPermissions": {
+            "type": "object",
+            "required": [
+              "addRecord",
+              "share",
+              "import",
+              "export",
+              "log",
+              "attachmentDownload",
+              "systemPrint",
+              "discuss"
+            ],
+            "properties": {
+              "log": {
+                "type": "boolean",
+                "description": "Log permission. true for has permission, false for no permission."
+              },
+              "share": {
+                "type": "boolean",
+                "description": "Public sharing permission for views and records. true for has permission, false for no permission."
+              },
+              "export": {
+                "type": "boolean",
+                "description": "Export permission. true for has permission, false for no permission."
+              },
+              "import": {
+                "type": "boolean",
+                "description": "Import permission. true for has permission, false for no permission."
+              },
+              "discuss": {
+                "type": "boolean",
+                "description": "Discussion permission. true for has permission, false for no permission."
+              },
+              "addRecord": {
+                "type": "boolean",
+                "description": "Permission to add records. true for has permission, false for no permission."
+              },
+              "systemPrint": {
+                "type": "boolean",
+                "description": "System print permission. true for has permission, false for no permission."
+              },
+              "attachmentDownload": {
+                "type": "boolean",
+                "description": "Attachment download permission. true for has permission, false for no permission."
+              }
+            },
+            "description": "Global application permissions, effective only when permissionScope is greater than 0."
+          },
+          "hideAppForMembers": {
+            "type": "string",
+            "description": "Whether to hide the application from members. true: hide, false: do not hide."
+          },
+          "worksheetPermissions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Worksheet ID"
+                },
+                "recordActions": {
+                  "type": "object",
+                  "required": [
+                    "share",
+                    "discuss",
+                    "systemPrint",
+                    "attachmentDownload",
+                    "log",
+                    "add"
+                  ],
+                  "properties": {
+                    "add": {
+                      "type": "boolean",
+                      "description": "Permission to add records."
+                    },
+                    "log": {
+                      "type": "boolean",
+                      "description": "Record log permission."
+                    },
+                    "share": {
+                      "type": "boolean",
+                      "description": "Public sharing permission for records."
+                    },
+                    "discuss": {
+                      "type": "boolean",
+                      "description": "Record discussion permission."
+                    },
+                    "systemPrint": {
+                      "type": "boolean",
+                      "description": "Record system print permission."
+                    },
+                    "attachmentDownload": {
+                      "type": "boolean",
+                      "description": "Record attachment download permission."
+                    }
+                  },
+                  "description": "Row record action permissions."
+                },
+                "paymentActions": {
+                  "type": "object",
+                  "required": [
+                    "pay"
+                  ],
+                  "properties": {
+                    "pay": {
+                      "type": "string",
+                      "description": "Payment permission in worksheet."
+                    }
+                  },
+                  "description": "Payment permissions."
+                },
+                "recordDataScope": {
+                  "type": "object",
+                  "required": [
+                    "read",
+                    "delete",
+                    "edit"
+                  ],
+                  "properties": {
+                    "edit": {
+                      "type": "integer",
+                      "description": "Edit permission scope. 0: Not authorized, 20: Only my own, 30: Mine and my subordinates', 100: All."
+                    },
+                    "read": {
+                      "type": "integer",
+                      "description": "View permission scope. 0: Not authorized, 20: Only my own, 30: Mine and my subordinates', 100: All."
+                    },
+                    "delete": {
+                      "type": "integer",
+                      "description": "Delete permission scope. 0: Not authorized, 20: Only my own, 30: Mine and my subordinates', 100: All."
+                    }
+                  },
+                  "description": "Data permission scope for row records."
+                },
+                "fieldPermissions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Field ID"
+                      },
+                      "add": {
+                        "type": "boolean",
+                        "description": "Permission to add field."
+                      },
+                      "edit": {
+                        "type": "boolean",
+                        "description": "Permission to edit field."
+                      },
+                      "read": {
+                        "type": "boolean",
+                        "description": "Permission to view field."
+                      },
+                      "decrypt": {
+                        "type": "boolean",
+                        "description": "Permission to decrypt field."
+                      }
+                    }
+                  },
+                  "description": "Field permissions."
+                },
+                "worksheetActions": {
+                  "type": "object",
+                  "required": [
+                    "shareView",
+                    "import",
+                    "export",
+                    "discuss",
+                    "batchOperation"
+                  ],
+                  "properties": {
+                    "export": {
+                      "type": "boolean",
+                      "description": "Worksheet export permission."
+                    },
+                    "import": {
+                      "type": "boolean",
+                      "description": "Worksheet import permission."
+                    },
+                    "discuss": {
+                      "type": "boolean",
+                      "description": "Worksheet discussion permission."
+                    },
+                    "shareView": {
+                      "type": "boolean",
+                      "description": "Public sharing permission for views."
+                    },
+                    "batchOperation": {
+                      "type": "boolean",
+                      "description": "Worksheet batch operation permission."
+                    }
+                  },
+                  "description": "Worksheet action permissions."
+                },
+                "recordPermissionInViews": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "edit": {
+                        "type": "boolean",
+                        "description": "Permission to edit row records."
+                      },
+                      "read": {
+                        "type": "boolean",
+                        "description": "Permission to view row records."
+                      },
+                      "delete": {
+                        "type": "boolean",
+                        "description": "Permission to delete row records."
+                      },
+                      "viewId": {
+                        "type": "string",
+                        "description": "View ID"
+                      }
+                    }
+                  },
+                  "description": "Row record permissions within views."
+                }
+              }
+            },
+            "description": "Detailed worksheet permissions, effective only when permissionScope is 0."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_role_details",
+      "description": "Get role details.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "role_id",
+          "ai_description"
+        ],
+        "properties": {
+          "role_id": {
+            "type": "string",
+            "description": "Role ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Role: <Role Name>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_workflow_details",
+      "description": "Get workflow details, including request and response parameters.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "process_id",
+          "ai_description"
+        ],
+        "properties": {
+          "process_id": {
+            "type": "string",
+            "description": "Process ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Workflow: <Workflow Name>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "create_record",
+      "description": "Create a new row record.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "fields",
+          "ai_description"
+        ],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "",
+                  "description": "Field ID/alias"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "SingleSelect/MultipleSelect: 1=do not add new options, 2=allow adding new options, default is 1.\nAttachment: 0=overwrite, 1=add new, default is 0."
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "number",
+                    "array"
+                  ],
+                  "items": {
+                    "type": [
+                      "string",
+                      "object"
+                    ]
+                  },
+                  "description": "Depending on the type, the value field supports the following parameter formats:\n\n1. **type=Attachment\uff08\u9644\u4ef6 / Attachment\uff09**:\n   Pass an array of objects, where each object contains `name` and `url`.\n   Example / \u793a\u4f8b\uff1a[{\"name\":\"file_name_with_extension / \u6587\u4ef6\u540d\u79f0\uff0c\u5e26\u540e\u7f00\",\"url\":\"url/base64\"}]\n\n2. **type=Relation/Collaborator/Department/OrgRole\uff08\u5173\u7cfb / \u5408\u4f5c\u8005 / \u90e8\u95e8 / \u7ec4\u7ec7\u89d2\u8272\uff09**:\n   Pass an array of text strings.\n   Example / \u793a\u4f8b\uff1a[\"UserA / \u7528\u6237A\", \"UserB / \u7528\u6237B\"]\n\n3. **type=SingleSelect/MultipleSelect\uff08\u5355\u9009 / \u591a\u9009\uff09**:\n   Pass an array of option `value`s.\n   Example / \u793a\u4f8b\uff1a[\"Option1 / \u9009\u9879\u503c1\", \"Option2 / \u9009\u9879\u503c2\"]\n\n4. **type=Region\uff08\u5730\u533a / Region\uff09**:\n   Pass a region code string (obtainable via the region information API / \u53ef\u901a\u8fc7\u83b7\u53d6\u5730\u533a\u4fe1\u606f\u63a5\u53e3\u67e5\u8be2)\u3002\n   Example / \u793a\u4f8b\uff1a\"310100\"\n\n5. **type=Location\uff08\u5b9a\u4f4d / Location\uff09**:\n   Pass a JSON string containing four fields: `x`, `y`, `address`, and `title`.\n   Example / \u793a\u4f8b\uff1a`{\"x\":66.666666,\"y\":88.888888,\"address\":\"Caohejing Development Zone, Shanghai / \u4e0a\u6d77\u5e02\u6f15\u6cb3\u6cfe\u5f00\u53d1\u533a\",\"title\":\"Company Building / \u516c\u53f8\u5927\u697c\"}`\n\n6. **type=Checkbox\uff08\u590d\u9009\u6846 / Checkbox\uff09**:\n   Pass 1 to indicate checked / \u4f20\u5165 1 \u8868\u793a\u9009\u4e2d\uff0c0 to indicate unchecked / \u4f20\u5165 0 \u8868\u793a\u672a\u9009\u4e2d\u3002\n   Example / \u793a\u4f8b\uff1a1\n\n7. **type=Rating\uff08\u7b49\u7ea7 / Rating\uff09**:\n   Pass a numeric string within the valid range / \u4f20\u5165\u8303\u56f4\u5185\u7684\u6570\u5b57\u5b57\u7b26\u4e32\u3002\n   Example / \u793a\u4f8b\uff1a\"5\"\n\n8. **Other types\uff08\u5176\u4ed6\u7c7b\u578b / Other types\uff09**:\n   Typically pass a string or numeric value / \u901a\u5e38\u4f20\u5165\u5b57\u7b26\u4e32\u6216\u6570\u503c\u3002"
+                }
+              }
+            },
+            "description": "Control data"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>. Response in user's language."
+          },
+          "triggerWorkflow": {
+            "type": "boolean",
+            "description": "Whether to trigger workflow"
+          }
+        }
+      }
+    },
+    {
+      "name": "batch_create_records",
+      "description": "Batch create new row records.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "rows",
+          "ai_description"
+        ],
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "value"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Field ID/alias"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "SingleSelect/MultipleSelect: 1=do not add new options, 2=allow adding new options, default is 1.\nAttachment: 0=overwrite, 1=add new, default is 0."
+                      },
+                      "value": {
+                        "type": [
+                          "string",
+                          "number",
+                          "array"
+                        ],
+                        "items": {
+                          "type": [
+                            "string",
+                            "object"
+                          ]
+                        },
+                        "description": "Depending on the type, the value field supports the following parameter formats:\n\n1. **type=Attachment\uff08\u9644\u4ef6 / Attachment\uff09**:\n   Pass an array of objects, where each object contains `name` and `url`.\n   Example / \u793a\u4f8b\uff1a[{\"name\":\"file_name_with_extension / \u6587\u4ef6\u540d\u79f0\uff0c\u5e26\u540e\u7f00\",\"url\":\"url/base64\"}]\n\n2. **type=Relation/Collaborator/Department/OrgRole\uff08\u5173\u7cfb / \u5408\u4f5c\u8005 / \u90e8\u95e8 / \u7ec4\u7ec7\u89d2\u8272\uff09**:\n   Pass an array of text strings.\n   Example / \u793a\u4f8b\uff1a[\"UserA / \u7528\u6237A\", \"UserB / \u7528\u6237B\"]\n\n3. **type=SingleSelect/MultipleSelect\uff08\u5355\u9009 / \u591a\u9009\uff09**:\n   Pass an array of option `value`s.\n   Example / \u793a\u4f8b\uff1a[\"Option1 / \u9009\u9879\u503c1\", \"Option2 / \u9009\u9879\u503c2\"]\n\n4. **type=Region\uff08\u5730\u533a / Region\uff09**:\n   Pass a region code string (obtainable via the region information API / \u53ef\u901a\u8fc7\u83b7\u53d6\u5730\u533a\u4fe1\u606f\u63a5\u53e3\u67e5\u8be2)\u3002\n   Example / \u793a\u4f8b\uff1a\"310100\"\n\n5. **type=Location\uff08\u5b9a\u4f4d / Location\uff09**:\n   Pass a JSON string containing four fields: `x`, `y`, `address`, and `title`.\n   Example / \u793a\u4f8b\uff1a`{\"x\":66.666666,\"y\":88.888888,\"address\":\"Caohejing Development Zone, Shanghai / \u4e0a\u6d77\u5e02\u6f15\u6cb3\u6cfe\u5f00\u53d1\u533a\",\"title\":\"Company Building / \u516c\u53f8\u5927\u697c\"}`\n\n6. **type=Checkbox\uff08\u590d\u9009\u6846 / Checkbox\uff09**:\n   Pass 1 to indicate checked / \u4f20\u5165 1 \u8868\u793a\u9009\u4e2d\uff0c0 to indicate unchecked / \u4f20\u5165 0 \u8868\u793a\u672a\u9009\u4e2d\u3002\n   Example / \u793a\u4f8b\uff1a1\n\n7. **type=Rating\uff08\u7b49\u7ea7 / Rating\uff09**:\n   Pass a numeric string within the valid range / \u4f20\u5165\u8303\u56f4\u5185\u7684\u6570\u5b57\u5b57\u7b26\u4e32\u3002\n   Example / \u793a\u4f8b\uff1a\"5\"\n\n8. **Other types\uff08\u5176\u4ed6\u7c7b\u578b / Other types\uff09**:\n   Typically pass a string or numeric value / \u901a\u5e38\u4f20\u5165\u5b57\u7b26\u4e32\u6216\u6570\u503c\u3002"
+                      }
+                    }
+                  },
+                  "description": "List of fields"
+                }
+              }
+            },
+            "description": "List of row records"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>. Response in user's language."
+          },
+          "triggerWorkflow": {
+            "type": "boolean",
+            "description": "Whether to trigger workflow"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_record",
+      "description": "Update a row record.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "row_id",
+          "fields",
+          "ai_description"
+        ],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "value"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "",
+                  "description": "Field ID/alias"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "SingleSelect/MultipleSelect: 1=do not add new options, 2=allow adding new options, default is 1.\nAttachment: 0=overwrite, 1=add new, default is 0."
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "number",
+                    "array"
+                  ],
+                  "items": {
+                    "type": [
+                      "string",
+                      "object"
+                    ]
+                  },
+                  "description": "Depending on the type, the value field supports the following parameter formats:\n\n1. **type=Attachment\uff08\u9644\u4ef6 / Attachment\uff09**:\n   Pass an array of objects, where each object contains `name` and `url`.\n   Example / \u793a\u4f8b\uff1a[{\"name\":\"file_name_with_extension / \u6587\u4ef6\u540d\u79f0\uff0c\u5e26\u540e\u7f00\",\"url\":\"url/base64\"}]\n\n2. **type=Relation/Collaborator/Department/OrgRole\uff08\u5173\u7cfb / \u5408\u4f5c\u8005 / \u90e8\u95e8 / \u7ec4\u7ec7\u89d2\u8272\uff09**:\n   Pass an array of text strings.\n   Example / \u793a\u4f8b\uff1a[\"UserA / \u7528\u6237A\", \"UserB / \u7528\u6237B\"]\n\n3. **type=SingleSelect/MultipleSelect\uff08\u5355\u9009 / \u591a\u9009\uff09**:\n   Pass an array of option `value`s.\n   Example / \u793a\u4f8b\uff1a[\"Option1 / \u9009\u9879\u503c1\", \"Option2 / \u9009\u9879\u503c2\"]\n\n4. **type=Region\uff08\u5730\u533a / Region\uff09**:\n   Pass a region code string (obtainable via the region information API / \u53ef\u901a\u8fc7\u83b7\u53d6\u5730\u533a\u4fe1\u606f\u63a5\u53e3\u67e5\u8be2)\u3002\n   Example / \u793a\u4f8b\uff1a\"310100\"\n\n5. **type=Location\uff08\u5b9a\u4f4d / Location\uff09**:\n   Pass a JSON string containing four fields: `x`, `y`, `address`, and `title`.\n   Example / \u793a\u4f8b\uff1a`{\"x\":66.666666,\"y\":88.888888,\"address\":\"Caohejing Development Zone, Shanghai / \u4e0a\u6d77\u5e02\u6f15\u6cb3\u6cfe\u5f00\u53d1\u533a\",\"title\":\"Company Building / \u516c\u53f8\u5927\u697c\"}`\n\n6. **type=Checkbox\uff08\u590d\u9009\u6846 / Checkbox\uff09**:\n   Pass 1 to indicate checked / \u4f20\u5165 1 \u8868\u793a\u9009\u4e2d\uff0c0 to indicate unchecked / \u4f20\u5165 0 \u8868\u793a\u672a\u9009\u4e2d\u3002\n   Example / \u793a\u4f8b\uff1a1\n\n7. **type=Rating\uff08\u7b49\u7ea7 / Rating\uff09**:\n   Pass a numeric string within the valid range / \u4f20\u5165\u8303\u56f4\u5185\u7684\u6570\u5b57\u5b57\u7b26\u4e32\u3002\n   Example / \u793a\u4f8b\uff1a\"5\"\n\n8. **Other types\uff08\u5176\u4ed6\u7c7b\u578b / Other types\uff09**:\n   Typically pass a string or numeric value / \u901a\u5e38\u4f20\u5165\u5b57\u7b26\u4e32\u6216\u6570\u503c\u3002"
+                }
+              }
+            },
+            "description": "List of fields"
+          },
+          "row_id": {
+            "type": "string",
+            "description": "Row record ID"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>, Record: <Record Title>. Response in user's language."
+          },
+          "triggerWorkflow": {
+            "type": "boolean",
+            "description": "Whether to trigger workflow"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_workflow_list",
+      "description": "Get a list of workflows in the application. Used to trigger specific business processes. Determine the applicable business scenario based on the workflow name and description.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_regions",
+      "description": "Get region information.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ai_description"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Region ID"
+          },
+          "search": {
+            "type": "string",
+            "description": "Fuzzy search content"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Region: <Region Name>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "find_department",
+      "description": "Find a department by name, returning department ID and name.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name",
+          "ai_description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Department name (exact match)"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Department: <Department Name>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_record_logs",
+      "description": "Get row record logs.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "row_id",
+          "ai_description"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Field ID/alias"
+          },
+          "row_id": {
+            "type": "string",
+            "description": "Row record ID"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date"
+          },
+          "pageSize": {
+            "type": "string",
+            "description": ""
+          },
+          "pageIndex": {
+            "type": "string",
+            "description": ""
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date"
+          },
+          "operatorIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Operator ID"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>, Record: <Record Title>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_app_info",
+      "description": "Get application information, including groups, worksheets, and custom pages under the application. The 'type' field of the items object means: 0-Worksheet, 1-Custom Page, 2-Subgroup.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "batch_update_records",
+      "description": "Batch update row records.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "fields",
+          "rowIds",
+          "ai_description"
+        ],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "value"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Field ID/alias"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "SingleSelect/MultipleSelect: 1=do not add new options, 2=allow adding new options, default is 1.\nAttachment: 0=overwrite, 1=add new, default is 0."
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "number",
+                    "array"
+                  ],
+                  "items": {
+                    "type": [
+                      "string",
+                      "object"
+                    ]
+                  },
+                  "description": "Depending on the type, the value field supports the following parameter formats:\n\n1. **type=Attachment\uff08\u9644\u4ef6 / Attachment\uff09**:\n   Pass an array of objects, where each object contains `name` and `url`.\n   Example / \u793a\u4f8b\uff1a[{\"name\":\"file_name_with_extension / \u6587\u4ef6\u540d\u79f0\uff0c\u5e26\u540e\u7f00\",\"url\":\"url/base64\"}]\n\n2. **type=Relation/Collaborator/Department/OrgRole\uff08\u5173\u7cfb / \u5408\u4f5c\u8005 / \u90e8\u95e8 / \u7ec4\u7ec7\u89d2\u8272\uff09**:\n   Pass an array of text strings.\n   Example / \u793a\u4f8b\uff1a[\"UserA / \u7528\u6237A\", \"UserB / \u7528\u6237B\"]\n\n3. **type=SingleSelect/MultipleSelect\uff08\u5355\u9009 / \u591a\u9009\uff09**:\n   Pass an array of option `value`s.\n   Example / \u793a\u4f8b\uff1a[\"Option1 / \u9009\u9879\u503c1\", \"Option2 / \u9009\u9879\u503c2\"]\n\n4. **type=Region\uff08\u5730\u533a / Region\uff09**:\n   Pass a region code string (obtainable via the region information API / \u53ef\u901a\u8fc7\u83b7\u53d6\u5730\u533a\u4fe1\u606f\u63a5\u53e3\u67e5\u8be2)\u3002\n   Example / \u793a\u4f8b\uff1a\"310100\"\n\n5. **type=Location\uff08\u5b9a\u4f4d / Location\uff09**:\n   Pass a JSON string containing four fields: `x`, `y`, `address`, and `title`.\n   Example / \u793a\u4f8b\uff1a`{\"x\":66.666666,\"y\":88.888888,\"address\":\"Caohejing Development Zone, Shanghai / \u4e0a\u6d77\u5e02\u6f15\u6cb3\u6cfe\u5f00\u53d1\u533a\",\"title\":\"Company Building / \u516c\u53f8\u5927\u697c\"}`\n\n6. **type=Checkbox\uff08\u590d\u9009\u6846 / Checkbox\uff09**:\n   Pass 1 to indicate checked / \u4f20\u5165 1 \u8868\u793a\u9009\u4e2d\uff0c0 to indicate unchecked / \u4f20\u5165 0 \u8868\u793a\u672a\u9009\u4e2d\u3002\n   Example / \u793a\u4f8b\uff1a1\n\n7. **type=Rating\uff08\u7b49\u7ea7 / Rating\uff09**:\n   Pass a numeric string within the valid range / \u4f20\u5165\u8303\u56f4\u5185\u7684\u6570\u5b57\u5b57\u7b26\u4e32\u3002\n   Example / \u793a\u4f8b\uff1a\"5\"\n\n8. **Other types\uff08\u5176\u4ed6\u7c7b\u578b / Other types\uff09**:\n   Typically pass a string or numeric value / \u901a\u5e38\u4f20\u5165\u5b57\u7b26\u4e32\u6216\u6570\u503c\u3002"
+                }
+              }
+            },
+            "description": "List of fields to update"
+          },
+          "rowIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of row record IDs to update"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>. Response in user's language."
+          },
+          "triggerWorkflow": {
+            "type": "boolean",
+            "description": "Whether to trigger workflow"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove_member_from_role",
+      "description": "Remove a member from a role.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "role_id",
+          "operatorId",
+          "ai_description"
+        ],
+        "properties": {
+          "jobIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of job IDs"
+          },
+          "role_id": {
+            "type": "string",
+            "description": "Role ID"
+          },
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user account IDs"
+          },
+          "operatorId": {
+            "type": "string",
+            "description": "Operator ID"
+          },
+          "orgRoleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of organization role IDs"
+          },
+          "departmentIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of department IDs"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Role: <Role Name>, Remove Member: <(Type) Name>. Response in user's language."
+          },
+          "departmentTreeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of department tree IDs"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_record_share_link",
+      "description": "Get a shareable link for a record.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "row_id",
+          "ai_description"
+        ],
+        "properties": {
+          "row_id": {
+            "type": "string",
+            "description": "Row record ID"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password to access the link"
+          },
+          "expiredIn": {
+            "type": "integer",
+            "description": "Link expiration time in seconds. A value of 0 or no value means the link never expires."
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "visibleFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of visible field IDs"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>, Record: <Record Title>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_role",
+      "description": "Delete a role.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "role_id",
+          "ai_description"
+        ],
+        "properties": {
+          "role_id": {
+            "type": "string",
+            "description": "Role ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Role: <Role Name>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_record",
+      "description": "Delete a row record.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "row_id",
+          "ai_description"
+        ],
+        "properties": {
+          "row_id": {
+            "type": "string",
+            "description": "Row record ID"
+          },
+          "permanent": {
+            "type": "boolean",
+            "description": "Whether to permanently delete (true: permanently delete, false: logical delete, default is false). Permanently deleted data does not go to the recycle bin and cannot be recovered. Please operate with caution!"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>, Record: <Record Title>. Response in user's language."
+          },
+          "triggerWorkflow": {
+            "type": "boolean",
+            "description": "Whether to trigger workflow"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_role_list",
+      "description": "Get a list of roles in the application.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "find_member",
+      "description": "Find a user by name, returning user ID, name, and redacted phone number and email.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name",
+          "ai_description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Person's name (exact match)"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Name: <Person's Name>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "leave_all_roles",
+      "description": "Remove a specified member from all roles in the application.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "ai_description"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Member: <Member Name>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_worksheet_structure",
+      "description": "Get worksheet configuration and its control information.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "ai_description"
+        ],
+        "properties": {
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_optionset",
+      "description": "Delete an optionset.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "optionset_id"
+        ],
+        "properties": {
+          "optionset_id": {
+            "type": "string",
+            "description": "Optionset ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_record_list",
+      "description": "Get a list of worksheet records.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "pageSize",
+          "pageIndex",
+          "ai_description"
+        ],
+        "properties": {
+          "sorts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "title": "Field ID or alias, field ID is preferred, if there is no alias, field ID is used directly"
+                },
+                "isAsc": {
+                  "type": "boolean",
+                  "title": "Whether to sort in ascending order, default is descending"
+                }
+              }
+            },
+            "description": "Sort fields"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Specify an array of field IDs to return. Only these fields will be included in the response. Optional."
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "group",
+                  "condition"
+                ],
+                "type": "string"
+              },
+              "field": {
+                "type": "string",
+                "description": "Field ID must be entered"
+              },
+              "logic": {
+                "enum": [
+                  "AND",
+                  "OR"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "operator": {
+                "type": "string"
+              }
+            },
+            "description": "Filter object for defining data query conditions.\n\n### Filter Structure\n```typescript\nFilter = {\n  type: 'group' | 'condition';\n  // Fields for type 'group'\n  logic?: 'AND' | 'OR';\n  children?: Filter[]; // Can only be all groups or all conditions, no mixing. Max two levels of children.\n  // Fields for type 'condition'\n  field?: string; // Field ID must be entered\n  operator?: FilterOperator; // Operator\n  value?: any; // Value (string, number, array)\n}\n```\n\n### Notes\n\n1.  **Nesting Limit**: Max two levels of nesting (group -> group -> condition), and the first level must be a group.\n2.  **Consistent Children Type**: A group's children must all be groups or all be conditions, no mixing.\n3.  **Logic Required**: When type is 'group', the logic field must be 'AND' or 'OR'.\n4.  **Empty Operators**: `isempty` and `isnotempty` do not require a value field.\n5.  **Array Values**: Some operators require array values (e.g., between, in, contains, concurrent, belongsto).\n6.  **Option Fields**: All option fields (single-select, multi-select) require the option's key in an array as the value, using array value operators.\n7.  **Related Records**: Filtering by related records requires first querying the corresponding record_id, then filtering using array value rules.\n\n### Usage Examples\n\n#### Example 1: Filter Conditions\nQuery for all employees with the last name \"Smith\" who joined in January:\n\n```json\n{\n  \"type\": \"group\",\n  \"logic\": \"AND\",\n  \"children\": [\n    {\n      \"type\": \"condition\",\n      \"field\": \"name\",\n      \"operator\": \"startswith\",\n      \"value\": \"Smith\"\n    },\n    {\n      \"type\": \"condition\",\n      \"field\": \"onboard_date\",\n      \"operator\": \"between\",\n      \"value\": [\"2025-01-01\", \"2025-01-31\"]\n    }\n  ]\n}\n```\n\n#### Example 2: Multi-level Filter Groups\nQuery for all employees with the last name \"Smith\" who joined in January from the Marketing and Sales departments in the North region:\n\n```json\n{\n  \"type\": \"group\",\n  \"logic\": \"AND\",\n  \"children\": [\n    {\n      \"type\": \"group\", \n      \"logic\": \"AND\",\n      \"children\": [\n        {\n          \"type\": \"condition\",\n          \"field\": \"name\",\n          \"operator\": \"startswith\",\n          \"value\": \"Smith\"\n        },\n        {\n          \"type\": \"condition\",\n          \"field\": \"onboard_date\",\n          \"operator\": \"between\",\n          \"value\": [\"2025-01-01\", \"2025-01-31\"]\n        }\n      ]\n    },\n    {\n      \"type\": \"group\",\n      \"logic\": \"OR\",\n      \"children\": [\n        {\n          \"type\": \"condition\",\n          \"field\": \"department_name\",\n          \"operator\": \"contains\",\n          \"value\": [\"Sales\", \"Marketing\"]\n        },\n        {\n          \"type\": \"condition\",\n          \"field\": \"department_id\",\n          \"operator\": \"belongsto\",\n          \"value\": [\"NorthRegionID\"]\n        }\n      ]\n    }\n  ]\n}\n```"
+          },
+          "search": {
+            "type": "string",
+            "description": "Keyword fuzzy search"
+          },
+          "viewId": {
+            "type": "string",
+            "description": "View ID, optional."
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Number of items per page, max 1000"
+          },
+          "pageIndex": {
+            "type": "integer",
+            "description": "Page number"
+          },
+          "tableView": {
+            "type": "boolean",
+            "description": "Whether to return record data in table view format"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "Description of the query parameters, including worksheet, view (if any), filter conditions, sorting, etc. Output detailed field names and condition operators/values. Response in user's language."
+          },
+          "useFieldIdAsKey": {
+            "type": "boolean",
+            "description": "Whether to use field ID as the key for returned data, default is to use alias"
+          },
+          "includeTotalCount": {
+            "type": "boolean",
+            "description": "Whether to return the total number of records"
+          },
+          "includeSystemFields": {
+            "type": "boolean",
+            "description": "Whether to return system fields"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_record_pivot_data",
+      "description": "Get pivot table summary data for worksheet records. Prioritize using this tool for querying statistics, summaries, and aggregations.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "values",
+          "ai_description"
+        ],
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "description": "Field ID"
+                },
+                "displayName": {
+                  "type": "string",
+                  "description": "Display name"
+                },
+                "granularity": {
+                  "type": "integer",
+                  "description": "Date and region statistical dimension.\nWhen the field type is date or region, use this parameter to set the statistical grouping granularity.\n- Date/Time: 1-Day, 2-Week, 3-Month;\n- Region: 1-Province, 2-Province/City, 3-Province/City/County (District)."
+                },
+                "includeEmpty": {
+                  "type": "boolean",
+                  "description": "Whether to include empty values in statistics, default is false."
+                }
+              }
+            },
+            "description": "List of row (dimension) fields"
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "description": "Field ID"
+                },
+                "isAsc": {
+                  "type": "boolean",
+                  "description": "Whether to sort in ascending order, default is descending"
+                }
+              }
+            },
+            "description": "Sort fields"
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "group",
+                  "condition"
+                ],
+                "type": "string"
+              },
+              "field": {
+                "type": "string",
+                "description": "Field ID must be entered"
+              },
+              "logic": {
+                "enum": [
+                  "AND",
+                  "OR"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "operator": {
+                "type": "string"
+              }
+            },
+            "description": "Filter object for defining data query conditions.\n\n### Filter Structure\n```\nFilter = {\n  type: 'group' | 'condition';\n  // Fields for type 'group'\n  logic?: 'AND' | 'OR';\n  children?: Filter[]; // Can only be all groups or all conditions, no mixing. Max two levels of children.\n  // Fields for type 'condition'\n  field?: string; // Field ID must be entered\n  operator?: FilterOperator; // Operator\n  value?: any; // Value (string, number, array)\n}\n```\n\n### Notes\n\n1.  **Nesting Limit**: Max two levels of nesting (group -> group -> condition), and the first level must be a group.\n2.  **Consistent Children Type**: A group's children must all be groups or all be conditions, no mixing.\n3.  **Operators**: Only the following 22 operators are supported: eq, ne, gt, ge, lt, le, in, notin, contains, notcontains, startswith, notstartswith, endswith, notendswith, between, notbetween, isempty, isnotempty, concurrent, belongsto, notbelongsto.\n4.  **Important Rules**: \n    - Fields must use their ID and exist in the worksheet structure;\n    - Option fields require the key value in an array as the value;\n    - Filtering by related records requires first querying the record_id and then filtering using array rules;\n    - Time filtering uses the `between` operator;\n    - `isempty`/`isnotempty` do not require a value."
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "description": "Field ID"
+                },
+                "aggregation": {
+                  "type": "string",
+                  "description": "Aggregation method (case-insensitive)\n- COUNT: Count\n- DISTINCTCOUNT: Distinct Count\n- SUM: Sum\n- MIN: Minimum\n- MAX: Maximum\n- AVG: Average"
+                },
+                "displayName": {
+                  "type": "string",
+                  "description": "Display name"
+                },
+                "includeEmpty": {
+                  "type": "boolean",
+                  "description": "Whether to include empty values in statistics, default is false. Empty values will be displayed as 0."
+                }
+              }
+            },
+            "description": "List of field values"
+          },
+          "viewId": {
+            "type": "string",
+            "description": "View ID"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "description": "Field ID"
+                },
+                "displayName": {
+                  "type": "string",
+                  "description": "Display name"
+                },
+                "granularity": {
+                  "type": "integer",
+                  "description": "Date and region statistical dimension.\nWhen the field type is date or region, use this parameter to set the statistical grouping granularity.\n- Date/Time: 1-Day, 2-Week, 3-Month;\n- Region: 1-Province, 2-Province/City, 3-Province/City/County (District)."
+                },
+                "includeEmpty": {
+                  "type": "boolean",
+                  "description": "Whether to include empty values in statistics, default is false."
+                }
+              }
+            },
+            "description": "List of column (dimension) fields"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Number of items per page, max 1000"
+          },
+          "pageIndex": {
+            "type": "integer",
+            "description": "Page number"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "Description of the query parameters, including worksheet, view (if any), filter conditions, dimensions, values, sorting, etc. Output detailed field names and condition operators/values. Response in user's language."
+          },
+          "includeSummary": {
+            "type": "boolean",
+            "description": "Whether to include a summary of all rows in the return value"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_optionset",
+      "description": "Create an optionset. Data includes: optionset name, optionset information (option value, sort order, color, score).",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name",
+          "options",
+          "enableColor",
+          "enableScore"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Optionset name"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "color": {
+                  "type": "string",
+                  "description": "Color value: effective when colorful is true. Reference values: #C0E6FC, #C3F2F2, #00C345, #FAD714, #FF9300, #F52222, #EB2F96, #7500EA, #2D46C4, #484848, #C9E6FC, #C3F2F2."
+                },
+                "index": {
+                  "type": "integer",
+                  "description": "Option sort order: must be an integer, smaller values are higher."
+                },
+                "score": {
+                  "type": "number",
+                  "description": "Score value, effective when enableScore is true. Allows decimals and positive/negative values."
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Option value, must be unique"
+                }
+              }
+            },
+            "description": "Optionset"
+          },
+          "enableColor": {
+            "type": "boolean",
+            "description": "Enable color"
+          },
+          "enableScore": {
+            "type": "boolean",
+            "description": "Enable score"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_record_details",
+      "description": "Get record details, including creator, owner, control information, and generate example values based on control data types.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "worksheet_id",
+          "row_id",
+          "ai_description"
+        ],
+        "properties": {
+          "row_id": {
+            "type": "string",
+            "description": "Row record ID"
+          },
+          "worksheet_id": {
+            "type": "string",
+            "description": "Worksheet ID"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>. Response in user's language."
+          },
+          "includeSystemFields": {
+            "type": "boolean",
+            "description": "Whether to get system fields"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_optionset_list",
+      "description": "Get a list of optionsets in the application.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "create_worksheet",
+      "description": "Create a worksheet. Currently supported field types are Text|Number|SingleSelect|MultipleSelect|Date|DateTime|Collaborator|Relation.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name",
+          "fields",
+          "ai_description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Worksheet name"
+          },
+          "alias": {
+            "type": "string",
+            "description": "Worksheet alias"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "max": {
+                  "type": "integer",
+                  "description": "Provide when type=Rating. Represents the maximum rating value (0-10)."
+                },
+                "name": {
+                  "type": "string",
+                  "title": "",
+                  "description": "Field name"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Field type"
+                },
+                "alias": {
+                  "type": "string",
+                  "title": "",
+                  "description": "Field alias"
+                },
+                "isTitle": {
+                  "type": "boolean",
+                  "description": "Whether it is a title field"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "value",
+                      "index"
+                    ],
+                    "properties": {
+                      "index": {
+                        "type": "integer",
+                        "description": "Option sort order"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Option name"
+                      }
+                    }
+                  },
+                  "description": "Provide when type=SingleSelect|MultipleSelect. 11 for single-select, 10 for multi-select."
+                },
+                "subType": {
+                  "type": "string",
+                  "description": "When type=Collaborator, it represents the number of members. Rules: 0 for single selection, 1 for multiple selections.\nWhen type=Relation, it represents the number of related records. Rules: 1 for a single record, 2 for multiple records.\nWhen type=Time, it represents time format. 1 for hour:minute, 6 for hour:minute:second.\nWhen type=Date|DateTime, it represents date format. 5 for year, 4 for year-month, 3 for year-month-day, 2 for year-month-day-hour, 1 for year-month-day-hour-minute, 6 for year-month-day-hour-minute-second."
+                },
+                "isHidden": {
+                  "type": "boolean",
+                  "description": "Whether it is hidden"
+                },
+                "isUnique": {
+                  "type": "boolean",
+                  "description": "Whether it is unique"
+                },
+                "relation": {
+                  "type": "object",
+                  "properties": {
+                    "showFields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of field IDs to display in the relation card or table."
+                    },
+                    "bidirectional": {
+                      "type": "boolean",
+                      "description": "Whether it is a bidirectional relation. true: bidirectional, false: unidirectional. Implemented by providing sourceField."
+                    }
+                  },
+                  "description": "Detailed configuration for relation fields when type='Relation'."
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether it is required"
+                },
+                "precision": {
+                  "type": "integer",
+                  "description": "When type=Number, it represents the number of decimal places to keep (0-14)."
+                },
+                "dataSource": {
+                  "type": "string",
+                  "description": "Provide when type=Relation. The ID of the related worksheet."
+                },
+                "isReadOnly": {
+                  "type": "boolean",
+                  "description": "Whether it is read-only"
+                },
+                "isHiddenOnCreate": {
+                  "type": "boolean",
+                  "description": "Whether to hide when creating a new record"
+                }
+              }
+            },
+            "description": "Worksheet field information"
+          },
+          "sectionId": {
+            "type": "string",
+            "description": "Group ID. If the application contains group information, prioritize using a suitable group."
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Worksheet: <Worksheet Name>. Response in user's language."
+          }
+        }
+      }
+    },
+    {
+      "name": "add_member_to_role",
+      "description": "Add member information to a role. Data includes: add users, jobs, departments.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "role_id",
+          "ai_description"
+        ],
+        "properties": {
+          "jobIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Collection of job IDs"
+          },
+          "role_id": {
+            "type": "string",
+            "description": "Role ID"
+          },
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Collection of user IDs. Must pass user ID."
+          },
+          "orgRoleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Collection of organization role IDs"
+          },
+          "departmentIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Collection of department IDs"
+          },
+          "ai_description": {
+            "type": "string",
+            "description": "e.g. Role: <Role Name>, Add Member: <(Type) Name>. Response in user's language."
+          },
+          "departmentTreeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Collection of department tree IDs"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_optionset",
+      "description": "Edit an optionset.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "optionset_id",
+          "name",
+          "options",
+          "enableColor",
+          "enableScore"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Optionset name"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "description": "Option's Key"
+                },
+                "color": {
+                  "type": "string",
+                  "description": "Color value: effective when colorful is true. Reference values: #C0E6FC, #C3F2F2, #00C345, #FAD714, #FF9300, #F52222, #EB2F96, #7500EA, #2D46C4, #484848, #C9E6FC, #C3F2F2."
+                },
+                "index": {
+                  "type": "integer",
+                  "description": "Option sort order: must be an integer, smaller values are higher."
+                },
+                "score": {
+                  "type": "number",
+                  "description": "Score value, effective when enableScore is true. Allows decimals and positive/negative values."
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Option value, must be unique"
+                },
+                "isDeleted": {
+                  "type": "boolean",
+                  "description": "Whether this option has been deleted"
+                }
+              }
+            },
+            "description": "Optionset"
+          },
+          "enableColor": {
+            "type": "boolean",
+            "description": "Enable color"
+          },
+          "enableScore": {
+            "type": "boolean",
+            "description": "Enable score"
+          },
+          "optionset_id": {
+            "type": "string",
+            "description": "Optionset ID"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:16:52.519060+00:00",
+    "source": "smithery"
+  }
+}

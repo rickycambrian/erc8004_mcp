@@ -1,0 +1,1498 @@
+{
+  "id": "chris/antigravity-jules-orchestration3",
+  "name": "chris/antigravity-jules-orchestration3",
+  "display_name": "antigravity-jules-orchestration3",
+  "version": null,
+  "description": "Automate GitHub development from task discovery to PR merge with session-based workflows, batching, and live monitoring. Generate code and answers locally with Ollama and accelerate changes with code-aware RAG. Strengthen results with semantic memory and keep deployments healthy through Render analysis and auto-fix.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "jules_list_sources",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all connected GitHub repositories (sources)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_create_session",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create a new Jules coding session for autonomous development",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "prompt",
+          "source"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Session title"
+          },
+          "branch": {
+            "type": "string",
+            "description": "Starting branch (default: repo default)"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Task description/prompt for Jules"
+          },
+          "source": {
+            "type": "string",
+            "description": "Source name (e.g., sources/github/owner/repo)"
+          },
+          "automationMode": {
+            "type": "string",
+            "description": "AUTO_CREATE_PR or NONE"
+          },
+          "requirePlanApproval": {
+            "type": "boolean",
+            "description": "Require approval before execution"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_list_sessions",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all Jules sessions",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_get_session",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get details of a specific session",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Session ID to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_send_message",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Send a message to an existing Jules session",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message to send"
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "Session ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_approve_plan",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Approve a session plan to allow execution",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Session ID to approve"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_get_activities",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get activities/events for a session",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Session ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_create_from_issue",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create a Jules session from a GitHub issue with full context",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "owner",
+          "repo",
+          "issueNumber"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string",
+            "description": "GitHub repository name"
+          },
+          "owner": {
+            "type": "string",
+            "description": "GitHub repository owner"
+          },
+          "autoApprove": {
+            "type": "boolean",
+            "description": "Auto-approve plan (default: false)"
+          },
+          "issueNumber": {
+            "type": "number",
+            "description": "Issue number to process"
+          },
+          "automationMode": {
+            "type": "string",
+            "description": "AUTO_CREATE_PR or NONE"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_batch_from_labels",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create sessions for all GitHub issues with a specific label",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "owner",
+          "repo",
+          "label"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string",
+            "description": "GitHub repository name"
+          },
+          "label": {
+            "type": "string",
+            "description": "Label to filter issues (e.g., \"jules-auto\")"
+          },
+          "owner": {
+            "type": "string",
+            "description": "GitHub repository owner"
+          },
+          "parallel": {
+            "type": "number",
+            "description": "Max parallel sessions (default: 3)"
+          },
+          "autoApprove": {
+            "type": "boolean",
+            "description": "Auto-approve all plans"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_batch_create",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create multiple Jules sessions in parallel from a task array",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "tasks"
+        ],
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {},
+            "description": "Array of session configs (each with prompt, source, title)"
+          },
+          "parallel": {
+            "type": "number",
+            "description": "Max parallel sessions (default: 3)"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_batch_status",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get status of all sessions in a batch",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "batchId"
+        ],
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "Batch ID from jules_batch_create"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_batch_approve_all",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Approve all pending plans in a batch",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "batchId"
+        ],
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "Batch ID to approve"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_monitor_all",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get real-time status of all active sessions with statistics",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_session_timeline",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get detailed activity timeline for a session",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Session ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "ollama_list_models",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List available local Ollama models",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "ollama_completion",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Generate text using local Ollama models",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model name (default: qwen2.5-coder:7b)"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Text prompt"
+          },
+          "systemPrompt": {
+            "type": "string",
+            "description": "System prompt"
+          }
+        }
+      }
+    },
+    {
+      "name": "ollama_code_generation",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Generate code using local Qwen2.5-Coder model",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "task"
+        ],
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "Code generation task"
+          },
+          "context": {
+            "type": "string",
+            "description": "Additional context"
+          },
+          "language": {
+            "type": "string",
+            "description": "Programming language (default: javascript)"
+          }
+        }
+      }
+    },
+    {
+      "name": "ollama_chat",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Multi-turn chat with local Ollama model",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "messages"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model name (default: qwen2.5-coder:7b)"
+          },
+          "messages": {
+            "type": "array",
+            "items": {},
+            "description": "Array of {role, content} messages"
+          }
+        }
+      }
+    },
+    {
+      "name": "ollama_rag_index",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Index a directory for RAG-powered codebase queries",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "directory"
+        ],
+        "properties": {
+          "maxFiles": {
+            "type": "number",
+            "description": "Max files to index (default: 100)"
+          },
+          "directory": {
+            "type": "string",
+            "description": "Directory path to index"
+          }
+        }
+      }
+    },
+    {
+      "name": "ollama_rag_query",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Query the indexed codebase with context-aware LLM responses",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "topK": {
+            "type": "number",
+            "description": "Number of context chunks (default: 5)"
+          },
+          "model": {
+            "type": "string",
+            "description": "Model to use (default: qwen2.5-coder:7b)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Question about the codebase"
+          }
+        }
+      }
+    },
+    {
+      "name": "ollama_rag_status",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get RAG index status and indexed files",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "ollama_rag_clear",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Clear the RAG index",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_cancel_session",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Cancel/abort an active session",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_retry_session",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Retry a failed session",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          },
+          "modifiedPrompt": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_get_diff",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get code changes from session",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_list_batches",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all batch operations",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_delete_session",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Delete a session",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_cache_stats",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get cache statistics",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_clear_cache",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Clear API cache",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_cancel_all_active",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Cancel all active sessions",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "confirm"
+        ],
+        "properties": {
+          "confirm": {
+            "type": "boolean",
+            "description": "Must point confirm: true to cancel all sessions"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_create_template",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Save session config as template",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name",
+          "config"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Template name"
+          },
+          "config": {
+            "description": "Session config object"
+          },
+          "description": {
+            "type": "string",
+            "description": "Template description"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_list_templates",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List saved templates",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_create_from_template",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create session from template",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "templateName"
+        ],
+        "properties": {
+          "overrides": {
+            "description": "Config overrides"
+          },
+          "templateName": {
+            "type": "string",
+            "description": "Template name"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_delete_template",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Delete a template",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_clone_session",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Clone a session config",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId"
+        ],
+        "properties": {
+          "newTitle": {
+            "type": "string"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "modifiedPrompt": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_search_sessions",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Search sessions with filters",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number"
+          },
+          "query": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_get_pr_status",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get PR status from session",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sessionId"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_merge_pr",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Merge a PR",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "owner",
+          "repo",
+          "prNumber"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "prNumber": {
+            "type": "number"
+          },
+          "mergeMethod": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_add_pr_comment",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Add comment to PR",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "owner",
+          "repo",
+          "prNumber",
+          "comment"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "prNumber": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_queue_session",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Queue session with priority",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "config"
+        ],
+        "properties": {
+          "config": {},
+          "priority": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_get_queue",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get queue status",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_process_queue",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Process next queued item",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_clear_queue",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Clear queue",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "jules_batch_retry_failed",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Retry failed sessions in batch",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "batchId"
+        ],
+        "properties": {
+          "batchId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_get_analytics",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get session analytics",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "days": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    {
+      "name": "memory_recall_context",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Recall relevant memories for a task",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "task"
+        ],
+        "properties": {
+          "task": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "repository": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "memory_store",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Store a memory manually",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "content": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "importance": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    {
+      "name": "memory_search",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Search memories by query",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "limit": {
+            "type": "number"
+          },
+          "query": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "memory_related",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get memories related to a specific memory",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "memoryId"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number"
+          },
+          "memoryId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "memory_reinforce",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Reinforce a memory when a pattern proves successful",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "memoryId"
+        ],
+        "properties": {
+          "boost": {
+            "type": "number"
+          },
+          "memoryId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "memory_forget",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Apply decay to old memories or remove them",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "soft": {
+            "type": "boolean"
+          },
+          "decayFactor": {
+            "type": "number"
+          },
+          "olderThanDays": {
+            "type": "number"
+          },
+          "belowImportance": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    {
+      "name": "memory_health",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Check semantic memory service health",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "memory_maintenance_schedule",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get memory maintenance schedule for temporal-agent-mcp",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "render_connect",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Connect Render integration by storing API key",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "apiKey"
+        ],
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Render API key (starts with rnd_)"
+          },
+          "webhookSecret": {
+            "type": "string",
+            "description": "Webhook secret for signature verification"
+          }
+        }
+      }
+    },
+    {
+      "name": "render_disconnect",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Disconnect Render integration",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "render_status",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Check Render integration status",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "render_list_services",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all Render services",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "render_list_deploys",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List deploys for a service",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "serviceId"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number"
+          },
+          "serviceId": {
+            "type": "string",
+            "description": "Service ID (srv-xxx)"
+          }
+        }
+      }
+    },
+    {
+      "name": "render_get_build_logs",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get build logs for a deploy",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "serviceId",
+          "deployId"
+        ],
+        "properties": {
+          "deployId": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "render_analyze_failure",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Analyze a build failure and get fix suggestions",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "serviceId"
+        ],
+        "properties": {
+          "serviceId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "render_autofix_status",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get auto-fix status and active operations",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "render_set_autofix",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Enable or disable auto-fix for Jules PRs",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "render_add_monitored_service",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Add a service to auto-fix monitoring",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "serviceId"
+        ],
+        "properties": {
+          "serviceId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "render_remove_monitored_service",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Remove a service from auto-fix monitoring",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "serviceId"
+        ],
+        "properties": {
+          "serviceId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "render_trigger_autofix",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Manually trigger auto-fix for a failed deploy",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "serviceId",
+          "deployId"
+        ],
+        "properties": {
+          "deployId": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_suggested_tasks",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Scan codebase for TODO/FIXME/HACK comments and suggest tasks for Jules",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "directory"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Max tasks to return"
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by comment types"
+          },
+          "directory": {
+            "type": "string",
+            "description": "Directory to scan"
+          },
+          "minPriority": {
+            "type": "number",
+            "description": "Minimum priority threshold (1-10)"
+          },
+          "includeGitInfo": {
+            "type": "boolean",
+            "description": "Include git blame info"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_fix_suggested_task",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create a Jules session to fix a suggested task",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "directory",
+          "taskIndex",
+          "source"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "GitHub source"
+          },
+          "directory": {
+            "type": "string"
+          },
+          "taskIndex": {
+            "type": "number",
+            "description": "Index of task from jules_suggested_tasks result"
+          }
+        }
+      }
+    },
+    {
+      "name": "jules_clear_suggested_cache",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Clear suggested tasks cache",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    }
+  ],
+  "tool_count": 68,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/chris/antigravity-jules-orchestration3/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "jules_list_sources",
+    "jules_create_session",
+    "jules_list_sessions",
+    "jules_get_session",
+    "jules_send_message",
+    "jules_approve_plan",
+    "jules_get_activities",
+    "jules_create_from_issue",
+    "jules_batch_from_labels",
+    "jules_batch_create",
+    "jules_batch_status",
+    "jules_batch_approve_all",
+    "jules_monitor_all",
+    "jules_session_timeline",
+    "ollama_list_models",
+    "ollama_completion",
+    "ollama_code_generation",
+    "ollama_chat",
+    "ollama_rag_index",
+    "ollama_rag_query",
+    "ollama_rag_status",
+    "ollama_rag_clear",
+    "jules_cancel_session",
+    "jules_retry_session",
+    "jules_get_diff",
+    "jules_list_batches",
+    "jules_delete_session",
+    "jules_cache_stats",
+    "jules_clear_cache",
+    "jules_cancel_all_active",
+    "jules_create_template",
+    "jules_list_templates",
+    "jules_create_from_template",
+    "jules_delete_template",
+    "jules_clone_session",
+    "jules_search_sessions",
+    "jules_get_pr_status",
+    "jules_merge_pr",
+    "jules_add_pr_comment",
+    "jules_queue_session",
+    "jules_get_queue",
+    "jules_process_queue",
+    "jules_clear_queue",
+    "jules_batch_retry_failed",
+    "jules_get_analytics",
+    "memory_recall_context",
+    "memory_store",
+    "memory_search",
+    "memory_related",
+    "memory_reinforce",
+    "memory_forget",
+    "memory_health",
+    "memory_maintenance_schedule",
+    "render_connect",
+    "render_disconnect",
+    "render_status",
+    "render_list_services",
+    "render_list_deploys",
+    "render_get_build_logs",
+    "render_analyze_failure",
+    "render_autofix_status",
+    "render_set_autofix",
+    "render_add_monitored_service",
+    "render_remove_monitored_service",
+    "render_trigger_autofix",
+    "jules_suggested_tasks",
+    "jules_fix_suggested_task",
+    "jules_clear_suggested_cache"
+  ]
+}

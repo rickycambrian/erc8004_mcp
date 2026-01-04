@@ -1,0 +1,423 @@
+{
+  "qualifiedName": "@irresi/bl-view-mcp",
+  "displayName": "Finance Portfolio Optimizer",
+  "description": "Optimize finance portfolios with Black-Litterman using your return views and confidence levels. Backtest strategies, benchmark performance, and analyze risk with correlations, drawdowns, and VaR. Use stock, ETF, and crypto datasets or upload custom assets to generate clear dashboards.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/a0541cbb-fb81-4dc6-8be8-2b235c9939fd.svg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@irresi/bl-view-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@irresi/bl-view-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {},
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "optimize_portfolio_bl",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Optimize portfolio using Black-Litterman model.\n\n## Quick Reference\n**Use for**: Portfolio weight allocation\n**Don't use for**: Stats only \u2192 get_asset_stats\n\n## Views Format (CRITICAL)\n\u274c {\"AAPL\": 0.10}                    \u2192 WRONG (old format)\n\u274c {\"P\": {\"AAPL\": 1}, \"Q\": [0.10]}   \u2192 WRONG (P must be LIST)\n\u2705 {\"P\": [{\"AAPL\": 1}], \"Q\": [0.10]} \u2192 Absolute: \"AAPL +10%\"\n\u2705 {\"P\": [{\"NVDA\": 1, \"AAPL\": -1}], \"Q\": [0.20]} \u2192 Relative: \"NVDA > AAPL by 20%\"\n\n## Key Parameters\n- tickers: [\"AAPL\", \"MSFT\", \"GOOGL\"]\n- period: \"1Y\" (recommended) or start_date: \"2023-01-01\"\n  Historical data available from 1980-01-01 (varies by ticker)\n- views: P, Q format above (optional)\n- confidence: 0.0-1.0 (default 0.5) or list [0.9, 0.7]\n- investment_style: \"aggressive\" / \"balanced\" / \"conservative\"\n- sensitivity_range: [0.3, 0.5, 0.9] for confidence sensitivity analysis\n- risk_aversion: \u26a0\ufe0f DO NOT USE (use investment_style instead)\n\n## Data Download (if ticker not found)\nRun: `make download-data` (S&P 500), `make download-nasdaq100`, `make download-etf`\nOr upload custom data via upload_price_data tool\n\n## Returns (Key Fields)\n- **weights**: Portfolio allocation (sums to 1.0) \u2190 USE THIS FOR INVESTMENT\n- prior_returns: Per-asset returns BEFORE views (NOT weights, don't sum to 1.0)\n- posterior_returns: Per-asset returns AFTER views (NOT weights)\n- expected_return, volatility, sharpe_ratio: Portfolio metrics\n\n## Examples\nAbsolute view: tickers=[\"AAPL\",\"MSFT\"], views={\"P\":[{\"AAPL\":1}],\"Q\":[0.10]}, confidence=0.7\nRelative view: tickers=[\"NVDA\",\"AAPL\"], views={\"P\":[{\"NVDA\":1,\"AAPL\":-1}],\"Q\":[0.20]}, confidence=0.8\n\n## Visualization (Investment Safety)\nCreate dashboard from `_visualization_hint`. Required:\n- Pie: weights (verify sum\u22481.0)\n- Bar: prior vs posterior returns\n- Table: metrics + raw data\nNEVER fabricate data. Include disclaimer: \"Please verify raw data before making investment decisions.\"",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tickers"
+        ],
+        "properties": {
+          "views": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ViewMatrix"
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "tickers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "risk_aversion": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "investment_style": {
+            "$ref": "#/$defs/InvestmentStyle",
+            "default": "balanced"
+          },
+          "sensitivity_range": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "upload_price_data",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Upload custom price data for assets not available in pre-loaded datasets.\n\nUse this tool when you need to work with:\n- International stocks (Korean, Japanese, European markets)\n- Alternative assets (commodities, real estate)\n- Custom indices or benchmarks\n- Data from external sources or other MCP servers\n\nThe uploaded data will be saved as a Parquet file and can be used\nimmediately with optimize_portfolio_bl.\n\nTwo input modes (provide EXACTLY ONE):\n1. Direct data: Use 'prices' parameter for small datasets (<100 rows)\n2. File path: Use 'file_path' parameter for large datasets or files\n\nArgs:\n    ticker: Ticker symbol to use (e.g., \"005930.KS\" for Samsung Electronics)\n            This will be the identifier used in optimize_portfolio_bl\n\n    prices: [Mode 1] List of price data dictionaries, each containing:\n            - date: Date string in \"YYYY-MM-DD\" format\n            - close: Closing price (float)\n\n            Example:\n            [\n                {\"date\": \"2024-01-02\", \"close\": 78000.0},\n                {\"date\": \"2024-01-03\", \"close\": 78500.0},\n                {\"date\": \"2024-01-04\", \"close\": 77800.0}\n            ]\n\n    file_path: [Mode 2] Absolute path to CSV or Parquet file\n               Use this for large datasets or when data is already in a file\n\n    date_column: Column name for dates when using file_path (default: \"date\")\n    close_column: Column name for closing prices when using file_path (default: \"close\")\n\n    source: Source identifier for audit trail (e.g., \"user\", \"pykrx\", \"external_mcp\")\n            Default: \"user\"\n\nReturns:\n    Dictionary containing:\n    - ticker: The ticker symbol saved\n    - records: Number of records saved\n    - date_range: Start and end dates of the data\n    - file_path: Path to the saved Parquet file\n    - source: Source identifier\n\nExamples:\n    # Example 1: Direct data input (small datasets)\n    upload_price_data(\n        ticker=\"005930.KS\",\n        prices=[\n            {\"date\": \"2024-01-02\", \"close\": 78000.0},\n            {\"date\": \"2024-01-03\", \"close\": 78500.0},\n        ],\n        source=\"pykrx\"\n    )\n\n    # Example 2: From CSV file (large datasets)\n    upload_price_data(\n        ticker=\"KOSPI\",\n        file_path=\"/path/to/kospi_data.csv\",\n        date_column=\"Date\",\n        close_column=\"Close\"\n    )\n\n    # Example 3: From Parquet file (from another MCP)\n    upload_price_data(\n        ticker=\"BTC-KRW\",\n        file_path=\"/tmp/crypto_data.parquet\"\n    )\n\n    # After upload, use in optimization:\n    optimize_portfolio_bl(\n        tickers=[\"005930.KS\", \"AAPL\"],\n        period=\"1Y\"\n    )",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticker"
+        ],
+        "properties": {
+          "prices": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "source": {
+            "type": "string",
+            "default": "user"
+          },
+          "ticker": {
+            "type": "string"
+          },
+          "file_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "date_column": {
+            "type": "string",
+            "default": "date"
+          },
+          "close_column": {
+            "type": "string",
+            "default": "close"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "backtest_portfolio",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Backtest a portfolio with specified weights.\n\n## Quick Reference\n**Use after**: optimize_portfolio_bl() to validate performance\n**Flow**: optimize \u2192 backtest(weights=result[\"weights\"])\n\n## Key Parameters\n- tickers: [\"AAPL\", \"MSFT\", \"GOOGL\"]\n- weights: {\"AAPL\": 0.4, \"MSFT\": 0.6} from optimize result\n- period: \"3Y\" (recommended for backtest)\n  Historical data available from 1980-01-01 (varies by ticker)\n- strategy: \"buy_and_hold\" / \"passive_rebalance\" / \"risk_managed\"\n- benchmark: \"SPY\" (default) or None to skip\n- compare_strategies: true \u2192 compare all strategies at once\n- custom_config: \u26a0\ufe0f Advanced (rebalance_frequency, fees, stop_loss, etc.)\n\n## Data Download (if ticker not found)\nRun: `make download-data` (S&P 500), `make download-nasdaq100`, `make download-etf`\nOr upload custom data via upload_price_data tool\n\n## Returns (Key Fields)\n- total_return, cagr, volatility, sharpe_ratio, max_drawdown\n- timeseries: [{date, value, benchmark, drawdown}, ...]\n- drawdown_details: {max_drawdown, start, end, recovery_date}\n- comparisons: (if compare_strategies=true)\n- alpha, beta, excess_return: (vs benchmark)\n\n## Example\nbl = optimize_portfolio_bl(tickers=[\"AAPL\",\"MSFT\"], period=\"1Y\")\nbt = backtest_portfolio(tickers=[\"AAPL\",\"MSFT\"], weights=bl[\"weights\"], period=\"3Y\")\n\n## Visualization (Investment Safety)\nCreate dashboard from `_visualization_hint`. Required:\n- Line: timeseries (value + benchmark)\n- Area: drawdown (red, MUST show negative values clearly)\n- Table: metrics + raw data\nNEVER fabricate data. Include disclaimer: \"Please verify raw data before making investment decisions.\"",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tickers",
+          "weights"
+        ],
+        "properties": {
+          "period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "tickers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "weights": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "strategy": {
+            "$ref": "#/$defs/BacktestStrategy",
+            "default": "passive_rebalance"
+          },
+          "benchmark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "SPY"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "custom_config": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/BacktestConfig"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "initial_capital": {
+            "type": "number",
+            "default": 10000
+          },
+          "timeseries_freq": {
+            "$ref": "#/$defs/TimeseriesFrequency",
+            "default": "monthly"
+          },
+          "compare_strategies": {
+            "type": "boolean",
+            "default": false
+          },
+          "include_equal_weight": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "list_available_tickers",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "List all available tickers that can be used with optimize_portfolio_bl.\n\nUse this tool to:\n- Check what assets are available before optimization\n- Search for specific tickers\n- See which custom assets have been uploaded\n\nArgs:\n    dataset: Filter by dataset (optional)\n             - \"snp500\": S&P 500 stocks\n             - \"nasdaq100\": NASDAQ 100 stocks\n             - \"etf\": Popular ETFs\n             - \"crypto\": Cryptocurrencies\n             - \"custom\": User-uploaded data\n             - None: All available tickers\n    search: Search pattern (case-insensitive substring match)\n            Examples: \"AAPL\", \"tech\", \"crypto\"\n\nReturns:\n    Dictionary containing:\n    - tickers: List of available ticker symbols\n    - count: Total number of tickers\n    - datasets: Available dataset categories\n    - custom_tickers: List of user-uploaded tickers (if any)\n\nExamples:\n    # List all available tickers\n    list_available_tickers()\n\n    # List only S&P 500 stocks\n    list_available_tickers(dataset=\"snp500\")\n\n    # Search for Apple-related tickers\n    list_available_tickers(search=\"AAPL\")\n\n    # List custom uploaded data\n    list_available_tickers(dataset=\"custom\")",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_asset_stats",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get comprehensive statistics for a list of assets.\n\n## Quick Reference\n**Use for**: Check correlations, validate return expectations, get VaR\n**Don't use for**: Portfolio weights \u2192 use optimize_portfolio_bl\n**Note**: This is OPTIONAL, not required before optimization\n\n## Key Parameters\n- tickers: [\"AAPL\", \"MSFT\", \"GOOGL\"]\n- period: \"1Y\" (recommended)\n  Historical data available from 1980-01-01 (varies by ticker)\n- include_var: false for faster response (skips EGARCH)\n\n## Data Download (if ticker not found)\nRun: `make download-data` (S&P 500), `make download-nasdaq100`, `make download-etf`\nOr upload custom data via upload_price_data tool\n\n## Returns\n- assets: {ticker: {price, annual_return, volatility, sharpe, max_drawdown, var_95, percentile_95}}\n- correlation_matrix: {ticker: {ticker: correlation}}\n- covariance_matrix: {ticker: {ticker: covariance}}\n\n## Example\nstats = get_asset_stats(tickers=[\"NVDA\",\"AMD\"], period=\"1Y\")\n# \u2192 stats[\"correlation_matrix\"][\"NVDA\"][\"AMD\"] = 0.75 (highly correlated!)\n# \u2192 stats[\"assets\"][\"NVDA\"][\"percentile_95\"] = 0.75 (75% is max realistic expectation)\n\n## Visualization (Investment Safety)\nCreate dashboard from `_visualization_hint`. Required:\n- Heatmap: correlation_matrix (FIXED scale -1 to +1, never auto-scale)\n- Scatter: risk vs return\n- Table: metrics + raw data\nNEVER fabricate data. Include disclaimer: \"Please verify raw data before making investment decisions.\"",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tickers"
+        ],
+        "properties": {
+          "period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "tickers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "include_var": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:16:29.402098+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,518 @@
+{
+  "id": "@isdaniel/pgtuner_mcp",
+  "name": "@isdaniel/pgtuner_mcp",
+  "display_name": "pgtuner_mcp",
+  "version": null,
+  "description": "provides AI-powered PostgreSQL performance tuning capabilities.  https://github.com/isdaniel/pgtuner_mcp",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "get_slow_queries",
+      "annotations": {
+        "title": "Slow Query Analyzer",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve slow queries from PostgreSQL using pg_stat_statements.\n\nReturns the top N slowest queries ordered by total execution time.\nRequires the pg_stat_statements extension to be enabled.\n\nThe results include:\n- Query text (normalized)\n- Total execution time\n- Number of calls\n- Mean execution time\n- Rows returned\n- Shared buffer hits/reads for cache analysis",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of slow queries to return (default: 10)"
+          },
+          "order_by": {
+            "enum": [
+              "total_time",
+              "mean_time",
+              "calls",
+              "rows"
+            ],
+            "type": "string",
+            "default": "total_time",
+            "description": "Column to order results by"
+          },
+          "min_calls": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1,
+            "description": "Minimum number of calls for a query to be included (default: 1)"
+          },
+          "min_total_time_ms": {
+            "type": "number",
+            "default": 0,
+            "description": "Minimum total execution time in milliseconds (default: 0)"
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_query",
+      "annotations": {
+        "title": "Query Execution Analyzer",
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze a SQL query's execution plan and performance characteristics.\n\nUses EXPLAIN ANALYZE to execute the query and capture detailed timing information.\nProvides analysis of:\n- Execution plan with actual vs estimated rows\n- Timing breakdown by operation\n- Buffer usage and I/O statistics\n- Potential performance issues and recommendations\n\nWARNING: This actually executes the query! For SELECT queries this is safe,\nbut be careful with INSERT/UPDATE/DELETE - use analyze_only=false for those.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The SQL query to analyze"
+          },
+          "format": {
+            "enum": [
+              "text",
+              "json",
+              "yaml",
+              "xml"
+            ],
+            "type": "string",
+            "default": "json",
+            "description": "Output format for the execution plan"
+          },
+          "analyze": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to actually execute the query (EXPLAIN ANALYZE vs EXPLAIN)"
+          },
+          "buffers": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include buffer usage statistics"
+          },
+          "verbose": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include verbose output with additional details"
+          },
+          "settings": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include information about configuration parameters"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_table_stats",
+      "annotations": {
+        "title": "Table Statistics Analyzer",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get detailed statistics for database tables.\n\nReturns information about:\n- Table size (data, indexes, total)\n- Row counts and dead tuple ratio\n- Last vacuum and analyze times\n- Sequential vs index scan ratios\n- Cache hit ratios\n\nThis helps identify tables that may need maintenance (VACUUM, ANALYZE)\nor have performance issues.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "order_by": {
+            "enum": [
+              "size",
+              "rows",
+              "dead_tuples",
+              "seq_scans",
+              "last_vacuum"
+            ],
+            "type": "string",
+            "default": "size",
+            "description": "Order results by this metric"
+          },
+          "table_name": {
+            "type": "string",
+            "description": "Specific table to analyze (optional, analyzes all tables if not provided)"
+          },
+          "schema_name": {
+            "type": "string",
+            "default": "public",
+            "description": "Schema to analyze (default: public)"
+          },
+          "include_indexes": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include index statistics"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_index_recommendations",
+      "annotations": {
+        "title": "Index Recommendation Engine",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get AI-powered index recommendations for your database.\n\nAnalyzes your query workload (from pg_stat_statements) and recommends indexes\nthat would improve performance. Uses a sophisticated analysis algorithm that:\n\n1. Identifies slow queries and their access patterns\n2. Extracts columns used in WHERE, JOIN, ORDER BY, and GROUP BY clauses\n3. Generates candidate indexes (single-column and composite)\n4. If HypoPG is available, tests indexes without creating them\n5. Uses a greedy optimization algorithm to select the best index set\n\nThe recommendations consider:\n- Query frequency and total execution time\n- Estimated improvement from each index\n- Index size and maintenance overhead\n- Avoiding redundant indexes",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "target_tables": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional list of tables to focus on"
+          },
+          "workload_queries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional list of specific queries to analyze. If not provided, uses pg_stat_statements."
+          },
+          "max_recommendations": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of index recommendations to return"
+          },
+          "min_improvement_percent": {
+            "type": "number",
+            "default": 10,
+            "description": "Minimum improvement percentage for a recommendation to be included"
+          },
+          "include_hypothetical_testing": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to test indexes using HypoPG (if available)"
+          }
+        }
+      }
+    },
+    {
+      "name": "explain_with_indexes",
+      "annotations": {
+        "title": "Query Plan Analyzer",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Run EXPLAIN on a query, optionally with hypothetical indexes.\n\nThis tool allows you to see how a query would perform with proposed indexes\nWITHOUT actually creating them. Requires HypoPG extension for hypothetical testing.\n\nUse this to:\n- Compare execution plans with and without specific indexes\n- Test if a proposed index would be used\n- Estimate the performance impact of new indexes\n\nReturns both the original and hypothetical execution plans for comparison.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The SQL query to explain"
+          },
+          "analyze": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to use EXPLAIN ANALYZE (executes the query)"
+          },
+          "hypothetical_indexes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "table",
+                "columns"
+              ],
+              "properties": {
+                "table": {
+                  "type": "string",
+                  "description": "Table name"
+                },
+                "unique": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "columns": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Columns for the index"
+                },
+                "index_type": {
+                  "enum": [
+                    "btree",
+                    "hash",
+                    "gin",
+                    "gist",
+                    "brin"
+                  ],
+                  "type": "string",
+                  "default": "btree"
+                }
+              }
+            },
+            "description": "List of hypothetical indexes to test"
+          }
+        }
+      }
+    },
+    {
+      "name": "manage_hypothetical_indexes",
+      "annotations": {
+        "title": "Hypothetical Index Manager",
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Manage HypoPG hypothetical indexes for testing.\n\nHypoPG allows you to create \"hypothetical\" indexes that exist only in memory\nand can be used to test query plans without the overhead of creating real indexes.\n\nActions:\n- create: Create a new hypothetical index\n- list: List all current hypothetical indexes\n- drop: Drop a specific hypothetical index\n- reset: Drop all hypothetical indexes\n- estimate_size: Estimate the size of a hypothetical index\n\nThis is useful for:\n- Testing if an index would improve a query\n- Comparing different index strategies\n- Estimating index storage requirements",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "table": {
+            "type": "string",
+            "description": "Table name (required for create, estimate_size)"
+          },
+          "action": {
+            "enum": [
+              "create",
+              "list",
+              "drop",
+              "reset",
+              "estimate_size",
+              "check"
+            ],
+            "type": "string",
+            "description": "Action to perform"
+          },
+          "unique": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the index should be unique"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Column names for the index (required for create, estimate_size)"
+          },
+          "index_id": {
+            "type": "integer",
+            "description": "Index OID (required for drop)"
+          },
+          "index_type": {
+            "enum": [
+              "btree",
+              "hash",
+              "gin",
+              "gist",
+              "brin"
+            ],
+            "type": "string",
+            "default": "btree",
+            "description": "Type of index to create"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_unused_indexes",
+      "annotations": {
+        "title": "Unused Index Finder",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Find indexes that are not being used or are duplicates.\n\nIdentifies:\n- Indexes with zero or very few scans since last stats reset\n- Duplicate indexes (same columns in same order)\n- Overlapping indexes (one index is a prefix of another)\n\nRemoving unused indexes can:\n- Reduce storage space\n- Speed up INSERT/UPDATE/DELETE operations\n- Reduce vacuum and maintenance overhead",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "min_size_mb": {
+            "type": "number",
+            "default": 0,
+            "description": "Minimum index size in MB to include"
+          },
+          "schema_name": {
+            "type": "string",
+            "default": "public",
+            "description": "Schema to analyze (default: public)"
+          },
+          "max_scan_ratio": {
+            "type": "number",
+            "default": 0.01,
+            "description": "Maximum scan ratio (scans/rows) to consider an index unused"
+          },
+          "include_duplicates": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include analysis of duplicate/overlapping indexes"
+          }
+        }
+      }
+    },
+    {
+      "name": "check_database_health",
+      "annotations": {
+        "title": "PostgreSQL Health Check",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Perform a comprehensive database health check.\n\nAnalyzes multiple aspects of PostgreSQL health:\n- Connection statistics and pool usage\n- Cache hit ratios (buffer and index)\n- Lock contention and blocking queries\n- Replication status (if configured)\n- Transaction wraparound risk\n- Disk space usage\n- Background writer statistics\n- Checkpoint frequency\n\nReturns a health score with detailed breakdown and recommendations.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "verbose": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include detailed statistics"
+          },
+          "include_recommendations": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include actionable recommendations"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_active_queries",
+      "annotations": {
+        "title": "Active Queries Monitor",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get information about currently active queries and connections.\n\nShows:\n- All active queries and their duration\n- Idle transactions that may be holding locks\n- Blocked queries waiting for locks\n- Connection state breakdown\n\nUseful for:\n- Identifying long-running queries\n- Finding queries that might need optimization\n- Detecting stuck transactions\n- Troubleshooting lock contention",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "database": {
+            "type": "string",
+            "description": "Filter by specific database"
+          },
+          "include_idle": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include idle connections"
+          },
+          "include_system": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include system/background processes"
+          },
+          "min_duration_seconds": {
+            "type": "integer",
+            "default": 0,
+            "description": "Minimum query duration in seconds to include"
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_wait_events",
+      "annotations": {
+        "title": "Wait Events Analyzer",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze PostgreSQL wait events to identify bottlenecks.\n\nWait events indicate what processes are waiting for:\n- Lock: Waiting for locks on tables/rows\n- IO: Waiting for disk I/O\n- CPU: Waiting for CPU time\n- Client: Waiting for client communication\n- Extension: Waiting in extension code\n\nThis helps identify:\n- I/O bottlenecks\n- Lock contention patterns\n- Resource saturation",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "active_only": {
+            "type": "boolean",
+            "default": true,
+            "description": "Only include active (running) queries"
+          }
+        }
+      }
+    },
+    {
+      "name": "review_settings",
+      "annotations": {
+        "title": "Configuration Settings Reviewer",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Review PostgreSQL configuration settings and get recommendations.\n\nAnalyzes key performance-related settings:\n- Memory settings (shared_buffers, work_mem, etc.)\n- Checkpoint settings\n- WAL settings\n- Autovacuum settings\n- Connection settings\n\nCompares against best practices and system resources.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "category": {
+            "enum": [
+              "all",
+              "memory",
+              "checkpoint",
+              "wal",
+              "autovacuum",
+              "connections"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Category of settings to review"
+          },
+          "include_all_settings": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include all settings, not just performance-related ones"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 11,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@isdaniel/pgtuner_mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "get_slow_queries",
+    "analyze_query",
+    "get_table_stats",
+    "get_index_recommendations",
+    "explain_with_indexes",
+    "manage_hypothetical_indexes",
+    "find_unused_indexes",
+    "check_database_health",
+    "get_active_queries",
+    "analyze_wait_events",
+    "review_settings"
+  ]
+}
