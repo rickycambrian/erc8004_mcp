@@ -1,0 +1,95 @@
+{
+  "qualifiedName": "@madhusudan-kulkarni/mcp-fal-ai-image",
+  "displayName": "fal.ai Image Generation Server",
+  "description": "MCP fal.ai Image Server\n\nEffortlessly generate images from text prompts using fal.ai and the Model Context Protocol (MCP). Integrates directly with AI IDEs like Cursor and Windsurf.\n\n## When and Why to Use\n\nThis tool is designed for:\n- Developers and designers who want to generate images from text prompts without leaving their IDE.\n- Rapid prototyping of UI concepts, marketing assets, or creative ideas.\n- Content creators needing unique visuals for blogs, presentations, or social media.\n- AI researchers and tinkerers experimenting with the latest fal.ai models.\n- Automating workflows that require programmatic image generation via MCP.\n\nKey features:\n- Supports any valid fal.ai model and all major image parameters.\n- Works out of the box with Node.js and a fal.ai API key.\n- Saves images locally with accessible file paths.\n- Simple configuration and robust error handling.\n\n## Quick Start\n\n1. Requirements: Node.js 18+, fal.ai API key\n2. Configure MCP:\n   {\n     \"mcpServers\": {\n       \"fal-ai-image\": {\n         \"command\": \"npx\",\n         \"args\": [\"-y\", \"mcp-fal-ai-image\"],\n         \"env\": { \"FAL_KEY\": \"YOUR-FAL-AI-API-KEY\" }\n       }\n     }\n   }\n3. Run: Use the generate-image tool from your IDE.\n\n\ud83d\udca1 Typical Workflow:\nDescribe the image you want (e.g., \u201cgenerate a landscape with flying cars using model fal-ai/kolors, 2 images, landscape_16_9\u201d) and get instant results in your IDE.\n\n### \ud83d\udde8\ufe0f Example Prompts\n\n- generate an image of a red apple\n- generate an image of a red apple using model fal-ai/kolors\n- generate 3 images of a glowing red apple in a futuristic city using model fal-ai/recraft-v3, square_hd, 40 inference steps, guidance scale 4.0, safety checker on\n\nSupported parameters: prompt, model ID (any fal.ai model), number of images, image size, inference steps, guidance scale, safety checker.\n\nImages are saved locally; file paths are shown in the response. For model IDs, see fal.ai/models.\n\n## Troubleshooting\n\n- FAL_KEY environment variable is not set: Set your fal.ai API key as above.\n- npx not found: Install Node.js 18+ and npm.\n\nAdvanced: Example MCP Request/Response\n\nRequest:\n{\n  \"tool\": \"generate-image\",\n  \"args\": {\n    \"prompt\": \"A futuristic cityscape at sunset\",\n    \"model\": \"fal-ai/kolors\"\n  }\n}\n\nExample response:\n{\n  \"images\": [\n    { \"url\": \"file:///path/to/generated_image1.png\" },\n    { \"url\": \"file:///path/to/generated_image2.png\" }\n  ]\n}\n\n## \ud83d\udcc1 Image Output Directory\n\nGenerated images are saved to your local system:\n\n- By default: ~/Downloads/fal_ai (on Linux/macOS; uses XDG standard if available)\n- Custom location: Set the environment variable FAL_IMAGES_OUTPUT_DIR to your desired folder. Images will be saved in /fal_ai.\n\nThe full file path for each image is included in the tool's response.\n\n## \u26a0\ufe0f Error Handling & Troubleshooting\n\n- If you specify a model ID that is not supported by fal.ai, you will receive an error from the backend. Double-check for typos or visit fal.ai/models to confirm the model ID.\n- For the latest list of models and their capabilities, refer to the fal.ai model catalog or API docs.\n- For other errors, consult your MCP client logs or open an issue on GitHub.\n\n## \ud83e\udd1d Contributing\n\nContributions and suggestions are welcome! Please open issues or pull requests on GitHub.\n\n## \ud83d\udd12 Security\n\n- Your API key is only used locally to authenticate with fal.ai.\n- No user data is stored or transmitted except as required by fal.ai API.\n\n## \ud83d\udee1 License\n\nMIT License \u00a9 2025 Madhusudan Kulkarni",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/f2be76fd-d85f-479c-aca5-c34e9a642da1.png",
+  "remote": false,
+  "deploymentUrl": null,
+  "connections": [
+    {
+      "type": "stdio",
+      "bundleUrl": "https://backend.smithery.ai/storage/v1/object/public/bundles/@madhusudan-kulkarni/mcp-fal-ai-image/server.mcpb",
+      "runtime": "node",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "apiKey"
+        ],
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Your fal.ai API key (FAL_KEY)"
+          },
+          "imagesOutputDir": {
+            "type": "string",
+            "default": "",
+            "description": "Optional output dir for images (FAL_IMAGES_OUTPUT_DIR)"
+          }
+        }
+      }
+    }
+  ],
+  "security": {
+    "scanPassed": true
+  },
+  "tools": [
+    {
+      "name": "generate-image",
+      "description": "Generate an image from a text prompt using a selectable text-to-image model.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "default": "fal-ai/recraft-v3",
+            "description": "ID of the text-to-image model to use (any valid fal.ai model ID)"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Text prompt describing the image to generate"
+          },
+          "image_size": {
+            "enum": [
+              "square_hd",
+              "square",
+              "portrait_4_3",
+              "portrait_16_9",
+              "landscape_4_3",
+              "landscape_16_9"
+            ],
+            "type": "string",
+            "default": "landscape_4_3",
+            "description": "Size of the generated image"
+          },
+          "num_images": {
+            "type": "integer",
+            "default": 1,
+            "description": "Number of images to generate"
+          },
+          "guidance_scale": {
+            "type": "number",
+            "default": 3.5,
+            "description": "Classifier Free Guidance scale"
+          },
+          "num_inference_steps": {
+            "type": "integer",
+            "default": 28,
+            "description": "Number of inference steps"
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable the safety checker"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:03:16.335655+00:00",
+    "source": "smithery"
+  }
+}

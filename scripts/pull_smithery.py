@@ -125,10 +125,10 @@ class SmitheryClient:
 
         raise last_error or Exception("Max retries exceeded")
 
-    def list_servers(self, page: int = 1, page_size: int = DEFAULT_PAGE_SIZE) -> dict:
-        """List servers with pagination."""
+    def list_servers(self, page: int = 1, page_size: int = DEFAULT_PAGE_SIZE, query: str = "") -> dict:
+        """List servers with pagination and optional search query."""
         url = f"{SMITHERY_API_URL}/servers"
-        params = {"page": page, "pageSize": page_size}
+        params = {"page": page, "pageSize": page_size, "q": query}
         return self._request_with_retry(url, params)
 
     def get_server(self, qualified_name: str) -> dict:
@@ -198,12 +198,42 @@ def build_index(servers_dir: Path) -> dict:
     return index
 
 
+def get_query_patterns() -> list:
+    """
+    Generate query patterns to bypass the 1000 server API limit.
+
+    Smithery's API caps results at 1000 per query, but different search
+    queries return different subsets. By using multiple targeted queries
+    and deduplicating, we can retrieve ALL servers.
+    """
+    patterns = [""]  # Default empty query
+
+    # Alphabet queries - catches most unscoped packages
+    patterns.extend(list("abcdefghijklmnopqrstuvwxyz"))
+
+    # @letter queries for scoped packages (@username/package)
+    patterns.extend([f"@{c}" for c in "abcdefghijklmnopqrstuvwxyz"])
+
+    # Additional patterns for edge cases
+    patterns.extend([
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",  # Numeric prefixes
+        "-", "_",  # Special chars
+    ])
+
+    return patterns
+
+
 def pull_servers(
     full_sync: bool = False,
     limit: Optional[int] = None,
     api_key: Optional[str] = None
 ) -> int:
-    """Pull servers from Smithery."""
+    """
+    Pull servers from Smithery using multi-query strategy.
+
+    The Smithery API caps results at 1000 per query. To get ALL servers,
+    we query with different search patterns and deduplicate results.
+    """
     SERVERS_DIR.mkdir(parents=True, exist_ok=True)
 
     # Get API key from environment
@@ -217,75 +247,105 @@ def pull_servers(
 
     start_time = time.time()
     servers_fetched = 0
+    seen_servers = set()  # Track already-fetched servers for deduplication
 
-    # Get total count first
-    try:
-        first_page = client.list_servers(page=1, page_size=1)
-        pagination = first_page.get("pagination", {})
-        total_pages = pagination.get("totalPages", 1)
-        total_count = pagination.get("totalCount", 0)
-        logger.info(f"Smithery has {total_count} servers across {total_pages} pages")
-    except Exception as e:
-        logger.error(f"Failed to connect to Smithery: {e}")
-        return 0
+    # Load existing servers to avoid re-fetching
+    if not full_sync:
+        for filepath in SERVERS_DIR.glob("*.json"):
+            try:
+                with open(filepath, "r") as f:
+                    data = json.load(f)
+                    seen_servers.add(data.get("qualifiedName"))
+            except (json.JSONDecodeError, IOError):
+                pass
+        if seen_servers:
+            logger.info(f"Loaded {len(seen_servers)} existing servers (incremental mode)")
 
     sync_start = datetime.now(timezone.utc).isoformat()
+    query_patterns = get_query_patterns()
+    total_patterns = len(query_patterns)
+
+    logger.info(f"Using {total_patterns} query patterns to bypass 1000 server limit")
 
     try:
-        page = 1
-        while page <= total_pages:
-            logger.info(f"Fetching page {page}/{total_pages}...")
+        for pattern_idx, query in enumerate(query_patterns):
+            # Get pagination info for this query
+            try:
+                first_page = client.list_servers(page=1, page_size=1, query=query)
+                pagination = first_page.get("pagination", {})
+                total_pages = min(pagination.get("totalPages", 1), 20)  # Cap at 20 pages per query
+                total_count = pagination.get("totalCount", 0)
 
-            # Get list of servers (basic info)
-            response = client.list_servers(page=page, page_size=DEFAULT_PAGE_SIZE)
-            servers = response.get("servers", [])
+                if total_count == 0:
+                    continue
 
-            if not servers:
-                break
+                logger.info(f"[{pattern_idx+1}/{total_patterns}] Query '{query}': {total_count} servers")
 
-            # Fetch full details for each server (includes tools)
-            for server_basic in servers:
-                qualified_name = server_basic.get("qualifiedName")
+            except Exception as e:
+                logger.warning(f"Failed to query '{query}': {e}")
+                continue
 
+            # Paginate through results for this query
+            for page in range(1, total_pages + 1):
                 try:
-                    # Get full server details with tools
-                    server_full = client.get_server(qualified_name)
-                    save_server(server_full, SERVERS_DIR)
-                    servers_fetched += 1
+                    response = client.list_servers(page=page, page_size=DEFAULT_PAGE_SIZE, query=query)
+                    servers = response.get("servers", [])
 
-                    tool_count = len(server_full.get("tools") or [])
-                    if servers_fetched % 50 == 0:
-                        logger.info(f"Progress: {servers_fetched} servers saved")
-
-                    # Check limit
-                    if limit and servers_fetched >= limit:
-                        logger.info(f"Reached limit of {limit}")
+                    if not servers:
                         break
 
+                    # Fetch full details for each NEW server
+                    for server_basic in servers:
+                        qualified_name = server_basic.get("qualifiedName")
+
+                        # Skip if already fetched
+                        if qualified_name in seen_servers:
+                            continue
+
+                        seen_servers.add(qualified_name)
+
+                        try:
+                            # Get full server details with tools
+                            server_full = client.get_server(qualified_name)
+                            save_server(server_full, SERVERS_DIR)
+                            servers_fetched += 1
+
+                            if servers_fetched % 100 == 0:
+                                logger.info(f"Progress: {servers_fetched} new servers saved, {len(seen_servers)} total unique")
+
+                            # Check limit
+                            if limit and servers_fetched >= limit:
+                                logger.info(f"Reached limit of {limit}")
+                                raise StopIteration()
+
+                        except Exception as e:
+                            if "429" in str(e) or "rate" in str(e).lower():
+                                logger.warning(f"Rate limited. Waiting...")
+                                time.sleep(5)
+                            else:
+                                logger.warning(f"Failed to fetch {qualified_name}: {e}")
+
+                        # Small delay to be nice to the API
+                        time.sleep(0.05)
+
                 except Exception as e:
-                    logger.warning(f"Failed to fetch {qualified_name}: {e}")
+                    logger.warning(f"Failed page {page} for query '{query}': {e}")
+                    break
 
-                # Small delay to be nice
-                time.sleep(0.05)
-
-            if limit and servers_fetched >= limit:
-                break
-
-            page += 1
-
-    except KeyboardInterrupt:
-        logger.warning("Interrupted. Saving progress...")
+    except (KeyboardInterrupt, StopIteration):
+        logger.warning("Stopping. Saving progress...")
 
     finally:
         duration = time.time() - start_time
 
         # Update state
         state.state["last_sync"] = sync_start
-        state.state["last_page"] = page
         state.state["total_servers"] = len(list(SERVERS_DIR.glob("*.json")))
+        state.state["unique_servers_seen"] = len(seen_servers)
         state.state["sync_history"].append({
             "timestamp": sync_start,
             "servers_fetched": servers_fetched,
+            "total_unique": len(seen_servers),
             "duration_seconds": round(duration, 2)
         })
         state.state["sync_history"] = state.state["sync_history"][-100:]
@@ -297,8 +357,8 @@ def pull_servers(
         with open(INDEX_FILE, "w") as f:
             json.dump(index, f, indent=2)
 
-        logger.info(f"Sync complete: {servers_fetched} servers in {duration:.1f}s")
-        logger.info(f"Total on disk: {state.state['total_servers']}")
+        logger.info(f"Sync complete: {servers_fetched} new servers in {duration:.1f}s")
+        logger.info(f"Total unique on disk: {state.state['total_servers']}")
 
     return servers_fetched
 

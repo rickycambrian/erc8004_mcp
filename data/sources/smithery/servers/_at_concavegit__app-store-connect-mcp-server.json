@@ -1,0 +1,1545 @@
+{
+  "qualifiedName": "@concavegit/app-store-connect-mcp-server",
+  "displayName": "app-store-connect-mcp-server",
+  "description": "Manage apps, metadata, and localizations across App Store Connect. Streamline beta testing, user/device administration, and bundle ID capabilities. Access analytics and finance reports, and monitor CI workflows with build logs, issues, and test results.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@concavegit/app-store-connect-mcp-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@concavegit/app-store-connect-mcp-server/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "APP_STORE_CONNECT_KEY_ID",
+          "APP_STORE_CONNECT_ISSUER_ID"
+        ],
+        "properties": {
+          "APP_STORE_CONNECT_KEY_ID": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Your App Store Connect API Key ID (found in App Store Connect > Users and Access > Keys)"
+          },
+          "APP_STORE_CONNECT_P8_PATH": {
+            "type": "string",
+            "description": "Absolute path to your App Store Connect P8 private key file (provide either this or P8_B64_STRING)"
+          },
+          "APP_STORE_CONNECT_ISSUER_ID": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Your App Store Connect Issuer ID (found in App Store Connect > Users and Access > Keys)"
+          },
+          "APP_STORE_CONNECT_P8_B64_STRING": {
+            "type": "string",
+            "description": "Base64 encoded contents of your App Store Connect P8 private key file (provide either this or P8_PATH)"
+          },
+          "APP_STORE_CONNECT_VENDOR_NUMBER": {
+            "type": "string",
+            "description": "Your vendor number from App Store Connect (optional - enables sales and finance reporting tools)"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "list_apps",
+      "description": "Get a list of all apps in App Store Connect",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of apps to return (default: 100)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_app_info",
+      "description": "Get detailed information about a specific app",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "appId"
+        ],
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "The ID of the app to get information for"
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "appClips",
+                "appInfos",
+                "appStoreVersions",
+                "availableTerritories",
+                "betaAppReviewDetail",
+                "betaGroups",
+                "betaLicenseAgreement",
+                "builds",
+                "endUserLicenseAgreement",
+                "gameCenterEnabledVersions",
+                "inAppPurchases",
+                "preOrder",
+                "prices",
+                "reviewSubmissions"
+              ],
+              "type": "string"
+            },
+            "description": "Optional relationships to include in the response"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_beta_groups",
+      "description": "Get a list of all beta groups (internal and external)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of groups to return (default: 100)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_group_testers",
+      "description": "Get a list of all testers in a specific beta group",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "groupId"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of testers to return (default: 100)"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "The ID of the beta group"
+          }
+        }
+      }
+    },
+    {
+      "name": "add_tester_to_group",
+      "description": "Add a new tester to a beta group",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "groupId",
+          "email",
+          "firstName",
+          "lastName"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address of the tester"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "The ID of the beta group"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name of the tester"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "First name of the tester"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove_tester_from_group",
+      "description": "Remove a tester from a beta group",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "groupId",
+          "testerId"
+        ],
+        "properties": {
+          "groupId": {
+            "type": "string",
+            "description": "The ID of the beta group"
+          },
+          "testerId": {
+            "type": "string",
+            "description": "The ID of the beta tester"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_beta_feedback_screenshots",
+      "description": "List all beta feedback screenshot submissions for an app. This includes feedback with screenshots, device information, and tester comments. You can identify the app using either appId or bundleId.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "sort": {
+            "enum": [
+              "createdDate",
+              "-createdDate"
+            ],
+            "type": "string",
+            "description": "Sort order for results (default: -createdDate for newest first)"
+          },
+          "appId": {
+            "type": "string",
+            "description": "The ID of the app to get feedback for (e.g., '6747745091')"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of feedback items to return (default: 50, max: 200)"
+          },
+          "buildId": {
+            "type": "string",
+            "description": "Filter by specific build ID (optional)"
+          },
+          "bundleId": {
+            "type": "string",
+            "description": "The bundle ID of the app (e.g., 'com.example.app'). Can be used instead of appId."
+          },
+          "testerId": {
+            "type": "string",
+            "description": "Filter by specific tester ID (optional)"
+          },
+          "osVersion": {
+            "type": "string",
+            "description": "Filter by OS version (e.g., '18.4.1') (optional)"
+          },
+          "appPlatform": {
+            "enum": [
+              "IOS",
+              "MAC_OS",
+              "TV_OS",
+              "VISION_OS"
+            ],
+            "type": "string",
+            "description": "Filter by app platform (optional)"
+          },
+          "deviceModel": {
+            "type": "string",
+            "description": "Filter by device model (e.g., 'iPhone15_2') (optional)"
+          },
+          "includeBuilds": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include build information in response (optional)"
+          },
+          "devicePlatform": {
+            "enum": [
+              "IOS",
+              "MAC_OS",
+              "TV_OS",
+              "VISION_OS"
+            ],
+            "type": "string",
+            "description": "Filter by device platform (optional)"
+          },
+          "includeTesters": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include tester information in response (optional)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_beta_feedback_screenshot",
+      "description": "Get detailed information about a specific beta feedback screenshot submission. By default, downloads and returns the screenshot image.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "feedbackId"
+        ],
+        "properties": {
+          "feedbackId": {
+            "type": "string",
+            "description": "The ID of the beta feedback screenshot submission"
+          },
+          "includeBuilds": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include build information in response (optional)"
+          },
+          "includeTesters": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include tester information in response (optional)"
+          },
+          "downloadScreenshot": {
+            "type": "boolean",
+            "default": true,
+            "description": "Download and return the screenshot as an image (default: true)"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_app_store_version",
+      "description": "Create a new app store version for an app",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "appId",
+          "platform",
+          "versionString"
+        ],
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "The ID of the app"
+          },
+          "buildId": {
+            "type": "string",
+            "description": "ID of the build to associate with this version (optional)"
+          },
+          "platform": {
+            "enum": [
+              "IOS",
+              "MAC_OS",
+              "TV_OS",
+              "VISION_OS"
+            ],
+            "type": "string",
+            "description": "The platform for this version"
+          },
+          "copyright": {
+            "type": "string",
+            "description": "Copyright text for this version (optional)"
+          },
+          "releaseType": {
+            "enum": [
+              "MANUAL",
+              "AFTER_APPROVAL",
+              "SCHEDULED"
+            ],
+            "type": "string",
+            "description": "How the app should be released"
+          },
+          "versionString": {
+            "type": "string",
+            "description": "Version string in format X.Y or X.Y.Z (e.g., '1.0' or '1.0.0')"
+          },
+          "earliestReleaseDate": {
+            "type": "string",
+            "description": "Earliest release date in ISO 8601 format (required when releaseType is SCHEDULED)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_app_store_versions",
+      "description": "Get all app store versions for a specific app",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "appId"
+        ],
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "The ID of the app"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of versions to return (default: 100)"
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "platform": {
+                "enum": [
+                  "IOS",
+                  "MAC_OS",
+                  "TV_OS"
+                ],
+                "type": "string",
+                "description": "Filter by platform (IOS, MAC_OS, TV_OS)"
+              },
+              "appStoreState": {
+                "enum": [
+                  "DEVELOPER_REMOVED_FROM_SALE",
+                  "DEVELOPER_REJECTED",
+                  "IN_REVIEW",
+                  "INVALID_BINARY",
+                  "METADATA_REJECTED",
+                  "PENDING_APPLE_RELEASE",
+                  "PENDING_CONTRACT",
+                  "PENDING_DEVELOPER_RELEASE",
+                  "PREPARE_FOR_SUBMISSION",
+                  "PREORDER_READY_FOR_SALE",
+                  "PROCESSING_FOR_APP_STORE",
+                  "READY_FOR_SALE",
+                  "REJECTED",
+                  "REMOVED_FROM_SALE",
+                  "WAITING_FOR_EXPORT_COMPLIANCE",
+                  "WAITING_FOR_REVIEW",
+                  "REPLACED_WITH_NEW_VERSION"
+                ],
+                "type": "string",
+                "description": "Filter by app store state"
+              },
+              "versionString": {
+                "type": "string",
+                "description": "Filter by version string (e.g., '1.0.0')"
+              }
+            },
+            "description": "Optional filters for app store versions"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_app_store_version_localizations",
+      "description": "Get all localizations for a specific app store version",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "appStoreVersionId"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of localizations to return (default: 100)"
+          },
+          "appStoreVersionId": {
+            "type": "string",
+            "description": "The ID of the app store version"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_app_store_version_localization",
+      "description": "Get detailed information about a specific app store version localization",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "localizationId"
+        ],
+        "properties": {
+          "localizationId": {
+            "type": "string",
+            "description": "The ID of the app store version localization"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_app_store_version_localization",
+      "description": "Update a specific field in an app store version localization",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "localizationId",
+          "field",
+          "value"
+        ],
+        "properties": {
+          "field": {
+            "enum": [
+              "description",
+              "keywords",
+              "marketingUrl",
+              "promotionalText",
+              "supportUrl",
+              "whatsNew"
+            ],
+            "type": "string",
+            "description": "The field to update"
+          },
+          "value": {
+            "type": "string",
+            "description": "The new value for the field"
+          },
+          "localizationId": {
+            "type": "string",
+            "description": "The ID of the app store version localization to update"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_bundle_id",
+      "description": "Register a new bundle ID for app development",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "identifier",
+          "name",
+          "platform"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "A name for the bundle ID"
+          },
+          "seedId": {
+            "type": "string",
+            "description": "Your team's seed ID (optional)"
+          },
+          "platform": {
+            "enum": [
+              "IOS",
+              "MAC_OS",
+              "UNIVERSAL"
+            ],
+            "type": "string",
+            "description": "The platform for this bundle ID"
+          },
+          "identifier": {
+            "type": "string",
+            "description": "The bundle ID string (e.g., 'com.example.app')"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_bundle_ids",
+      "description": "Find and list bundle IDs that are registered to your team",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sort": {
+            "enum": [
+              "name",
+              "-name",
+              "platform",
+              "-platform",
+              "identifier",
+              "-identifier",
+              "seedId",
+              "-seedId",
+              "id",
+              "-id"
+            ],
+            "type": "string",
+            "description": "Sort order for the results"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of bundle IDs to return (default: 100, max: 200)"
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Filter by name"
+              },
+              "seedId": {
+                "type": "string",
+                "description": "Filter by seed ID"
+              },
+              "platform": {
+                "enum": [
+                  "IOS",
+                  "MAC_OS",
+                  "UNIVERSAL"
+                ],
+                "type": "string",
+                "description": "Filter by platform"
+              },
+              "identifier": {
+                "type": "string",
+                "description": "Filter by bundle identifier"
+              }
+            }
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "profiles",
+                "bundleIdCapabilities",
+                "app"
+              ],
+              "type": "string"
+            },
+            "description": "Related resources to include in the response"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_bundle_id_info",
+      "description": "Get detailed information about a specific bundle ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "bundleIdId"
+        ],
+        "properties": {
+          "fields": {
+            "type": "object",
+            "properties": {
+              "bundleIds": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "name",
+                    "platform",
+                    "identifier",
+                    "seedId"
+                  ],
+                  "type": "string"
+                },
+                "description": "Fields to include for the bundle ID"
+              }
+            },
+            "description": "Specific fields to include in the response"
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "profiles",
+                "bundleIdCapabilities",
+                "app"
+              ],
+              "type": "string"
+            },
+            "description": "Optional relationships to include in the response"
+          },
+          "bundleIdId": {
+            "type": "string",
+            "description": "The ID of the bundle ID to get information for"
+          }
+        }
+      }
+    },
+    {
+      "name": "enable_bundle_capability",
+      "description": "Enable a capability for a bundle ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "bundleIdId",
+          "capabilityType"
+        ],
+        "properties": {
+          "settings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "description": "The setting key"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "enabled": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Optional capability settings"
+          },
+          "bundleIdId": {
+            "type": "string",
+            "description": "The ID of the bundle ID"
+          },
+          "capabilityType": {
+            "enum": [
+              "ICLOUD",
+              "IN_APP_PURCHASE",
+              "GAME_CENTER",
+              "PUSH_NOTIFICATIONS",
+              "WALLET",
+              "INTER_APP_AUDIO",
+              "MAPS",
+              "ASSOCIATED_DOMAINS",
+              "PERSONAL_VPN",
+              "APP_GROUPS",
+              "HEALTHKIT",
+              "HOMEKIT",
+              "WIRELESS_ACCESSORY_CONFIGURATION",
+              "APPLE_PAY",
+              "DATA_PROTECTION",
+              "SIRIKIT",
+              "NETWORK_EXTENSIONS",
+              "MULTIPATH",
+              "HOT_SPOT",
+              "NFC_TAG_READING",
+              "CLASSKIT",
+              "AUTOFILL_CREDENTIAL_PROVIDER",
+              "ACCESS_WIFI_INFORMATION",
+              "NETWORK_CUSTOM_PROTOCOL",
+              "COREMEDIA_HLS_LOW_LATENCY",
+              "SYSTEM_EXTENSION_INSTALL",
+              "USER_MANAGEMENT",
+              "APPLE_ID_AUTH"
+            ],
+            "type": "string",
+            "description": "The type of capability to enable"
+          }
+        }
+      }
+    },
+    {
+      "name": "disable_bundle_capability",
+      "description": "Disable a capability for a bundle ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "capabilityId"
+        ],
+        "properties": {
+          "capabilityId": {
+            "type": "string",
+            "description": "The ID of the capability to disable"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_devices",
+      "description": "Get a list of all devices registered to your team",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sort": {
+            "enum": [
+              "name",
+              "-name",
+              "platform",
+              "-platform",
+              "status",
+              "-status",
+              "udid",
+              "-udid",
+              "deviceClass",
+              "-deviceClass",
+              "model",
+              "-model",
+              "addedDate",
+              "-addedDate"
+            ],
+            "type": "string",
+            "description": "Sort order for the results"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of devices to return (default: 100, max: 200)"
+          },
+          "fields": {
+            "type": "object",
+            "properties": {
+              "devices": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "name",
+                    "platform",
+                    "udid",
+                    "deviceClass",
+                    "status",
+                    "model",
+                    "addedDate"
+                  ],
+                  "type": "string"
+                },
+                "description": "Fields to include for each device"
+              }
+            }
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Filter by device name"
+              },
+              "udid": {
+                "type": "string",
+                "description": "Filter by device UDID"
+              },
+              "status": {
+                "enum": [
+                  "ENABLED",
+                  "DISABLED"
+                ],
+                "type": "string",
+                "description": "Filter by status"
+              },
+              "platform": {
+                "enum": [
+                  "IOS",
+                  "MAC_OS"
+                ],
+                "type": "string",
+                "description": "Filter by platform"
+              },
+              "deviceClass": {
+                "enum": [
+                  "APPLE_WATCH",
+                  "IPAD",
+                  "IPHONE",
+                  "IPOD",
+                  "APPLE_TV",
+                  "MAC"
+                ],
+                "type": "string",
+                "description": "Filter by device class"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "list_users",
+      "description": "Get a list of all users registered on your App Store Connect team",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sort": {
+            "enum": [
+              "username",
+              "-username",
+              "firstName",
+              "-firstName",
+              "lastName",
+              "-lastName",
+              "roles",
+              "-roles"
+            ],
+            "type": "string",
+            "description": "Sort order for the results"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of users to return (default: 100, max: 200)"
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "roles": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "ADMIN",
+                    "FINANCE",
+                    "TECHNICAL",
+                    "SALES",
+                    "MARKETING",
+                    "DEVELOPER",
+                    "ACCOUNT_HOLDER",
+                    "READ_ONLY",
+                    "APP_MANAGER",
+                    "ACCESS_TO_REPORTS",
+                    "CUSTOMER_SUPPORT"
+                  ],
+                  "type": "string"
+                },
+                "description": "Filter by user roles"
+              },
+              "username": {
+                "type": "string",
+                "description": "Filter by username"
+              },
+              "visibleApps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Filter by apps the user can see (app IDs)"
+              }
+            }
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "visibleApps"
+              ],
+              "type": "string"
+            },
+            "description": "Related resources to include in the response"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_analytics_report_request",
+      "description": "Create a new analytics report request for an app",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "appId"
+        ],
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "The ID of the app to generate analytics reports for"
+          },
+          "accessType": {
+            "enum": [
+              "ONGOING",
+              "ONE_TIME_SNAPSHOT"
+            ],
+            "type": "string",
+            "default": "ONE_TIME_SNAPSHOT",
+            "description": "Access type for the analytics report (ONGOING for daily data, ONE_TIME_SNAPSHOT for historical data)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_analytics_reports",
+      "description": "Get available analytics reports for a specific report request",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "reportRequestId"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of reports to return (default: 100)"
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "enum": [
+                  "APP_STORE_ENGAGEMENT",
+                  "APP_STORE_COMMERCE",
+                  "APP_USAGE",
+                  "FRAMEWORKS_USAGE",
+                  "PERFORMANCE"
+                ],
+                "type": "string",
+                "description": "Filter by report category"
+              }
+            }
+          },
+          "reportRequestId": {
+            "type": "string",
+            "description": "The ID of the analytics report request"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_analytics_report_segments",
+      "description": "Get segments for a specific analytics report (contains download URLs)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "reportId"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of segments to return (default: 100)"
+          },
+          "reportId": {
+            "type": "string",
+            "description": "The ID of the analytics report"
+          }
+        }
+      }
+    },
+    {
+      "name": "download_analytics_report_segment",
+      "description": "Download data from an analytics report segment URL",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "segmentUrl"
+        ],
+        "properties": {
+          "segmentUrl": {
+            "type": "string",
+            "description": "The URL of the analytics report segment to download"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_schemes",
+      "description": "List all available schemes in an Xcode project or workspace",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "projectPath"
+        ],
+        "properties": {
+          "projectPath": {
+            "type": "string",
+            "description": "Path to the Xcode project (.xcodeproj) or workspace (.xcworkspace)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_workflows",
+      "description": "List all App Store Connect workflows (CI products) and their associated apps",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sort": {
+            "enum": [
+              "name",
+              "-name",
+              "productType",
+              "-productType"
+            ],
+            "type": "string",
+            "description": "Sort order for the results"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of workflows to return (default: 100, max: 200)"
+          },
+          "fields": {
+            "type": "object",
+            "properties": {
+              "ciProducts": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "name",
+                    "productType"
+                  ],
+                  "type": "string"
+                },
+                "description": "Fields to include for each workflow"
+              }
+            }
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "productType": {
+                "enum": [
+                  "IOS",
+                  "MAC_OS",
+                  "TV_OS",
+                  "VISION_OS"
+                ],
+                "type": "string",
+                "description": "Filter by product type"
+              }
+            }
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "app",
+                "bundleId",
+                "primaryRepositories"
+              ],
+              "type": "string"
+            },
+            "description": "Related resources to include in the response"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_build_runs",
+      "description": "List build runs for a specific workflow/CI product, including git commit information",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ciProductId"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "number",
+              "-number",
+              "createdDate",
+              "-createdDate",
+              "startedDate",
+              "-startedDate",
+              "finishedDate",
+              "-finishedDate"
+            ],
+            "type": "string",
+            "description": "Sort order for the results"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of build runs to return (default: 100, max: 200)"
+          },
+          "fields": {
+            "type": "object",
+            "properties": {
+              "ciBuildRuns": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "number",
+                    "createdDate",
+                    "startedDate",
+                    "finishedDate",
+                    "sourceCommit",
+                    "destinationCommit",
+                    "isPullRequestBuild",
+                    "issueCounts",
+                    "executionProgress",
+                    "completionStatus",
+                    "startReason",
+                    "cancelReason"
+                  ],
+                  "type": "string"
+                },
+                "description": "Fields to include for each build run"
+              }
+            }
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "number": {
+                "type": "number",
+                "description": "Filter by build run number"
+              },
+              "startReason": {
+                "enum": [
+                  "MANUAL",
+                  "SCM_CHANGE",
+                  "PULL_REQUEST_UPDATE",
+                  "SCHEDULED"
+                ],
+                "type": "string",
+                "description": "Filter by start reason"
+              },
+              "completionStatus": {
+                "enum": [
+                  "SUCCEEDED",
+                  "FAILED",
+                  "ERRORED",
+                  "CANCELED",
+                  "SKIPPED"
+                ],
+                "type": "string",
+                "description": "Filter by completion status"
+              },
+              "executionProgress": {
+                "enum": [
+                  "PENDING",
+                  "RUNNING",
+                  "COMPLETE"
+                ],
+                "type": "string",
+                "description": "Filter by execution progress"
+              },
+              "isPullRequestBuild": {
+                "type": "boolean",
+                "description": "Filter by whether it's a pull request build"
+              }
+            }
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "builds",
+                "workflow",
+                "product",
+                "sourceBranchOrTag",
+                "destinationBranch",
+                "pullRequest"
+              ],
+              "type": "string"
+            },
+            "description": "Related resources to include in the response"
+          },
+          "ciProductId": {
+            "type": "string",
+            "description": "The ID of the CI product (workflow) to list build runs for"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_ci_build_actions",
+      "description": "List build actions (analyze, build, test, archive) for a specific build run",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "buildRunId"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "name",
+              "-name",
+              "actionType",
+              "-actionType",
+              "startedDate",
+              "-startedDate",
+              "finishedDate",
+              "-finishedDate"
+            ],
+            "type": "string",
+            "description": "Sort order for the results"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of build actions to return (default: 100, max: 200)"
+          },
+          "fields": {
+            "type": "object",
+            "properties": {
+              "ciBuildActions": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "name",
+                    "actionType",
+                    "startedDate",
+                    "finishedDate",
+                    "issueCounts",
+                    "executionProgress",
+                    "completionStatus"
+                  ],
+                  "type": "string"
+                },
+                "description": "Fields to include for each build action"
+              }
+            }
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "actionType": {
+                "enum": [
+                  "ANALYZE",
+                  "BUILD",
+                  "TEST",
+                  "ARCHIVE"
+                ],
+                "type": "string",
+                "description": "Filter by action type"
+              },
+              "completionStatus": {
+                "enum": [
+                  "SUCCEEDED",
+                  "FAILED",
+                  "ERRORED",
+                  "CANCELED",
+                  "SKIPPED"
+                ],
+                "type": "string",
+                "description": "Filter by completion status"
+              },
+              "executionProgress": {
+                "enum": [
+                  "PENDING",
+                  "RUNNING",
+                  "COMPLETE"
+                ],
+                "type": "string",
+                "description": "Filter by execution progress"
+              }
+            }
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "buildRun",
+                "issues",
+                "testResults"
+              ],
+              "type": "string"
+            },
+            "description": "Related resources to include in the response"
+          },
+          "buildRunId": {
+            "type": "string",
+            "description": "The ID of the build run to list actions for"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_ci_build_action",
+      "description": "Get detailed information about a specific build action",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "buildActionId"
+        ],
+        "properties": {
+          "fields": {
+            "type": "object",
+            "properties": {
+              "ciBuildActions": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "name",
+                    "actionType",
+                    "startedDate",
+                    "finishedDate",
+                    "issueCounts",
+                    "executionProgress",
+                    "completionStatus"
+                  ],
+                  "type": "string"
+                },
+                "description": "Fields to include for the build action"
+              }
+            }
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "buildRun",
+                "issues",
+                "testResults"
+              ],
+              "type": "string"
+            },
+            "description": "Related resources to include in the response"
+          },
+          "buildActionId": {
+            "type": "string",
+            "description": "The ID of the build action"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_ci_issues",
+      "description": "List issues and errors from a build run or build action",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sort": {
+            "enum": [
+              "issueType",
+              "-issueType",
+              "category",
+              "-category",
+              "message",
+              "-message"
+            ],
+            "type": "string",
+            "description": "Sort order for the results"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of issues to return (default: 100, max: 200)"
+          },
+          "fields": {
+            "type": "object",
+            "properties": {
+              "ciIssues": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "issueType",
+                    "message",
+                    "fileSource",
+                    "category"
+                  ],
+                  "type": "string"
+                },
+                "description": "Fields to include for each issue"
+              }
+            }
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string",
+                "description": "Filter by issue category"
+              },
+              "issueType": {
+                "enum": [
+                  "ANALYZER_WARNING",
+                  "ERROR",
+                  "TEST_FAILURE",
+                  "WARNING"
+                ],
+                "type": "string",
+                "description": "Filter by issue type"
+              }
+            }
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "buildAction",
+                "buildRun"
+              ],
+              "type": "string"
+            },
+            "description": "Related resources to include in the response"
+          },
+          "buildRunId": {
+            "type": "string",
+            "description": "The ID of the build run to list issues for (provide either buildRunId or buildActionId)"
+          },
+          "buildActionId": {
+            "type": "string",
+            "description": "The ID of the build action to list issues for (provide either buildRunId or buildActionId)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_ci_test_results",
+      "description": "List test results from a build run or build action",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sort": {
+            "enum": [
+              "className",
+              "-className",
+              "name",
+              "-name",
+              "status",
+              "-status",
+              "duration",
+              "-duration"
+            ],
+            "type": "string",
+            "description": "Sort order for the results"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of test results to return (default: 100, max: 200)"
+          },
+          "fields": {
+            "type": "object",
+            "properties": {
+              "ciTestResults": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "className",
+                    "name",
+                    "status",
+                    "fileLocation",
+                    "failureMessage",
+                    "duration"
+                  ],
+                  "type": "string"
+                },
+                "description": "Fields to include for each test result"
+              }
+            }
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Filter by test name"
+              },
+              "status": {
+                "enum": [
+                  "SUCCESS",
+                  "FAILURE",
+                  "SKIPPED"
+                ],
+                "type": "string",
+                "description": "Filter by test status"
+              },
+              "className": {
+                "type": "string",
+                "description": "Filter by test class name"
+              }
+            }
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "buildAction",
+                "buildRun"
+              ],
+              "type": "string"
+            },
+            "description": "Related resources to include in the response"
+          },
+          "buildRunId": {
+            "type": "string",
+            "description": "The ID of the build run to list test results for (provide either buildRunId or buildActionId)"
+          },
+          "buildActionId": {
+            "type": "string",
+            "description": "The ID of the build action to list test results for (provide either buildRunId or buildActionId)"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:02:50.029386+00:00",
+    "source": "smithery"
+  }
+}

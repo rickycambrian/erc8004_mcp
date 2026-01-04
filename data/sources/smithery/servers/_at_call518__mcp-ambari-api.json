@@ -1,0 +1,1297 @@
+{
+  "qualifiedName": "@call518/mcp-ambari-api",
+  "displayName": "MCP-Ambari-API",
+  "description": "Manage Apache Ambari clusters effortlessly. Start, stop, and restart services; monitor health and alerts; and query Ambari Metrics with exact identifiers. Inspect and update configurations, track requests, and fetch host and user details to speed troubleshooting.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/216a04c5-6762-4623-b67b-bd2f31043d51.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@call518/mcp-ambari-api",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@call518/mcp-ambari-api/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "dump_configurations",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Dump Configurations",
+      "description": "Unified configuration introspection tool (supersedes get_configurations & list_configurations & dump_all_configurations).\n\nModes:\n  1) Single type values: specify config_type=<type>\n  2) Bulk list (optionally narrowed by service_filter substring in type name)\n  3) Filtering keys/types via filter substring\n\nArgs:\n    config_type: focus on one type's latest tag (other bulk params ignored except filter on keys)\n    service_filter: substring to restrict bulk types (ignored if config_type provided)\n    filter: substring applied to type names OR property keys\n    summarize: bulk mode summary lines only (counts + sample keys, forces include_values False)\n    include_values: include key=value pairs (bulk/full mode only)\n    limit: max number of types to output in bulk mode (0 = unlimited)\n    max_chars: truncate final output if exceeds",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 0
+          },
+          "filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filter",
+            "default": null
+          },
+          "max_chars": {
+            "type": "integer",
+            "title": "Max Chars",
+            "default": 30000
+          },
+          "summarize": {
+            "type": "boolean",
+            "title": "Summarize",
+            "default": false
+          },
+          "config_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config Type",
+            "default": null
+          },
+          "include_values": {
+            "type": "boolean",
+            "title": "Include Values",
+            "default": true
+          },
+          "service_filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Filter",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_cluster_info",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieves basic information for an Ambari cluster.\n\n[Tool Role]: Dedicated tool for real-time retrieval of overall status and basic information for an Ambari cluster.\n\n[Core Functions]:\n- Retrieve cluster name, version, provisioning state, and security type\n- Provide formatted output for LLM automation and cluster monitoring\n\n[Required Usage Scenarios]:\n- When users request cluster info, status, or summary\n- When monitoring cluster health or auditing cluster properties\n- When users mention cluster overview, Ambari cluster, or cluster details\n\nReturns:\n    Cluster basic information (success: formatted info, failure: English error message)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_active_requests",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieves currently active (in progress) requests/operations in an Ambari cluster.\nShows running operations, in-progress tasks, pending requests.\n\n[Tool Role]: Dedicated tool for monitoring currently running Ambari operations\n\n[Core Functions]:\n- Retrieve active/running Ambari operations (IN_PROGRESS, PENDING status)\n- Show real-time progress of ongoing operations\n- Monitor current cluster activity\n\n[Required Usage Scenarios]:\n- When users ask for \"active requests\", \"running operations\", \"current requests\"\n- When users ask for \"request list\", \"operation list\", \"task list\"\n- When users want to see \"current tasks\", \"running tasks\", \"in progress operations\"\n- When users mention \"running\", \"in progress\", \"current activity\"\n- When users ask about Ambari requests, operations, or tasks\n- When checking if any operations are currently running\n\nReturns:\n    Active requests information (success: active request list, failure: error message)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_cluster_services",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieves the list of services with status in an Ambari cluster.\n\n[Tool Role]: Dedicated tool for real-time retrieval of all running services and basic status information in an Ambari cluster\n\n[Core Functions]: \n- Retrieve cluster service list with status via Ambari REST API\n- Provide service names, current state, and cluster information\n- Include detailed link information for each service\n- Display visual indicators for service status\n\n[Required Usage Scenarios]:\n- When users mention \"service list\", \"cluster services\", \"Ambari services\"\n- When cluster status check is needed\n- When service management requires current status overview\n- When real-time cluster information is absolutely necessary\n\n[Absolutely Prohibited Scenarios]:\n- General Hadoop knowledge questions\n- Service installation or configuration changes\n- Log viewing or performance monitoring\n- Requests belonging to other cluster management tools\n\nReturns:\n    Cluster service list with status information (success: service list with status, failure: error message)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_service_status",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieves the status information for a specific service in an Ambari cluster.\n\n[Tool Role]: Dedicated tool for real-time retrieval of specific service status and state information\n\n[Core Functions]:\n- Retrieve specific service status via Ambari REST API\n- Provide detailed service state information (STARTED, STOPPED, INSTALLING, etc.)\n- Include service configuration and component information\n\n[Required Usage Scenarios]:\n- When users ask about specific service status (e.g., \"HDFS status\", \"YARN state\")\n- When troubleshooting service issues\n- When monitoring specific service health\n\nArgs:\n    service_name: Name of the service to check (e.g., \"HDFS\", \"YARN\", \"HBASE\")\n\nReturns:\n    Service status information (success: detailed status, failure: error message)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "service_name"
+        ],
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "title": "Service Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_service_components",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieves detailed components information for a specific service in the Ambari cluster.\n\n[Tool Role]: Dedicated tool for retrieving service component details and host assignments.\n\n[Core Functions]:\n- List all components for a service, including state and category\n- Show host assignments and instance counts\n- Provide formatted output for LLM automation and troubleshooting\n\n[Required Usage Scenarios]:\n- When users request service component details or host info\n- When troubleshooting service health or scaling\n- When users mention component list, host assignments, or service breakdown\n\nArgs:\n    service_name: Name of the service (e.g., \"HDFS\", \"YARN\", \"HBASE\")\n\nReturns:\n    Service components detailed information (success: formatted list, failure: English error message)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "service_name"
+        ],
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "title": "Service Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_service_details",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieves detailed status and configuration information for a specific service in the Ambari cluster.\n\n[Tool Role]: Dedicated tool for retrieving comprehensive service details, including state, components, and configuration.\n\n[Core Functions]:\n- Retrieve service state, component list, and configuration availability\n- Provide formatted output for LLM automation and troubleshooting\n\n[Required Usage Scenarios]:\n- When users request detailed service info or breakdown\n- When troubleshooting service health or auditing service setup\n- When users mention service details, service summary, or configuration status\n\nArgs:\n    service_name: Name of the service to check (e.g., \"HDFS\", \"YARN\", \"HBASE\")\n\nReturns:\n    Detailed service information (success: comprehensive details, failure: English error message)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "service_name"
+        ],
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "title": "Service Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "start_all_services",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Starts all services in an Ambari cluster (equivalent to \"Start All\" in Ambari Web UI).\n\n[Tool Role]: Dedicated tool for bulk starting all services in the cluster, automating mass startup.\n\n[Core Functions]:\n- Start all installed services simultaneously\n- Return request information for progress tracking\n- Provide clear success or error message for LLM automation\n\n[Required Usage Scenarios]:\n- When users request to \"start all services\", \"start everything\", \"cluster startup\"\n- When recovering cluster after maintenance or outage\n- When users mention mass startup, bulk start, or cluster bring-up\n\nReturns:\n    Start operation result (success: request info, failure: English error message)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "stop_all_services",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Stops all services in an Ambari cluster (equivalent to \"Stop All\" in Ambari Web UI).\n\n[Tool Role]: Dedicated tool for bulk stopping all services in the cluster, automating mass shutdown.\n\n[Core Functions]:\n- Stop all running services simultaneously\n- Return request information for progress tracking\n- Provide clear success or error message for LLM automation\n\n[Required Usage Scenarios]:\n- When users request to \"stop all services\", \"stop everything\", \"cluster shutdown\"\n- When cluster maintenance or troubleshooting requires mass shutdown\n- When users mention mass shutdown, bulk stop, or cluster halt\n\nReturns:\n    Stop operation result (success: request info, failure: English error message)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "start_service",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Starts a specific service in the Ambari cluster.\n\n[Tool Role]: Dedicated tool for automated start of Ambari services, ensuring safe and monitored startup.\n\n[Core Functions]:\n- Start the specified service and initiate Ambari request\n- Return request information for progress tracking\n- Provide clear success or error message for LLM automation\n\n[Required Usage Scenarios]:\n- When users request to \"start\" a service (e.g., \"start HDFS\", \"start YARN\")\n- When recovering stopped services\n- When maintenance or configuration changes require a service start\n- When users mention service start, bring up service, or automated start\n\nArgs:\n    service_name: Name of the service to start (e.g., \"HDFS\", \"YARN\", \"HBASE\")\n\nReturns:\n    Start operation result (success: request info, failure: error message)\n    - Success: Multi-line string with request ID, status, monitor URL, and instructions for progress tracking\n    - Failure: English error message describing the problem",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "service_name"
+        ],
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "title": "Service Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "stop_service",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Stops a specific service in the Ambari cluster.\n\n[Tool Role]: Dedicated tool for automated stop of Ambari services, ensuring safe and monitored shutdown.\n\n[Core Functions]:\n- Stop the specified service and initiate Ambari request\n- Return request information for progress tracking\n- Provide clear success or error message for LLM automation\n\n[Required Usage Scenarios]:\n- When users request to \"stop\" a service (e.g., \"stop HDFS\", \"stop YARN\")\n- When maintenance or troubleshooting requires a service shutdown\n- When users mention service stop, shutdown, or automated stop\n\nArgs:\n    service_name: Name of the service to stop (e.g., \"HDFS\", \"YARN\", \"HBASE\")\n\nReturns:\n    Stop operation result (success: request info, failure: error message)\n    - Success: Multi-line string with request ID, status, monitor URL, and instructions for progress tracking\n    - Failure: English error message describing the problem",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "service_name"
+        ],
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "title": "Service Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_request_status",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieves the status and progress of a specific Ambari request operation.\n\n[Tool Role]: Dedicated tool for real-time tracking and reporting of Ambari request status.\n\n[Core Functions]:\n- Query the status, progress, and context of a request by its ID\n- Provide detailed status (PENDING, IN_PROGRESS, COMPLETED, FAILED, etc.)\n- Show progress percentage and timing information\n- Return actionable status for automation and LLM integration\n\n[Required Usage Scenarios]:\n- When users ask for the status or progress of a specific operation/request\n- When monitoring or troubleshooting Ambari operations\n- When tracking bulk or individual service actions\n- When users mention request ID, operation status, or progress\n\nArgs:\n    request_id: ID of the Ambari request to check (int)\n\nReturns:\n    Request status information (success: detailed status and progress, failure: error message)\n    - Success: Multi-line string with request ID, status, progress, context, start/end time, and status description\n    - Failure: English error message describing the problem",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "request_id"
+        ],
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "restart_service",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Restarts a specific service in an Ambari cluster (stop then start).\n\n[Tool Role]: Dedicated tool for automated restart of Ambari services, ensuring safe stop and start sequence.\n\n[Core Functions]:\n- Stop the specified service and wait for completion\n- Start the service and wait for completion\n- Return clear success or error message for LLM automation\n\n[Required Usage Scenarios]:\n- When users request to \"restart\" a service (e.g., \"restart HDFS\", \"restart YARN\")\n- When troubleshooting or recovering service issues\n- When maintenance or configuration changes require a restart\n- When users mention service restart, safe restart, or automated restart\n\nArgs:\n    service_name: Name of the service to restart (e.g., \"HDFS\", \"YARN\")\n\nReturns:\n    Restart operation result (success: English completion message, failure: English error message)\n    - Success: \"Service '<service_name>' restart operation completed successfully.\"\n    - Failure: \"Error: ...\" with details",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "service_name"
+        ],
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "title": "Service Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "restart_all_services",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Restarts all services in the Ambari cluster (stop all, then start all).\n\n[Tool Role]: Dedicated tool for automated bulk restart of all Ambari services, ensuring safe stop and start sequence.\n\n[Core Functions]:\n- Stop all running services and wait for completion\n- Start all services and wait for completion\n- Return clear success or error message for LLM automation\n\n[Required Usage Scenarios]:\n- When users request to \"restart all services\", \"bulk restart\", \"cluster-wide restart\"\n- When troubleshooting or recovering cluster-wide issues\n- When maintenance or configuration changes require a full restart\n\nReturns:\n    Bulk restart operation result (success: English completion message, failure: English error message)\n    - Success: \"All services restart operation completed successfully.\"\n    - Failure: \"Error: ...\" with details",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "list_hosts",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieves the list of hosts in the Ambari cluster.\n\n[Tool Role]: Dedicated tool for listing all hosts registered in the Ambari cluster.\n\n[Core Functions]:\n- Query Ambari REST API for host list\n- Return host names and API links\n- Provide formatted output for LLM automation and cluster management\n\n[Required Usage Scenarios]:\n- When users request cluster host list or host details\n- When auditing or monitoring cluster nodes\n\nReturns:\n    List of hosts (success: formatted list, failure: error message)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_host_details",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieves detailed information for a specific host or all hosts in the Ambari cluster.\n\n[Tool Role]: Dedicated tool for retrieving comprehensive host details including metrics, hardware info, and components.\n\n[Core Functions]:\n- If host_name provided: Query specific host information\n- If host_name not provided: Query all hosts and their detailed information\n- Return host hardware specs, state, metrics, and assigned components\n- Provide formatted output for LLM automation and cluster management\n\n[Required Usage Scenarios]:\n- When users request specific host details or host status\n- When users request all hosts details or cluster-wide host information\n- When auditing or monitoring individual or all cluster nodes\n- When troubleshooting host-specific issues\n\nArgs:\n    host_name: Name of the specific host to retrieve details for (optional, e.g., \"bigtop-hostname0.demo.local\")\n\nReturns:\n    Detailed host information (success: formatted details, failure: error message)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "host_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Name",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "list_users",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "List all users in the Ambari system.\n\nReturns a formatted list of all users with their basic information.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_user",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get detailed information about a specific user.\n\nArgs:\n    user_name: The username to retrieve details for\n    \nReturns:\n    Detailed user information including profile, permissions, and authentication sources",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "user_name"
+        ],
+        "properties": {
+          "user_name": {
+            "type": "string",
+            "title": "User Name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_alerts_history",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieve current alerts or alert history from Ambari cluster.\n\n[Tool Role]: Unified tool for retrieving both current/active alert status and historical alert events from Ambari cluster\n\n[Core Functions]:\n- Current mode: Retrieve current alerts for entire cluster, specific service, or specific host\n- History mode: Retrieve alert history for entire cluster, specific service, or specific host  \n- Support filtering by alert state (CRITICAL, WARNING, OK, UNKNOWN)\n- Support filtering by definition name\n- Current mode: Support filtering by maintenance state (ON, OFF)\n- History mode: Support filtering by time range with from_timestamp/to_timestamp\n- Support different output formats (detailed, summary, compact, groupedSummary for current)\n- History mode: Provide pagination support for large datasets\n- Provide current time context for LLM natural language time calculations\n\n[Required Usage Scenarios]:\n- Current mode: When users request current alerts, active alerts, or alert status\n- Current mode: When monitoring immediate cluster health\n- Current mode: When investigating current issues or troubleshooting active problems\n- History mode: When users request alert history, past alerts, or historical alert data\n- History mode: When monitoring alert trends or analyzing alert patterns\n- History mode: When investigating past alert incidents or troubleshooting\n- When users mention alert status, current problems, cluster health, alert events, alert timeline, or alert logs\n\nArgs:\n    mode: \"current\" for active alerts, \"history\" for past events (default: \"current\")\n    cluster_name: Name of cluster (uses default if not specified)\n    service_name: Filter by specific service name (e.g., HDFS, YARN)\n    host_name: Filter by specific host name\n    state_filter: Filter by alert state (CRITICAL, WARNING, OK, UNKNOWN)\n    definition_name: Filter by alert definition name\n    maintenance_state: Filter by maintenance state (ON, OFF) - current mode only\n    from_timestamp: Start timestamp in milliseconds (Unix epoch) - history mode only\n    to_timestamp: End timestamp in milliseconds (Unix epoch) - history mode only\n    include_time_context: Add current time information for LLM natural language processing\n    limit: Maximum number of alert entries to return\n    page_size: Number of entries per page (default: 100) - history mode only\n    start_page: Starting page number (default: 0) - history mode only\n    format: Output format - 'detailed', 'summary', 'compact', or 'groupedSummary' (current mode only)\n\nReturns:\n    Alert information (success: formatted alerts, failure: English error message)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "current"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Limit",
+            "default": null
+          },
+          "format": {
+            "type": "string",
+            "title": "Format",
+            "default": "detailed"
+          },
+          "host_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Name",
+            "default": null
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "default": 100
+          },
+          "start_page": {
+            "type": "integer",
+            "title": "Start Page",
+            "default": 0
+          },
+          "cluster_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cluster Name",
+            "default": null
+          },
+          "service_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Name",
+            "default": null
+          },
+          "state_filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Filter",
+            "default": null
+          },
+          "to_timestamp": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Timestamp",
+            "default": null
+          },
+          "from_timestamp": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Timestamp",
+            "default": null
+          },
+          "definition_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Name",
+            "default": null
+          },
+          "maintenance_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maintenance State",
+            "default": null
+          },
+          "include_time_context": {
+            "type": "boolean",
+            "title": "Include Time Context",
+            "default": false
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_current_alerts",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieve current alerts from Ambari cluster.\n\nDEPRECATED: This function is deprecated in favor of get_alerts_history with mode=\"current\".\nThis wrapper is maintained for backward compatibility.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "title": "Format",
+            "default": "detailed"
+          },
+          "host_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Name",
+            "default": null
+          },
+          "cluster_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cluster Name",
+            "default": null
+          },
+          "service_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Name",
+            "default": null
+          },
+          "state_filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Filter",
+            "default": null
+          },
+          "definition_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Name",
+            "default": null
+          },
+          "maintenance_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maintenance State",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "list_ambari_metrics_metadata",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "List Ambari Metrics Metadata",
+      "description": "Retrieve metric metadata from Ambari Metrics service with optional filters.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 40
+          },
+          "app_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Id",
+            "default": null
+          },
+          "host_filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Filter",
+            "default": null
+          },
+          "include_dimensions": {
+            "type": "boolean",
+            "title": "Include Dimensions",
+            "default": false
+          },
+          "metric_name_filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Name Filter",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "list_common_metrics_catalog",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "List Common Metrics Catalog",
+      "description": "List supported metrics per appId (exact names only).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 40
+          },
+          "app_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Id",
+            "default": null
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Search",
+            "default": null
+          },
+          "min_score": {
+            "type": "integer",
+            "title": "Min Score",
+            "default": 6
+          },
+          "include_description": {
+            "type": "boolean",
+            "title": "Include Description",
+            "default": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "hdfs_dfadmin_report",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "HDFS DFSAdmin Report",
+      "description": "Produce a DFSAdmin-style capacity and DataNode report using Ambari metrics.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cluster_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cluster Name",
+            "default": null
+          },
+          "lookback_minutes": {
+            "type": "integer",
+            "title": "Lookback Minutes",
+            "default": 10
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "query_ambari_metrics",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Query Ambari Metrics",
+      "description": "Fetch time-series metrics (exact metric names only) from Ambari Metrics.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "metric_names"
+        ],
+        "properties": {
+          "app_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Id",
+            "default": null
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration",
+            "default": "1h"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Time",
+            "default": null
+          },
+          "hostnames": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hostnames",
+            "default": null
+          },
+          "precision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Precision",
+            "default": null
+          },
+          "max_points": {
+            "type": "integer",
+            "title": "Max Points",
+            "default": 120
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time",
+            "default": null
+          },
+          "metric_names": {
+            "type": "string",
+            "title": "Metric Names"
+          },
+          "group_by_host": {
+            "type": "boolean",
+            "title": "Group By Host",
+            "default": false
+          },
+          "include_points": {
+            "type": "boolean",
+            "title": "Include Points",
+            "default": false
+          },
+          "temporal_aggregator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temporal Aggregator",
+            "default": null
+          },
+          "temporal_granularity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temporal Granularity",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_prompt_template",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Return the canonical English prompt template (optionally a specific section).\n\nSimplified per project decision: only a single English template file `PROMPT_TEMPLATE.md` is maintained.\n\nArgs:\n    section: (optional) section number or keyword (case-insensitive) e.g. \"1\", \"purpose\", \"tool map\".\n    mode: (optional) if \"headings\" returns just the list of section headings with numeric indices.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode",
+            "default": null
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "_WrappedResult",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:04:17.037073+00:00",
+    "source": "smithery"
+  }
+}

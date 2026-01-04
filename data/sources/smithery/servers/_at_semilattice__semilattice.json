@@ -1,0 +1,142 @@
+{
+  "qualifiedName": "@semilattice/semilattice",
+  "displayName": "Semilattice - audience prediction",
+  "description": "Test content, personalise features, and A/B test decisions with accurate audience prediction. Semilattice MCP lets agents predict things about your audience. Your agent could predict which email subject line or website copy your audience would prefer. Or it could predict which use cases your audience wants to see in a new product experience. Audience predictions are >87% accurate on average and take <20 seconds to complete.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/607c12c1-25d4-482d-b6bd-94d9d665c689.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@semilattice/semilattice",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@semilattice/semilattice/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "list_population_models",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "List all available population models.\n\nReturns:\n    List of population model dictionaries, each containing an 'id' field\n    that can be used with create_prediction()",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "create_prediction",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Predict how a population would answer a question.\n\nArgs:\n    population_id: The ID of the population model to use. \n                  Get valid IDs by calling list_population_models()\n    question: The question to ask the population\n    answer_options: List of possible answer choices\n    question_type: Either \"single-choice\" or \"multiple-choice\" (default: \"single-choice\")\n\nReturns:\n    Dictionary containing the prediction with an 'id' field (initially status will be \"Queued\").\n    Use the 'id' field with get_prediction() or wait_for_prediction() to check results.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "population_id",
+          "question",
+          "answer_options"
+        ],
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "population_id": {
+            "type": "string"
+          },
+          "question_type": {
+            "type": "string",
+            "default": "single-choice"
+          },
+          "answer_options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_prediction",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieve a prediction by ID to check its status and results.\n\nArgs:\n    prediction_id: The ID of the prediction to retrieve.\n                  This is the 'id' field returned by create_prediction()\n\nReturns:\n    Dictionary containing prediction status and results (if completed)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "prediction_id"
+        ],
+        "properties": {
+          "prediction_id": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "wait_for_prediction",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Wait for a prediction to complete and return the results.\nPredictions typically take ~20 seconds to complete.\n\nArgs:\n    prediction_id: The ID of the prediction to wait for.\n                  This is the 'id' field returned by create_prediction()\n    max_wait_seconds: Maximum time to wait in seconds (default: 60)\n\nReturns:\n    Dictionary containing completed prediction results with 'predicted_answer_percentages'",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "prediction_id"
+        ],
+        "properties": {
+          "prediction_id": {
+            "type": "string"
+          },
+          "max_wait_seconds": {
+            "type": "integer",
+            "default": 60
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:02:54.458303+00:00",
+    "source": "smithery"
+  }
+}

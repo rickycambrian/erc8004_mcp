@@ -1,0 +1,626 @@
+{
+  "qualifiedName": "@dashayus/aliceblue-mcp-server",
+  "displayName": "AliceBlue",
+  "description": "Manage your AliceBlue portfolio, orders, and funds from one place. View holdings, positions, margins, and real-time market data, and place, modify, or cancel orders with ease. Track order and trade history, convert or square off positions, and automate entries with GTT orders.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@dashayus/aliceblue-mcp-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@dashayus/aliceblue-mcp-server/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "ConfigSchema",
+        "required": [
+          "user_id",
+          "auth_code",
+          "api_secret"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "description": "Your AliceBlue User ID"
+          },
+          "auth_code": {
+            "type": "string",
+            "title": "Auth Code",
+            "description": "Your AliceBlue Auth Code"
+          },
+          "api_secret": {
+            "type": "string",
+            "title": "Api Secret",
+            "description": "Your AliceBlue API Secret"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "test_connection",
+      "description": "Test connection to AliceBlue API and verify authentication",
+      "inputSchema": {
+        "type": "object",
+        "title": "test_connectionArguments",
+        "properties": {}
+      }
+    },
+    {
+      "name": "check_and_authenticate",
+      "description": "Check if AliceBlue session is active and re-authenticate if needed.",
+      "inputSchema": {
+        "type": "object",
+        "title": "check_and_authenticateArguments",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_profile",
+      "description": "Fetches the user's profile details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_profileArguments",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_holdings",
+      "description": "Fetches the user's Holdings Stock",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_holdingsArguments",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_positions",
+      "description": "Fetches the user's Positions",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_positionsArguments",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_positions_sqroff",
+      "description": "Position Square Off",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_positions_sqroffArguments",
+        "required": [
+          "exch",
+          "symbol",
+          "qty",
+          "product",
+          "transaction_type"
+        ],
+        "properties": {
+          "qty": {
+            "type": "string",
+            "title": "Qty"
+          },
+          "exch": {
+            "type": "string",
+            "title": "Exch"
+          },
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "transaction_type": {
+            "type": "string",
+            "title": "Transaction Type"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_position_conversion",
+      "description": "Position conversion",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_position_conversionArguments",
+        "required": [
+          "exchange",
+          "validity",
+          "prevProduct",
+          "product",
+          "quantity",
+          "tradingSymbol",
+          "transactionType",
+          "orderSource"
+        ],
+        "properties": {
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "exchange": {
+            "type": "string",
+            "title": "Exchange"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "validity": {
+            "type": "string",
+            "title": "Validity"
+          },
+          "orderSource": {
+            "type": "string",
+            "title": "Ordersource"
+          },
+          "prevProduct": {
+            "type": "string",
+            "title": "Prevproduct"
+          },
+          "tradingSymbol": {
+            "type": "string",
+            "title": "Tradingsymbol"
+          },
+          "transactionType": {
+            "type": "string",
+            "title": "Transactiontype"
+          }
+        }
+      }
+    },
+    {
+      "name": "place_order",
+      "description": "Places an order for the given stock.",
+      "inputSchema": {
+        "type": "object",
+        "title": "place_orderArguments",
+        "required": [
+          "instrument_id",
+          "exchange",
+          "transaction_type",
+          "quantity",
+          "order_type",
+          "product",
+          "order_complexity",
+          "price",
+          "validity"
+        ],
+        "properties": {
+          "price": {
+            "type": "number",
+            "title": "Price"
+          },
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "exchange": {
+            "type": "string",
+            "title": "Exchange"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "validity": {
+            "type": "string",
+            "title": "Validity"
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type"
+          },
+          "instrument_id": {
+            "type": "string",
+            "title": "Instrument Id"
+          },
+          "order_complexity": {
+            "type": "string",
+            "title": "Order Complexity"
+          },
+          "transaction_type": {
+            "type": "string",
+            "title": "Transaction Type"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_order_book",
+      "description": "Fetches Order Book",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_order_bookArguments",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_order_history",
+      "description": "Fetchs Orders History",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_order_historyArguments",
+        "required": [
+          "brokerOrderId"
+        ],
+        "properties": {
+          "brokerOrderId": {
+            "type": "string",
+            "title": "Brokerorderid"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_modify_order",
+      "description": "Modify Order",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_modify_orderArguments",
+        "required": [
+          "brokerOrderId",
+          "validity"
+        ],
+        "properties": {
+          "price": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price",
+            "default": null
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity",
+            "default": null
+          },
+          "validity": {
+            "type": "string",
+            "title": "Validity"
+          },
+          "triggerPrice": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Triggerprice",
+            "default": null
+          },
+          "brokerOrderId": {
+            "type": "string",
+            "title": "Brokerorderid"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_cancel_order",
+      "description": "Cancel Order",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_cancel_orderArguments",
+        "required": [
+          "brokerOrderId"
+        ],
+        "properties": {
+          "brokerOrderId": {
+            "type": "string",
+            "title": "Brokerorderid"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_trade_book",
+      "description": "Fetches Trade Book",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_trade_bookArguments",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_order_margin",
+      "description": "Order Margin",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_order_marginArguments",
+        "required": [
+          "exchange",
+          "instrumentId",
+          "transactionType",
+          "quantity",
+          "product",
+          "orderComplexity",
+          "orderType",
+          "validity"
+        ],
+        "properties": {
+          "price": {
+            "type": "string",
+            "title": "price",
+            "default": 0
+          },
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "exchange": {
+            "type": "string",
+            "title": "Exchange"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "validity": {
+            "type": "string",
+            "title": "Validity"
+          },
+          "orderType": {
+            "type": "string",
+            "title": "Ordertype"
+          },
+          "instrumentId": {
+            "type": "string",
+            "title": "Instrumentid"
+          },
+          "slTriggerPrice": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sltriggerprice",
+            "default": null
+          },
+          "orderComplexity": {
+            "type": "string",
+            "title": "Ordercomplexity"
+          },
+          "transactionType": {
+            "type": "string",
+            "title": "Transactiontype"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_exit_bracket_order",
+      "description": "Exit Bracket Order",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_exit_bracket_orderArguments",
+        "required": [
+          "brokerOrderId",
+          "orderComplexity"
+        ],
+        "properties": {
+          "brokerOrderId": {
+            "type": "string",
+            "title": "Brokerorderid"
+          },
+          "orderComplexity": {
+            "type": "string",
+            "title": "Ordercomplexity"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_place_gtt_order",
+      "description": "Place GTT Order",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_place_gtt_orderArguments",
+        "required": [
+          "tradingSymbol",
+          "exchange",
+          "transactionType",
+          "orderType",
+          "product",
+          "validity",
+          "quantity",
+          "price",
+          "orderComplexity",
+          "instrumentId",
+          "gttType",
+          "gttValue"
+        ],
+        "properties": {
+          "price": {
+            "type": "number",
+            "title": "Price"
+          },
+          "gttType": {
+            "type": "string",
+            "title": "Gtttype"
+          },
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "exchange": {
+            "type": "string",
+            "title": "Exchange"
+          },
+          "gttValue": {
+            "type": "number",
+            "title": "Gttvalue"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "validity": {
+            "type": "string",
+            "title": "Validity"
+          },
+          "orderType": {
+            "type": "string",
+            "title": "Ordertype"
+          },
+          "instrumentId": {
+            "type": "string",
+            "title": "Instrumentid"
+          },
+          "tradingSymbol": {
+            "type": "string",
+            "title": "Tradingsymbol"
+          },
+          "orderComplexity": {
+            "type": "string",
+            "title": "Ordercomplexity"
+          },
+          "transactionType": {
+            "type": "string",
+            "title": "Transactiontype"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_gtt_order_book",
+      "description": "Fetches GTT Order Book",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_gtt_order_bookArguments",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_modify_gtt_order",
+      "description": "Modify GTT Order",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_modify_gtt_orderArguments",
+        "required": [
+          "brokerOrderId",
+          "instrumentId",
+          "tradingSymbol",
+          "exchange",
+          "orderType",
+          "product",
+          "validity",
+          "quantity",
+          "price",
+          "orderComplexity",
+          "gttType",
+          "gttValue"
+        ],
+        "properties": {
+          "price": {
+            "type": "number",
+            "title": "Price"
+          },
+          "gttType": {
+            "type": "string",
+            "title": "Gtttype"
+          },
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "exchange": {
+            "type": "string",
+            "title": "Exchange"
+          },
+          "gttValue": {
+            "type": "number",
+            "title": "Gttvalue"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "validity": {
+            "type": "string",
+            "title": "Validity"
+          },
+          "orderType": {
+            "type": "string",
+            "title": "Ordertype"
+          },
+          "instrumentId": {
+            "type": "string",
+            "title": "Instrumentid"
+          },
+          "brokerOrderId": {
+            "type": "string",
+            "title": "Brokerorderid"
+          },
+          "tradingSymbol": {
+            "type": "string",
+            "title": "Tradingsymbol"
+          },
+          "orderComplexity": {
+            "type": "string",
+            "title": "Ordercomplexity"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_cancel_gtt_order",
+      "description": "Cancel GTT Order",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_cancel_gtt_orderArguments",
+        "required": [
+          "brokerOrderId"
+        ],
+        "properties": {
+          "brokerOrderId": {
+            "type": "string",
+            "title": "Brokerorderid"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_limits",
+      "description": "Get Account Limits",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_limitsArguments",
+        "properties": {}
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:02:53.046399+00:00",
+    "source": "smithery"
+  }
+}

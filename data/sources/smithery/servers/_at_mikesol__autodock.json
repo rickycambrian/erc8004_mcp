@@ -1,0 +1,671 @@
+{
+  "qualifiedName": "@mikesol/autodock",
+  "displayName": "autodock",
+  "description": "Launch and manage on-demand cloud development environments with preserved storage. Expose services securely, sync code safely, and get ready-to-run SSH and logging workflows. Capture browser logs and screenshots, receive environment emails, and run ephemeral GitHub Actions runners when needed.",
+  "iconUrl": null,
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@mikesol/autodock",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@mikesol/autodock/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "account.info",
+      "description": "Return information about the currently authenticated Autodock user",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "account.create_api_key",
+      "description": "Create a new API key for headless MCP authentication.\n\nThe key will be shown ONCE - make sure to save it securely.\nUse the key with: claude mcp add --transport http autodock https://autodock.io/api/mcp/streamable-http --header \"Authorization: Bearer <key>\"",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Optional friendly name for the key (e.g., \"CI Pipeline\"). Auto-generated if not provided."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "account.list_api_keys",
+      "description": "List your API keys (shows prefix only, not full key)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of keys to return (default: 50)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "account.revoke_api_key",
+      "description": "Revoke an API key by ID. The key will immediately stop working.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "keyId"
+        ],
+        "properties": {
+          "keyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the key to revoke (from account.list_api_keys)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.list",
+      "description": "List environments for the authenticated user",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1
+          },
+          "cursor": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "provisioning",
+              "ready",
+              "stopped",
+              "failed",
+              "destroyed"
+            ],
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.launch",
+      "description": "Launch a new Autodock environment. Typically takes 1-2 minutes.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "pool": {
+            "type": "string"
+          },
+          "size": {
+            "enum": [
+              "small",
+              "medium",
+              "large",
+              "xlarge"
+            ],
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "template": {
+            "enum": [
+              "ubuntu-dev"
+            ],
+            "type": "string"
+          },
+          "customImage": {
+            "type": "string"
+          },
+          "cloudProvider": {
+            "enum": [
+              "aws"
+            ],
+            "type": "string"
+          },
+          "autoStopMinutes": {
+            "type": "integer",
+            "maximum": 1440,
+            "minimum": 5
+          },
+          "environmentVariables": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.status",
+      "description": "Fetch a specific environment by ID",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId"
+        ],
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID (UUID)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.get_ssh_key",
+      "description": "Fetch a fresh download URL for the SSH private key. Use this if the key was corrupted during initial save (e.g., \"error in libcrypto\" when running ssh-keygen -y -f <keyfile>).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId"
+        ],
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID (UUID)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.stop",
+      "description": "Stop (power down) an environment. Safe to restart later.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId"
+        ],
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID (UUID)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.restart",
+      "description": "Restart a stopped environment. Boots the same instance with preserved storage.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId"
+        ],
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID (UUID)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.destroy",
+      "description": "Destroy an environment permanently.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId"
+        ],
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID (UUID)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.extend",
+      "description": "Extend the auto-stop timer for a running environment. Resets the idle timer and sets a new auto-stop duration.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId",
+          "minutes"
+        ],
+        "properties": {
+          "minutes": {
+            "type": "integer",
+            "maximum": 480,
+            "minimum": 1,
+            "description": "New auto-stop timeout in minutes (1-480)"
+          },
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID (UUID)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.expose",
+      "description": "Expose a port on an environment with a public HTTPS URL.\n\nCreates https://<name|port>--<slug>.<base-domain>. Returns URL and .env update guidance.\n\nIMPORTANT: After exposing a port, you MUST verify connectivity from the LOCAL environment (NOT the remote environment):\n1. Run: dig <hostname> +short (verifies DNS resolution)\n2. Run: curl -sI <url> (verifies actual HTTPS connectivity)\nBoth must succeed for the user to connect. If either fails, troubleshoot:\n   - Is the service running? Check with \"ss -tlnp | grep <port>\"\n   - Is it bound to 0.0.0.0 (not just localhost/127.0.0.1)?\n   - Is the backend serving HTTPS internally? Caddy expects HTTP - disable TLS on the backend. Examples: Argo CD, Kubernetes Dashboard, Grafana (when TLS enabled), Vault UI, Consul UI\n   - Does the service have an HTTPS-based readiness check that's failing? Examples: Argo CD health checks, Istio control plane, cert-manager webhook",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId",
+          "port"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer",
+            "maximum": 65535,
+            "minimum": 1
+          },
+          "ttlSeconds": {
+            "type": "integer",
+            "maximum": 86400,
+            "minimum": 60
+          },
+          "environmentId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.unexpose",
+      "description": "Remove an exposed port from an environment",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer",
+            "maximum": 65535,
+            "minimum": 1
+          },
+          "environmentId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.listExposed",
+      "description": "List exposed ports for an environment",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId"
+        ],
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.sync",
+      "description": "REQUIRED before syncing files to an Autodock environment.\n\nProvides SSH connection details and rsync templates. Does NOT perform the sync itself.\nIf environmentId omitted, auto-selects when exactly one running env exists.\n\nCRITICAL: .ENV FILE HANDLING (the #1 source of remote dev issues)\n\nLocal .env files contain localhost URLs that MUST be patched for remote development.\nDo NOT rsync .env files blindly - handle them specially.\n\nWORKFLOW:\n1. SCAN: grep -r \"localhost\" .env* to find URLs needing patches\n2. CLASSIFY each variable as EXTERNAL (browser/user-facing) or INTERNAL (machine-to-machine)\n3. PATCH external URLs to https://<port>--<slug>.autodock.io\n4. COPY patched .env to remote separately from main rsync\n5. PRESERVE: keep .env.local.original on remote to detect local changes on re-sync\n\nEXTERNAL VARS (patch to autodock URL):\n  NEXT_PUBLIC_*, VITE_*, REACT_APP_* (browser-accessible)\n  API_URL, BACKEND_URL, FRONTEND_URL, APP_URL, BASE_URL, NEXTAUTH_URL\n  CSRF_TRUSTED_ORIGINS, ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS\n  WS_URL, WEBSOCKET_URL (use wss:// instead of https://)\n  OAUTH_REDIRECT_URI, CALLBACK_URL\n\nINTERNAL VARS (keep as localhost):\n  DATABASE_URL, DB_HOST, POSTGRES_*, MYSQL_*, REDIS_*, MONGODB_*, CACHE_URL\n  ELASTICSEARCH_URL, RABBITMQ_URL, KAFKA_*, *_SERVICE_HOST\n\nEXAMPLE:\n  Local: NEXT_PUBLIC_API_URL=http://localhost:3001\n  Remote (after exposing 3001): NEXT_PUBLIC_API_URL=https://3001--my-env.autodock.io\n\nSHADOW COPY: On first sync, save .env.local.original. On re-sync, compare local to\n.env.local.original - only re-patch if local changed (preserves remote patches).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectName"
+        ],
+        "properties": {
+          "direction": {
+            "enum": [
+              "push",
+              "pull"
+            ],
+            "type": "string",
+            "default": "push",
+            "description": "push = local\u2192remote (default), pull = remote\u2192local"
+          },
+          "remotePath": {
+            "type": "string",
+            "description": "Remote directory path. Defaults to /workspace/<projectName>. Only override if you need a custom location."
+          },
+          "projectName": {
+            "type": "string",
+            "description": "Local project directory name (basename of cwd). Used to create /workspace/<projectName> on remote. REQUIRED to avoid syncing to /workspace root which would delete shared resources like /workspace/docker."
+          },
+          "forwardAgent": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable SSH agent forwarding (-A flag) for git operations. Only enable when running git push/pull/clone with SSH remotes. Security note: agent forwarding exposes your SSH agent socket on the remote host."
+          },
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID. If omitted: auto-selects if exactly one running env exists."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.run",
+      "description": "REQUIRED before executing commands on an Autodock environment.\n\nALWAYS call this tool before using SSH to run commands - it provides:\n\u2022 SSH key path and connection string\n\u2022 CRITICAL: nohup backgrounding pattern (</dev/null) to prevent SSH hangs\n\u2022 mise-managed tool activation (node, npm, python, pip, go, etc. need bash -li -c wrapper)\n\u2022 Vite host validation fix (__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS)\n\u2022 HTTP proxy setup for traffic logging\n\u2022 Log file locations for Loki capture\n\nReturns SSH connection details and command templates. Does NOT execute commands directly.\nAfter calling this tool, use the provided command patterns with Bash.\n\nIf environmentId omitted, auto-selects when exactly one running env exists.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "default": "/workspace",
+            "description": "Working directory for the command (default: /workspace)"
+          },
+          "command": {
+            "type": "string",
+            "description": "Command to run (optional - if provided, will be included in the SSH command)"
+          },
+          "forwardAgent": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable SSH agent forwarding (-A flag). Required for git push/pull with SSH remotes. Security note: agent forwarding exposes your SSH agent socket on the remote host."
+          },
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID. If omitted: auto-selects if exactly one running env exists."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.observe",
+      "description": "Get Loki query commands for observing logs on an Autodock environment.\n\nReturns SSH+curl commands for querying the local Loki instance. Does NOT fetch logs directly.\n\nIf environmentId omitted, auto-selects when exactly one running env exists.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 100,
+            "maximum": 5000,
+            "minimum": 1,
+            "description": "Max log entries"
+          },
+          "query": {
+            "type": "string",
+            "default": "{filename=~\"/workspace/logs/.*\"}",
+            "description": "LogQL query. Default: {filename=~\"/workspace/logs/.*\"} (app logs). Other options: {job=\"docker\"} (containers), {job=\"autodock\"} (system logs)"
+          },
+          "since": {
+            "type": "string",
+            "default": "1h",
+            "description": "Time range to query (e.g., \"1h\", \"30m\", \"2h\"). Default: 1h"
+          },
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID. If omitted: auto-selects if exactly one running env exists."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.save",
+      "description": "Get templates for saving session setup to AUTODOCK.md.\n\nReturns environment details, exposed ports, and command templates for documentation.\n\nIf environmentId omitted, auto-selects when exactly one running env exists.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID. If omitted: auto-selects if exactly one running env exists."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.reserve",
+      "description": "Preview the cost of reserving an environment for 30 days ($149). Reserved environments do not auto-stop and do not count against your concurrent environment limit. Requires a paid plan (Starter or Pro).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId"
+        ],
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The environment ID to reserve"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.reserve_confirm",
+      "description": "Confirm reservation and process $149 payment. Environment will not auto-stop for 30 days after reservation. Payment is charged immediately to your card on file.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "environmentId"
+        ],
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The environment ID to reserve"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.email",
+      "description": "Documentation for receiving emails in an Autodock environment.\n\nEach environment can receive emails at *@{slug}.autodock.io. Emails are delivered via HTTPS\nwebhook (SES -> Vercel -> your environment) with Bearer token authentication.\n\nA boilerplate email handler is pre-installed at /opt/autodock/email-server.js that you can\ncustomize or replace with your own implementation.\n\nTo receive emails:\n1. Start the boilerplate: node /opt/autodock/email-server.js (or write your own on port 47982)\n2. Handle POST /email with JSON body and validate Bearer token\n3. Send emails to any address @{slug}.autodock.io\n\nWEBHOOK PAYLOAD: { from, to, subject, textBody, htmlBody, messageId, timestamp, spamVerdict, virusVerdict }\nLIMITS: 150KB max email (SES SNS limit). Large emails/attachments are truncated.\nAUTH: Bearer token (from /opt/autodock/email-webhook-secret) is required for webhook requests.\n\nIf no application is listening on 47982, emails are silently dropped.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID. If omitted: auto-selects if exactly one running env exists."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "env.gh_runner",
+      "description": "Documentation for configuring and running a GitHub Actions self-hosted runner.\n\nThe GitHub Actions runner is pre-installed at /opt/actions-runner. To use it:\n1. Get a registration token from GitHub (Settings > Actions > Runners > New self-hosted runner)\n2. Configure the runner with --ephemeral flag (auto-unregisters after one job)\n3. Start the runner in the background\n\nLabels are auto-applied: autodock,<environment-slug> plus any extra labels you specify.\n\nIMPORTANT: Runner runs as root and is ephemeral - it processes one job then exits.\nFor continuous runner usage, re-run the configuration and start commands.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url",
+          "token"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "GitHub repository or organization URL (e.g., https://github.com/owner/repo)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Runner name (defaults to environment slug)"
+          },
+          "token": {
+            "type": "string",
+            "description": "Registration token from GitHub Actions settings"
+          },
+          "labels": {
+            "type": "string",
+            "description": "Comma-separated extra labels (autodock and slug are auto-added)"
+          },
+          "environmentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Environment ID. If omitted: auto-selects if exactly one running env exists."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browser.listen",
+      "description": "Start a browser listener to capture console logs, network requests, and errors from the user's browser.\n\nAfter starting, provide the user with the console command to paste in their browser.\nThe listener will capture events until stopped or expired.\n\nUSAGE:\n1. Call this tool to create a listener session\n2. Give the user the consoleCommand to paste in their browser console\n3. IMPORTANT: Wait for the user to confirm they've pasted the command, then wait ~5 seconds for events to accumulate before calling browser.poll\n4. Use browser.poll to retrieve captured events (the browser batches events every 3 seconds)\n5. Use browser.shot to request a screenshot\n6. Use browser.stop when done",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "ttlMinutes": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 60,
+            "minimum": 5,
+            "description": "Session timeout in minutes (5-60, default: 30)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browser.poll",
+      "description": "Retrieve captured browser events from a listener session.\n\nReturns console logs, network requests, and errors captured from the browser.\nAlso returns any pending screenshot if one was requested.\n\nTIMING: The browser batches and sends events every 3 seconds. Wait at least 3-5 seconds after the user confirms they've started the listener before polling. If no events are returned, wait a few more seconds and try again.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum events to retrieve (1-100, default: 50)"
+          },
+          "token": {
+            "type": "string",
+            "maxLength": 6,
+            "minLength": 6,
+            "description": "The 6-character session token"
+          },
+          "sinceMinutes": {
+            "type": "integer",
+            "default": 5,
+            "maximum": 60,
+            "minimum": 1,
+            "description": "Only return events from the last N minutes (1-60, default: 5)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browser.shot",
+      "description": "Request a screenshot from the browser.\n\nThe screenshot will be captured asynchronously by the browser.\nIMPORTANT: Screenshots can take 10-15 seconds to capture (the browser must render the page to canvas).\nAfter calling this, wait 10-15 seconds, then call browser.poll to check for the screenshot URL.\nIf no screenshot URL is returned, wait a few more seconds and poll again.\n\nWhen ready, browser.poll will return a screenshotUrl. Fetch this URL to view the screenshot image and analyze what the user is seeing.\n\nNote: The browser tab must be visible for the screenshot to work.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 6,
+            "minLength": 6,
+            "description": "The 6-character session token"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "browser.stop",
+      "description": "Stop a browser listener session.\n\nThis will signal the browser to stop capturing and clean up server resources.\nThe user can also stop from the browser by typing autodock.stop() in the console.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 6,
+            "minLength": 6,
+            "description": "The 6-character session token"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:01:50.205190+00:00",
+    "source": "smithery"
+  }
+}

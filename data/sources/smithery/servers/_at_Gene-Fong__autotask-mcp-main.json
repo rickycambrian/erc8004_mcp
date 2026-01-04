@@ -1,0 +1,1202 @@
+{
+  "qualifiedName": "@Gene-Fong/autotask-mcp-main",
+  "displayName": "Autotask PSA",
+  "description": "Access Kaseya Autotask PSA to search, create, and update companies, contacts, tickets, projects, and more. Run powerful filtered searches, get full ticket details, log time, and manage notes, attachments, quotes, invoices, contracts, and tasks. Work faster with automatic ID-to-name mapping and complete results for reliable reporting.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@Gene-Fong/autotask-mcp-main",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@Gene-Fong/autotask-mcp-main/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "autotaskUsername",
+          "autotaskSecret",
+          "autotaskIntegrationCode"
+        ],
+        "properties": {
+          "httpHost": {
+            "type": "string",
+            "default": "0.0.0.0",
+            "description": "HTTP host for HTTP transport"
+          },
+          "httpPort": {
+            "type": "integer",
+            "default": 3000,
+            "maximum": 65535,
+            "minimum": 1,
+            "description": "HTTP port for HTTP transport"
+          },
+          "logLevel": {
+            "enum": [
+              "error",
+              "warn",
+              "info",
+              "debug"
+            ],
+            "type": "string",
+            "default": "info",
+            "description": "Logging level for server output"
+          },
+          "logFormat": {
+            "enum": [
+              "simple",
+              "json"
+            ],
+            "type": "string",
+            "default": "simple",
+            "description": "Logging format for server output"
+          },
+          "transport": {
+            "enum": [
+              "stdio",
+              "http",
+              "both"
+            ],
+            "type": "string",
+            "default": "http",
+            "description": "Transport(s) to enable for this server instance"
+          },
+          "serverName": {
+            "type": "string",
+            "default": "autotask-mcp",
+            "description": "Name reported to MCP clients"
+          },
+          "serverVersion": {
+            "type": "string",
+            "default": "1.0.0",
+            "description": "Semantic version reported to clients"
+          },
+          "autotaskApiUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional Autotask API base URL override"
+          },
+          "autotaskSecret": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Autotask API secret key"
+          },
+          "httpAuthEnabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable HTTP basic authentication"
+          },
+          "autotaskUsername": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Autotask API username (email)"
+          },
+          "httpAuthPassword": {
+            "type": "string",
+            "description": "HTTP basic auth password (required when auth enabled)"
+          },
+          "httpAuthUsername": {
+            "type": "string",
+            "description": "HTTP basic auth username (required when auth enabled)"
+          },
+          "autotaskIntegrationCode": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Autotask integration code"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "test_connection",
+      "description": "Test the connection to Autotask API",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "search_companies",
+      "description": "Search for companies in Autotask with optional filters",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "Filter by active status"
+          },
+          "pageSize": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Number of results to return (default: 50, max: 200)"
+          },
+          "searchTerm": {
+            "type": "string",
+            "description": "Search term for company name"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_company",
+      "description": "Create a new company in Autotask",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "companyName",
+          "companyType"
+        ],
+        "properties": {
+          "city": {
+            "type": "string",
+            "description": "Company city"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Company phone number"
+          },
+          "state": {
+            "type": "string",
+            "description": "Company state/province"
+          },
+          "address1": {
+            "type": "string",
+            "description": "Company address line 1"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the company is active"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Company postal/ZIP code"
+          },
+          "companyName": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "companyType": {
+            "type": "number",
+            "description": "Company type ID"
+          },
+          "ownerResourceID": {
+            "type": "number",
+            "description": "Owner resource ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_company",
+      "description": "Update an existing company in Autotask",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Company ID to update"
+          },
+          "city": {
+            "type": "string",
+            "description": "Company city"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Company phone number"
+          },
+          "state": {
+            "type": "string",
+            "description": "Company state/province"
+          },
+          "address1": {
+            "type": "string",
+            "description": "Company address line 1"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the company is active"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Company postal/ZIP code"
+          },
+          "companyName": {
+            "type": "string",
+            "description": "Company name"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_contacts",
+      "description": "Search for contacts in Autotask with optional filters",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "isActive": {
+            "type": "number",
+            "description": "Filter by active status (1=active, 0=inactive)"
+          },
+          "pageSize": {
+            "type": "number",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Number of results to return (default: 50, max: 200)"
+          },
+          "companyID": {
+            "type": "number",
+            "description": "Filter by company ID"
+          },
+          "searchTerm": {
+            "type": "string",
+            "description": "Search term for contact name or email"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_contact",
+      "description": "Create a new contact in Autotask",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "companyID",
+          "firstName",
+          "lastName"
+        ],
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Contact phone number"
+          },
+          "title": {
+            "type": "string",
+            "description": "Contact job title"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Contact last name"
+          },
+          "companyID": {
+            "type": "number",
+            "description": "Company ID for the contact"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Contact first name"
+          },
+          "emailAddress": {
+            "type": "string",
+            "description": "Contact email address"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_tickets",
+      "description": "Search for tickets in Autotask with optional filters. BY DEFAULT retrieves ALL matching tickets via pagination for complete accuracy. Only specify pageSize to limit results. Perfect for reports and analytics.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "Filter by ticket status ID (omit for all open tickets: status < 5)"
+          },
+          "pageSize": {
+            "type": "number",
+            "maximum": 500,
+            "minimum": 1,
+            "description": "OPTIONAL: Limit number of results. If omitted, retrieves ALL matching tickets for complete accuracy."
+          },
+          "companyID": {
+            "type": "number",
+            "description": "Filter by company ID"
+          },
+          "searchTerm": {
+            "type": "string",
+            "description": "Search term for ticket title or description"
+          },
+          "unassigned": {
+            "type": "boolean",
+            "description": "Set to true to find tickets that are not assigned to any resource (where assignedResourceID is null)"
+          },
+          "assignedResourceID": {
+            "type": "number",
+            "description": "Filter by assigned resource ID. Use null (or omit) to search for unassigned tickets."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_ticket_details",
+      "description": "Get detailed information for a specific ticket by ID. Use this for full ticket data when needed.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticketID"
+        ],
+        "properties": {
+          "ticketID": {
+            "type": "number",
+            "description": "Ticket ID to retrieve"
+          },
+          "fullDetails": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to return full ticket details (default: false for optimized data)"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_ticket",
+      "description": "Create a new ticket in Autotask",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "companyID",
+          "title",
+          "description"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Ticket title"
+          },
+          "status": {
+            "type": "number",
+            "description": "Ticket status ID"
+          },
+          "priority": {
+            "type": "number",
+            "description": "Ticket priority ID"
+          },
+          "companyID": {
+            "type": "number",
+            "description": "Company ID for the ticket"
+          },
+          "contactID": {
+            "type": "number",
+            "description": "Contact ID for the ticket"
+          },
+          "description": {
+            "type": "string",
+            "description": "Ticket description"
+          },
+          "assignedResourceID": {
+            "type": "number",
+            "description": "Assigned resource ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_ticket",
+      "description": "Update an existing ticket in Autotask using PATCH semantics for core fields",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticketId"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Ticket title/summary"
+          },
+          "status": {
+            "type": "number",
+            "description": "Ticket status ID to apply"
+          },
+          "queueID": {
+            "type": "number",
+            "description": "Queue ID for routing the ticket"
+          },
+          "priority": {
+            "type": "number",
+            "description": "Ticket priority ID to apply"
+          },
+          "ticketId": {
+            "type": "number",
+            "description": "Ticket ID to update"
+          },
+          "resolution": {
+            "type": "string",
+            "description": "Resolution notes to append/update"
+          },
+          "description": {
+            "type": "string",
+            "description": "Ticket description/body"
+          },
+          "dueDateTime": {
+            "type": "string",
+            "description": "ISO 8601 due date/time (e.g., 2025-09-17T16:30:00Z)"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_time_entry",
+      "description": "Create a time entry in Autotask",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "resourceID",
+          "dateWorked",
+          "hoursWorked",
+          "summaryNotes"
+        ],
+        "properties": {
+          "taskID": {
+            "type": "number",
+            "description": "Task ID for the time entry (optional, for project work)"
+          },
+          "ticketID": {
+            "type": "number",
+            "description": "Ticket ID for the time entry"
+          },
+          "dateWorked": {
+            "type": "string",
+            "description": "Date worked (YYYY-MM-DD format)"
+          },
+          "resourceID": {
+            "type": "number",
+            "description": "Resource ID (user) logging the time"
+          },
+          "endDateTime": {
+            "type": "string",
+            "description": "End date/time (ISO format)"
+          },
+          "hoursWorked": {
+            "type": "number",
+            "description": "Number of hours worked"
+          },
+          "summaryNotes": {
+            "type": "string",
+            "description": "Summary notes for the time entry"
+          },
+          "internalNotes": {
+            "type": "string",
+            "description": "Internal notes for the time entry"
+          },
+          "startDateTime": {
+            "type": "string",
+            "description": "Start date/time (ISO format)"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_projects",
+      "description": "Search for projects in Autotask with optional filters. Returns optimized project data to prevent large responses.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "Filter by project status"
+          },
+          "pageSize": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 100)"
+          },
+          "companyID": {
+            "type": "number",
+            "description": "Filter by company ID"
+          },
+          "searchTerm": {
+            "type": "string",
+            "description": "Search term for project name"
+          },
+          "projectManagerResourceID": {
+            "type": "number",
+            "description": "Filter by project manager resource ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_project",
+      "description": "Create a new project in Autotask",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "companyID",
+          "projectName",
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "Project status (1=New, 2=In Progress, 5=Complete)"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "Project end date (YYYY-MM-DD)"
+          },
+          "companyID": {
+            "type": "number",
+            "description": "Company ID for the project"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Project start date (YYYY-MM-DD)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Project description"
+          },
+          "projectName": {
+            "type": "string",
+            "description": "Project name"
+          },
+          "estimatedHours": {
+            "type": "number",
+            "description": "Estimated hours for the project"
+          },
+          "projectManagerResourceID": {
+            "type": "number",
+            "description": "Project manager resource ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_resources",
+      "description": "Search for resources (users) in Autotask with optional filters",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "Filter by active status"
+          },
+          "pageSize": {
+            "type": "number",
+            "maximum": 500,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 500)"
+          },
+          "searchTerm": {
+            "type": "string",
+            "description": "Search term for resource name or email"
+          },
+          "resourceType": {
+            "type": "number",
+            "description": "Filter by resource type (1=Employee, 2=Contractor, 3=Temporary)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_ticket_note",
+      "description": "Get a specific ticket note by ticket ID and note ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticketId",
+          "noteId"
+        ],
+        "properties": {
+          "noteId": {
+            "type": "number",
+            "description": "The note ID to retrieve"
+          },
+          "ticketId": {
+            "type": "number",
+            "description": "The ticket ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_ticket_notes",
+      "description": "Search for notes on a specific ticket",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticketId"
+        ],
+        "properties": {
+          "pageSize": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 100)"
+          },
+          "ticketId": {
+            "type": "number",
+            "description": "The ticket ID to search notes for"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_ticket_note",
+      "description": "Create a new note for a ticket",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticketId",
+          "description"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Note title"
+          },
+          "publish": {
+            "type": "number",
+            "description": "Publish level (1=Internal Only, 2=All Autotask Users, 3=Everyone)"
+          },
+          "noteType": {
+            "type": "number",
+            "description": "Note type (1=General, 2=Appointment, 3=Task, 4=Ticket, 5=Project, 6=Opportunity)"
+          },
+          "ticketId": {
+            "type": "number",
+            "description": "The ticket ID to add the note to"
+          },
+          "description": {
+            "type": "string",
+            "description": "Note content"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_project_note",
+      "description": "Get a specific project note by project ID and note ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "projectId",
+          "noteId"
+        ],
+        "properties": {
+          "noteId": {
+            "type": "number",
+            "description": "The note ID to retrieve"
+          },
+          "projectId": {
+            "type": "number",
+            "description": "The project ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_project_notes",
+      "description": "Search for notes on a specific project",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "pageSize": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 100)"
+          },
+          "projectId": {
+            "type": "number",
+            "description": "The project ID to search notes for"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_project_note",
+      "description": "Create a new note for a project",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "projectId",
+          "description"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Note title"
+          },
+          "noteType": {
+            "type": "number",
+            "description": "Note type (1=General, 2=Appointment, 3=Task, 4=Ticket, 5=Project, 6=Opportunity)"
+          },
+          "projectId": {
+            "type": "number",
+            "description": "The project ID to add the note to"
+          },
+          "description": {
+            "type": "string",
+            "description": "Note content"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_company_note",
+      "description": "Get a specific company note by company ID and note ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "companyId",
+          "noteId"
+        ],
+        "properties": {
+          "noteId": {
+            "type": "number",
+            "description": "The note ID to retrieve"
+          },
+          "companyId": {
+            "type": "number",
+            "description": "The company ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_company_notes",
+      "description": "Search for notes on a specific company",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "companyId"
+        ],
+        "properties": {
+          "pageSize": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 100)"
+          },
+          "companyId": {
+            "type": "number",
+            "description": "The company ID to search notes for"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_company_note",
+      "description": "Create a new note for a company",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "companyId",
+          "description"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Note title"
+          },
+          "companyId": {
+            "type": "number",
+            "description": "The company ID to add the note to"
+          },
+          "actionType": {
+            "type": "number",
+            "description": "Action type for the note"
+          },
+          "description": {
+            "type": "string",
+            "description": "Note content"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_ticket_attachment",
+      "description": "Get a specific ticket attachment by ticket ID and attachment ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticketId",
+          "attachmentId"
+        ],
+        "properties": {
+          "ticketId": {
+            "type": "number",
+            "description": "The ticket ID"
+          },
+          "includeData": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to include base64 encoded file data (default: false)"
+          },
+          "attachmentId": {
+            "type": "number",
+            "description": "The attachment ID to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_ticket_attachments",
+      "description": "Search for attachments on a specific ticket",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ticketId"
+        ],
+        "properties": {
+          "pageSize": {
+            "type": "number",
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Number of results to return (default: 10, max: 50)"
+          },
+          "ticketId": {
+            "type": "number",
+            "description": "The ticket ID to search attachments for"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_expense_report",
+      "description": "Get a specific expense report by ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "reportId"
+        ],
+        "properties": {
+          "reportId": {
+            "type": "number",
+            "description": "The expense report ID to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_expense_reports",
+      "description": "Search for expense reports with optional filters",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "Filter by status (1=New, 2=Submitted, 3=Approved, 4=Paid, 5=Rejected, 6=InReview)"
+          },
+          "pageSize": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 100)"
+          },
+          "submitterId": {
+            "type": "number",
+            "description": "Filter by submitter resource ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_expense_report",
+      "description": "Create a new expense report",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "submitterId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Expense report name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Expense report description"
+          },
+          "submitterId": {
+            "type": "number",
+            "description": "The resource ID of the submitter"
+          },
+          "weekEndingDate": {
+            "type": "string",
+            "description": "Week ending date (YYYY-MM-DD format)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_quote",
+      "description": "Get a specific quote by ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "quoteId"
+        ],
+        "properties": {
+          "quoteId": {
+            "type": "number",
+            "description": "The quote ID to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_quotes",
+      "description": "Search for quotes with optional filters",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "pageSize": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 100)"
+          },
+          "companyId": {
+            "type": "number",
+            "description": "Filter by company ID"
+          },
+          "contactId": {
+            "type": "number",
+            "description": "Filter by contact ID"
+          },
+          "searchTerm": {
+            "type": "string",
+            "description": "Search term for quote name or description"
+          },
+          "opportunityId": {
+            "type": "number",
+            "description": "Filter by opportunity ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_quote",
+      "description": "Create a new quote",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "companyId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Quote name"
+          },
+          "companyId": {
+            "type": "number",
+            "description": "Company ID for the quote"
+          },
+          "contactId": {
+            "type": "number",
+            "description": "Contact ID for the quote"
+          },
+          "description": {
+            "type": "string",
+            "description": "Quote description"
+          },
+          "effectiveDate": {
+            "type": "string",
+            "description": "Effective date (YYYY-MM-DD format)"
+          },
+          "opportunityId": {
+            "type": "number",
+            "description": "Associated opportunity ID"
+          },
+          "expirationDate": {
+            "type": "string",
+            "description": "Expiration date (YYYY-MM-DD format)"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_configuration_items",
+      "description": "Search for configuration items in Autotask with optional filters",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "Filter by active status"
+          },
+          "pageSize": {
+            "type": "number",
+            "maximum": 500,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 500)"
+          },
+          "companyID": {
+            "type": "number",
+            "description": "Filter by company ID"
+          },
+          "productID": {
+            "type": "number",
+            "description": "Filter by product ID"
+          },
+          "searchTerm": {
+            "type": "string",
+            "description": "Search term for configuration item name"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_contracts",
+      "description": "Search for contracts in Autotask with optional filters",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "Filter by contract status (1=In Effect, 3=Terminated)"
+          },
+          "pageSize": {
+            "type": "number",
+            "maximum": 500,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 500)"
+          },
+          "companyID": {
+            "type": "number",
+            "description": "Filter by company ID"
+          },
+          "searchTerm": {
+            "type": "string",
+            "description": "Search term for contract name"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_invoices",
+      "description": "Search for invoices in Autotask with optional filters",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "isVoided": {
+            "type": "boolean",
+            "description": "Filter by voided status"
+          },
+          "pageSize": {
+            "type": "number",
+            "maximum": 500,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 500)"
+          },
+          "companyID": {
+            "type": "number",
+            "description": "Filter by company ID"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "description": "Filter by invoice number"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_tasks",
+      "description": "Search for tasks in Autotask with optional filters. Returns optimized task data to prevent large responses.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "Filter by task status (1=New, 2=In Progress, 5=Complete)"
+          },
+          "pageSize": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of results to return (default: 25, max: 100)"
+          },
+          "projectID": {
+            "type": "number",
+            "description": "Filter by project ID"
+          },
+          "searchTerm": {
+            "type": "string",
+            "description": "Search term for task title"
+          },
+          "assignedResourceID": {
+            "type": "number",
+            "description": "Filter by assigned resource ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_task",
+      "description": "Create a new task in Autotask",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "projectID",
+          "title",
+          "status"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Task title"
+          },
+          "status": {
+            "type": "number",
+            "description": "Task status (1=New, 2=In Progress, 5=Complete)"
+          },
+          "projectID": {
+            "type": "number",
+            "description": "Project ID for the task"
+          },
+          "description": {
+            "type": "string",
+            "description": "Task description"
+          },
+          "endDateTime": {
+            "type": "string",
+            "description": "Task end date/time (ISO format)"
+          },
+          "startDateTime": {
+            "type": "string",
+            "description": "Task start date/time (ISO format)"
+          },
+          "estimatedHours": {
+            "type": "number",
+            "description": "Estimated hours for the task"
+          },
+          "assignedResourceID": {
+            "type": "number",
+            "description": "Assigned resource ID"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:02:42.816369+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,323 @@
+{
+  "qualifiedName": "@avac22/tavily-mcp",
+  "displayName": "Tavily Web Search and Extraction Server",
+  "description": "Enable AI assistants to perform real-time web searches, extract data from web pages, map website structures, and crawl websites systematically. Integrate advanced search and data extraction capabilities seamlessly into your AI workflows. Enhance your AI's access to up-to-date web information with powerful filtering and domain-specific search features.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/tavily.com.ico",
+  "remote": false,
+  "deploymentUrl": null,
+  "connections": [
+    {
+      "type": "stdio",
+      "bundleUrl": "https://backend.smithery.ai/storage/v1/object/public/bundles/@avac22/tavily-mcp/server.mcpb",
+      "runtime": "node",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "tavilyApiKey"
+        ],
+        "properties": {
+          "tavilyApiKey": {
+            "type": "string",
+            "description": "The API key for the Tavily MCP server."
+          }
+        }
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "tavily-search",
+      "description": "A powerful web search tool that provides comprehensive, real-time results using Tavily's AI search engine. Returns relevant web content with customizable parameters for result count, content type, and domain filtering. Ideal for gathering current information, news, and detailed web content analysis.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "days": {
+            "type": "number",
+            "default": 3,
+            "description": "The number of days back from the current date to include in the search results. This specifies the time frame of data to be retrieved. Please note that this feature is only available when using the 'news' search topic"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "topic": {
+            "enum": [
+              "general",
+              "news"
+            ],
+            "type": "string",
+            "default": "general",
+            "description": "The category of the search. This will determine which of our agents will be used for the search"
+          },
+          "time_range": {
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "year",
+              "d",
+              "w",
+              "m",
+              "y"
+            ],
+            "type": "string",
+            "description": "The time range back from the current date to include in the search results. This feature is available for both 'general' and 'news' search topics"
+          },
+          "max_results": {
+            "type": "number",
+            "default": 10,
+            "maximum": 20,
+            "minimum": 5,
+            "description": "The maximum number of search results to return"
+          },
+          "search_depth": {
+            "enum": [
+              "basic",
+              "advanced"
+            ],
+            "type": "string",
+            "default": "basic",
+            "description": "The depth of the search. It can be 'basic' or 'advanced'"
+          },
+          "include_images": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include a list of query-related images in the response"
+          },
+          "exclude_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "List of domains to specifically exclude, if the user asks to exclude a domain set this to the domain of the site"
+          },
+          "include_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "A list of domains to specifically include in the search results, if the user asks to search on specific sites set this to the domain of the site"
+          },
+          "include_raw_content": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include the cleaned and parsed HTML content of each search result"
+          },
+          "include_image_descriptions": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include a list of query-related images and their descriptions in the response"
+          }
+        }
+      }
+    },
+    {
+      "name": "tavily-extract",
+      "description": "A powerful web content extraction tool that retrieves and processes raw content from specified URLs, ideal for data collection, content analysis, and research tasks.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "urls"
+        ],
+        "properties": {
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of URLs to extract content from"
+          },
+          "extract_depth": {
+            "enum": [
+              "basic",
+              "advanced"
+            ],
+            "type": "string",
+            "default": "basic",
+            "description": "Depth of extraction - 'basic' or 'advanced', if usrls are linkedin use 'advanced' or if explicitly told to use advanced"
+          },
+          "include_images": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include a list of images extracted from the urls in the response"
+          }
+        }
+      }
+    },
+    {
+      "name": "tavily-crawl",
+      "description": "A powerful web crawler that initiates a structured web crawl starting from a specified base URL. The crawler expands from that point like a tree, following internal links across pages. You can control how deep and wide it goes, and guide it to focus on specific sections of the site.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The root URL to begin the crawl"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "description": "Total number of links the crawler will process before stopping"
+          },
+          "max_depth": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1,
+            "description": "Max depth of the crawl. Defines how far from the base URL the crawler can explore."
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "Careers",
+                "Blog",
+                "Documentation",
+                "About",
+                "Pricing",
+                "Community",
+                "Developers",
+                "Contact",
+                "Media"
+              ],
+              "type": "string"
+            },
+            "default": [],
+            "description": "Filter URLs using predefined categories like documentation, blog, api, etc"
+          },
+          "max_breadth": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "description": "Max number of links to follow per level of the tree (i.e., per page)"
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Natural language instructions for the crawler"
+          },
+          "select_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Regex patterns to select only URLs with specific path patterns (e.g., /docs/.*, /api/v1.*)"
+          },
+          "extract_depth": {
+            "enum": [
+              "basic",
+              "advanced"
+            ],
+            "type": "string",
+            "default": "basic",
+            "description": "Advanced extraction retrieves more data, including tables and embedded content, with higher success but may increase latency"
+          },
+          "allow_external": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to allow following links that go to external domains"
+          },
+          "select_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Regex patterns to select crawling to specific domains or subdomains (e.g., ^docs\\.example\\.com$)"
+          }
+        }
+      }
+    },
+    {
+      "name": "tavily-map",
+      "description": "A powerful web mapping tool that creates a structured map of website URLs, allowing you to discover and analyze site structure, content organization, and navigation paths. Perfect for site audits, content discovery, and understanding website architecture.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The root URL to begin the mapping"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "description": "Total number of links the crawler will process before stopping"
+          },
+          "max_depth": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1,
+            "description": "Max depth of the mapping. Defines how far from the base URL the crawler can explore"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "Careers",
+                "Blog",
+                "Documentation",
+                "About",
+                "Pricing",
+                "Community",
+                "Developers",
+                "Contact",
+                "Media"
+              ],
+              "type": "string"
+            },
+            "default": [],
+            "description": "Filter URLs using predefined categories like documentation, blog, api, etc"
+          },
+          "max_breadth": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "description": "Max number of links to follow per level of the tree (i.e., per page)"
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Natural language instructions for the crawler"
+          },
+          "select_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Regex patterns to select only URLs with specific path patterns (e.g., /docs/.*, /api/v1.*)"
+          },
+          "allow_external": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to allow following links that go to external domains"
+          },
+          "select_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Regex patterns to select crawling to specific domains or subdomains (e.g., ^docs\\.example\\.com$)"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:01:58.635495+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "qualifiedName": "arjunkmrm/brightdata-test",
+  "displayName": "brightdata-test",
+  "description": "Discover up-to-date information from major search engines. Extract clean, readable content from webpages for analysis and reuse. Accelerate research by running batch searches and multi-page scraping in parallel.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/arjunkmrm/brightdata-test",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/arjunkmrm/brightdata-test/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "properties": {
+          "pro": {
+            "type": "string",
+            "default": "0",
+            "description": "Enable pro mode tools (search_engine_batch, scrape_batch)"
+          },
+          "token": {
+            "type": "string",
+            "description": "Bright Data API key, available in https://brightdata.com/cp/setting/users"
+          },
+          "browser": {
+            "type": "string",
+            "default": "mcp_browser",
+            "description": "Optional: Zone name for the Browser API (enables browser control tools, defaults to 'mcp_browser')"
+          },
+          "unlocker": {
+            "type": "string",
+            "default": "mcp_unlocker",
+            "description": "Optional: The Web Unlocker zone name (defaults to 'mcp_unlocker')"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_engine",
+      "description": "Scrape search results from Google, Bing or Yandex. Returns SERP results in JSON or Markdown (URL, title, description), Ideal forgathering current information, news, and detailed search results.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor for next page"
+          },
+          "engine": {
+            "enum": [
+              "google",
+              "bing",
+              "yandex"
+            ],
+            "type": "string",
+            "default": "google"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scrape_as_markdown",
+      "description": "Scrape a single webpage URL with advanced options for content extraction and get back the results in MarkDown language. This tool can unlock any webpage even if it uses bot detection or CAPTCHA.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_engine_batch",
+      "description": "Run multiple search queries simultaneously. Returns JSON for Google, Markdown for Bing/Yandex.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "queries"
+        ],
+        "properties": {
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "cursor": {
+                  "type": "string"
+                },
+                "engine": {
+                  "enum": [
+                    "google",
+                    "bing",
+                    "yandex"
+                  ],
+                  "type": "string",
+                  "default": "google"
+                }
+              },
+              "additionalProperties": false
+            },
+            "maxItems": 10,
+            "minItems": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "scrape_batch",
+      "description": "Scrape multiple webpages URLs with advanced options for content extraction and get back the results in MarkDown language. This tool can unlock any webpage even if it uses bot detection or CAPTCHA.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urls"
+        ],
+        "properties": {
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "description": "Array of URLs to scrape (max 10)"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:05:25.222974+00:00",
+    "source": "smithery"
+  }
+}

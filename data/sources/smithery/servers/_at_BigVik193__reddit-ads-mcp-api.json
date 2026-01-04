@@ -1,0 +1,668 @@
+{
+  "qualifiedName": "@BigVik193/reddit-ads-mcp-api",
+  "displayName": "Reddit Ads",
+  "description": "Manage Reddit advertising end to end across accounts, funding methods, campaigns, ad groups, and ads. Create and launch campaigns from new or existing posts with precise targeting and bidding. Generate on-brand images from text prompts and explore profiles and posts to inform creative.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@BigVik193/reddit-ads-mcp-api",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@BigVik193/reddit-ads-mcp-api/mcp",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "REDDABLE_API_KEY"
+        ],
+        "properties": {
+          "REDDABLE_API_KEY": {
+            "type": "string",
+            "description": "Long-term API key for Reddable MCP access"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "getAdAccounts",
+      "title": "Get Ad Accounts",
+      "description": "Get all available Reddit ad accounts for a business",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "businessId": {
+            "type": "string",
+            "description": "Reddit Business ID (optional if REDDIT_BUSINESS_ID env var is set)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getFundingInstruments",
+      "title": "Get Funding Instruments",
+      "description": "Get all payment methods/funding instruments for an ad account",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "adAccountId"
+        ],
+        "properties": {
+          "adAccountId": {
+            "type": "string",
+            "description": "Reddit ad account ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getCampaigns",
+      "title": "Get Campaigns",
+      "description": "Get all campaigns for an ad account",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "adAccountId"
+        ],
+        "properties": {
+          "adAccountId": {
+            "type": "string",
+            "description": "Reddit ad account ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getAdGroups",
+      "title": "Get Ad Groups",
+      "description": "Get all ad groups for an ad account",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "adAccountId"
+        ],
+        "properties": {
+          "adAccountId": {
+            "type": "string",
+            "description": "Reddit ad account ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getProfiles",
+      "title": "Get Profiles",
+      "description": "Get all Reddit profiles/accounts available for an ad account",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "adAccountId"
+        ],
+        "properties": {
+          "adAccountId": {
+            "type": "string",
+            "description": "Reddit ad account ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "createCampaign",
+      "title": "Create Campaign",
+      "description": "Create a new Reddit advertising campaign",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "adAccountId",
+          "name",
+          "objective",
+          "fundingInstrumentId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 3,
+            "description": "Campaign name (3-200 characters)"
+          },
+          "appId": {
+            "type": "string",
+            "description": "App ID for app installs campaigns (Apple App Store or Google Play)"
+          },
+          "goalType": {
+            "enum": [
+              "LIFETIME_SPEND",
+              "DAILY_SPEND"
+            ],
+            "type": "string",
+            "description": "Campaign goal type (requires CBO)"
+          },
+          "spendCap": {
+            "type": "number",
+            "description": "Campaign lifetime spend cap in microcurrency"
+          },
+          "goalValue": {
+            "type": "number",
+            "description": "Campaign level goal value in micros (requires CBO)"
+          },
+          "objective": {
+            "enum": [
+              "APP_INSTALLS",
+              "CATALOG_SALES",
+              "CLICKS",
+              "CONVERSIONS",
+              "IMPRESSIONS",
+              "LEAD_GENERATION",
+              "VIDEO_VIEWABLE_IMPRESSIONS"
+            ],
+            "type": "string",
+            "description": "Campaign objective type"
+          },
+          "adAccountId": {
+            "type": "string",
+            "description": "Reddit ad account ID"
+          },
+          "ageRestriction": {
+            "enum": [
+              "ABOVE_18",
+              "ABOVE_21",
+              "NO_AGE_RESTRICTION"
+            ],
+            "type": "string",
+            "default": "NO_AGE_RESTRICTION",
+            "description": "Age restriction for campaign"
+          },
+          "configuredStatus": {
+            "enum": [
+              "ACTIVE",
+              "ARCHIVED",
+              "DELETED",
+              "PAUSED"
+            ],
+            "type": "string",
+            "default": "ACTIVE",
+            "description": "Campaign status"
+          },
+          "fundingInstrumentId": {
+            "type": "string",
+            "description": "Funding instrument ID for payment"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "createAdGroup",
+      "title": "Create Ad Group",
+      "description": "Create a new Reddit ad group with targeting and bidding options",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "adAccountId",
+          "campaignId",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Ad group name"
+          },
+          "appId": {
+            "type": "string",
+            "description": "App ID for app install campaigns"
+          },
+          "bidType": {
+            "enum": [
+              "CPC",
+              "CPM",
+              "CPV",
+              "CPV6"
+            ],
+            "type": "string",
+            "description": "Bidding strategy type"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "ISO 8601 timestamp when ad group ends"
+          },
+          "bidValue": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Bid amount in microcurrency per event"
+          },
+          "goalType": {
+            "enum": [
+              "DAILY_SPEND",
+              "LIFETIME_SPEND"
+            ],
+            "type": "string",
+            "description": "Type of goal"
+          },
+          "goalValue": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Goal value in microcurrency"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "ISO 8601 timestamp when ad group starts (e.g., 2025-09-18T22:27:10Z)"
+          },
+          "targeting": {
+            "type": "object",
+            "properties": {
+              "communities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "geolocations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "age_targeting": {
+                "type": "object",
+                "properties": {
+                  "max_age": {
+                    "type": "number",
+                    "maximum": 65,
+                    "minimum": 13
+                  },
+                  "min_age": {
+                    "type": "number",
+                    "maximum": 65,
+                    "minimum": 13
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "description": "Targeting options",
+            "additionalProperties": false
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "Campaign ID this ad group belongs to"
+          },
+          "adAccountId": {
+            "type": "string",
+            "description": "Reddit ad account ID"
+          },
+          "bidStrategy": {
+            "enum": [
+              "BIDLESS",
+              "MANUAL_BIDDING",
+              "MAXIMIZE_VOLUME",
+              "TARGET_CPX"
+            ],
+            "type": "string",
+            "description": "Bid strategy"
+          },
+          "configuredStatus": {
+            "enum": [
+              "ACTIVE",
+              "ARCHIVED",
+              "DELETED",
+              "PAUSED"
+            ],
+            "type": "string",
+            "default": "ACTIVE",
+            "description": "Ad group status"
+          },
+          "optimizationGoal": {
+            "enum": [
+              "PAGE_VISIT",
+              "VIEW_CONTENT",
+              "SEARCH",
+              "ADD_TO_CART",
+              "ADD_TO_WISHLIST",
+              "PURCHASE",
+              "LEAD",
+              "SIGN_UP",
+              "CLICKS",
+              "MOBILE_CONVERSION_INSTALL",
+              "MOBILE_CONVERSION_SIGN_UP",
+              "MOBILE_CONVERSION_ADD_PAYMENT_INFO",
+              "MOBILE_CONVERSION_ADD_TO_CART",
+              "MOBILE_CONVERSION_PURCHASE",
+              "MOBILE_CONVERSION_COMPLETED_TUTORIAL",
+              "MOBILE_CONVERSION_LEVEL_ACHIEVED",
+              "MOBILE_CONVERSION_SPEND_CREDITS",
+              "MOBILE_CONVERSION_REINSTALL",
+              "MOBILE_CONVERSION_UNLOCK_ACHIEVEMENT",
+              "MOBILE_CONVERSION_START_TRIAL",
+              "MOBILE_CONVERSION_SUBSCRIBE",
+              "MOBILE_CONVERSION_ONBOARD_STARTED",
+              "MOBILE_CONVERSION_FIRST_TIME_PURCHASE"
+            ],
+            "type": "string",
+            "description": "Optimization goal for conversions"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "createPost",
+      "title": "Create Post",
+      "description": "Create a new Reddit post for advertising",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "profileId",
+          "type",
+          "headline",
+          "allowComments",
+          "thumbnailUrl",
+          "content"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "CAROUSEL",
+              "IMAGE",
+              "TEXT",
+              "VIDEO"
+            ],
+            "type": "string",
+            "description": "Post type"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "destination_url",
+                "display_url",
+                "media_url"
+              ],
+              "properties": {
+                "media_url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "Image/video media URL"
+                },
+                "display_url": {
+                  "type": "string",
+                  "description": "Display URL shown to users"
+                },
+                "call_to_action": {
+                  "type": "string",
+                  "default": "Learn More",
+                  "description": "Call to action text only should be 'Learn More'"
+                },
+                "destination_url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "Destination URL when clicked"
+                }
+              },
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "description": "Post content array (required)"
+          },
+          "headline": {
+            "type": "string",
+            "description": "Post title/headline"
+          },
+          "profileId": {
+            "type": "string",
+            "description": "Reddit profile ID (format: t2_xxxxx)"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Thumbnail image URL"
+          },
+          "allowComments": {
+            "type": "boolean",
+            "description": "Enable comments on the post"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "createAd",
+      "title": "Create Reddit Ad",
+      "description": "Create a Reddit ad using the official Reddit Ads API",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "adAccountId",
+          "name",
+          "configuredStatus"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "description": "Ad name (1-500 characters)"
+          },
+          "postId": {
+            "type": "string",
+            "pattern": "^t3_.*",
+            "description": "Reddit post ID to promote (format: t3_xxxxx)"
+          },
+          "clickUrl": {
+            "type": "string",
+            "maxLength": 5000,
+            "description": "Destination URL when ad is clicked (max 5000 characters)"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "product_id"
+              ],
+              "properties": {
+                "product_id": {
+                  "type": "string",
+                  "description": "Product ID"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Products associated with the ad"
+          },
+          "adGroupId": {
+            "type": "string",
+            "description": "Ad group ID this ad belongs to"
+          },
+          "profileId": {
+            "type": "string",
+            "description": "Profile ID for catalog sales campaigns"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "Campaign ID this ad belongs to"
+          },
+          "adAccountId": {
+            "type": "string",
+            "description": "Reddit ad account ID"
+          },
+          "eventTrackers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "Tracking URL"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Event type (e.g., CLICK)"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Event tracking pixels from approved providers"
+          },
+          "previewExpiry": {
+            "type": "string",
+            "description": "ISO 8601 timestamp for preview URL expiry"
+          },
+          "profileUsername": {
+            "type": "string",
+            "description": "Profile username for catalog sales campaigns"
+          },
+          "configuredStatus": {
+            "enum": [
+              "ACTIVE",
+              "ARCHIVED",
+              "DELETED",
+              "PAUSED"
+            ],
+            "type": "string",
+            "description": "Ad status"
+          },
+          "shoppingCreative": {
+            "type": "object",
+            "properties": {
+              "headline": {
+                "type": "string"
+              },
+              "allow_comments": {
+                "type": "boolean"
+              },
+              "call_to_action": {
+                "type": "string",
+                "default": "Learn More",
+                "description": "Call to action text only should be 'Learn More'"
+              },
+              "destination_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "second_line_cta": {
+                "type": "string"
+              },
+              "dpa_carousel_mode": {
+                "type": "string"
+              }
+            },
+            "description": "Shopping creative settings",
+            "additionalProperties": false
+          },
+          "clickUrlQueryParams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "value"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Query parameter name"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Query parameter value"
+                }
+              },
+              "additionalProperties": false
+            },
+            "maxItems": 14,
+            "description": "UTM parameters for click URL (max 14 items)"
+          },
+          "campaignObjectiveType": {
+            "enum": [
+              "APP_INSTALLS",
+              "CATALOG_SALES",
+              "CLICKS",
+              "CONVERSIONS",
+              "IMPRESSIONS",
+              "LEAD_GENERATION",
+              "VIDEO_VIEWABLE_IMPRESSIONS"
+            ],
+            "type": "string",
+            "description": "Campaign objective type"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getAds",
+      "title": "Get All Ads",
+      "description": "Get all ads from a Reddit ad account",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "adAccountId"
+        ],
+        "properties": {
+          "adAccountId": {
+            "type": "string",
+            "description": "Reddit ad account ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generateImage",
+      "title": "Generate Image",
+      "description": "Generate an image from a text description using Google's Gemini Flash Image Preview",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "style": {
+            "enum": [
+              "photorealistic",
+              "illustration",
+              "minimalist",
+              "artistic"
+            ],
+            "type": "string",
+            "default": "photorealistic",
+            "description": "Style of the generated image"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Text description of the image to generate"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:04:14.191413+00:00",
+    "source": "smithery"
+  }
+}

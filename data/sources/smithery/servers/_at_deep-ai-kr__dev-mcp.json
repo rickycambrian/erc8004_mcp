@@ -1,0 +1,198 @@
+{
+  "qualifiedName": "@deep-ai-kr/dev-mcp",
+  "displayName": "dev-mcp",
+  "description": "Browse directories and read files within a safe, configurable root. Pull accurate context from local projects and docs without leaving your workflow. Limit access to a chosen root to keep your environment secure.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@deep-ai-kr/dev-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@deep-ai-kr/dev-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {
+          "FS_ROOT": {
+            "type": "string",
+            "description": "\ud30c\uc77c\uc2dc\uc2a4\ud15c \ub8e8\ud2b8 \uacbd\ub85c (MCP \ud074\ub77c\uc774\uc5b8\ud2b8\uac00 \uc811\uadfc\ud560 \uc218 \uc788\ub294 \ucd5c\uc0c1\uc704 \ub514\ub809\ud1a0\ub9ac)"
+          },
+          "VERBOSE": {
+            "type": "boolean",
+            "default": false,
+            "description": "\uc0c1\uc138 \ub85c\uadf8 \ucd9c\ub825"
+          },
+          "LOG_LEVEL": {
+            "type": "string",
+            "default": "info",
+            "description": "\ub85c\uadf8 \ub808\ubca8"
+          },
+          "GITHUB_ROOT": {
+            "type": "string",
+            "description": "GitHub \ub8e8\ud2b8 \uacbd\ub85c (FS_ROOT \ub300\uc2e0 \uc0ac\uc6a9 \uac00\ub2a5)"
+          },
+          "OBSIDIAN_PATH": {
+            "type": "string",
+            "description": "Obsidian Vault \uacbd\ub85c"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "read_text_file",
+      "description": "Read a text file from the filesystem. Returns the file content as text.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "head": {
+            "type": "number",
+            "description": "If provided, returns only the first N lines"
+          },
+          "path": {
+            "type": "string",
+            "description": "Path to the file to read (relative to root)"
+          },
+          "tail": {
+            "type": "number",
+            "description": "If provided, returns only the last N lines"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "write_file",
+      "description": "Write content to a file. Creates the file if it doesn't exist, overwrites if it does.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "path",
+          "content"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to the file to write (relative to root)"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content to write to the file"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_directory",
+      "description": "List files and directories in a specified path",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to the directory to list (relative to root)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_directory",
+      "description": "Create a directory. Creates parent directories if they don't exist.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to the directory to create (relative to root)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_file_info",
+      "description": "Get detailed information about a file or directory (size, permissions, timestamps, etc.)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to the file or directory (relative to root)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "move_file",
+      "description": "Move or rename a file or directory",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "source",
+          "destination"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Source path (relative to root)"
+          },
+          "destination": {
+            "type": "string",
+            "description": "Destination path (relative to root)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_files",
+      "description": "Recursively search for files and directories matching a pattern",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "path",
+          "pattern"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Directory to search in (relative to root)"
+          },
+          "pattern": {
+            "type": "string",
+            "description": "Search pattern (case-insensitive, matches partial names)"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T15:01:11.455139+00:00",
+    "source": "smithery"
+  }
+}
