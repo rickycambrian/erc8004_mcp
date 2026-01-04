@@ -38,7 +38,43 @@ interface SmitheryServer {
   deploymentUrl?: string;
   remote?: boolean;
   tools?: Array<{ name: string; description?: string }>;
-  connections?: Array<{ type: string; deploymentUrl?: string }>;
+  connections?: Array<{
+    type: string;
+    deploymentUrl?: string;
+    configSchema?: Record<string, unknown>;
+  }>;
+}
+
+/**
+ * Get config schema from server connections
+ */
+function getConfigSchema(server: SmitheryServer): Record<string, unknown> | null {
+  if (server.connections) {
+    for (const conn of server.connections) {
+      if (conn.configSchema) {
+        return conn.configSchema;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Derive npm package name for local stdio execution
+ * Common patterns: "exa" -> "exa-mcp-server", "@org/name" -> "@org/name-mcp-server"
+ */
+function getNpmPackage(server: SmitheryServer): string | null {
+  const name = server.qualifiedName;
+  if (!name) return null;
+
+  // Common npm package patterns for MCP servers
+  // Try the most common pattern: name-mcp-server
+  if (!name.includes('/')) {
+    return `${name}-mcp-server`;
+  }
+
+  // For scoped packages like @org/name
+  return `${name}-mcp-server`;
 }
 
 /**
@@ -138,6 +174,9 @@ async function main() {
   console.log(`  Tools (${toolNames.length}): ${toolNames.slice(0, 5).join(', ')}${toolNames.length > 5 ? '...' : ''}`);
 
   if (dryRun) {
+    const configSchema = getConfigSchema(server);
+    const npmPackage = getNpmPackage(server);
+
     console.log('\n✅ Dry run complete. Registration file would contain:');
     console.log(JSON.stringify({
       name: server.displayName,
@@ -147,7 +186,11 @@ async function main() {
         name: 'MCP',
         endpoint: mcpEndpoint,
         version: MCP_VERSION,
-        mcpTools: toolNames
+        meta: {
+          mcpTools: toolNames,
+          configSchema: configSchema,
+          npmPackage: npmPackage
+        }
       }],
       active: true
     }, null, 2));
@@ -198,13 +241,31 @@ async function main() {
   console.log('🔗 Setting MCP endpoint...');
   await agent.setMCP(mcpEndpoint, MCP_VERSION, false);
 
-  // Manually set tool names from our collected data
+  // Manually set tool names and local execution info from our collected data
   const regFile = agent.getRegistrationFile();
   const mcpEndpointObj = regFile.endpoints.find(e => e.type === 'MCP');
-  if (mcpEndpointObj && toolNames.length > 0) {
+  if (mcpEndpointObj) {
     mcpEndpointObj.meta = mcpEndpointObj.meta || {};
-    mcpEndpointObj.meta.mcpTools = toolNames;
-    console.log(`  Set ${toolNames.length} tools from collected data`);
+
+    // Set tool names
+    if (toolNames.length > 0) {
+      mcpEndpointObj.meta.mcpTools = toolNames;
+      console.log(`  Set ${toolNames.length} tools from collected data`);
+    }
+
+    // Set config schema for authentication/configuration
+    const configSchema = getConfigSchema(server);
+    if (configSchema) {
+      mcpEndpointObj.meta.configSchema = configSchema;
+      console.log(`  Set configSchema for endpoint configuration`);
+    }
+
+    // Set npm package for local stdio execution
+    const npmPackage = getNpmPackage(server);
+    if (npmPackage) {
+      mcpEndpointObj.meta.npmPackage = npmPackage;
+      console.log(`  Set npmPackage: ${npmPackage} for local execution`);
+    }
   }
 
   // Set as active
