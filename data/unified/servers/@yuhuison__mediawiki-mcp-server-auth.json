@@ -1,0 +1,392 @@
+{
+  "id": "@yuhuison/mediawiki-mcp-server-auth",
+  "name": "@yuhuison/mediawiki-mcp-server-auth",
+  "display_name": "MediaWiki Auth",
+  "version": null,
+  "description": "Connect to your MediaWiki using simple credentials and manage content without OAuth. Search, read, create, and update pages, review histories, and retrieve files across one or more wikis. Automate routine wiki maintenance with minimal setup.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "get-page",
+      "annotations": {
+        "title": "Get page",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Returns the standard page object for a wiki page, optionally including page source or rendered HTML, and including the license and information about the latest revision.2",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "server",
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Wiki page title"
+          },
+          "server": {
+            "type": "string",
+            "format": "uri",
+            "description": "the host URL of target wiki which you want to use for current session, it belike https://{WIKI_ID}.pub.wiki/ (e.g. https://somewhere.pub.wiki/)."
+          },
+          "content": {
+            "enum": [
+              "noContent",
+              "withSource",
+              "withHtml"
+            ],
+            "type": "string",
+            "default": "withSource",
+            "description": "Format of the page content to retrieve"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-page-history",
+      "annotations": {
+        "title": "Get page history",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Returns information about the latest revisions to a wiki page, in segments of 20 revisions, starting with the latest revision. The response includes API routes for the next oldest, next newest, and latest revision segments.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "server",
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Wiki page title"
+          },
+          "filter": {
+            "type": "string",
+            "description": "Filter that returns only revisions with certain tags. Only support one filter per request."
+          },
+          "server": {
+            "type": "string",
+            "format": "uri",
+            "description": "the host URL of target wiki which you want to use for current session, it belike https://{WIKI_ID}.pub.wiki/ (e.g. https://somewhere.pub.wiki/)."
+          },
+          "newerThan": {
+            "type": "number",
+            "description": "The ID of the newest revision to return"
+          },
+          "olderThan": {
+            "type": "number",
+            "description": "The ID of the oldest revision to return"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create-image-to-wiki",
+      "annotations": {
+        "title": "Create image to Wiki",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Generate an image from a prompt using ModelScope API and upload it to MediaWiki as a file. it will generate JPEG image by default.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "server",
+          "prompt",
+          "filename"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Prompt text for AI image generation"
+          },
+          "server": {
+            "type": "string",
+            "format": "uri",
+            "description": "the host URL of target wiki which you want to use for current session, it belike https://{WIKI_ID}.pub.wiki/ (e.g. https://somewhere.pub.wiki/)."
+          },
+          "comment": {
+            "type": "string",
+            "description": "Upload comment"
+          },
+          "filename": {
+            "type": "string",
+            "description": "Target file name on the wiki, e.g., GeneratedCat.jpg"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "load-world",
+      "annotations": {
+        "title": "Set wiki",
+        "destructiveHint": true
+      },
+      "description": "load the world knowledge from the wiki.Use to init for starting chat;",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "server"
+        ],
+        "properties": {
+          "server": {
+            "type": "string",
+            "format": "uri",
+            "description": "the host URL of target wiki which you want to use for current session, it belike https://{WIKI_ID}.pub.wiki/ (e.g. https://somewhere.pub.wiki/)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list-all-page-titles",
+      "annotations": {
+        "title": "List all page titles",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "List wiki page titles (uses list=allpages). Supports limit and continuation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "server"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "maximum": 500,
+            "minimum": 1,
+            "description": "Maximum number of pages to return (1\u2013500, default=50)."
+          },
+          "server": {
+            "type": "string",
+            "format": "uri",
+            "description": "the host URL of target wiki which you want to use for current session, it belike https://{WIKI_ID}.pub.wiki/ (e.g. https://somewhere.pub.wiki/)."
+          },
+          "apcontinue": {
+            "type": "string",
+            "description": "Pagination token (apcontinue) to continue listing pages."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update-page",
+      "annotations": {
+        "title": "Update page",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Updates a wiki page (or a specific section) using the traditional MediaWiki Action API (action=edit). Please CALL [get-page] to get the latest content before updating to avoid to lose some content OR use section param to specify the section to update.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "server",
+          "title",
+          "source"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Wiki page title"
+          },
+          "server": {
+            "type": "string",
+            "format": "uri",
+            "description": "the host URL of target wiki which you want to use for current session, it belike https://{WIKI_ID}.pub.wiki/ (e.g. https://somewhere.pub.wiki/)."
+          },
+          "source": {
+            "type": "string",
+            "description": "New content (full page or section content)"
+          },
+          "comment": {
+            "type": "string",
+            "description": "Summary of the edit"
+          },
+          "section": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "Section identifier: \"new\" to add, \"0\" for lead, or a section index. Omit for full-page edit."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-file",
+      "annotations": {
+        "title": "Get file",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Returns information about a file, including links to download the file in thumbnail, preview, and original formats.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "server",
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "File title"
+          },
+          "server": {
+            "type": "string",
+            "format": "uri",
+            "description": "the host URL of target wiki which you want to use for current session, it belike https://{WIKI_ID}.pub.wiki/ (e.g. https://somewhere.pub.wiki/)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create-page",
+      "annotations": {
+        "title": "Create page",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Creates a wiki page with the provided content.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "server",
+          "source",
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Wiki page title"
+          },
+          "server": {
+            "type": "string",
+            "format": "uri",
+            "description": "the host URL of target wiki which you want to use for current session, it belike https://{WIKI_ID}.pub.wiki/ (e.g. https://somewhere.pub.wiki/)."
+          },
+          "source": {
+            "type": "string",
+            "description": "Page content in the format specified by the contentModel parameter. Must be [wikitext] format. Make sure format correct"
+          },
+          "comment": {
+            "type": "string",
+            "description": "Reason for creating the page"
+          },
+          "contentModel": {
+            "type": "string",
+            "description": "Only \"wikitext\" available"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "upload-image",
+      "annotations": {
+        "title": "Upload image",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "description": "Download an image from a URL and upload it to MediaWiki as a file.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "server",
+          "url",
+          "filename"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Image URL to download, and it will be uploaded to the wiki,if image is generated by AI, please provide source URL"
+          },
+          "server": {
+            "type": "string",
+            "format": "uri",
+            "description": "the host URL of target wiki which you want to use for current session, it belike https://{WIKI_ID}.pub.wiki/ (e.g. https://somewhere.pub.wiki/)."
+          },
+          "comment": {
+            "type": "string",
+            "description": "Upload comment"
+          },
+          "filename": {
+            "type": "string",
+            "description": "Target file name on the wiki, e.g., Example.png"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "set-target-wiki",
+      "annotations": {
+        "title": "Set Target Wiki",
+        "destructiveHint": true
+      },
+      "description": "Set the active target wiki for this editing session. This tool should be called once at the beginning. ",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "server"
+        ],
+        "properties": {
+          "server": {
+            "type": "string",
+            "format": "uri",
+            "description": "The host URL of the target wiki to be used for this session. Example: https://{WIKI_ID}.pub.wiki/ (e.g., https://somewhere.pub.wiki/)."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 10,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@yuhuison/mediawiki-mcp-server-auth/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "get-page",
+    "get-page-history",
+    "create-image-to-wiki",
+    "load-world",
+    "list-all-page-titles",
+    "update-page",
+    "get-file",
+    "create-page",
+    "upload-image",
+    "set-target-wiki"
+  ]
+}

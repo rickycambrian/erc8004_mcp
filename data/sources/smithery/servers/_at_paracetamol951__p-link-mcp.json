@@ -1,0 +1,320 @@
+{
+  "qualifiedName": "@paracetamol951/p-link-mcp",
+  "displayName": "\ud83d\ude80 P-Link x402 on Solana - Email to wallet",
+  "description": "P-Link makes it incredibly easy for your AI agents to send money, receive payments, pay x402 links and manage a wallet \u2014 instantly, anywhere in the world \ud83c\udf0d\u26a1\ufe0f.\n\nAny email or phone number becomes a wallet \u2014 no signup flow, no crypto knowledge required.\nUsers can even create their P-Link account directly from your client \ud83c\udd95 and top it up by credit card or Solana tokens \ud83d\udcb3\ud83e\ude99.\n\nP-Link also supports the x402 standard, which allows your agents to pay 402 payment links \u2014 meaning an AI can buy things online safely and autonomously using P-Link \ud83d\udd17\ud83e\udd16.\n\nA P-Link is a payment link, that you can open in order to access a payment page.\nThe payment page can accept credit card payment, or any token on Solana for payment (the token will be converted to USDC during transaction).\n\n\ud83d\udca1 What P-Link x402 MCP Server Enables\n\n\u2714\ufe0f Instant account creation from any client\n\u2714\ufe0f Top up your wallet via credit card or Solana\n\u2714\ufe0f Send money to any email or phone number \ud83d\udcb8\n\u2714\ufe0f Request payments and generate P-Link payment pages (usable by humans & agents)\n\u2714\ufe0f P-Links are compatible with the x402 standard \u2014 an AI agent can open a link, check the price, and pay it automatically\n\u2714\ufe0f Pay existing 402 links (buy online products, pay for APIs, unlock digital content, etc.)\n\u2714\ufe0f Access wallet data (balance + public address) \ud83e\uddfe\n\u2714\ufe0f View the full transaction history \ud83d\udcdc\n\nWith P-Link, your AI agents don\u2019t just talk \u2014\nthey can act, transact, and interact with the real world \ud83d\ude80\ud83e\udd16\ud83d\udcb0",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/ce7b138d-c0d2-47a0-b155-dce03b7ecdc9.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@paracetamol951/p-link-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@paracetamol951/p-link-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {
+          "API_KEY": {
+            "type": "string",
+            "default": "",
+            "description": "API_KEY from P-Link.io [optional, you can get API_KEY using the MCP tools]"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "get_wallet_and_otp",
+      "annotations": {
+        "title": "Create a wallet for your email or get otp by email",
+        "readOnlyHint": true
+      },
+      "description": "Create a wallet for your email or get otp by email",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email that will be associated with the wallet. This email can claim the funds on the wallet."
+          }
+        }
+      }
+    },
+    {
+      "name": "login_with_otp",
+      "annotations": {
+        "title": "Login using otp. Connect to your P-Link wallet using the one time password you received by email",
+        "readOnlyHint": true
+      },
+      "description": "Login using otp. Connect to your P-Link wallet using the one time password you received by email",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "email",
+          "otp"
+        ],
+        "properties": {
+          "otp": {
+            "type": "string",
+            "description": "otp in order to access your account. You can receive your one time password by email usgin this MCP server tools or get it on https://p-link.io"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of your account."
+          }
+        }
+      }
+    },
+    {
+      "name": "fund_my_wallet",
+      "annotations": {
+        "title": "Fund wallet : Obtain a link in order to fund your wallet of the desired amount using a credit card, or the Solana address of your wallet if you want to fund your account using Solana.",
+        "readOnlyHint": true
+      },
+      "description": "Fund wallet : Obtain a link in order to fund your wallet of the desired amount using a credit card, or the Solana address of your wallet if you want to fund your account using Solana.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "default": 10,
+            "description": "Amount to fund in your wallet in USD",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "get_private_key_of_wallet",
+      "annotations": {
+        "title": "Get the private key of your wallet on secured app https://p-link.io",
+        "readOnlyHint": true
+      },
+      "description": "Get the private key of your wallet on secured app https://p-link.io",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "solanaWalletAddress": {
+            "type": "string",
+            "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$",
+            "description": "Solana wallet address"
+          }
+        }
+      }
+    },
+    {
+      "name": "send_money",
+      "annotations": {
+        "title": "Send money to an email, Solana wallet or phone number. The provided email or phone can be used to claim the money of the wallet. If new user does not claim for 3 days, the money is returned to the sender.",
+        "readOnlyHint": true
+      },
+      "description": "Send money to an email, Solana wallet or phone number. The provided email or phone can be used to claim the money of the wallet. If new user does not claim for 3 days, the money is returned to the sender.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "to",
+          "amount"
+        ],
+        "properties": {
+          "to": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\+?[0-9]{6,15}$",
+                    "description": "Phone number (00XX format)"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$",
+                    "description": "Solana wallet address"
+                  }
+                ],
+                "description": "Email, phone number or wallet address"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/properties/to/anyOf/0"
+                },
+                "minItems": 1
+              }
+            ],
+            "description": "One or multiple recipients"
+          },
+          "title": {
+            "type": "string",
+            "description": "A title for the transaction shown to the receiver"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount to send",
+            "exclusiveMinimum": 0
+          },
+          "currency": {
+            "enum": [
+              "USD",
+              "EUR"
+            ],
+            "type": "string",
+            "default": "USD",
+            "description": "Currency of specified amount to send"
+          }
+        }
+      }
+    },
+    {
+      "name": "request_payment_link",
+      "annotations": {
+        "title": "Create a payment link in order to request a payment to your account. This payment link can be used to pay you. Payment can be made using a credit card, or any Solana token (automatically converted to USDC)",
+        "readOnlyHint": true
+      },
+      "description": "Create a payment link in order to request a payment to your account. This payment link can be used to pay you. Payment can be made using a credit card, or any Solana token (automatically converted to USDC)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "amount"
+        ],
+        "properties": {
+          "logo": {
+            "type": "string",
+            "description": "Optional : URL to an image displayed in payment page"
+          },
+          "param": {
+            "type": "string",
+            "description": "Custom parameter"
+          },
+          "title": {
+            "type": "string",
+            "description": "A title for the payment shown to the payer"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount to request",
+            "exclusiveMinimum": 0
+          },
+          "webhook": {
+            "type": "string",
+            "description": "HTTP webhook to call on payment success"
+          },
+          "currency": {
+            "enum": [
+              "USD",
+              "EUR"
+            ],
+            "type": "string",
+            "default": "USD",
+            "description": "Currency of specified amount to request"
+          },
+          "returnURL": {
+            "type": "string",
+            "description": "Optional : URL to redirect the client to after failed payment"
+          },
+          "description": {
+            "type": "string",
+            "description": "A description, shown in the payment page"
+          },
+          "returnOKURL": {
+            "type": "string",
+            "description": "Optional : URL to redirect the client to after successfull payment"
+          },
+          "receivingPayment": {
+            "type": "string",
+            "description": "Email, phone or Solana wallet of the recipient of the payment"
+          },
+          "notificationEmail": {
+            "type": "string",
+            "description": "Email to notify on payment success"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_wallet_info",
+      "annotations": {
+        "title": "Retrieve the wallet infos about the connected P-Link account (Solana wallet address, wallet balance, tokens detail)",
+        "readOnlyHint": true
+      },
+      "description": "Retrieve the wallet infos about the connected P-Link account (Solana wallet address, wallet balance, tokens detail)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pubk": {
+            "type": "string",
+            "description": "The Solana address of the wallet you want to see, if not provided, uses the currently connected user wallet address."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_transaction_state",
+      "annotations": {
+        "title": "Retrieve the state and details of a transaction using Solana trx ID",
+        "readOnlyHint": true
+      },
+      "description": "Retrieve the state and details of a transaction using Solana trx ID",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "trxID": {
+            "type": "string",
+            "description": "The transaction ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_wallet_history",
+      "annotations": {
+        "title": "Transaction history : Retrieve list of the transactions related to the specified Solana wallet address (received and sent funds with dates)",
+        "readOnlyHint": true
+      },
+      "description": "Transaction history : Retrieve list of the transactions related to the specified Solana wallet address (received and sent funds with dates)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "walletAddress": {
+            "type": "string",
+            "description": "The Solana address of the wallet you want to see, if not provided, uses the currently connected user wallet address."
+          }
+        }
+      }
+    },
+    {
+      "name": "pay_and_get_402_protected_url",
+      "annotations": {
+        "title": "Pay 402 link",
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "description": "Pay a HTTP 402 protected URL using your P-Link managed account, and returns the result",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The 402 protected URL (can be any link complying to the x402 protocol)"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:26:20.797281+00:00",
+    "source": "smithery"
+  }
+}

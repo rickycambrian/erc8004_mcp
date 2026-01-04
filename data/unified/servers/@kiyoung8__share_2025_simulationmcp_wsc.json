@@ -1,0 +1,561 @@
+{
+  "id": "@kiyoung8/share_2025_simulationmcp_wsc",
+  "name": "@kiyoung8/share_2025_simulationmcp_wsc",
+  "display_name": "Simulation by SimPy",
+  "version": null,
+  "description": "Simulate and analyze an M/M/1 queue to understand performance under different loads. Validate configurations and compute key metrics like utilization, waiting times, and queue lengths. Compare results with theory, generate ready-to-run code, and get parameter recommendations for target utilization.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "validate_config",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Validate M/M/1 queue configuration\n\nChecks if parameters are valid and system is stable (\u03c1 < 1).\n\nArgs:\n    arrival_rate: \u03bb (customers per time unit)\n    service_rate: \u03bc (customers per time unit)\n    simulation_time: Duration of simulation\n\nReturns:\n    Validation results with stability analysis",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "arrival_rate",
+          "service_rate"
+        ],
+        "properties": {
+          "arrival_rate": {
+            "type": "number"
+          },
+          "service_rate": {
+            "type": "number"
+          },
+          "simulation_time": {
+            "type": "number",
+            "default": 10000
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "calculate_metrics",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Calculate theoretical M/M/1 performance metrics\n\nUses exact formulas to compute steady-state metrics.\n\nArgs:\n    arrival_rate: \u03bb (customers per time unit)\n    service_rate: \u03bc (customers per time unit)\n\nReturns:\n    Dictionary with theoretical performance metrics",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "arrival_rate",
+          "service_rate"
+        ],
+        "properties": {
+          "arrival_rate": {
+            "type": "number"
+          },
+          "service_rate": {
+            "type": "number"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "run_simulation",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Run M/M/1 queue simulation using SimPy\n\nLegacy tool for single-server simulation.\nFor multi-server, use run_mmc_simulation.\n\nArgs:\n    arrival_rate: \u03bb (customers per time unit)\n    service_rate: \u03bc (customers per time unit)\n    simulation_time: Duration of simulation\n    random_seed: Random seed (None for random)\n\nReturns:\n    Simulation and theoretical metrics",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "arrival_rate",
+          "service_rate"
+        ],
+        "properties": {
+          "random_seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "arrival_rate": {
+            "type": "number"
+          },
+          "service_rate": {
+            "type": "number"
+          },
+          "simulation_time": {
+            "type": "number",
+            "default": 10000
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "run_mmc_simulation",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Run M/M/c queue simulation (supports 1 to n servers)\n\nThis tool can simulate:\n- M/M/1: Single server (num_servers=1)\n- M/M/2: Two servers (num_servers=2)\n- M/M/3: Three servers (num_servers=3)\n- M/M/c: Any number of servers\n\nArgs:\n    arrival_rate: \u03bb (customers per time unit)\n    service_rate: \u03bc (customers per time unit per server)\n    num_servers: c (number of parallel servers)\n    simulation_time: Duration of simulation\n    random_seed: Random seed (None for random)\n\nReturns:\n    Simulation and theoretical metrics for M/M/c system\n\nExample:\n    # Supermarket with 3 cashiers\n    run_mmc_simulation(\n        arrival_rate=12,    # 12 customers/min arrive\n        service_rate=5,     # Each cashier serves 5/min\n        num_servers=3       # 3 cashiers\n    )",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "arrival_rate",
+          "service_rate"
+        ],
+        "properties": {
+          "num_servers": {
+            "type": "integer",
+            "default": 1
+          },
+          "random_seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "arrival_rate": {
+            "type": "number"
+          },
+          "service_rate": {
+            "type": "number"
+          },
+          "simulation_time": {
+            "type": "number",
+            "default": 10000
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "compare_mm1_vs_mmc",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Compare M/M/1 \u00d7 c (separate queues) vs M/M/c (pooled queue)\n\nThis is the key tool for comparing:\n- Strategy A: c separate M/M/1 queues (distributed)\n- Strategy B: Single M/M/c queue (pooled)\n\nPerfect for supermarket/bank/coffee shop scenarios!\n\nArgs:\n    arrival_rate: Total arrival rate \u03bb\n    service_rate_per_server: Service rate \u03bc per server\n    num_servers: Number of servers c\n    simulation_time: Simulation duration\n\nReturns:\n    Comparison showing why pooled queue is better\n\nExample:\n    # 3 cashiers: separate vs pooled queues\n    compare_mm1_vs_mmc(\n        arrival_rate=12,\n        service_rate_per_server=5,\n        num_servers=3\n    )",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "arrival_rate",
+          "service_rate_per_server"
+        ],
+        "properties": {
+          "num_servers": {
+            "type": "integer",
+            "default": 3
+          },
+          "arrival_rate": {
+            "type": "number"
+          },
+          "simulation_time": {
+            "type": "number",
+            "default": 10000
+          },
+          "service_rate_per_server": {
+            "type": "number"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "analyze_cashier_problem",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Analyze the supermarket cashier problem\n\nCompares separate queues vs single pooled queue for cashiers.\n\nArgs:\n    arrival_rate: New arrivals per minute\n    service_rate: Customers served per minute per cashier\n    num_cashiers: Number of cashiers\n\nReturns:\n    Complete analysis with recommendations",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "arrival_rate": {
+            "type": "number",
+            "default": 12
+          },
+          "num_cashiers": {
+            "type": "integer",
+            "default": 3
+          },
+          "service_rate": {
+            "type": "number",
+            "default": 5
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "recommend_parameters",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Recommend optimal parameters for queue system\n\nGiven constraints, suggests missing parameters.\n\nArgs:\n    target_utilization: Desired \u03c1 (default: 0.8)\n    target_waiting_time: Desired Wq in time units\n    arrival_rate: Known \u03bb (optional)\n    service_rate: Known \u03bc (optional)\n    num_servers: Known c (optional)\n\nReturns:\n    Recommended configuration with analysis",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "num_servers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "arrival_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "service_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "target_utilization": {
+            "type": "number",
+            "default": 0.8
+          },
+          "target_waiting_time": {
+            "type": "number",
+            "default": 1
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "run_mps_sim",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Run Matrix Production System (MPS) simulation.\n\nThis implements MPS as defined in the KTH thesis (2025):\n- Grid layout with machines at fixed positions\n- MHV (Material Handling Vehicle) transport between machines\n- Manhattan distance for transport time calculation\n- Post-task buffer constraints\n- Task-machine eligibility constraints\n\nArgs:\n    config: Complete configuration dict (alternative to individual params)\n    layout: Grid layout {\"rows\": 3, \"cols\": 2, \"machine_positions\": {\"M1\": [0,0], ...}}\n    machines: List of machines [{\"id\": \"M1\", \"eligible_tasks\": [\"T1\", \"T2\"]}]\n    tasks: List of tasks [{\"id\": \"T1\", \"processing_time\": 20}]\n    products: List of products [{\"id\": \"A\", \"task_sequence\": [\"T1\",\"T3\"], \"quantity\": 1}]\n    mhv: MHV config {\"count\": 3, \"speed\": 1.0}\n    grid_distance: Distance between adjacent machines (meters)\n    buffer_capacity: Post-task buffer capacity per machine\n    random_seed: Random seed for reproducibility\n    output_format: Output format - \"default\" or \"schedule\" (for CP verification)\n        - \"default\": Standard format with task_schedule, mhv_schedule lists\n        - \"schedule\": CP-verification format with jobs grouped by job_id\n\nReturns:\n    Simulation results. Format depends on output_format:\n\n    \"default\" format:\n    - makespan: Total completion time\n    - task_schedule: List of task execution records\n    - mhv_schedule: List of transport records\n    - machine_utilization: Utilization per machine\n    - mhv_utilization: Utilization per MHV\n\n    \"schedule\" format (for CP verification):\n    - jobs: List of jobs with operations grouped by job_id\n    - transports: List of transport records\n    - calculated_makespan: Maximum end time\n\nExample (3\u00d72 grid, 6 machines, 5 products):\n    run_mps_sim(\n        layout={\"rows\": 3, \"cols\": 2, \"machine_positions\": {\n            \"M1\": [0,0], \"M2\": [0,1], \"M3\": [1,0],\n            \"M4\": [1,1], \"M5\": [2,0], \"M6\": [2,1]\n        }},\n        machines=[\n            {\"id\": \"M1\", \"eligible_tasks\": [\"T1\", \"T2\"]},\n            {\"id\": \"M2\", \"eligible_tasks\": [\"T3\", \"T4\"]},\n            {\"id\": \"M3\", \"eligible_tasks\": [\"T5\", \"T6\"]},\n            {\"id\": \"M4\", \"eligible_tasks\": [\"T1\", \"T3\"]},\n            {\"id\": \"M5\", \"eligible_tasks\": [\"T2\", \"T5\"]},\n            {\"id\": \"M6\", \"eligible_tasks\": [\"T4\", \"T6\"]}\n        ],\n        tasks=[\n            {\"id\": \"T1\", \"processing_time\": 20},\n            {\"id\": \"T2\", \"processing_time\": 25},\n            {\"id\": \"T3\", \"processing_time\": 30},\n            {\"id\": \"T4\", \"processing_time\": 30},\n            {\"id\": \"T5\", \"processing_time\": 35},\n            {\"id\": \"T6\", \"processing_time\": 40}\n        ],\n        products=[\n            {\"id\": \"A\", \"task_sequence\": [\"T1\",\"T3\",\"T4\",\"T6\"], \"quantity\": 1},\n            {\"id\": \"B\", \"task_sequence\": [\"T1\",\"T2\",\"T4\",\"T5\"], \"quantity\": 1},\n            {\"id\": \"C\", \"task_sequence\": [\"T2\",\"T3\",\"T5\",\"T6\"], \"quantity\": 1},\n            {\"id\": \"D\", \"task_sequence\": [\"T6\",\"T5\",\"T1\",\"T3\"], \"quantity\": 1},\n            {\"id\": \"E\", \"task_sequence\": [\"T4\",\"T2\",\"T5\",\"T1\"], \"quantity\": 1}\n        ],\n        mhv={\"count\": 5, \"speed\": 1.0},\n        grid_distance=15.0,\n        buffer_capacity=2\n    )",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mhv": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "tasks": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "config": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "machines": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "products": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "random_seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "grid_distance": {
+            "type": "number",
+            "default": 15
+          },
+          "output_format": {
+            "type": "string",
+            "default": "default"
+          },
+          "buffer_capacity": {
+            "type": "integer",
+            "default": 2
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "calculate_mps_metrics",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Calculate theoretical MPS metrics.\n\nEstimates manufacturing performance using analytical methods:\n- Total processing time per product\n- Minimum transport time (Manhattan distance)\n- Lower bound on makespan\n- Machine load analysis\n\nArgs:\n    machines: List of machines with eligible_tasks\n    tasks: List of tasks with processing_time\n    products: List of products with task_sequence and quantity\n\nReturns:\n    Theoretical estimates and analysis\n\nExample:\n    calculate_mps_metrics(\n        machines=[\n            {\"id\": \"M1\", \"eligible_tasks\": [\"T1\", \"T2\"], \"position\": [0,0]},\n            {\"id\": \"M2\", \"eligible_tasks\": [\"T3\", \"T4\"], \"position\": [0,1]}\n        ],\n        tasks=[\n            {\"id\": \"T1\", \"processing_time\": 20},\n            {\"id\": \"T2\", \"processing_time\": 25},\n            {\"id\": \"T3\", \"processing_time\": 30},\n            {\"id\": \"T4\", \"processing_time\": 30}\n        ],\n        products=[\n            {\"id\": \"A\", \"task_sequence\": [\"T1\", \"T3\"], \"quantity\": 1}\n        ]\n    )",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "machines",
+          "tasks",
+          "products"
+        ],
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {}
+          },
+          "machines": {
+            "type": "array",
+            "items": {}
+          },
+          "products": {
+            "type": "array",
+            "items": {}
+          },
+          "mhv_speed": {
+            "type": "number",
+            "default": 1
+          },
+          "grid_distance": {
+            "type": "number",
+            "default": 15
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "analyze_mps_schedule",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Analyze MPS simulation schedule results.\n\nProvides detailed analysis of task and transport schedules:\n- Gantt chart data\n- Machine utilization breakdown\n- MHV utilization breakdown\n- Idle time analysis\n\nArgs:\n    task_schedule: Task execution records from simulation\n    mhv_schedule: Transport records from simulation\n    machines: Machine definitions\n\nReturns:\n    Detailed schedule analysis\n\nExample:\n    analyze_mps_schedule(\n        task_schedule=[\n            {\"job\": \"A0\", \"task\": \"T1\", \"machine\": \"M1\", \"start_time\": 0, \"end_time\": 20}\n        ],\n        mhv_schedule=[\n            {\"mhv\": \"H1\", \"job\": \"A0\", \"from_machine\": \"M1\", \"to_machine\": \"M2\",\n             \"depart_time\": 20, \"arrive_time\": 35}\n        ],\n        machines=[{\"id\": \"M1\"}, {\"id\": \"M2\"}]\n    )",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "task_schedule",
+          "mhv_schedule",
+          "machines"
+        ],
+        "properties": {
+          "machines": {
+            "type": "array",
+            "items": {}
+          },
+          "mhv_schedule": {
+            "type": "array",
+            "items": {}
+          },
+          "task_schedule": {
+            "type": "array",
+            "items": {}
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "verify_mps_schedule",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Verify a given MPS schedule and calculate its makespan.\n\nThis tool validates a pre-defined schedule against MPS constraints\nand calculates the theoretical makespan. Use this to verify if\nLLM-generated code produces correct results.\n\nThe schedule format includes:\n- jobs: List of job schedules with operations (task, machine, start, end)\n- transports: Optional list of MHV transport events\n- calculated_makespan: Expected makespan (ground truth)\n\nConstraints verified:\n1. Task precedence (operations follow correct order)\n2. Machine eligibility (task runs on valid machine)\n3. Processing time (duration matches task definition)\n4. Disjunctive (no machine overlap)\n\nArgs:\n    schedule: Schedule dictionary with jobs and operations\n    config: Optional MPS configuration. Uses default if not provided.\n\nReturns:\n    Dictionary with:\n    - calculated_makespan: Makespan computed from schedule\n    - expected_makespan: Expected makespan from schedule data\n    - error_percent: Difference percentage\n    - matches: True if matches (within 0.1% tolerance)\n    - constraint_valid: True if all constraints satisfied\n    - constraint_violations: List of any violations\n\nExample:\n    verify_mps_schedule(\n        schedule={\n            \"jobs\": [\n                {\n                    \"job_id\": \"A0\",\n                    \"operations\": [\n                        {\"task\": \"T1\", \"machine\": \"M1\", \"start\": 0, \"end\": 20},\n                        {\"task\": \"T3\", \"machine\": \"M2\", \"start\": 35, \"end\": 65},\n                        {\"task\": \"T4\", \"machine\": \"M2\", \"start\": 65, \"end\": 95},\n                        {\"task\": \"T6\", \"machine\": \"M3\", \"start\": 110, \"end\": 150}\n                    ]\n                }\n            ],\n            \"calculated_makespan\": 150.0\n        }\n    )",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "schedule"
+        ],
+        "properties": {
+          "config": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "schedule": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_mps_default_config",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get default MPS configuration (Base Setup from KTH thesis).\n\nReturns the standard 3\u00d72 grid configuration with:\n- 6 machines (M1-M6)\n- 6 tasks (T1-T6)\n- 5 products (A-E)\n- 5 MHVs\n\nThis matches the experimental setup from the KTH Master Thesis (2025).\n\nReturns:\n    Complete MPS configuration dictionary",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "tool_count": 12,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@kiyoung8/share_2025_simulationmcp_wsc/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "validate_config",
+    "calculate_metrics",
+    "run_simulation",
+    "run_mmc_simulation",
+    "compare_mm1_vs_mmc",
+    "analyze_cashier_problem",
+    "recommend_parameters",
+    "run_mps_sim",
+    "calculate_mps_metrics",
+    "analyze_mps_schedule",
+    "verify_mps_schedule",
+    "get_mps_default_config"
+  ]
+}

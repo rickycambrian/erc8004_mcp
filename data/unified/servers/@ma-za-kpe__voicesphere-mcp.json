@@ -1,0 +1,427 @@
+{
+  "id": "@ma-za-kpe/voicesphere-mcp",
+  "name": "@ma-za-kpe/voicesphere-mcp",
+  "display_name": "voicesphere-mcp",
+  "version": null,
+  "description": "Launch voice collection campaigns for feature phones, list active tasks, and monitor campaign stats. Validate and transcribe audio samples automatically to ensure high-quality datasets. Credit mobile data rewards instantly to drive participant engagement.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "create_campaign",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Create new voice collection campaign\n\nRequires API key for authentication and credit deduction.\nCost: $0.40 per sample (target_samples * $0.40)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name",
+          "language",
+          "prompt_text"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "language": {
+            "type": "string"
+          },
+          "reward_mb": {
+            "type": "integer",
+            "default": 250
+          },
+          "prompt_text": {
+            "type": "string"
+          },
+          "target_samples": {
+            "type": "integer",
+            "default": 10000
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_campaigns",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get active campaigns",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_campaign_stats",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get campaign statistics",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "campaign_id"
+        ],
+        "properties": {
+          "campaign_id": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "validate_audio",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Validate audio (duration, language, quality)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "audio_url",
+          "expected_language"
+        ],
+        "properties": {
+          "audio_url": {
+            "type": "string"
+          },
+          "expected_language": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "transcribe_audio",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Transcribe audio to text",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "audio_url",
+          "language"
+        ],
+        "properties": {
+          "language": {
+            "type": "string"
+          },
+          "audio_url": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "calculate_campaign_cost",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Calculate cost before creating campaign\n\nReturns total cost, reward cost, platform margin, and credits required.\nPricing: $0.40/sample total ($0.25 contributor reward + $0.15 platform margin)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "target_samples"
+        ],
+        "properties": {
+          "target_samples": {
+            "type": "integer"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_billing_usage",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Check credit balance and usage for an API customer\n\nReturns customer info, credits balance, total spent, and plan details.\nRequires valid API key for authentication.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "api_key"
+        ],
+        "properties": {
+          "api_key": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "purchase_credits",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Purchase credits for campaign creation\n\nCredits are used at $0.40 per credit (1 credit = 1 sample).\nAccepts 'stripe' or 'paypal' as payment methods.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "api_key",
+          "credits"
+        ],
+        "properties": {
+          "api_key": {
+            "type": "string"
+          },
+          "credits": {
+            "type": "integer"
+          },
+          "stripe_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "payment_method": {
+            "type": "string",
+            "default": "stripe"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_billing_transactions",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get billing transaction history for an API customer\n\nReturns recent credit purchases and campaign charges.\nShows transaction type, credits delta, amount in USD, and timestamps.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "api_key"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 20
+          },
+          "api_key": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "credit_data_reward",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Credit mobile data reward to contributor's phone",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "phone_number",
+          "data_mb"
+        ],
+        "properties": {
+          "data_mb": {
+            "type": "integer"
+          },
+          "phone_number": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_user_earnings",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get earnings for a contributor by phone number\n\nReturns total data earned (MB), total samples submitted, and valid samples.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "phone_number"
+        ],
+        "properties": {
+          "phone_number": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "list_reward_transactions",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "List reward transactions with optional filters\n\nFilter by phone number, campaign ID, or status (pending/completed/failed).\nReturns transaction details including reward amount, telco, and timestamps.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 20
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "campaign_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "phone_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "tool_count": 12,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@ma-za-kpe/voicesphere-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "create_campaign",
+    "get_campaigns",
+    "get_campaign_stats",
+    "validate_audio",
+    "transcribe_audio",
+    "calculate_campaign_cost",
+    "get_billing_usage",
+    "purchase_credits",
+    "get_billing_transactions",
+    "credit_data_reward",
+    "get_user_earnings",
+    "list_reward_transactions"
+  ]
+}

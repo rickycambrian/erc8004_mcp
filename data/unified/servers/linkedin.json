@@ -1,0 +1,226 @@
+{
+  "id": "linkedin",
+  "name": "linkedin",
+  "display_name": "Linkedin",
+  "version": null,
+  "description": "LinkedIn is a professional networking platform enabling job seekers, companies, and thought leaders to connect, share content, and discover business opportunities",
+  "icon_url": "https://logos.composio.dev/api/linkedin",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "LINKEDIN_CREATE_LINKED_IN_POST",
+      "description": "Creates a new post on LinkedIn for the authenticated user or an organization they manage; ensure the user has necessary permissions if posting for an organization.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateLinkedInPostRequest",
+        "required": [
+          "author",
+          "commentary"
+        ],
+        "properties": {
+          "author": {
+            "type": "string",
+            "title": "Author",
+            "examples": [
+              "urn:li:person:123456789",
+              "urn:li:organization:987654321"
+            ],
+            "description": "The URN of the LinkedIn member or organization creating the post. Use the GET_USER_INFO action to retrieve the 'author_id' (URN) for the authenticated user. For an organization, the URN will be in the format 'urn:li:organization:{id}'."
+          },
+          "commentary": {
+            "type": "string",
+            "title": "Commentary",
+            "examples": [
+              "Excited to share our new product update!",
+              "Check out this insightful article: [link]"
+            ],
+            "maxLength": 3000,
+            "description": "The main text content of the post. This field supports plain text and @-mentions (e.g., @[LinkedIn Member](urn:li:person:xxxx)). Maximum length: 3000 characters."
+          },
+          "visibility": {
+            "enum": [
+              "PUBLIC",
+              "CONNECTIONS",
+              "LOGGED_IN",
+              "CONTAINER"
+            ],
+            "type": "string",
+            "title": "Visibility",
+            "default": "PUBLIC",
+            "description": "Controls who can see the post. 'PUBLIC' makes it visible to everyone, 'CONNECTIONS' to connections only, 'LOGGED_IN' to signed-in LinkedIn members, and 'CONTAINER' for specific group/event posts."
+          },
+          "distribution": {
+            "type": "object",
+            "title": "Distribution",
+            "properties": {
+              "targetEntities": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                },
+                "title": "Target Entities",
+                "description": "A list of entities to target with this post. Each entity should be a dictionary. This is often used for targeted distribution, e.g., to specific groups or GeoLocations. For GeoLocations, provide a dictionary like: `{'geoLocations': [{'geo': 'urn:li:geo:103644278'}]}`. Refer to LinkedIn documentation for specific URN formats."
+              },
+              "feedDistribution": {
+                "enum": [
+                  "MAIN_FEED",
+                  "NONE"
+                ],
+                "type": "string",
+                "title": "Feed Distribution",
+                "default": "MAIN_FEED",
+                "description": "Specifies how the post is distributed on the LinkedIn feed. 'MAIN_FEED' distributes to the main feed, 'NONE' creates Direct Sponsored Content and requires adContext.dscAdAccount (adContext parameter not exposed in this action)."
+              },
+              "thirdPartyDistributionChannels": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Third Party Distribution Channels",
+                "description": "A list of third-party channels where the post should be distributed, e.g., Twitter. Refer to LinkedIn documentation for supported channels."
+              }
+            },
+            "description": "Specifies distribution rules for the post, including feed distribution and targeting.",
+            "additionalProperties": false
+          },
+          "lifecycleState": {
+            "type": "string",
+            "title": "Lifecycle State",
+            "default": "PUBLISHED",
+            "examples": [
+              "PUBLISHED",
+              "DRAFT",
+              "PUBLISH_REQUESTED"
+            ],
+            "description": "The state of the post. Use 'PUBLISHED' to post directly, 'DRAFT' to save as a draft, or 'PUBLISH_REQUESTED' if the post requires review before publishing."
+          },
+          "isReshareDisabledByAuthor": {
+            "type": "boolean",
+            "title": "Is Reshare Disabled By Author",
+            "default": false,
+            "description": "Set to true to prevent others from resharing this post."
+          }
+        }
+      }
+    },
+    {
+      "name": "LINKEDIN_DELETE_LINKED_IN_POST",
+      "description": "Deletes a specific LinkedIn post (share) by its unique `share_id`, which must correspond to an existing share.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteLinkedInPostRequest",
+        "required": [
+          "share_id"
+        ],
+        "properties": {
+          "share_id": {
+            "type": "string",
+            "title": "Share Id",
+            "examples": [
+              "7245341016004718592"
+            ],
+            "description": "Unique identifier of the LinkedIn share (post) to be deleted."
+          }
+        }
+      }
+    },
+    {
+      "name": "LINKEDIN_GET_COMPANY_INFO",
+      "description": "Retrieves organizations where the authenticated user has specific roles (ACLs), to determine their management or content posting capabilities for LinkedIn company pages.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCompanyInfoRequest",
+        "properties": {
+          "role": {
+            "enum": [
+              "ADMINISTRATOR",
+              "DIRECT_SPONSORED_CONTENT_POSTER"
+            ],
+            "type": "string",
+            "title": "Role",
+            "default": "ADMINISTRATOR",
+            "examples": [
+              "ADMINISTRATOR",
+              "DIRECT_SPONSORED_CONTENT_POSTER"
+            ],
+            "description": "The specific role to filter organization ACLs by."
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1,
+            "examples": [
+              "10",
+              "50",
+              "100"
+            ],
+            "description": "The number of organization ACLs to return per page."
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start",
+            "default": 0,
+            "minimum": 0,
+            "examples": [
+              "0",
+              "10",
+              "20"
+            ],
+            "description": "The starting index for pagination, representing the number of initial ACLs to skip."
+          },
+          "state": {
+            "enum": [
+              "APPROVED",
+              "REQUESTED"
+            ],
+            "type": "string",
+            "title": "State",
+            "default": "APPROVED",
+            "examples": [
+              "APPROVED",
+              "REQUESTED"
+            ],
+            "description": "The approval state of the role to filter by."
+          }
+        },
+        "description": "Parameters for listing organizations where the authenticated user has specific roles and permissions (ACLs)."
+      }
+    },
+    {
+      "name": "LINKEDIN_GET_MY_INFO",
+      "description": "Fetches the authenticated LinkedIn user's profile, notably including the 'author_id' required for attributing content such as posts or articles.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMyInfoRequest",
+        "properties": {}
+      }
+    }
+  ],
+  "tool_count": 4,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/linkedin/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "LINKEDIN_CREATE_LINKED_IN_POST",
+    "LINKEDIN_DELETE_LINKED_IN_POST",
+    "LINKEDIN_GET_COMPANY_INFO",
+    "LINKEDIN_GET_MY_INFO"
+  ]
+}

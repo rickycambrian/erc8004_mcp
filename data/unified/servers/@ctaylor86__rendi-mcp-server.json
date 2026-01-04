@@ -1,0 +1,172 @@
+{
+  "id": "@ctaylor86/rendi-mcp-server",
+  "name": "@ctaylor86/rendi-mcp-server",
+  "display_name": "rendi-ffmpeg-mcp-server",
+  "version": null,
+  "description": "Run FFmpeg commands in the cloud for fast video and audio conversions, edits, and workflows\u2014no local install required. Chain multiple commands efficiently, monitor progress, and fetch results with direct download links and metadata. Clean up output files when finished to control storage.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "test_rendi_connection",
+      "title": "Test Rendi Connection",
+      "description": "Test connectivity to Rendi FFmpeg API and validate your API key",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_ffmpeg_command",
+      "title": "Run FFmpeg Command",
+      "description": "Submit a single FFmpeg command for cloud processing. Use {{alias}} placeholders for files (e.g., {{in_1}}, {{out_1}}). Input files must start with 'in_' and be publicly accessible URLs. Output files must start with 'out_'.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "ffmpeg_command",
+          "input_files",
+          "output_files"
+        ],
+        "properties": {
+          "vcpu_count": {
+            "type": "number",
+            "description": "Number of vCPUs to use (default: 8)"
+          },
+          "input_files": {
+            "type": "object",
+            "description": "Dictionary mapping input aliases to URLs (e.g., {\"in_1\": \"https://example.com/video.mp4\"})",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "output_files": {
+            "type": "object",
+            "description": "Dictionary mapping output aliases to filenames (e.g., {\"out_1\": \"output.mp4\"})",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "ffmpeg_command": {
+            "type": "string",
+            "description": "FFmpeg command using {{alias}} placeholders (e.g., \"-i {{in_1}} -vf scale=1280:720 {{out_1}}\")"
+          },
+          "max_command_run_seconds": {
+            "type": "number",
+            "description": "Maximum runtime in seconds (default: 300)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "run_chained_ffmpeg_commands",
+      "title": "Run Chained FFmpeg Commands",
+      "description": "Submit multiple sequential FFmpeg commands where outputs from earlier commands can be used as inputs in later commands. This is more efficient than running commands separately. Maximum 10 commands per chain.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "ffmpeg_commands",
+          "input_files",
+          "output_files"
+        ],
+        "properties": {
+          "vcpu_count": {
+            "type": "number",
+            "description": "Number of vCPUs to use (default: 8)"
+          },
+          "input_files": {
+            "type": "object",
+            "description": "Dictionary mapping input aliases to URLs (e.g., {\"in_1\": \"https://example.com/video.mp4\"})",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "output_files": {
+            "type": "object",
+            "description": "Dictionary mapping output aliases to filenames (e.g., {\"out_1\": \"output.mp4\", \"out_2\": \"thumbnail.jpg\"})",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "ffmpeg_commands": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of FFmpeg command strings using {{alias}} placeholders"
+          },
+          "max_command_run_seconds": {
+            "type": "number",
+            "description": "Maximum runtime per command in seconds (default: 300)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "poll_ffmpeg_command",
+      "title": "Poll FFmpeg Command",
+      "description": "Check the status of a previously submitted FFmpeg command (single or chained). Returns current status, processing time, and output files with download URLs when complete.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "command_id"
+        ],
+        "properties": {
+          "command_id": {
+            "type": "string",
+            "description": "The command ID returned when the command was submitted"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_command_files",
+      "title": "Delete Command Files",
+      "description": "Delete all output files associated with a completed command. This frees up storage space on Rendi's servers. Note: This action cannot be undone.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "command_id"
+        ],
+        "properties": {
+          "command_id": {
+            "type": "string",
+            "description": "The command ID of the files to delete"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 5,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@ctaylor86/rendi-mcp-server/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "test_rendi_connection",
+    "run_ffmpeg_command",
+    "run_chained_ffmpeg_commands",
+    "poll_ffmpeg_command",
+    "delete_command_files"
+  ]
+}

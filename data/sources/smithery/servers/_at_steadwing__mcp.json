@@ -1,0 +1,80 @@
+{
+  "qualifiedName": "@steadwing/mcp",
+  "displayName": "Steadwing MCP",
+  "description": "Your autonomous 24/7 on-call engineer!\n\nGet a detailed RCA along with the solutions for your alerts, incidents or errors. Effortlessly correlates evidence across your observability, code, and incident management tools for debugging.\n\n\n\n\n\n\n\n",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/779ff2b4-7c04-4cc4-a94e-69944dce810b.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@steadwing/mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@steadwing/mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "Steadwing API Key"
+        ],
+        "properties": {
+          "Steadwing API Key": {
+            "type": "string",
+            "description": "API Key for authentication. Required for API access. Can be obtained from https://app.steadwing.com/settings"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "run_rca",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Analyze errors and debug issues with AI-powered root cause analysis.\n\nWHEN TO USE THIS TOOL:\n- When user provides an error message, stack trace, or error description for analysis and asks for root cause analysis\n- When the user explicitly mentions \"Steadwing\" or asks for error analysis\n\nWHAT THIS TOOL RETURNS:\n- Returns a direct URL to the incident on the Steadwing platform\n- Analysis happens in the background and results can be viewed by visiting the provided URL\n\nHOW TO PROVIDE FILES (Optional but STRONGLY RECOMMENDED):\n1. Always include files when available for better analysis accuracy\n2. Start with the file mentioned in the error stack trace or error message\n3. Include files that are directly imported or used by the failing code\n4. Include configuration files if the error relates to setup/initialization\n5. Include test files if the error occurs during testing\n6. Focus on files most likely related to the error context (max 20 files)\n\nUSAGE EXAMPLE:\n{\n  \"error\": \"TypeError: Cannot read property 'length' of undefined at processData (app.js:45)\",\n  \"files\": [\n    {\n      \"name\": \"src/app.js\",\n      \"content\": \"function processData(data) { return data.length; }\"\n    },\n    {\n      \"name\": \"src/utils.js\",\n      \"content\": \"export function getData() { return null; }\"\n    }\n  ]\n}",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "The complete error message, stack trace, or error description to analyze. Include as much context as possible such as error type, message, stack trace, line numbers, and any relevant error details. Example: \"TypeError: Cannot read property 'length' of undefined at processData (app.js:45:12)\""
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "content"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Relative path from project root to the file. Use forward slashes (/) as path separators. Examples: \"src/app.js\", \"lib/utils/helper.ts\", \"config/database.json\""
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Complete, unmodified source code or file content. Include the entire file contents exactly as they appear - do not truncate, summarize, or preprocess"
+                }
+              },
+              "additionalProperties": false
+            },
+            "maxItems": 20,
+            "description": "Array of relevant source files for analysis (up to 20 files). STRONGLY RECOMMENDED: Always include files when available for better analysis. Include files in order of relevance: (1) Files mentioned in error stack trace, (2) Files directly imported/used by failing code, (3) Configuration files if error relates to setup, (4) Test files if error occurs during testing"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:25:40.349064+00:00",
+    "source": "smithery"
+  }
+}

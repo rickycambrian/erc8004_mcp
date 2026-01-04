@@ -1,0 +1,397 @@
+{
+  "id": "@alexcz-a11y/tessie-mcp-fixx",
+  "name": "@alexcz-a11y/tessie-mcp-fixx",
+  "display_name": "Tessie Insights \uff08fork from keithah/tessie-mcp\uff09",
+  "version": null,
+  "description": "\ud83d\ude97 Transform your Tesla ownership with intelligent analytics, cost optimization, and predictive insights through the Tessie API. Get smart charging reminders, efficiency trends, and comprehensive vehicle intelligence.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/3f1ae070-f82a-4fec-a353-e73957ad61b5.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "get_vehicle_current_state",
+      "description": "Get the current state of a vehicle including location, battery level, odometer reading",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "vin"
+        ],
+        "properties": {
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN)"
+          },
+          "use_cache": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to use cached data to avoid waking the vehicle"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_driving_history",
+      "description": "Get driving history for a vehicle within a date range",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "vin"
+        ],
+        "properties": {
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN)"
+          },
+          "limit": {
+            "type": "number",
+            "default": 50,
+            "description": "Maximum number of drives to return"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ssZ)"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ssZ)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_weekly_mileage",
+      "description": "Calculate total miles driven in a specific week or time period",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "vin",
+          "start_date",
+          "end_date"
+        ],
+        "properties": {
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN)"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date of the period (ISO format)"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date of the period (ISO format)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_latest_drive",
+      "description": "Analyze the most recent drive with comprehensive metrics including duration, battery consumption, FSD usage, and drive merging for stops <7 minutes",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "vin"
+        ],
+        "properties": {
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN)"
+          },
+          "days_back": {
+            "type": "number",
+            "default": 7,
+            "description": "Number of days to look back for recent drives"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_charging_costs",
+      "description": "Analyze charging sessions and costs from driving history, with recommendations to save money",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "vin"
+        ],
+        "properties": {
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN)"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date in ISO format (YYYY-MM-DD)"
+          },
+          "home_rate": {
+            "type": "number",
+            "description": "Your home electricity rate per kWh (default: $0.13)"
+          },
+          "peak_rate": {
+            "type": "number",
+            "description": "Peak hour electricity rate per kWh (default: $0.32)"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date in ISO format (YYYY-MM-DD)"
+          },
+          "off_peak_rate": {
+            "type": "number",
+            "description": "Off-peak electricity rate per kWh (default: $0.09)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_trip_cost",
+      "description": "Calculate the cost and environmental impact of completed trips with gas comparison and optimization tips",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "vin"
+        ],
+        "properties": {
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN)"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date in ISO format (YYYY-MM-DD)"
+          },
+          "gas_price": {
+            "type": "number",
+            "description": "Current gas price per gallon (default: $4.50)"
+          },
+          "home_rate": {
+            "type": "number",
+            "description": "Your home electricity rate per kWh (default: $0.13)"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date in ISO format (YYYY-MM-DD)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "estimate_future_trip",
+      "description": "Estimate cost and charging strategy for a planned trip based on distance and current battery level",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "distance_miles",
+          "current_battery_percent"
+        ],
+        "properties": {
+          "home_rate": {
+            "type": "number",
+            "description": "Your home electricity rate per kWh (default: $0.13)"
+          },
+          "distance_miles": {
+            "type": "number",
+            "description": "Trip distance in miles"
+          },
+          "supercharger_rate": {
+            "type": "number",
+            "description": "Supercharger rate per kWh (default: $0.28)"
+          },
+          "current_battery_percent": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 0,
+            "description": "Current battery percentage"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_commute_patterns",
+      "description": "Detect regular commute routes and analyze efficiency trends, time patterns, and costs",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "vin"
+        ],
+        "properties": {
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN)"
+          },
+          "days_back": {
+            "type": "number",
+            "default": 30,
+            "description": "Number of days to analyze (default: 30)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze_efficiency_trends",
+      "description": "Analyze driving efficiency trends over time with weather, speed, and time pattern insights",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "vin"
+        ],
+        "properties": {
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN)"
+          },
+          "days_back": {
+            "type": "number",
+            "default": 45,
+            "description": "Number of days to analyze (default: 45, minimum: 14)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_smart_charging_reminders",
+      "description": "Get intelligent charging reminders and optimization strategy based on current vehicle state, usage patterns, and conditions",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "vin"
+        ],
+        "properties": {
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN)"
+          },
+          "daily_miles": {
+            "type": "number",
+            "default": 40,
+            "description": "Average daily driving miles (default: 40)"
+          },
+          "weather_temp": {
+            "type": "number",
+            "description": "Current or forecast temperature in Fahrenheit"
+          },
+          "next_trip_distance": {
+            "type": "number",
+            "description": "Distance of upcoming trip in miles"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_vehicles",
+      "description": "List all vehicles in the Tessie account",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_tire_pressure",
+      "description": "Get current tire pressure readings for all four tires with status indicators",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "vin"
+        ],
+        "properties": {
+          "to": {
+            "type": "number",
+            "description": "End timestamp for historical data (Unix timestamp in seconds)"
+          },
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN)"
+          },
+          "from": {
+            "type": "number",
+            "description": "Start timestamp for historical data (Unix timestamp in seconds)"
+          },
+          "pressure_format": {
+            "enum": [
+              "bar",
+              "kpa",
+              "psi"
+            ],
+            "type": "string",
+            "default": "psi",
+            "description": "Pressure unit (default: psi)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "natural_language_query",
+      "description": "Process natural language queries about your vehicle data (e.g., \"How many miles did I drive last week?\")",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "vin": {
+            "type": "string",
+            "description": "Vehicle identification number (VIN) - optional if only one vehicle"
+          },
+          "query": {
+            "type": "string",
+            "description": "Natural language query about vehicle data"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 13,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@alexcz-a11y/tessie-mcp-fixx/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "get_vehicle_current_state",
+    "get_driving_history",
+    "get_weekly_mileage",
+    "analyze_latest_drive",
+    "analyze_charging_costs",
+    "calculate_trip_cost",
+    "estimate_future_trip",
+    "analyze_commute_patterns",
+    "analyze_efficiency_trends",
+    "get_smart_charging_reminders",
+    "get_vehicles",
+    "get_tire_pressure",
+    "natural_language_query"
+  ]
+}

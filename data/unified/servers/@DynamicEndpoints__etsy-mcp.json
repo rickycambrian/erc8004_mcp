@@ -1,0 +1,762 @@
+{
+  "id": "@DynamicEndpoints/etsy-mcp",
+  "name": "@DynamicEndpoints/etsy-mcp",
+  "display_name": "etsy-mcp",
+  "version": null,
+  "description": "Search Etsy listings, fetch shop details, and explore trending products. Create and update listings, manage inventory, images, and shop sections when authorized. Streamline product research and shop operations directly from your workspace.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "search_listings",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search for active Etsy listings. Supports keyword search with various filters.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "keywords"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 25,
+            "description": "Maximum number of results (default: 25, max: 100)"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Number of results to skip (for pagination)"
+          },
+          "sort_on": {
+            "enum": [
+              "created",
+              "price",
+              "updated",
+              "score"
+            ],
+            "type": "string",
+            "description": "Field to sort results on"
+          },
+          "keywords": {
+            "type": "string",
+            "description": "Search keywords for finding listings"
+          },
+          "max_price": {
+            "type": "number",
+            "description": "Maximum price in the shop currency"
+          },
+          "min_price": {
+            "type": "number",
+            "description": "Minimum price in the shop currency"
+          },
+          "sort_order": {
+            "enum": [
+              "asc",
+              "desc",
+              "ascending",
+              "descending"
+            ],
+            "type": "string",
+            "description": "Sort order"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_listing",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get detailed information about a specific Etsy listing by its ID.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "listing_id"
+        ],
+        "properties": {
+          "includes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "Shop",
+                "Images",
+                "User",
+                "Translations",
+                "Inventory"
+              ],
+              "type": "string"
+            },
+            "description": "Additional data to include in the response"
+          },
+          "listing_id": {
+            "type": "number",
+            "description": "The numeric ID of the listing"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_shop",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get information about an Etsy shop by shop ID.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_id"
+        ],
+        "properties": {
+          "shop_id": {
+            "type": "number",
+            "description": "The numeric ID of the shop"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_shop_listings",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get all active listings from a specific shop.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 25,
+            "description": "Maximum number of results (default: 25, max: 100)"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "inactive",
+              "sold_out",
+              "draft",
+              "expired"
+            ],
+            "type": "string",
+            "default": "active",
+            "description": "Filter by listing state (default: active)"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Number of results to skip (for pagination)"
+          },
+          "shop_id": {
+            "type": "number",
+            "description": "The numeric ID of the shop"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_shops",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search for Etsy shops by shop name.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_name"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 25,
+            "description": "Maximum number of results (default: 25, max: 100)"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Number of results to skip (for pagination)"
+          },
+          "shop_name": {
+            "type": "string",
+            "description": "The shop name to search for"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_listing_inventory",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get inventory information for a listing, including available quantities and variations.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "listing_id"
+        ],
+        "properties": {
+          "listing_id": {
+            "type": "number",
+            "description": "The numeric ID of the listing"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_listing_images",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get all images associated with a specific listing.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "listing_id"
+        ],
+        "properties": {
+          "listing_id": {
+            "type": "number",
+            "description": "The numeric ID of the listing"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_shop_sections",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get all sections/categories for a specific shop.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_id"
+        ],
+        "properties": {
+          "shop_id": {
+            "type": "number",
+            "description": "The numeric ID of the shop"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_trending_listings",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get current trending listings on Etsy.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 25,
+            "description": "Maximum number of results (default: 25, max: 100)"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Number of results to skip (for pagination)"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_shops",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Find shops by location or other criteria.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 25,
+            "description": "Maximum number of results (default: 25, max: 100)"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Number of results to skip (for pagination)"
+          },
+          "location": {
+            "type": "string",
+            "description": "Location to search for shops"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_listing",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a new listing in your Etsy shop. Requires OAuth access token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_id",
+          "quantity",
+          "title",
+          "description",
+          "price",
+          "who_made",
+          "when_made",
+          "taxonomy_id"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of tags (max 13)"
+          },
+          "price": {
+            "type": "number",
+            "description": "Price in shop currency"
+          },
+          "title": {
+            "type": "string",
+            "description": "Listing title (max 140 characters)"
+          },
+          "shop_id": {
+            "type": "number",
+            "description": "Your shop ID"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Available quantity"
+          },
+          "who_made": {
+            "enum": [
+              "i_did",
+              "someone_else",
+              "collective"
+            ],
+            "type": "string",
+            "description": "Who made this item"
+          },
+          "when_made": {
+            "type": "string",
+            "description": "When was it made (e.g., made_to_order, 2020_2023, 2010_2019)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Item description"
+          },
+          "taxonomy_id": {
+            "type": "number",
+            "description": "Category taxonomy ID"
+          },
+          "shop_section_id": {
+            "type": "number",
+            "description": "Shop section ID (optional)"
+          },
+          "shipping_profile_id": {
+            "type": "number",
+            "description": "Shipping profile ID (optional)"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_listing",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update an existing listing. Requires OAuth access token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_id",
+          "listing_id"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "New tags"
+          },
+          "price": {
+            "type": "number",
+            "description": "New price"
+          },
+          "title": {
+            "type": "string",
+            "description": "New title"
+          },
+          "shop_id": {
+            "type": "number",
+            "description": "Your shop ID"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "New quantity"
+          },
+          "listing_id": {
+            "type": "number",
+            "description": "Listing ID to update"
+          },
+          "description": {
+            "type": "string",
+            "description": "New description"
+          },
+          "shop_section_id": {
+            "type": "number",
+            "description": "Shop section ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_listing",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete a listing from your shop. Requires OAuth access token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "listing_id"
+        ],
+        "properties": {
+          "listing_id": {
+            "type": "number",
+            "description": "Listing ID to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_listing_inventory",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update inventory for a listing (quantities, prices, SKUs). Requires OAuth access token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "listing_id",
+          "products"
+        ],
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sku": {
+                  "type": "string"
+                },
+                "offerings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "price": {
+                        "type": "number"
+                      },
+                      "quantity": {
+                        "type": "number"
+                      },
+                      "is_enabled": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "property_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "values": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "scale_id": {
+                        "type": "number"
+                      },
+                      "value_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      },
+                      "property_id": {
+                        "type": "number"
+                      },
+                      "property_name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Array of product variations with offerings"
+          },
+          "listing_id": {
+            "type": "number",
+            "description": "Listing ID"
+          },
+          "sku_on_property": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Property IDs that affect SKU"
+          },
+          "price_on_property": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Property IDs that affect price"
+          },
+          "quantity_on_property": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Property IDs that affect quantity"
+          }
+        }
+      }
+    },
+    {
+      "name": "upload_listing_image",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Upload an image to a listing. Requires OAuth access token and image file.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_id",
+          "listing_id",
+          "image_url"
+        ],
+        "properties": {
+          "rank": {
+            "type": "number",
+            "description": "Display order (1 = primary image)"
+          },
+          "shop_id": {
+            "type": "number",
+            "description": "Your shop ID"
+          },
+          "alt_text": {
+            "type": "string",
+            "description": "Alternative text for accessibility"
+          },
+          "image_url": {
+            "type": "string",
+            "description": "URL of the image to upload"
+          },
+          "listing_id": {
+            "type": "number",
+            "description": "Listing ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_shop_section",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a new shop section/category. Requires OAuth access token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_id",
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Section title"
+          },
+          "shop_id": {
+            "type": "number",
+            "description": "Your shop ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_shop_section",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update a shop section. Requires OAuth access token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_id",
+          "shop_section_id",
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "New section title"
+          },
+          "shop_id": {
+            "type": "number",
+            "description": "Your shop ID"
+          },
+          "shop_section_id": {
+            "type": "number",
+            "description": "Section ID to update"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_shop_section",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete a shop section. Requires OAuth access token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_id",
+          "shop_section_id"
+        ],
+        "properties": {
+          "shop_id": {
+            "type": "number",
+            "description": "Your shop ID"
+          },
+          "shop_section_id": {
+            "type": "number",
+            "description": "Section ID to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_shop",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update shop information (title, announcement, etc.). Requires OAuth access token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "shop_id"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Shop title"
+          },
+          "shop_id": {
+            "type": "number",
+            "description": "Your shop ID"
+          },
+          "announcement": {
+            "type": "string",
+            "description": "Shop announcement message"
+          },
+          "sale_message": {
+            "type": "string",
+            "description": "Message to buyers at checkout"
+          },
+          "policy_welcome": {
+            "type": "string",
+            "description": "Shop policies welcome message"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 19,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@DynamicEndpoints/etsy-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "search_listings",
+    "get_listing",
+    "get_shop",
+    "get_shop_listings",
+    "search_shops",
+    "get_listing_inventory",
+    "get_listing_images",
+    "get_shop_sections",
+    "get_trending_listings",
+    "find_shops",
+    "create_listing",
+    "update_listing",
+    "delete_listing",
+    "update_listing_inventory",
+    "upload_listing_image",
+    "create_shop_section",
+    "update_shop_section",
+    "delete_shop_section",
+    "update_shop"
+  ]
+}

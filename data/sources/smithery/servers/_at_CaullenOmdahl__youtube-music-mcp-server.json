@@ -1,0 +1,717 @@
+{
+  "qualifiedName": "@CaullenOmdahl/youtube-music-mcp-server",
+  "displayName": "youtube-music-mcp-server",
+  "description": "Search songs, albums, and artists on YouTube Music. Manage your library and playlists end-to-end: create, edit, and organize tracks. Generate smart, personalized playlists and analyze your taste profile to discover new music.",
+  "iconUrl": null,
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@CaullenOmdahl/youtube-music-mcp-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@CaullenOmdahl/youtube-music-mcp-server/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_songs",
+      "title": "Search Songs",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Search for songs on YouTube Music. Returns structured JSON with song title, album, artist, year, and video ID.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query (song name, lyrics, etc.)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_albums",
+      "title": "Search Albums",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Search for albums on YouTube Music. Returns album name, artist, year, and browse ID.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query (album name, artist, etc.)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_artists",
+      "title": "Search Artists",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Search for artists on YouTube Music. Returns artist name, browse ID, and thumbnails.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of results to return"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query (artist name)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_song_info",
+      "title": "Get Song Info",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Get detailed information about a specific song by video ID. Returns title, artist, album, duration, and thumbnails.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "video_id"
+        ],
+        "properties": {
+          "video_id": {
+            "type": "string",
+            "description": "YouTube Music video ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_album_info",
+      "title": "Get Album Info",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Get detailed album information including all tracks, year, and artist. Use browse_id from search results.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "browse_id"
+        ],
+        "properties": {
+          "browse_id": {
+            "type": "string",
+            "description": "Album browse ID from search results"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_artist_info",
+      "title": "Get Artist Info",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Get detailed artist information including top songs. Use browse_id from search results.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "browse_id"
+        ],
+        "properties": {
+          "browse_id": {
+            "type": "string",
+            "description": "Artist browse ID (channel ID) from search results"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_library_songs",
+      "title": "Get Library Songs",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Get the user's liked songs from their YouTube Music library. Returns structured JSON with song details.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 100,
+            "maximum": 500,
+            "minimum": 1,
+            "description": "Maximum number of songs to return"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_playlists",
+      "title": "Get Playlists",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Get the user's playlists from YouTube Music library. Returns playlist name, ID, and track count as structured JSON.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of playlists to return"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_playlist_details",
+      "title": "Get Playlist Details",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Get detailed playlist information including all tracks with song, album, artist, and duration.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "playlist_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 100,
+            "maximum": 500,
+            "minimum": 1,
+            "description": "Maximum number of tracks to return"
+          },
+          "playlist_id": {
+            "type": "string",
+            "description": "Playlist ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_playlist",
+      "title": "Create Playlist",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "description": "Create a new YouTube Music playlist. Returns the new playlist ID.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Playlist name"
+          },
+          "privacy": {
+            "enum": [
+              "PRIVATE",
+              "PUBLIC",
+              "UNLISTED"
+            ],
+            "type": "string",
+            "default": "PRIVATE",
+            "description": "Privacy status"
+          },
+          "description": {
+            "type": "string",
+            "description": "Playlist description"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "edit_playlist",
+      "title": "Edit Playlist",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Edit playlist metadata (name, description, privacy). Only provide fields you want to change.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "playlist_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New playlist name"
+          },
+          "privacy": {
+            "enum": [
+              "PRIVATE",
+              "PUBLIC",
+              "UNLISTED"
+            ],
+            "type": "string",
+            "description": "New privacy status"
+          },
+          "description": {
+            "type": "string",
+            "description": "New playlist description"
+          },
+          "playlist_id": {
+            "type": "string",
+            "description": "Playlist ID to edit"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_playlist",
+      "title": "Delete Playlist",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete a playlist from YouTube Music. This action cannot be undone.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "playlist_id"
+        ],
+        "properties": {
+          "playlist_id": {
+            "type": "string",
+            "description": "Playlist ID to delete"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "add_songs_to_playlist",
+      "title": "Add Songs to Playlist",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "description": "Add one or more songs to an existing playlist. Supports batch operations for efficiency.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "playlist_id",
+          "video_ids"
+        ],
+        "properties": {
+          "video_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Array of video IDs to add"
+          },
+          "playlist_id": {
+            "type": "string",
+            "description": "Target playlist ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "remove_songs_from_playlist",
+      "title": "Remove Songs from Playlist",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "description": "Remove one or more songs from a playlist. Requires setVideoId (not videoId) from playlist track data.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "playlist_id",
+          "set_video_ids"
+        ],
+        "properties": {
+          "playlist_id": {
+            "type": "string",
+            "description": "Playlist ID"
+          },
+          "set_video_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Array of setVideoIds from playlist tracks to remove"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "start_smart_playlist",
+      "title": "Start Smart Playlist",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "description": "Start an interactive smart playlist creation session. Returns session ID to use with other smart playlist tools.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "mode": {
+            "enum": [
+              "discover",
+              "from_library",
+              "mixed"
+            ],
+            "type": "string",
+            "default": "discover",
+            "description": "discover: Find new music based on seeds. from_library: Build from liked songs. mixed: Combine both."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "add_seed_artist",
+      "title": "Add Seed Artist",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "description": "Add an artist to influence smart playlist recommendations. Looks up artist in MusicBrainz and retrieves tags.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "session_id",
+          "artist_name"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Smart playlist session ID"
+          },
+          "artist_name": {
+            "type": "string",
+            "description": "Artist name to add as seed"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "add_seed_track",
+      "title": "Add Seed Track",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "description": "Add a specific track as a seed for smart playlist recommendations.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "session_id",
+          "track_name",
+          "artist_name"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Smart playlist session ID"
+          },
+          "track_name": {
+            "type": "string",
+            "description": "Track title"
+          },
+          "artist_name": {
+            "type": "string",
+            "description": "Artist name"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "refine_recommendations",
+      "title": "Refine Recommendations",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Adjust recommendation parameters: exclude artists, prefer/avoid tags, set diversity level.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "diversity": {
+            "enum": [
+              "focused",
+              "balanced",
+              "diverse"
+            ],
+            "type": "string",
+            "description": "focused: Very similar to seeds. balanced: Mix of similar and new. diverse: Exploratory."
+          },
+          "avoid_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags to avoid (e.g., \"metal\", \"country\")"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Smart playlist session ID"
+          },
+          "prefer_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags to prefer (e.g., \"electronic\", \"ambient\")"
+          },
+          "exclude_artists": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Artists to exclude from recommendations"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_recommendations",
+      "title": "Get Recommendations",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Generate playlist recommendations based on seeds and refinement settings. Searches YouTube Music for tracks.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 50,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of recommendations"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Smart playlist session ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "preview_playlist",
+      "title": "Preview Playlist",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Preview the smart playlist before creating it. Shows all tracks and session details.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Smart playlist session ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_smart_playlist",
+      "title": "Create Smart Playlist",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "description": "Create the smart playlist on YouTube Music with all recommended tracks.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "session_id",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Playlist name"
+          },
+          "privacy": {
+            "enum": [
+              "PRIVATE",
+              "PUBLIC",
+              "UNLISTED"
+            ],
+            "type": "string",
+            "default": "PRIVATE",
+            "description": "Privacy status"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Smart playlist session ID"
+          },
+          "description": {
+            "type": "string",
+            "description": "Playlist description"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_user_taste_profile",
+      "title": "Get User Taste Profile",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Analyze user's liked songs to build a taste profile with top tags, artists, and genres.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 100,
+            "maximum": 500,
+            "minimum": 10,
+            "description": "Number of liked songs to analyze"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_auth_status",
+      "title": "Get Auth Status",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Check authentication status and get OAuth URL if not authenticated. After authenticating via the returned URL, the session becomes active automatically.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_server_status",
+      "title": "Get Server Status",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Get server health, version, uptime, and rate limit status.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:21:05.014210+00:00",
+    "source": "smithery"
+  }
+}

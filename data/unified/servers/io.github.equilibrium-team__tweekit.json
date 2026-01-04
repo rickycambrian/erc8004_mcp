@@ -1,0 +1,387 @@
+{
+  "id": "io.github.equilibrium-team/tweekit",
+  "name": "io.github.equilibrium-team/tweekit",
+  "display_name": "TweekIT MCP Server",
+  "version": "1.6.1",
+  "description": "Normalize and convert more than 400 file types via TweekIT's hosted MCP streamable HTTP endpoint.",
+  "icon_url": null,
+  "repository_url": "https://github.com/equilibrium-team/tweekit-mcp",
+  "status": "active",
+  "published_at": "2025-12-01T22:30:26.318306Z",
+  "tools": [
+    {
+      "name": "doctype",
+      "description": "Retrieve a list of supported file formats or map a file extension to its document type.\n\nArgs:\n    apiKey (str): The API key for authentication. Falls back to TWEEKIT_API_KEY when omitted.\n    apiSecret (str): The API secret for authentication. Falls back to TWEEKIT_API_SECRET when omitted.\n    extension (str): The file extension to query (e.g., 'jpg', 'pdf') or leave off or use '*' to return all supported input formats.\n\nReturns:\n    Dict[str, Any]: A dictionary containing the supported file formats or an error message.",
+      "inputSchema": {
+        "properties": {
+          "apiKey": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "TweekIT API key passed via the ApiKey header. Defaults to the TWEEKIT_API_KEY environment variable when omitted."
+          },
+          "apiSecret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "TweekIT API secret paired with the apiKey. Defaults to the TWEEKIT_API_SECRET environment variable when omitted."
+          },
+          "extension": {
+            "default": "*",
+            "description": "File extension to inspect; use '*' to list all supported inputs.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      }
+    },
+    {
+      "name": "convert",
+      "description": "Convert an uploaded document payload with TweekIT.\n\nThe file must already be base64 encoded (see `blob`). The conversion can be\nresized and cropped by providing optional geometry parameters. For raster\noutputs, set `alpha`/`bgColor` to control transparency handling.\n\nArgs:\n    inext: Source file extension such as `pdf`, `docx`, or `png`.\n    outfmt: Desired output format (`Fmt` in the API body).\n    blob: Base64 encoded document payload (`DocData`).\n    apiKey: TweekIT API key (`ApiKey` header). Falls back to `TWEEKIT_API_KEY` env var.\n    apiSecret: TweekIT API secret (`ApiSecret` header). Falls back to `TWEEKIT_API_SECRET` env var.\n    noRasterize: Forwarded to TweekIT to skip rasterization when possible.\n    width: Optional pixel width to request in the output.\n    height: Optional pixel height to request in the output.\n    x1: Left crop coordinate in source pixels.\n    y1: Top crop coordinate in source pixels.\n    x2: Right crop coordinate in source pixels.\n    y2: Bottom crop coordinate in source pixels.\n    page: Page number to extract for multipage inputs.\n    alpha: Whether the output should preserve alpha transparency.\n    bgColor: Background color to composite behind transparent pixels.\n\nReturns:\n    A FastMCP `Image` or `File` payload, or an error description.",
+      "inputSchema": {
+        "properties": {
+          "inext": {
+            "description": "Input file extension (e.g., pdf, docx, png).",
+            "type": "string"
+          },
+          "outfmt": {
+            "description": "Requested output format to send as Fmt.",
+            "type": "string"
+          },
+          "blob": {
+            "description": "Base64 encoded document payload (DocData).",
+            "type": "string"
+          },
+          "apiKey": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "TweekIT API key passed via the ApiKey header. Defaults to the TWEEKIT_API_KEY environment variable when omitted."
+          },
+          "apiSecret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "TweekIT API secret paired with the apiKey. Defaults to the TWEEKIT_API_SECRET environment variable when omitted."
+          },
+          "noRasterize": {
+            "default": false,
+            "description": "Forward to TweekIT to disable rasterization when supported.",
+            "type": "boolean"
+          },
+          "width": {
+            "default": 0,
+            "description": "Optional pixel width for the converted output.",
+            "type": "integer"
+          },
+          "height": {
+            "default": 0,
+            "description": "Optional pixel height for the converted output.",
+            "type": "integer"
+          },
+          "x1": {
+            "default": 0,
+            "description": "Left crop coordinate in source pixels.",
+            "type": "integer"
+          },
+          "y1": {
+            "default": 0,
+            "description": "Top crop coordinate in source pixels.",
+            "type": "integer"
+          },
+          "x2": {
+            "default": 0,
+            "description": "Right crop coordinate in source pixels.",
+            "type": "integer"
+          },
+          "y2": {
+            "default": 0,
+            "description": "Bottom crop coordinate in source pixels.",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "description": "Page number to convert for multi-page inputs.",
+            "type": "integer"
+          },
+          "alpha": {
+            "default": true,
+            "description": "Preserve alpha transparency when producing raster formats.",
+            "type": "boolean"
+          },
+          "bgColor": {
+            "default": "",
+            "description": "Background color (hex RGB) to composite behind transparent pixels.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "inext",
+          "outfmt",
+          "blob"
+        ],
+        "type": "object"
+      },
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      }
+    },
+    {
+      "name": "convert_url",
+      "description": "Download a remote file and convert it with TweekIT in one step.\n\nThis helper first fetches `url`, infers the input extension when possible,\nand then forwards the bytes to `convert`. Supply `fetchHeaders` when the\nremote resource needs authentication or custom headers.\n\nArgs:\n    url: Direct download URL for the source document or image.\n    outfmt: Desired output format (`Fmt`).\n    apiKey: TweekIT API key (`ApiKey` header). Falls back to `TWEEKIT_API_KEY` env var.\n    apiSecret: TweekIT API secret (`ApiSecret` header). Falls back to `TWEEKIT_API_SECRET` env var.\n    inext: Optional override for the source extension if it cannot be\n        detected from the URL or response headers.\n    noRasterize: Forwarded to TweekIT to skip rasterization when possible.\n    width: Optional pixel width to request in the output.\n    height: Optional pixel height to request in the output.\n    x1: Left crop coordinate in source pixels.\n    y1: Top crop coordinate in source pixels.\n    x2: Right crop coordinate in source pixels.\n    y2: Bottom crop coordinate in source pixels.\n    page: Page number to extract for multipage inputs.\n    alpha: Whether the output should preserve alpha transparency.\n    bgColor: Background color to composite behind transparent pixels.\n    fetchHeaders: Optional mapping of HTTP headers to include when fetching.\n\nReturns:\n    A FastMCP `Image` or `File` payload, or an error description.",
+      "inputSchema": {
+        "properties": {
+          "url": {
+            "description": "Direct download URL for the source document or image.",
+            "type": "string"
+          },
+          "outfmt": {
+            "description": "Requested output format to send as Fmt.",
+            "type": "string"
+          },
+          "apiKey": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "TweekIT API key passed via the ApiKey header. Defaults to the TWEEKIT_API_KEY environment variable when omitted."
+          },
+          "apiSecret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "TweekIT API secret paired with the apiKey. Defaults to the TWEEKIT_API_SECRET environment variable when omitted."
+          },
+          "inext": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Override for the detected input extension (e.g., pdf)."
+          },
+          "noRasterize": {
+            "default": false,
+            "description": "Forward to TweekIT to disable rasterization when supported.",
+            "type": "boolean"
+          },
+          "width": {
+            "default": 0,
+            "description": "Optional pixel width for the converted output.",
+            "type": "integer"
+          },
+          "height": {
+            "default": 0,
+            "description": "Optional pixel height for the converted output.",
+            "type": "integer"
+          },
+          "x1": {
+            "default": 0,
+            "description": "Left crop coordinate in source pixels.",
+            "type": "integer"
+          },
+          "y1": {
+            "default": 0,
+            "description": "Top crop coordinate in source pixels.",
+            "type": "integer"
+          },
+          "x2": {
+            "default": 0,
+            "description": "Right crop coordinate in source pixels.",
+            "type": "integer"
+          },
+          "y2": {
+            "default": 0,
+            "description": "Bottom crop coordinate in source pixels.",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "description": "Page number to convert for multi-page inputs.",
+            "type": "integer"
+          },
+          "alpha": {
+            "default": true,
+            "description": "Preserve alpha transparency when producing raster formats.",
+            "type": "boolean"
+          },
+          "bgColor": {
+            "default": "",
+            "description": "Background color (hex RGB) to composite behind transparent pixels.",
+            "type": "string"
+          },
+          "fetchHeaders": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional HTTP headers to include when downloading the URL."
+          }
+        },
+        "required": [
+          "url",
+          "outfmt"
+        ],
+        "type": "object"
+      },
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      }
+    },
+    {
+      "name": "fetch",
+      "description": "Fetch a URL and return content.\n\n- Images return as FastMCP Image.\n- PDFs return as File(format=\"pdf\").\n- Text/JSON return as a JSON payload with metadata and text.",
+      "inputSchema": {
+        "properties": {
+          "url": {
+            "description": "HTTP or HTTPS URL to retrieve and normalize.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      },
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      }
+    },
+    {
+      "name": "search",
+      "description": "Simple web search using DuckDuckGo HTML endpoint.\n\nReturns a list of {title, url, snippet} objects. Best\u2011effort parsing.",
+      "inputSchema": {
+        "properties": {
+          "query": {
+            "description": "Search keywords to send to DuckDuckGo.",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "description": "Maximum number of results to return (1-10).",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      }
+    }
+  ],
+  "tool_count": 5,
+  "prompts": [],
+  "resources": [
+    {
+      "name": "version",
+      "uri": "config://tweekit-version",
+      "description": "Get current version of the TweekIT API.",
+      "mimeType": "text/plain",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      }
+    },
+    {
+      "name": "mcp_version",
+      "uri": "config://tweekit-mcp-version",
+      "description": "Return the TweekIT MCP server version.",
+      "mimeType": "text/plain",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      }
+    }
+  ],
+  "remote_endpoint": "https://mcp.tweekit.io/mcp",
+  "packages": [],
+  "sources": [
+    "official"
+  ],
+  "primary_source": "official",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "doctype",
+    "convert",
+    "convert_url",
+    "fetch",
+    "search"
+  ]
+}

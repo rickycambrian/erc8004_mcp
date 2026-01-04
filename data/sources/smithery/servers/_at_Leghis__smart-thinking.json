@@ -1,0 +1,489 @@
+{
+  "qualifiedName": "@Leghis/smart-thinking",
+  "displayName": "Smart\u2011Thinking",
+  "description": "Find relevant Smart\u2011Thinking memories fast. Fetch full entries by ID to get complete context. Speed up research, writing, and decision\u2011making.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@Leghis/smart-thinking",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@Leghis/smart-thinking/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "default": {
+          "mode": "full"
+        },
+        "properties": {
+          "mode": {
+            "enum": [
+              "full",
+              "connector"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Mode du serveur Smart-Thinking"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "smartthinking",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "thought"
+        ],
+        "properties": {
+          "help": {
+            "type": "boolean",
+            "default": true,
+            "description": "Afficher le guide d'utilisation complet"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Identifiant de l'utilisateur pour la personnalisation"
+          },
+          "thought": {
+            "type": "string",
+            "description": "Le contenu de la pens\u00e9e \u00e0 analyser - PARAM\u00c8TRE OBLIGATOIRE"
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "Identifiant de session pour maintenir l'\u00e9tat"
+          },
+          "connections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "targetId",
+                "type",
+                "strength"
+              ],
+              "properties": {
+                "type": {
+                  "enum": [
+                    "supports",
+                    "contradicts",
+                    "refines",
+                    "branches",
+                    "derives",
+                    "associates",
+                    "exemplifies",
+                    "generalizes",
+                    "compares",
+                    "contrasts",
+                    "questions",
+                    "extends",
+                    "analyzes",
+                    "synthesizes",
+                    "applies",
+                    "evaluates",
+                    "cites",
+                    "extended-by",
+                    "analyzed-by",
+                    "component-of",
+                    "applied-by",
+                    "evaluated-by",
+                    "cited-by"
+                  ],
+                  "type": "string",
+                  "description": "Type de connexion"
+                },
+                "inferred": {
+                  "type": "boolean",
+                  "description": "Si la connexion a \u00e9t\u00e9 inf\u00e9r\u00e9e automatiquement"
+                },
+                "strength": {
+                  "type": "number",
+                  "maximum": 1,
+                  "minimum": 0,
+                  "description": "Force de la connexion (0 \u00e0 1)"
+                },
+                "targetId": {
+                  "type": "string",
+                  "description": "ID de la pens\u00e9e cible"
+                },
+                "attributes": {
+                  "type": "object",
+                  "properties": {
+                    "scope": {
+                      "enum": [
+                        "broad",
+                        "specific",
+                        "partial",
+                        "complete"
+                      ],
+                      "type": "string"
+                    },
+                    "nature": {
+                      "enum": [
+                        "causal",
+                        "correlational",
+                        "sequential",
+                        "hierarchical",
+                        "associative"
+                      ],
+                      "type": "string"
+                    },
+                    "certainty": {
+                      "enum": [
+                        "definite",
+                        "high",
+                        "moderate",
+                        "low",
+                        "speculative"
+                      ],
+                      "type": "string"
+                    },
+                    "temporality": {
+                      "enum": [
+                        "before",
+                        "after",
+                        "during",
+                        "concurrent"
+                      ],
+                      "type": "string"
+                    },
+                    "directionality": {
+                      "enum": [
+                        "unidirectional",
+                        "bidirectional",
+                        "multidirectional"
+                      ],
+                      "type": "string"
+                    },
+                    "customAttributes": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description optionnelle de la connexion"
+                },
+                "bidirectional": {
+                  "type": "boolean",
+                  "description": "Si la relation est intrins\u00e8quement bidirectionnelle"
+                },
+                "inferenceConfidence": {
+                  "type": "number",
+                  "maximum": 1,
+                  "minimum": 0,
+                  "description": "Confiance dans l'inf\u00e9rence (0 \u00e0 1)"
+                }
+              },
+              "additionalProperties": false
+            },
+            "default": [],
+            "description": "Connexions \u00e0 d'autres pens\u00e9es"
+          },
+          "thoughtType": {
+            "enum": [
+              "regular",
+              "revision",
+              "meta",
+              "hypothesis",
+              "conclusion"
+            ],
+            "type": "string",
+            "default": "regular",
+            "description": "Type de pens\u00e9e dans le graphe de raisonnement"
+          },
+          "suggestTools": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sugg\u00e9rer des outils MCP pertinents pour cette \u00e9tape du raisonnement"
+          },
+          "visualizationType": {
+            "enum": [
+              "graph",
+              "chronological",
+              "thematic",
+              "hierarchical",
+              "force",
+              "radial"
+            ],
+            "type": "string",
+            "default": "graph",
+            "description": "Type de visualisation \u00e0 g\u00e9n\u00e9rer"
+          },
+          "requestSuggestions": {
+            "type": "boolean",
+            "default": false,
+            "description": "Demander des suggestions d'am\u00e9lioration du raisonnement"
+          },
+          "requestVerification": {
+            "type": "boolean",
+            "default": false,
+            "description": "Demander explicitement une v\u00e9rification des informations"
+          },
+          "containsCalculations": {
+            "type": "boolean",
+            "default": false,
+            "description": "Indique si la pens\u00e9e contient des calculs \u00e0 v\u00e9rifier"
+          },
+          "visualizationOptions": {
+            "type": "object",
+            "properties": {
+              "filters": {
+                "type": "object",
+                "properties": {
+                  "dateRange": {
+                    "type": "array",
+                    "items": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    ],
+                    "maxItems": 2,
+                    "minItems": 2
+                  },
+                  "nodeTypes": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/properties/thoughtType"
+                    }
+                  },
+                  "textSearch": {
+                    "type": "string"
+                  },
+                  "customFilters": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "connectionTypes": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "supports",
+                        "contradicts",
+                        "refines",
+                        "branches",
+                        "derives",
+                        "associates",
+                        "exemplifies",
+                        "generalizes",
+                        "compares",
+                        "contrasts",
+                        "questions",
+                        "extends",
+                        "analyzes",
+                        "synthesizes",
+                        "applies",
+                        "evaluates",
+                        "cites",
+                        "extended-by",
+                        "analyzed-by",
+                        "component-of",
+                        "applied-by",
+                        "evaluated-by",
+                        "cited-by"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "metricThresholds": {
+                    "type": "object",
+                    "properties": {
+                      "quality": {
+                        "type": "array",
+                        "items": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "maxItems": 2,
+                        "minItems": 2
+                      },
+                      "relevance": {
+                        "type": "array",
+                        "items": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "maxItems": 2,
+                        "minItems": 2
+                      },
+                      "confidence": {
+                        "type": "array",
+                        "items": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "maxItems": 2,
+                        "minItems": 2
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "description": "Options de filtrage des n\u0153uds et des liens",
+                "additionalProperties": false
+              },
+              "maxDepth": {
+                "type": "number",
+                "description": "Profondeur maximale pour les visualisations hi\u00e9rarchiques ou radiales"
+              },
+              "clusterBy": {
+                "enum": [
+                  "type",
+                  "theme",
+                  "metric",
+                  "connectivity"
+                ],
+                "type": "string",
+                "description": "Crit\u00e8re de regroupement des n\u0153uds en clusters"
+              },
+              "direction": {
+                "enum": [
+                  "LR",
+                  "RL",
+                  "TB",
+                  "BT"
+                ],
+                "type": "string",
+                "default": "TB",
+                "description": "Direction de la disposition hi\u00e9rarchique"
+              },
+              "centerNode": {
+                "type": "string",
+                "description": "ID du n\u0153ud central pour les visualisations radiales ou hi\u00e9rarchiques"
+              },
+              "interactivity": {
+                "type": "object",
+                "properties": {
+                  "tooltips": {
+                    "type": "boolean"
+                  },
+                  "zoomable": {
+                    "type": "boolean"
+                  },
+                  "draggable": {
+                    "type": "boolean"
+                  },
+                  "zoomRange": {
+                    "type": "array",
+                    "items": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "maxItems": 2,
+                    "minItems": 2
+                  },
+                  "selectable": {
+                    "type": "boolean"
+                  },
+                  "initialZoom": {
+                    "type": "number"
+                  },
+                  "expandableNodes": {
+                    "type": "boolean"
+                  },
+                  "highlightOnHover": {
+                    "type": "boolean"
+                  }
+                },
+                "description": "Options d'interactivit\u00e9 pour la visualisation",
+                "additionalProperties": false
+              }
+            },
+            "description": "Options avanc\u00e9es pour la visualisation",
+            "additionalProperties": false
+          },
+          "generateVisualization": {
+            "type": "boolean",
+            "default": false,
+            "description": "G\u00e9n\u00e9rer une visualisation du graphe de pens\u00e9e"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search",
+      "description": "Recherche les pens\u00e9es et m\u00e9moires Smart-Thinking pertinentes pour la requ\u00eate",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 5,
+            "maximum": 20,
+            "minimum": 1
+          },
+          "query": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sessionId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "fetch",
+      "description": "R\u00e9cup\u00e8re le contenu complet d'une m\u00e9moire Smart-Thinking par identifiant",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sessionId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:19:29.612525+00:00",
+    "source": "smithery"
+  }
+}

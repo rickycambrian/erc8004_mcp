@@ -1,0 +1,753 @@
+{
+  "id": "googletasks",
+  "name": "googletasks",
+  "display_name": "Google Tasks",
+  "version": null,
+  "description": "Google Tasks provides a simple to-do list and task management system integrated into Gmail and Google Calendar for quick and easy tracking",
+  "icon_url": "https://logos.composio.dev/api/googletasks",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "GOOGLETASKS_CLEAR_TASKS",
+      "description": "Permanently clears all completed tasks from a specified Google Tasks list; this action is destructive and idempotent.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ClearTasksRequest",
+        "required": [
+          "tasklist"
+        ],
+        "properties": {
+          "tasklist": {
+            "type": "string",
+            "title": "Tasklist",
+            "examples": [
+              "@default",
+              "MDQ1MTE2NTY4MDE5OTY4MjQ4MzU6MDow"
+            ],
+            "description": "The identifier of the task list from which to clear completed tasks. Use '@default' for the default task list."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_CREATE_TASK_LIST",
+      "description": "Creates a new task list with the specified title.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateTaskListRequest",
+        "required": [
+          "tasklist_title"
+        ],
+        "properties": {
+          "tasklist_title": {
+            "type": "string",
+            "title": "Tasklist Title",
+            "examples": [
+              "Work Projects",
+              "Grocery Shopping",
+              "Weekend Plans"
+            ],
+            "description": "Title for the new task list. The maximum allowed length is 1024 characters."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_DELETE_TASK",
+      "description": "Deletes a specified task from a given task list in Google Tasks.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTaskRequest",
+        "required": [
+          "tasklist_id",
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "tsk_123abc456def789ghi"
+            ],
+            "description": "The unique identifier of the Google Task to be deleted."
+          },
+          "tasklist_id": {
+            "type": "string",
+            "title": "Tasklist Id",
+            "examples": [
+              "MDczNTQ2MjMwMzI1MzIzMzIzMzIzNTQ2MzIzN"
+            ],
+            "description": "The unique identifier of the Google Task list from which the task will be deleted."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_DELETE_TASK_LIST",
+      "description": "Permanently deletes an existing Google Task list, identified by `tasklist_id`, along with all its tasks; this operation is irreversible.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTaskListRequest",
+        "properties": {
+          "tasklist_id": {
+            "type": "string",
+            "title": "Tasklist Id",
+            "examples": [
+              "MDQ1MDM5NzY1MzA4NDM4MTIzNDE6MDow"
+            ],
+            "description": "Unique identifier of the Google Task list to be deleted."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_GET_TASK",
+      "description": "Use to retrieve a specific Google Task if its `task_id` and parent `tasklist_id` are known.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTaskRequest",
+        "required": [
+          "tasklist_id",
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "MVFfNEN3QUhUSmpZRVk0RQ"
+            ],
+            "description": "Unique identifier of the Google Task to retrieve."
+          },
+          "tasklist_id": {
+            "type": "string",
+            "title": "Tasklist Id",
+            "examples": [
+              "MDQ1NDcwMTQ0OTQ3MTA4MTQ4MTg6MDow"
+            ],
+            "description": "Unique identifier of the Google Tasks list containing the task."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_GET_TASK_LIST",
+      "description": "Retrieves a specific task list from the user's Google Tasks if the `tasklist_id` exists for the authenticated user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTaskListRequest",
+        "required": [
+          "tasklist_id"
+        ],
+        "properties": {
+          "tasklist_id": {
+            "type": "string",
+            "title": "Tasklist Id",
+            "examples": [
+              "7f574d94-ae28-4f2e-a69a-fb37978ec62e"
+            ],
+            "description": "The unique identifier of the task list to retrieve, assigned by Google Tasks when the list is created."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_INSERT_TASK",
+      "description": "Creates a new task in a given `tasklist_id`, optionally as a subtask of an existing `task_parent` or positioned after an existing `task_previous` sibling, where both `task_parent` and `task_previous` must belong to the same `tasklist_id` if specified. IMPORTANT: Date fields (due, completed) accept various formats like '28 Sep 2025', '11:59 PM, 22 Sep 2025', or ISO format '2025-09-21T15:30:00Z' and will automatically convert them to RFC3339 format required by the API.",
+      "inputSchema": {
+        "type": "object",
+        "title": "InsertTaskRequest",
+        "required": [
+          "title",
+          "status",
+          "tasklist_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "default": null,
+            "nullable": true,
+            "description": "Unique identifier for the task. Generated by Google Tasks API when creating a task. Used for updating or deleting existing tasks."
+          },
+          "due": {
+            "type": "string",
+            "title": "Due",
+            "default": null,
+            "examples": [
+              "2025-09-28T23:59:00Z",
+              "28 Sep 2025",
+              "11:59 PM, 22 Sep 2025",
+              "1:00 PM, 21 Sep 2025",
+              "UTC-5:30, 6:50 PM",
+              "UTC+1, 11:59 PM, 31 Dec",
+              "2025-09-21T15:30:00+02:00"
+            ],
+            "nullable": true,
+            "description": "Due date for the task (optional). NOTE: Google Tasks only stores the date portion - any time provided will be normalized to midnight UTC by the API. \nGoogle Tasks API requires dates in RFC3339 format (e.g., 2025-09-22T13:48:27Z).\nWe automatically convert various human-readable formats to RFC3339:\n\nAccepted formats:\n\u2022 2025-09-28T23:59:00Z \u2192 RFC3339/ISO-8601 format (preferred) - September 28, 2025 at 11:59 PM UTC\n\u2022 28 Sep 2025 \u2192 Simple date format - Will be converted to midnight UTC on that date\n\u2022 11:59 PM, 22 Sep 2025 \u2192 Time with date - Assumes UTC timezone if not specified\n\u2022 1:00 PM, 21 Sep 2025 \u2192 12-hour format with date - Converted to 13:00 UTC\n\u2022 UTC-5:30, 6:50 PM \u2192 With timezone offset - Converted to UTC automatically\n\u2022 UTC+1, 11:59 PM, 31 Dec \u2192 Timezone with date - Next occurrence of Dec 31\n\u2022 2025-09-21T15:30:00+02:00 \u2192 RFC3339 with timezone offset\n\nNote: If no timezone is specified, UTC is assumed. Dates without times default to midnight UTC."
+          },
+          "etag": {
+            "type": "string",
+            "title": "Etag",
+            "default": null,
+            "nullable": true,
+            "description": "ETag of the resource for concurrency control. Prevents accidental overwrites when multiple clients modify the same task. Auto-generated by the API."
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "nullable": true,
+            "maxLength": 8192,
+            "description": "Additional details or description for the task. Supports plain text only (no HTML/markdown). Maximum 8192 characters. Example: 'Include Q3 sales data and projections'"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "maxLength": 1024,
+            "minLength": 1,
+            "description": "Title/name of the task (REQUIRED). This is the main text displayed for the task. Maximum 1024 characters. Example: 'Complete quarterly report'"
+          },
+          "hidden": {
+            "type": "boolean",
+            "title": "Hidden",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the task is hidden from the default view. Hidden tasks can still be accessed via API but won't show in UI. Default: false"
+          },
+          "status": {
+            "enum": [
+              "needsAction",
+              "completed"
+            ],
+            "type": "string",
+            "title": "Status",
+            "description": "Current status of the task (REQUIRED). Must be either 'needsAction' (task is pending) or 'completed' (task is done). Default: 'needsAction'"
+          },
+          "deleted": {
+            "type": "boolean",
+            "title": "Deleted",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the task has been deleted. Deleted tasks are marked but not immediately removed, allowing for recovery. Default: false"
+          },
+          "completed": {
+            "type": "string",
+            "title": "Completed",
+            "default": null,
+            "examples": [
+              "2025-09-28T23:59:00Z",
+              "28 Sep 2025",
+              "11:59 PM, 22 Sep 2025",
+              "1:00 PM, 21 Sep 2025",
+              "UTC-5:30, 6:50 PM",
+              "UTC+1, 11:59 PM, 31 Dec",
+              "2025-09-21T15:30:00+02:00"
+            ],
+            "nullable": true,
+            "description": "Date/time when the task was marked as completed. Only applicable when status='completed'. Unlike 'due', this field preserves the time component. \nGoogle Tasks API requires dates in RFC3339 format (e.g., 2025-09-22T13:48:27Z).\nWe automatically convert various human-readable formats to RFC3339:\n\nAccepted formats:\n\u2022 2025-09-28T23:59:00Z \u2192 RFC3339/ISO-8601 format (preferred) - September 28, 2025 at 11:59 PM UTC\n\u2022 28 Sep 2025 \u2192 Simple date format - Will be converted to midnight UTC on that date\n\u2022 11:59 PM, 22 Sep 2025 \u2192 Time with date - Assumes UTC timezone if not specified\n\u2022 1:00 PM, 21 Sep 2025 \u2192 12-hour format with date - Converted to 13:00 UTC\n\u2022 UTC-5:30, 6:50 PM \u2192 With timezone offset - Converted to UTC automatically\n\u2022 UTC+1, 11:59 PM, 31 Dec \u2192 Timezone with date - Next occurrence of Dec 31\n\u2022 2025-09-21T15:30:00+02:00 \u2192 RFC3339 with timezone offset\n\nNote: If no timezone is specified, UTC is assumed. Dates without times default to midnight UTC."
+          },
+          "task_parent": {
+            "type": "string",
+            "title": "Task Parent",
+            "default": null,
+            "nullable": true,
+            "description": "Identifier of an existing task to serve as parent; if provided, creates a subtask, otherwise a top-level task in the specified list."
+          },
+          "tasklist_id": {
+            "type": "string",
+            "title": "Tasklist Id",
+            "examples": [
+              "MDQ1NTEzMjc4OTM5MzM0NTY4NzE6MDow",
+              "N1FNZHM5Y0xYN3g5TzJBVQ"
+            ],
+            "description": "Identifier for the Google Task list where the new task will be created. Use actual task list IDs, not '@default'. You can get list IDs using 'List Task Lists' action."
+          },
+          "task_previous": {
+            "type": "string",
+            "title": "Task Previous",
+            "default": null,
+            "nullable": true,
+            "description": "Identifier of an existing task after which the new task will be placed, at the same hierarchical level (as a sibling)."
+          }
+        },
+        "description": "Defines the request for creating a new task. Inherits common task properties\n(e.g., title, notes, due date) from `TaskInput` and adds specific parameters\nfor task placement within a Google Tasks list."
+      }
+    },
+    {
+      "name": "GOOGLETASKS_LIST_TASK_LISTS",
+      "description": "Fetches the authenticated user's task lists from Google Tasks; results may be paginated.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTaskListsRequest",
+        "properties": {
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "description": "Token for the page of results to return; omit for the first page, use `nextPageToken` from a previous response for subsequent pages."
+          },
+          "maxResults": {
+            "type": "integer",
+            "title": "Max Results",
+            "default": 20,
+            "examples": [
+              "10",
+              "20",
+              "50"
+            ],
+            "description": "Maximum number of task lists to return per page."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_LIST_TASKS",
+      "description": "Retrieves tasks from a Google Tasks list; all date/time strings must be RFC3339 UTC, and `showCompleted` must be true if `completedMin` or `completedMax` are specified.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListTasksRequest",
+        "required": [
+          "tasklist_id"
+        ],
+        "properties": {
+          "dueMax": {
+            "type": "string",
+            "title": "Due Max",
+            "examples": [
+              "2025-09-28T23:59:00Z",
+              "28 Sep 2025",
+              "11:59 PM, 22 Sep 2025",
+              "1:00 PM, 21 Sep 2025",
+              "UTC-5:30, 6:50 PM",
+              "UTC+1, 11:59 PM, 31 Dec",
+              "2025-09-21T15:30:00+02:00"
+            ],
+            "description": "Exclude tasks due after this date. \nGoogle Tasks API requires dates in RFC3339 format (e.g., 2025-09-22T13:48:27Z).\nWe automatically convert various human-readable formats to RFC3339:\n\nAccepted formats:\n\u2022 2025-09-28T23:59:00Z \u2192 RFC3339/ISO-8601 format (preferred) - September 28, 2025 at 11:59 PM UTC\n\u2022 28 Sep 2025 \u2192 Simple date format - Will be converted to midnight UTC on that date\n\u2022 11:59 PM, 22 Sep 2025 \u2192 Time with date - Assumes UTC timezone if not specified\n\u2022 1:00 PM, 21 Sep 2025 \u2192 12-hour format with date - Converted to 13:00 UTC\n\u2022 UTC-5:30, 6:50 PM \u2192 With timezone offset - Converted to UTC automatically\n\u2022 UTC+1, 11:59 PM, 31 Dec \u2192 Timezone with date - Next occurrence of Dec 31\n\u2022 2025-09-21T15:30:00+02:00 \u2192 RFC3339 with timezone offset\n\nNote: If no timezone is specified, UTC is assumed. Dates without times default to midnight UTC."
+          },
+          "dueMin": {
+            "type": "string",
+            "title": "Due Min",
+            "examples": [
+              "2025-09-28T23:59:00Z",
+              "28 Sep 2025",
+              "11:59 PM, 22 Sep 2025",
+              "1:00 PM, 21 Sep 2025",
+              "UTC-5:30, 6:50 PM",
+              "UTC+1, 11:59 PM, 31 Dec",
+              "2025-09-21T15:30:00+02:00"
+            ],
+            "description": "Exclude tasks due before this date. \nGoogle Tasks API requires dates in RFC3339 format (e.g., 2025-09-22T13:48:27Z).\nWe automatically convert various human-readable formats to RFC3339:\n\nAccepted formats:\n\u2022 2025-09-28T23:59:00Z \u2192 RFC3339/ISO-8601 format (preferred) - September 28, 2025 at 11:59 PM UTC\n\u2022 28 Sep 2025 \u2192 Simple date format - Will be converted to midnight UTC on that date\n\u2022 11:59 PM, 22 Sep 2025 \u2192 Time with date - Assumes UTC timezone if not specified\n\u2022 1:00 PM, 21 Sep 2025 \u2192 12-hour format with date - Converted to 13:00 UTC\n\u2022 UTC-5:30, 6:50 PM \u2192 With timezone offset - Converted to UTC automatically\n\u2022 UTC+1, 11:59 PM, 31 Dec \u2192 Timezone with date - Next occurrence of Dec 31\n\u2022 2025-09-21T15:30:00+02:00 \u2192 RFC3339 with timezone offset\n\nNote: If no timezone is specified, UTC is assumed. Dates without times default to midnight UTC."
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              "CiAKGjBpbmRXUTA1Y1cxVWF6b2hVbkprZWxTelNVUWdRMBoOCL2q0qcCELqGmgsQ0KG3jAE="
+            ],
+            "description": "Token from a previous list operation for fetching a specific page; if omitted, retrieves the first page."
+          },
+          "maxResults": {
+            "type": "integer",
+            "title": "Max Results",
+            "examples": [
+              "20",
+              "50",
+              "100"
+            ],
+            "description": "Maximum number of tasks to return. API default: 20, maximum: 100."
+          },
+          "showHidden": {
+            "type": "boolean",
+            "title": "Show Hidden",
+            "description": "Include hidden tasks. Defaults to false."
+          },
+          "updatedMin": {
+            "type": "string",
+            "title": "Updated Min",
+            "examples": [
+              "2025-09-28T23:59:00Z",
+              "28 Sep 2025",
+              "11:59 PM, 22 Sep 2025",
+              "1:00 PM, 21 Sep 2025",
+              "UTC-5:30, 6:50 PM",
+              "UTC+1, 11:59 PM, 31 Dec",
+              "2025-09-21T15:30:00+02:00"
+            ],
+            "description": "Lower bound for task's last modification time (for syncing). \nGoogle Tasks API requires dates in RFC3339 format (e.g., 2025-09-22T13:48:27Z).\nWe automatically convert various human-readable formats to RFC3339:\n\nAccepted formats:\n\u2022 2025-09-28T23:59:00Z \u2192 RFC3339/ISO-8601 format (preferred) - September 28, 2025 at 11:59 PM UTC\n\u2022 28 Sep 2025 \u2192 Simple date format - Will be converted to midnight UTC on that date\n\u2022 11:59 PM, 22 Sep 2025 \u2192 Time with date - Assumes UTC timezone if not specified\n\u2022 1:00 PM, 21 Sep 2025 \u2192 12-hour format with date - Converted to 13:00 UTC\n\u2022 UTC-5:30, 6:50 PM \u2192 With timezone offset - Converted to UTC automatically\n\u2022 UTC+1, 11:59 PM, 31 Dec \u2192 Timezone with date - Next occurrence of Dec 31\n\u2022 2025-09-21T15:30:00+02:00 \u2192 RFC3339 with timezone offset\n\nNote: If no timezone is specified, UTC is assumed. Dates without times default to midnight UTC."
+          },
+          "showDeleted": {
+            "type": "boolean",
+            "title": "Show Deleted",
+            "description": "Include deleted tasks. Defaults to false."
+          },
+          "tasklist_id": {
+            "type": "string",
+            "title": "Tasklist Id",
+            "examples": [
+              "@default",
+              "MdXxc1BhcEt4NVJhcEVXMQ"
+            ],
+            "description": "Identifier of the task list. Use '@default' for the user's primary task list."
+          },
+          "completedMax": {
+            "type": "string",
+            "title": "Completed Max",
+            "examples": [
+              "2025-09-28T23:59:00Z",
+              "28 Sep 2025",
+              "11:59 PM, 22 Sep 2025",
+              "1:00 PM, 21 Sep 2025",
+              "UTC-5:30, 6:50 PM",
+              "UTC+1, 11:59 PM, 31 Dec",
+              "2025-09-21T15:30:00+02:00"
+            ],
+            "description": "Exclude tasks completed after this date. \nGoogle Tasks API requires dates in RFC3339 format (e.g., 2025-09-22T13:48:27Z).\nWe automatically convert various human-readable formats to RFC3339:\n\nAccepted formats:\n\u2022 2025-09-28T23:59:00Z \u2192 RFC3339/ISO-8601 format (preferred) - September 28, 2025 at 11:59 PM UTC\n\u2022 28 Sep 2025 \u2192 Simple date format - Will be converted to midnight UTC on that date\n\u2022 11:59 PM, 22 Sep 2025 \u2192 Time with date - Assumes UTC timezone if not specified\n\u2022 1:00 PM, 21 Sep 2025 \u2192 12-hour format with date - Converted to 13:00 UTC\n\u2022 UTC-5:30, 6:50 PM \u2192 With timezone offset - Converted to UTC automatically\n\u2022 UTC+1, 11:59 PM, 31 Dec \u2192 Timezone with date - Next occurrence of Dec 31\n\u2022 2025-09-21T15:30:00+02:00 \u2192 RFC3339 with timezone offset\n\nNote: If no timezone is specified, UTC is assumed. Dates without times default to midnight UTC."
+          },
+          "completedMin": {
+            "type": "string",
+            "title": "Completed Min",
+            "default": null,
+            "examples": [
+              "2025-09-28T23:59:00Z",
+              "28 Sep 2025",
+              "11:59 PM, 22 Sep 2025",
+              "1:00 PM, 21 Sep 2025",
+              "UTC-5:30, 6:50 PM",
+              "UTC+1, 11:59 PM, 31 Dec",
+              "2025-09-21T15:30:00+02:00"
+            ],
+            "nullable": true,
+            "description": "Exclude tasks completed before this date. \nGoogle Tasks API requires dates in RFC3339 format (e.g., 2025-09-22T13:48:27Z).\nWe automatically convert various human-readable formats to RFC3339:\n\nAccepted formats:\n\u2022 2025-09-28T23:59:00Z \u2192 RFC3339/ISO-8601 format (preferred) - September 28, 2025 at 11:59 PM UTC\n\u2022 28 Sep 2025 \u2192 Simple date format - Will be converted to midnight UTC on that date\n\u2022 11:59 PM, 22 Sep 2025 \u2192 Time with date - Assumes UTC timezone if not specified\n\u2022 1:00 PM, 21 Sep 2025 \u2192 12-hour format with date - Converted to 13:00 UTC\n\u2022 UTC-5:30, 6:50 PM \u2192 With timezone offset - Converted to UTC automatically\n\u2022 UTC+1, 11:59 PM, 31 Dec \u2192 Timezone with date - Next occurrence of Dec 31\n\u2022 2025-09-21T15:30:00+02:00 \u2192 RFC3339 with timezone offset\n\nNote: If no timezone is specified, UTC is assumed. Dates without times default to midnight UTC."
+          },
+          "showCompleted": {
+            "type": "boolean",
+            "title": "Show Completed",
+            "description": "Include completed tasks. Defaults to true. (See action docstring for interaction with `completedMin`/`Max`)."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_MOVE_TASK",
+      "description": "Moves the specified task to another position in the destination task list.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MoveTaskRequest",
+        "required": [
+          "tasklist",
+          "task"
+        ],
+        "properties": {
+          "task": {
+            "type": "string",
+            "title": "Task",
+            "examples": [
+              "taskId1"
+            ],
+            "description": "Task identifier."
+          },
+          "parent": {
+            "type": "string",
+            "title": "Parent",
+            "default": null,
+            "examples": [
+              "newParentTaskId1"
+            ],
+            "nullable": true,
+            "description": "New parent task identifier. If not provided, the task is moved to the top level."
+          },
+          "previous": {
+            "type": "string",
+            "title": "Previous",
+            "default": null,
+            "examples": [
+              "previousTaskId1"
+            ],
+            "nullable": true,
+            "description": "New previous sibling task identifier. If not provided, the task is moved to the first position among its siblings."
+          },
+          "tasklist": {
+            "type": "string",
+            "title": "Tasklist",
+            "examples": [
+              "taskListId1"
+            ],
+            "description": "Task list identifier."
+          },
+          "destinationTasklist": {
+            "type": "string",
+            "title": "Destination Tasklist",
+            "default": null,
+            "examples": [
+              "destinationTaskListId1"
+            ],
+            "nullable": true,
+            "description": "Destination task list identifier. If set, the task is moved to this list; otherwise, it remains in its current list."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_PATCH_TASK",
+      "description": "Partially updates an existing task (identified by `task_id`) within a specific Google Task list (identified by `tasklist_id`), modifying only the provided attributes from `TaskInput` (e.g., `title`, `notes`, `due` date, `status`) and requiring both the task and list to exist.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PatchTaskRequest",
+        "required": [
+          "title",
+          "status",
+          "tasklist_id",
+          "task_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "default": null,
+            "nullable": true,
+            "description": "Unique identifier for the task. Generated by Google Tasks API when creating a task. Used for updating or deleting existing tasks."
+          },
+          "due": {
+            "type": "string",
+            "title": "Due",
+            "default": null,
+            "examples": [
+              "2025-09-28T23:59:00Z",
+              "28 Sep 2025",
+              "11:59 PM, 22 Sep 2025",
+              "1:00 PM, 21 Sep 2025",
+              "UTC-5:30, 6:50 PM",
+              "UTC+1, 11:59 PM, 31 Dec",
+              "2025-09-21T15:30:00+02:00"
+            ],
+            "nullable": true,
+            "description": "Due date for the task (optional). NOTE: Google Tasks only stores the date portion - any time provided will be normalized to midnight UTC by the API. \nGoogle Tasks API requires dates in RFC3339 format (e.g., 2025-09-22T13:48:27Z).\nWe automatically convert various human-readable formats to RFC3339:\n\nAccepted formats:\n\u2022 2025-09-28T23:59:00Z \u2192 RFC3339/ISO-8601 format (preferred) - September 28, 2025 at 11:59 PM UTC\n\u2022 28 Sep 2025 \u2192 Simple date format - Will be converted to midnight UTC on that date\n\u2022 11:59 PM, 22 Sep 2025 \u2192 Time with date - Assumes UTC timezone if not specified\n\u2022 1:00 PM, 21 Sep 2025 \u2192 12-hour format with date - Converted to 13:00 UTC\n\u2022 UTC-5:30, 6:50 PM \u2192 With timezone offset - Converted to UTC automatically\n\u2022 UTC+1, 11:59 PM, 31 Dec \u2192 Timezone with date - Next occurrence of Dec 31\n\u2022 2025-09-21T15:30:00+02:00 \u2192 RFC3339 with timezone offset\n\nNote: If no timezone is specified, UTC is assumed. Dates without times default to midnight UTC."
+          },
+          "etag": {
+            "type": "string",
+            "title": "Etag",
+            "default": null,
+            "nullable": true,
+            "description": "ETag of the resource for concurrency control. Prevents accidental overwrites when multiple clients modify the same task. Auto-generated by the API."
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "nullable": true,
+            "maxLength": 8192,
+            "description": "Additional details or description for the task. Supports plain text only (no HTML/markdown). Maximum 8192 characters. Example: 'Include Q3 sales data and projections'"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "maxLength": 1024,
+            "minLength": 1,
+            "description": "Title/name of the task (REQUIRED). This is the main text displayed for the task. Maximum 1024 characters. Example: 'Complete quarterly report'"
+          },
+          "hidden": {
+            "type": "boolean",
+            "title": "Hidden",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the task is hidden from the default view. Hidden tasks can still be accessed via API but won't show in UI. Default: false"
+          },
+          "status": {
+            "enum": [
+              "needsAction",
+              "completed"
+            ],
+            "type": "string",
+            "title": "Status",
+            "description": "Current status of the task (REQUIRED). Must be either 'needsAction' (task is pending) or 'completed' (task is done). Default: 'needsAction'"
+          },
+          "deleted": {
+            "type": "boolean",
+            "title": "Deleted",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the task has been deleted. Deleted tasks are marked but not immediately removed, allowing for recovery. Default: false"
+          },
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "MDQ1NzM3ODI0NzM2NzY0NjA4MDk6MTU4MzM3MDQ4OTow",
+              "ZjFRbVRoOVdFNEk"
+            ],
+            "description": "Identifier of the Google Task to be updated within the specified task list."
+          },
+          "completed": {
+            "type": "string",
+            "title": "Completed",
+            "default": null,
+            "examples": [
+              "2025-09-28T23:59:00Z",
+              "28 Sep 2025",
+              "11:59 PM, 22 Sep 2025",
+              "1:00 PM, 21 Sep 2025",
+              "UTC-5:30, 6:50 PM",
+              "UTC+1, 11:59 PM, 31 Dec",
+              "2025-09-21T15:30:00+02:00"
+            ],
+            "nullable": true,
+            "description": "Date/time when the task was marked as completed. Only applicable when status='completed'. Unlike 'due', this field preserves the time component. \nGoogle Tasks API requires dates in RFC3339 format (e.g., 2025-09-22T13:48:27Z).\nWe automatically convert various human-readable formats to RFC3339:\n\nAccepted formats:\n\u2022 2025-09-28T23:59:00Z \u2192 RFC3339/ISO-8601 format (preferred) - September 28, 2025 at 11:59 PM UTC\n\u2022 28 Sep 2025 \u2192 Simple date format - Will be converted to midnight UTC on that date\n\u2022 11:59 PM, 22 Sep 2025 \u2192 Time with date - Assumes UTC timezone if not specified\n\u2022 1:00 PM, 21 Sep 2025 \u2192 12-hour format with date - Converted to 13:00 UTC\n\u2022 UTC-5:30, 6:50 PM \u2192 With timezone offset - Converted to UTC automatically\n\u2022 UTC+1, 11:59 PM, 31 Dec \u2192 Timezone with date - Next occurrence of Dec 31\n\u2022 2025-09-21T15:30:00+02:00 \u2192 RFC3339 with timezone offset\n\nNote: If no timezone is specified, UTC is assumed. Dates without times default to midnight UTC."
+          },
+          "tasklist_id": {
+            "type": "string",
+            "title": "Tasklist Id",
+            "examples": [
+              "MDQ1NzM3ODI0NzM2NzY0NjA4MDk6MDow",
+              "N1Zsb2FKeDRSOE0"
+            ],
+            "description": "Identifier of the Google Task list that contains the task to be updated."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_PATCH_TASK_LIST",
+      "description": "Updates the title of an existing Google Tasks task list.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PatchTaskListRequest",
+        "required": [
+          "tasklist_id",
+          "updated_title"
+        ],
+        "properties": {
+          "tasklist_id": {
+            "type": "string",
+            "title": "Tasklist Id",
+            "examples": [
+              "MDQ1MjA4MTA5NzQxNzYxMjM0NTY6MDow"
+            ],
+            "description": "The unique identifier of the task list to be updated."
+          },
+          "updated_title": {
+            "type": "string",
+            "title": "Updated Title",
+            "examples": [
+              "Project Alpha Tasks Q3"
+            ],
+            "description": "The new title for the task list."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_UPDATE_TASK",
+      "description": "Updates the specified task.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateTaskRequest",
+        "required": [
+          "tasklist",
+          "task"
+        ],
+        "properties": {
+          "due": {
+            "type": "string",
+            "title": "Due",
+            "default": null,
+            "nullable": true,
+            "description": "Due date of the task (RFC 3339 timestamp)."
+          },
+          "task": {
+            "type": "string",
+            "title": "Task",
+            "description": "Task identifier."
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": null,
+            "nullable": true,
+            "description": "Notes describing the task."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "nullable": true,
+            "description": "Title of the task."
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": null,
+            "nullable": true,
+            "description": "Status of the task (\"needsAction\" or \"completed\")."
+          },
+          "tasklist": {
+            "type": "string",
+            "title": "Tasklist",
+            "description": "Task list identifier."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLETASKS_UPDATE_TASK_LIST",
+      "description": "Updates the authenticated user's specified task list.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateTaskListRequest",
+        "required": [
+          "tasklist_id",
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "New Task List Title"
+            ],
+            "description": "Title of the task list. Maximum length allowed: 1024 characters."
+          },
+          "tasklist_id": {
+            "type": "string",
+            "title": "Tasklist Id",
+            "examples": [
+              "MDQ1NTE1OTM4NDM5MzM2MTQ4NzM6MDow"
+            ],
+            "description": "Task list identifier."
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 14,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/googletasks/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "GOOGLETASKS_CLEAR_TASKS",
+    "GOOGLETASKS_CREATE_TASK_LIST",
+    "GOOGLETASKS_DELETE_TASK",
+    "GOOGLETASKS_DELETE_TASK_LIST",
+    "GOOGLETASKS_GET_TASK",
+    "GOOGLETASKS_GET_TASK_LIST",
+    "GOOGLETASKS_INSERT_TASK",
+    "GOOGLETASKS_LIST_TASK_LISTS",
+    "GOOGLETASKS_LIST_TASKS",
+    "GOOGLETASKS_MOVE_TASK",
+    "GOOGLETASKS_PATCH_TASK",
+    "GOOGLETASKS_PATCH_TASK_LIST",
+    "GOOGLETASKS_UPDATE_TASK",
+    "GOOGLETASKS_UPDATE_TASK_LIST"
+  ]
+}

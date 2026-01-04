@@ -1,0 +1,580 @@
+{
+  "id": "@Ami3466/mcp-flowengine-n8n-workflow-builder",
+  "name": "@Ami3466/mcp-flowengine-n8n-workflow-builder",
+  "display_name": "mcp-flowengine-n8n-workflow-builder",
+  "version": null,
+  "description": "Generate production-ready n8n workflows from plain language. \nValidate, test, and auto-fix workflows to catch errors and improve reliability. Explore templates and a rich node library to design, optimize, and secure your automations.\nFor free n8n hosting and to enjoy the full capabilities of n8n workflow builder, go to flowengine.cloud",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/81a0be91-0368-4a2a-8668-ba3f50aff164.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "build_workflow",
+      "annotations": {
+        "title": "Build Workflow"
+      },
+      "description": "Generate n8n workflow from natural language description using FlowEngine's generation engine",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Workflow name (optional)"
+          },
+          "pattern": {
+            "enum": [
+              "linear",
+              "conditional",
+              "parallel",
+              "ai-agent",
+              "event-driven"
+            ],
+            "type": "string",
+            "description": "Architecture pattern (auto-detected if not specified)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Natural language description of the workflow"
+          }
+        }
+      }
+    },
+    {
+      "name": "add_node",
+      "annotations": {
+        "title": "Add Node"
+      },
+      "description": "Add a node to an existing workflow",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow",
+          "nodeType"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Custom node name (optional)"
+          },
+          "nodeType": {
+            "type": "string",
+            "description": "Type of node to add (e.g. \"n8n-nodes-base.slack\")"
+          },
+          "position": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Node position [x, y]"
+          },
+          "workflow": {
+            "type": "object",
+            "description": "The workflow to modify"
+          },
+          "parameters": {
+            "type": "object",
+            "default": {},
+            "description": "Node parameters"
+          }
+        }
+      }
+    },
+    {
+      "name": "edit_node",
+      "annotations": {
+        "title": "Edit Node"
+      },
+      "description": "Edit parameters of an existing node in a workflow",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow",
+          "nodeName",
+          "parameters"
+        ],
+        "properties": {
+          "nodeName": {
+            "type": "string",
+            "description": "Name of the node to edit"
+          },
+          "workflow": {
+            "type": "object",
+            "description": "The workflow containing the node"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "New parameters to merge with existing ones"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_node",
+      "annotations": {
+        "title": "Delete Node",
+        "destructiveHint": true
+      },
+      "description": "Delete a node from a workflow",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow",
+          "nodeName"
+        ],
+        "properties": {
+          "nodeName": {
+            "type": "string",
+            "description": "Name of the node to delete"
+          },
+          "workflow": {
+            "type": "object",
+            "description": "The workflow to modify"
+          }
+        }
+      }
+    },
+    {
+      "name": "add_connection",
+      "annotations": {
+        "title": "Add Connection"
+      },
+      "description": "Add a connection between two nodes in a workflow",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow",
+          "sourceNode",
+          "targetNode"
+        ],
+        "properties": {
+          "workflow": {
+            "type": "object",
+            "description": "The workflow to modify"
+          },
+          "sourceNode": {
+            "type": "string",
+            "description": "Name of the source node"
+          },
+          "targetNode": {
+            "type": "string",
+            "description": "Name of the target node"
+          },
+          "targetInput": {
+            "type": "number",
+            "default": 0,
+            "description": "Target input index (default: 0)"
+          },
+          "sourceOutput": {
+            "type": "number",
+            "default": 0,
+            "description": "Source output index (default: 0)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_workflow_details",
+      "annotations": {
+        "title": "Get Workflow Details",
+        "readOnlyHint": true
+      },
+      "description": "Get detailed information about a workflow structure",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow"
+        ],
+        "properties": {
+          "workflow": {
+            "type": "object",
+            "description": "The workflow to analyze"
+          }
+        }
+      }
+    },
+    {
+      "name": "validate_workflow",
+      "annotations": {
+        "title": "Validate Workflow",
+        "readOnlyHint": true
+      },
+      "description": "Validate and auto-fix n8n workflow JSON with 13 comprehensive auto-fixing features",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow"
+        ],
+        "properties": {
+          "autofix": {
+            "type": "boolean",
+            "default": true,
+            "description": "Apply auto-fixes (default: true)"
+          },
+          "workflow": {
+            "type": "object",
+            "description": "The n8n workflow JSON to validate"
+          }
+        }
+      }
+    },
+    {
+      "name": "extract_workflow_json",
+      "annotations": {
+        "title": "Extract Workflow JSON",
+        "readOnlyHint": true
+      },
+      "description": "Extract n8n workflow JSON from text/markdown (useful when AI wraps JSON in explanation)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text containing workflow JSON"
+          }
+        }
+      }
+    },
+    {
+      "name": "suggest_architecture",
+      "annotations": {
+        "title": "Suggest Architecture",
+        "readOnlyHint": true
+      },
+      "description": "Recommend the best workflow architecture pattern for a task",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "description"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Task description"
+          }
+        }
+      }
+    },
+    {
+      "name": "suggest_nodes",
+      "annotations": {
+        "title": "Suggest Nodes",
+        "readOnlyHint": true
+      },
+      "description": "Recommend nodes for a specific task",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "task"
+        ],
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "Task description"
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_workflow",
+      "annotations": {
+        "title": "Analyze Workflow",
+        "readOnlyHint": true
+      },
+      "description": "Analyze workflow and provide insights and suggestions",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow"
+        ],
+        "properties": {
+          "workflow": {
+            "type": "object",
+            "description": "n8n workflow JSON"
+          }
+        }
+      }
+    },
+    {
+      "name": "suggest_improvements",
+      "annotations": {
+        "title": "Suggest Improvements",
+        "readOnlyHint": true
+      },
+      "description": "Get optimization suggestions for a workflow",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow"
+        ],
+        "properties": {
+          "workflow": {
+            "type": "object",
+            "description": "n8n workflow JSON"
+          }
+        }
+      }
+    },
+    {
+      "name": "explain_workflow",
+      "annotations": {
+        "title": "Explain Workflow",
+        "readOnlyHint": true
+      },
+      "description": "Generate natural language explanation of what a workflow does",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow"
+        ],
+        "properties": {
+          "workflow": {
+            "type": "object",
+            "description": "n8n workflow JSON"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_nodes",
+      "annotations": {
+        "title": "Search Nodes",
+        "readOnlyHint": true
+      },
+      "description": "Search the node library (600+ nodes) by keyword",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_nodes_by_category",
+      "annotations": {
+        "title": "List Nodes by Category",
+        "readOnlyHint": true
+      },
+      "description": "List all nodes in a specific category",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "category"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Category name (trigger, communication, data, ai, core)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_node_details",
+      "annotations": {
+        "title": "Get Node Details",
+        "readOnlyHint": true
+      },
+      "description": "Get detailed information about a specific node",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "nodeType"
+        ],
+        "properties": {
+          "nodeType": {
+            "type": "string",
+            "description": "Node type (e.g., n8n-nodes-base.slack)"
+          }
+        }
+      }
+    },
+    {
+      "name": "test_workflow",
+      "annotations": {
+        "title": "Test Workflow",
+        "readOnlyHint": true
+      },
+      "description": "Dry-run test workflow without executing (simulates execution path)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow"
+        ],
+        "properties": {
+          "workflow": {
+            "type": "object",
+            "description": "n8n workflow JSON"
+          }
+        }
+      }
+    },
+    {
+      "name": "scan_security",
+      "annotations": {
+        "title": "Scan Security",
+        "readOnlyHint": true
+      },
+      "description": "Scan workflow for security vulnerabilities (credential leaks, unsafe code, etc.)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow"
+        ],
+        "properties": {
+          "workflow": {
+            "type": "object",
+            "description": "n8n workflow JSON"
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_performance",
+      "annotations": {
+        "title": "Analyze Performance",
+        "readOnlyHint": true
+      },
+      "description": "Analyze workflow performance and detect bottlenecks",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "workflow"
+        ],
+        "properties": {
+          "workflow": {
+            "type": "object",
+            "description": "n8n workflow JSON"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_templates",
+      "annotations": {
+        "title": "List Templates",
+        "readOnlyHint": true
+      },
+      "description": "List all available workflow templates",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Filter by category (optional)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_template",
+      "annotations": {
+        "title": "Get Template",
+        "readOnlyHint": true
+      },
+      "description": "Get a specific workflow template by ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "templateId"
+        ],
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "description": "Template ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_templates",
+      "annotations": {
+        "title": "Search Templates",
+        "readOnlyHint": true
+      },
+      "description": "Search workflow templates",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          }
+        }
+      }
+    },
+    {
+      "name": "fix_json",
+      "annotations": {
+        "title": "Fix JSON"
+      },
+      "description": "Attempt to repair truncated or malformed workflow JSON",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "json"
+        ],
+        "properties": {
+          "json": {
+            "type": "string",
+            "description": "Potentially broken JSON string"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 23,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@Ami3466/mcp-flowengine-n8n-workflow-builder/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "build_workflow",
+    "add_node",
+    "edit_node",
+    "delete_node",
+    "add_connection",
+    "get_workflow_details",
+    "validate_workflow",
+    "extract_workflow_json",
+    "suggest_architecture",
+    "suggest_nodes",
+    "analyze_workflow",
+    "suggest_improvements",
+    "explain_workflow",
+    "search_nodes",
+    "list_nodes_by_category",
+    "get_node_details",
+    "test_workflow",
+    "scan_security",
+    "analyze_performance",
+    "list_templates",
+    "get_template",
+    "search_templates",
+    "fix_json"
+  ]
+}

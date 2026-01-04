@@ -1,0 +1,655 @@
+{
+  "id": "@lumberjack-so/joemcp",
+  "name": "@lumberjack-so/joemcp",
+  "display_name": "joemcp",
+  "version": null,
+  "description": "Manage clients, contacts, proposals, estimates, and projects in Joe API. Create and track action items, assign supervisors, and coordinate schedules to keep work moving. Monitor project finances with summaries and detailed views to make informed decisions.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "list_clients",
+      "title": "List Clients",
+      "description": "Retrieve a paginated list of clients",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number (default: 1)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Items per page (default: 5, max: 100)"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_client",
+      "title": "Create Client",
+      "description": "Create a new client record",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "Name",
+          "EmailAddress",
+          "CompanyName",
+          "Phone"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string",
+            "description": "Client name"
+          },
+          "Phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "CompanyName": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "EmailAddress": {
+            "type": "string",
+            "description": "Client email address"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_contacts",
+      "title": "List Contacts",
+      "description": "Retrieve a list of contacts",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Items per page (default: 5)"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_contact",
+      "title": "Create Contact",
+      "description": "Create a new contact",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "Name",
+          "Email",
+          "Phone"
+        ],
+        "properties": {
+          "City": {
+            "type": "string",
+            "description": "City (optional)"
+          },
+          "Name": {
+            "type": "string",
+            "description": "Contact name"
+          },
+          "Email": {
+            "type": "string",
+            "description": "Email address"
+          },
+          "Phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "State": {
+            "type": "string",
+            "description": "State (optional)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_proposals",
+      "title": "List Proposals",
+      "description": "Get a minimal list of proposals with optional project filtering. Returns only name, id, and projectId for each proposal. Use discover or search to find proposals and get full details.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Items per page (default: 5)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_estimates",
+      "title": "List Estimates",
+      "description": "Get a minimal list of estimates with optional project filtering. Returns only name, id, and projectId for each estimate. Use get_estimates to retrieve full details for a specific project's estimates.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Items per page (default: 3, max: 10 to prevent token overflow)"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "UUID of project to filter by (optional - if not provided, returns estimates from all projects)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_action_items",
+      "title": "List Action Items",
+      "description": "Get a minimal list of action items with optional project filtering. Returns only name (title), id, and projectId for each action item. Use get_action_item to retrieve full details for a specific action item.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Items per page (default: 3, max: 10 to prevent token overflow)"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "UUID of project to filter by (optional - if not provided, returns action items from all projects)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_action_item",
+      "title": "Get Action Item",
+      "description": "Get full details for a specific action item by ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "actionItemId"
+        ],
+        "properties": {
+          "actionItemId": {
+            "type": "string",
+            "description": "The GUID of the action item to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_action_item",
+      "title": "Create Action Item",
+      "description": "Create a new Action Item. Can be Generic (ActionTypeId=3), Cost Change (ActionTypeId=1), or Schedule Change (ActionTypeId=2). For Cost/Schedule changes, you MUST include the corresponding nested object with all required fields.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "Title",
+          "Description",
+          "ProjectId",
+          "ActionTypeId",
+          "DueDate"
+        ],
+        "properties": {
+          "Title": {
+            "type": "string",
+            "description": "Action item title"
+          },
+          "Source": {
+            "type": "number",
+            "description": "Source code (default: 1)"
+          },
+          "Status": {
+            "type": "number",
+            "description": "Status code (default: 1)"
+          },
+          "DueDate": {
+            "type": "string",
+            "description": "ISO Date YYYY-MM-DD"
+          },
+          "ProjectId": {
+            "type": "string",
+            "description": "UUID of the project"
+          },
+          "CostChange": {
+            "type": "object",
+            "required": [
+              "Amount",
+              "EstimateCategoryId",
+              "RequiresClientApproval"
+            ],
+            "properties": {
+              "Amount": {
+                "type": "number",
+                "description": "Cost change amount"
+              },
+              "EstimateCategoryId": {
+                "type": "string",
+                "description": "UUID of estimate category"
+              },
+              "RequiresClientApproval": {
+                "type": "boolean",
+                "description": "Whether client approval is required"
+              }
+            },
+            "description": "Cost change details (REQUIRED when ActionTypeId=1)",
+            "additionalProperties": false
+          },
+          "Description": {
+            "type": "string",
+            "description": "Action item description"
+          },
+          "ActionTypeId": {
+            "type": "number",
+            "description": "1=CostChange, 2=ScheduleChange, 3=Generic"
+          },
+          "InitialComment": {
+            "type": "string",
+            "description": "Initial comment (optional)"
+          },
+          "ScheduleChange": {
+            "type": "object",
+            "required": [
+              "NoOfDays",
+              "ConstructionTaskId",
+              "RequiresClientApproval"
+            ],
+            "properties": {
+              "NoOfDays": {
+                "type": "number",
+                "description": "Number of days to adjust schedule"
+              },
+              "ConstructionTaskId": {
+                "type": "string",
+                "description": "UUID of construction task"
+              },
+              "RequiresClientApproval": {
+                "type": "boolean",
+                "description": "Whether client approval is required"
+              }
+            },
+            "description": "Schedule change details (REQUIRED when ActionTypeId=2)",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add_action_item_comment",
+      "title": "Add Action Item Comment",
+      "description": "Add a comment to an action item",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "actionItemId",
+          "comment"
+        ],
+        "properties": {
+          "comment": {
+            "type": "string",
+            "description": "Comment text"
+          },
+          "actionItemId": {
+            "type": "string",
+            "description": "Action item ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "assign_action_item_supervisor",
+      "title": "Assign Action Item Supervisor",
+      "description": "Assign a supervisor to an action item",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "actionItemId",
+          "supervisorId"
+        ],
+        "properties": {
+          "actionItemId": {
+            "type": "string",
+            "description": "Action item ID"
+          },
+          "supervisorId": {
+            "type": "number",
+            "description": "Supervisor user ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_projects",
+      "title": "List Projects",
+      "description": "Get a minimal list of all projects. Returns only name, id, and projectId for each project. Use get_project to retrieve full details for a specific project.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number (default: 1)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Items per page (default: 5, max: 100)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_project",
+      "title": "Get Project",
+      "description": "Get full project details by project ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "The GUID of the project to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_schedule",
+      "title": "Get Schedule",
+      "description": "Get full schedule data for a specific project",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "The GUID of the project to retrieve schedule for"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_schedules",
+      "title": "List Schedules",
+      "description": "Get a minimal list of schedules with optional project filtering. Returns only name, id, and projectId for each schedule.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Optional limit on number of results to return"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Optional project GUID to filter schedules by project"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_estimates",
+      "title": "Get Estimates",
+      "description": "Get full estimate data for a specific project",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "The GUID of the project to retrieve estimates for"
+          }
+        }
+      }
+    },
+    {
+      "name": "discover",
+      "title": "Discover Projects",
+      "description": "Discover comprehensive project data by searching for a project and retrieving all related information including project details, financials (estimates, job balances, cost variance), schedules, and action items - all in one unified JSON response",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query to find the project (searches in project name, description, status)"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Optional: Direct project ID if already known (skips search step)"
+          }
+        }
+      }
+    },
+    {
+      "name": "async",
+      "title": "Async Agent",
+      "description": "Delegate complex multi-step workflows to the async-agent system with real-time progress updates. Use this for tasks that require multiple coordinated steps, data gathering from multiple sources, or complex orchestration.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "The task or question to send to the async-agent"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_financials",
+      "title": "Get Financials",
+      "description": "Get comprehensive financial data for a project including job balances and cost variance",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "The GUID of the project to retrieve financial data for"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_transactions",
+      "title": "Get Transactions",
+      "description": "Get transaction list for a project with optional date range filtering",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "description": "End date in ISO-8601 format (e.g., 2024-12-31)"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "The GUID of the project to retrieve transactions for"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date in ISO-8601 format (e.g., 2024-01-01)"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_project",
+      "title": "Find Project",
+      "description": "Search for projects by name, client name, or other attributes. Returns matching projects with basic info.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query to find projects"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_estimate",
+      "title": "Find Estimate",
+      "description": "Search for estimates and estimate categories. Can search across all estimates or within a specific project.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query to find estimates or categories"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Optional project GUID to search within specific project for estimate categories"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_schedule",
+      "title": "Find Schedule",
+      "description": "Search for schedules and construction tasks. Can search across all schedules or within a specific project.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query to find schedules or tasks"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Optional project GUID to search within specific project for construction tasks"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_proposal",
+      "title": "Find Proposal",
+      "description": "Search for proposals by proposal number, title, or description. Can optionally filter by project.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query to find proposals"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Optional project GUID to filter proposals by project"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_action_items",
+      "title": "Find Action Items",
+      "description": "Search for action items by title or description. Can optionally filter by project.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query to find action items"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Optional project GUID to filter action items by project"
+          }
+        }
+      }
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Generic search tool that can search across multiple entity types with optional filtering by project.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Entity type to search: project, estimate, schedule, proposal, estimateCategory, constructionTask, action-item"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Optional project GUID to filter results by project"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 26,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@lumberjack-so/joemcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "list_clients",
+    "create_client",
+    "list_contacts",
+    "create_contact",
+    "list_proposals",
+    "list_estimates",
+    "list_action_items",
+    "get_action_item",
+    "create_action_item",
+    "add_action_item_comment",
+    "assign_action_item_supervisor",
+    "list_projects",
+    "get_project",
+    "get_schedule",
+    "list_schedules",
+    "get_estimates",
+    "discover",
+    "async",
+    "get_financials",
+    "get_transactions",
+    "find_project",
+    "find_estimate",
+    "find_schedule",
+    "find_proposal",
+    "find_action_items",
+    "search"
+  ]
+}

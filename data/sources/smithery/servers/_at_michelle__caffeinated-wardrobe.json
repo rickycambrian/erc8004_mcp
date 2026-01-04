@@ -1,0 +1,4845 @@
+{
+  "qualifiedName": "@michelle/caffeinated-wardrobe",
+  "displayName": "Caffeinated Wardrobe",
+  "description": "Caffeinated Wardrobe is like an API for your closet. This MCP server brings programmatic wardrobe management to any MCP-compatible AI client - track clothing items, compose (and remember) outfits, analyze wear patterns, and get AI-powered styling recommendations. Combine with filesystem, calendar, or browser MCP servers for context-aware outfit suggestions based on your schedule, weather, or recent purchases.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/80361f9f-8977-4d4a-b7cf-aa80dfe7effa.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@michelle/caffeinated-wardrobe",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@michelle/caffeinated-wardrobe/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "list_tags",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Get all unique tags used by the current user for their items.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "include_paused": {
+            "type": "boolean",
+            "title": "Include Paused",
+            "default": false,
+            "description": "Include tags from paused items"
+          },
+          "include_archived": {
+            "type": "boolean",
+            "title": "Include Archived",
+            "default": false,
+            "description": "Include tags from archived items"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "UserTagsResponse",
+        "required": [
+          "tags"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "description": "List of all tags used by the user"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_item",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Create a new wardrobe item.\n\nFor brands, colors, and stores, you can provide either the name or ID:\n- brand: \"Nike\" (auto-creates if not found) OR brand_id: UUID\n- color: \"Blue\" (auto-creates if not found) OR color_id: UUID\n- store: \"Amazon\" (auto-creates if not found) OR store_id: UUID\n\nYou can also provide image_urls to upload images from publicly accessible URLs.\nImages will be uploaded after the item is created. If any image URLs fail to upload,\nthe item will still be created successfully.\n\nNo need to check if brands/colors/stores exist first - the system handles this automatically.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          }
+        },
+        "required": [
+          "name",
+          "category"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "URL link to the item (e.g., product page, purchase link)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name or title of the wardrobe item"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "description": "Custom tags for categorizing or organizing the item"
+          },
+          "brand": {
+            "type": "string",
+            "title": "Brand",
+            "description": "The brand name of the item"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color",
+            "description": "The primary color of the item"
+          },
+          "price": {
+            "type": "number",
+            "title": "Price",
+            "description": "The purchase price of the item"
+          },
+          "store": {
+            "type": "string",
+            "title": "Store",
+            "description": "The store name where the item was purchased"
+          },
+          "brand_id": {
+            "type": "string",
+            "title": "Brand Id",
+            "format": "uuid",
+            "description": "The ID of the brand for this item"
+          },
+          "category": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          },
+          "color_id": {
+            "type": "string",
+            "title": "Color Id",
+            "format": "uuid",
+            "description": "The ID of the color for this item"
+          },
+          "material": {
+            "type": "string",
+            "title": "Material",
+            "description": "The primary material of the item"
+          },
+          "store_id": {
+            "type": "string",
+            "title": "Store Id",
+            "format": "uuid",
+            "description": "The ID of the store where this item was purchased"
+          },
+          "item_size": {
+            "type": "string",
+            "title": "Item Size",
+            "description": "The size of the item (e.g., S, M, L, 32, 8)"
+          },
+          "materials": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Materials",
+            "description": "List of material names (e.g., ['Cotton', 'Polyester']). Materials will be created if they don't exist."
+          },
+          "image_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Image Urls",
+            "maxItems": 10,
+            "description": "Optional list of publicly accessible image URLs to upload for this item. Images will be uploaded after item creation. If any URLs fail to upload, the item will still be created successfully."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Additional details or notes about the item"
+          },
+          "material_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "Material Ids",
+            "description": "The IDs of the materials used in this item"
+          },
+          "order_number": {
+            "type": "string",
+            "title": "Order Number",
+            "description": "The order number or receipt reference"
+          },
+          "purchase_date": {
+            "type": "string",
+            "title": "Purchase Date",
+            "format": "date-time",
+            "description": "The date when the item was purchased"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "BrandSchema": {
+            "type": "object",
+            "title": "BrandSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The brand name"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized brand name for search/comparison"
+              }
+            }
+          },
+          "ColorSchema": {
+            "type": "object",
+            "title": "ColorSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The color name"
+              },
+              "hex_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Hex Code",
+                "description": "The hexadecimal color code (e.g., #FF0000)"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "color_family": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Color Family",
+                "description": "The color family category (e.g., red, blue, neutral)"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized color name for search/comparison"
+              }
+            }
+          },
+          "ImageSchema": {
+            "type": "object",
+            "title": "ImageSchema",
+            "required": [
+              "id",
+              "wardrobe_item_id",
+              "is_default_image"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "image_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Image Url"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "is_default_image": {
+                "type": "boolean",
+                "title": "Is Default Image"
+              },
+              "wardrobe_item_id": {
+                "type": "string",
+                "title": "Wardrobe Item Id",
+                "format": "uuid"
+              }
+            }
+          },
+          "MaterialSchema": {
+            "type": "object",
+            "title": "MaterialSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The material name"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized material name for search/comparison"
+              }
+            }
+          },
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          },
+          "StoreNestedSchema": {
+            "type": "object",
+            "title": "StoreNestedSchema",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Url"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name"
+              }
+            }
+          }
+        },
+        "title": "WardrobeItemResponse",
+        "required": [
+          "id",
+          "user_id",
+          "name",
+          "category"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "format": "uuid"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url",
+            "description": "URL link to the item (e.g., product page, purchase link)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name or title of the wardrobe item"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "description": "Custom tags for categorizing or organizing the item"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price",
+            "description": "The purchase price of the item"
+          },
+          "store": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/StoreNestedSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The store where this item was purchased"
+          },
+          "images": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ImageSchema"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Images",
+            "description": "Images of this wardrobe item"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "format": "uuid"
+          },
+          "category": {
+            "$ref": "#/$defs/ItemCategoryEnum",
+            "description": "The category of the item (e.g., tops, bottoms, shoes)"
+          },
+          "brand_rel": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/BrandSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The brand information for this item"
+          },
+          "color_rel": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ColorSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The color information for this item"
+          },
+          "is_paused": {
+            "type": "boolean",
+            "title": "Is Paused",
+            "default": false,
+            "description": "Whether the item is currently paused"
+          },
+          "item_size": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Size",
+            "description": "The size of the item (e.g., S, M, L, 32, 8)"
+          },
+          "materials": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/MaterialSchema"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Materials",
+            "description": "The materials used in this item"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "wear_count": {
+            "type": "number",
+            "title": "Wear Count",
+            "default": 0,
+            "description": "The total number of times the item has been worn"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Additional details or notes about the item"
+          },
+          "is_archived": {
+            "type": "boolean",
+            "title": "Is Archived",
+            "default": false,
+            "description": "Whether the item is archived"
+          },
+          "last_worn_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Worn At",
+            "description": "The date when the item was last worn"
+          },
+          "order_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Number",
+            "description": "The order number or receipt reference"
+          },
+          "cost_per_wear": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Per Wear",
+            "description": "The calculated cost per wear (price \u00f7 wear_count)"
+          },
+          "purchase_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date",
+            "description": "The date when the item was purchased"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_items",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Get a list of all wardrobe items with reduced details for MCP efficiency.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          }
+        },
+        "required": [],
+        "properties": {
+          "skip": {
+            "type": "number",
+            "title": "Skip"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "default": [],
+            "description": "Filter by tags"
+          },
+          "limit": {
+            "type": "number",
+            "title": "Limit"
+          },
+          "search": {
+            "type": "string",
+            "title": "Search",
+            "description": "Search term to filter items by name or description"
+          },
+          "sort_by": {
+            "type": "string",
+            "title": "Sort By",
+            "description": "Field to sort by"
+          },
+          "brand_id": {
+            "type": "string",
+            "title": "Brand Id",
+            "format": "uuid",
+            "description": "Filter by brand ID"
+          },
+          "category": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "Category",
+            "description": "Filter by item category"
+          },
+          "color_id": {
+            "type": "string",
+            "title": "Color Id",
+            "format": "uuid",
+            "description": "Filter by color ID"
+          },
+          "store_id": {
+            "type": "string",
+            "title": "Store Id",
+            "format": "uuid",
+            "description": "Filter by store where item was purchased"
+          },
+          "price_max": {
+            "type": "number",
+            "title": "Price Max",
+            "description": "Maximum price filter"
+          },
+          "price_min": {
+            "type": "number",
+            "title": "Price Min",
+            "description": "Minimum price filter"
+          },
+          "sort_order": {
+            "type": "string",
+            "title": "Sort Order",
+            "description": "Sort order (asc or desc)"
+          },
+          "last_worn_to": {
+            "type": "string",
+            "title": "Last Worn To",
+            "format": "date-time",
+            "description": "Filter items last worn before this date"
+          },
+          "material_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "Material Ids",
+            "default": [],
+            "description": "Filter by material IDs"
+          },
+          "include_paused": {
+            "type": "boolean",
+            "title": "Include Paused",
+            "default": false,
+            "description": "Whether to include paused items in results"
+          },
+          "last_worn_from": {
+            "type": "string",
+            "title": "Last Worn From",
+            "format": "date-time",
+            "description": "Filter items last worn after this date"
+          },
+          "max_wear_count": {
+            "type": "number",
+            "title": "Max Wear Count",
+            "description": "Maximum wear count filter"
+          },
+          "min_wear_count": {
+            "type": "number",
+            "title": "Min Wear Count",
+            "description": "Minimum wear count filter"
+          },
+          "include_archived": {
+            "type": "boolean",
+            "title": "Include Archived",
+            "default": false,
+            "description": "Whether to include archived items in results"
+          },
+          "purchase_date_to": {
+            "type": "string",
+            "title": "Purchase Date To",
+            "format": "date-time",
+            "description": "Filter items purchased before this date"
+          },
+          "purchase_date_from": {
+            "type": "string",
+            "title": "Purchase Date From",
+            "format": "date-time",
+            "description": "Filter items purchased after this date"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          },
+          "WardrobeItemMinimalResponse": {
+            "type": "object",
+            "title": "WardrobeItemMinimalResponse",
+            "required": [
+              "id",
+              "name",
+              "category"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid",
+                "description": "The unique identifier of the wardrobe item"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The name or title of the wardrobe item"
+              },
+              "category": {
+                "$ref": "#/$defs/ItemCategoryEnum",
+                "description": "The category of the item (e.g., tops, bottoms, shoes)"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "last_worn_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Last Worn At",
+                "description": "The date when the item was last worn"
+              }
+            }
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/WardrobeItemMinimalResponse"
+            },
+            "title": "Response List Items Minimal"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_item_details",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Get details of a specific wardrobe item.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "BrandSchema": {
+            "type": "object",
+            "title": "BrandSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The brand name"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized brand name for search/comparison"
+              }
+            }
+          },
+          "ColorSchema": {
+            "type": "object",
+            "title": "ColorSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The color name"
+              },
+              "hex_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Hex Code",
+                "description": "The hexadecimal color code (e.g., #FF0000)"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "color_family": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Color Family",
+                "description": "The color family category (e.g., red, blue, neutral)"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized color name for search/comparison"
+              }
+            }
+          },
+          "ImageSchema": {
+            "type": "object",
+            "title": "ImageSchema",
+            "required": [
+              "id",
+              "wardrobe_item_id",
+              "is_default_image"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "image_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Image Url"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "is_default_image": {
+                "type": "boolean",
+                "title": "Is Default Image"
+              },
+              "wardrobe_item_id": {
+                "type": "string",
+                "title": "Wardrobe Item Id",
+                "format": "uuid"
+              }
+            }
+          },
+          "MaterialSchema": {
+            "type": "object",
+            "title": "MaterialSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The material name"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized material name for search/comparison"
+              }
+            }
+          },
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          },
+          "StoreNestedSchema": {
+            "type": "object",
+            "title": "StoreNestedSchema",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Url"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name"
+              }
+            }
+          }
+        },
+        "title": "WardrobeItemResponse",
+        "required": [
+          "id",
+          "user_id",
+          "name",
+          "category"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "format": "uuid"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url",
+            "description": "URL link to the item (e.g., product page, purchase link)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name or title of the wardrobe item"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "description": "Custom tags for categorizing or organizing the item"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price",
+            "description": "The purchase price of the item"
+          },
+          "store": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/StoreNestedSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The store where this item was purchased"
+          },
+          "images": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ImageSchema"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Images",
+            "description": "Images of this wardrobe item"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "format": "uuid"
+          },
+          "category": {
+            "$ref": "#/$defs/ItemCategoryEnum",
+            "description": "The category of the item (e.g., tops, bottoms, shoes)"
+          },
+          "brand_rel": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/BrandSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The brand information for this item"
+          },
+          "color_rel": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ColorSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The color information for this item"
+          },
+          "is_paused": {
+            "type": "boolean",
+            "title": "Is Paused",
+            "default": false,
+            "description": "Whether the item is currently paused"
+          },
+          "item_size": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Size",
+            "description": "The size of the item (e.g., S, M, L, 32, 8)"
+          },
+          "materials": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/MaterialSchema"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Materials",
+            "description": "The materials used in this item"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "wear_count": {
+            "type": "number",
+            "title": "Wear Count",
+            "default": 0,
+            "description": "The total number of times the item has been worn"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Additional details or notes about the item"
+          },
+          "is_archived": {
+            "type": "boolean",
+            "title": "Is Archived",
+            "default": false,
+            "description": "Whether the item is archived"
+          },
+          "last_worn_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Worn At",
+            "description": "The date when the item was last worn"
+          },
+          "order_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Number",
+            "description": "The order number or receipt reference"
+          },
+          "cost_per_wear": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Per Wear",
+            "description": "The calculated cost per wear (price \u00f7 wear_count)"
+          },
+          "purchase_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date",
+            "description": "The date when the item was purchased"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_existing_item",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Update an existing wardrobe item.\n\nFor brands, colors, and stores, you can provide either the name or ID:\n- brand: \"Nike\" (auto-creates if not found) OR brand_id: UUID\n- color: \"Blue\" (auto-creates if not found) OR color_id: UUID\n- store: \"Amazon\" (auto-creates if not found) OR store_id: UUID\n\nYou can also provide image_urls to upload images from publicly accessible URLs.\nImages will be uploaded after the item is updated. If any image URLs fail to upload,\nthe item will still be updated successfully.\n\nNo need to check if brands/colors/stores exist first - the system handles this automatically.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          }
+        },
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "URL link to the item (e.g., product page, purchase link)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name or title of the wardrobe item"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "description": "Custom tags for categorizing or organizing the item"
+          },
+          "brand": {
+            "type": "string",
+            "title": "Brand",
+            "description": "The brand name of the item"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color",
+            "description": "The primary color of the item"
+          },
+          "price": {
+            "type": "number",
+            "title": "Price",
+            "description": "The purchase price of the item"
+          },
+          "store": {
+            "type": "string",
+            "title": "Store",
+            "description": "The store name where the item was purchased"
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid"
+          },
+          "brand_id": {
+            "type": "string",
+            "title": "Brand Id",
+            "format": "uuid",
+            "description": "The ID of the brand for this item"
+          },
+          "category": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "The category of the item (e.g., tops, bottoms, shoes)"
+          },
+          "color_id": {
+            "type": "string",
+            "title": "Color Id",
+            "format": "uuid",
+            "description": "The ID of the color for this item"
+          },
+          "material": {
+            "type": "string",
+            "title": "Material",
+            "description": "The primary material of the item"
+          },
+          "store_id": {
+            "type": "string",
+            "title": "Store Id",
+            "format": "uuid",
+            "description": "The ID of the store where this item was purchased"
+          },
+          "is_paused": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Paused",
+            "description": "Whether the item is currently paused"
+          },
+          "item_size": {
+            "type": "string",
+            "title": "Item Size",
+            "description": "The size of the item (e.g., S, M, L, 32, 8)"
+          },
+          "materials": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Materials",
+            "description": "List of material names (e.g., ['Cotton', 'Polyester']). Materials will be created if they don't exist."
+          },
+          "image_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Image Urls",
+            "maxItems": 10,
+            "description": "Optional list of publicly accessible image URLs to upload for this item. Images will be uploaded after item update. If any URLs fail to upload, the item will still be updated successfully."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Additional details or notes about the item"
+          },
+          "is_archived": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Archived",
+            "description": "Whether the item is archived"
+          },
+          "material_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "Material Ids",
+            "description": "The IDs of the materials used in this item"
+          },
+          "order_number": {
+            "type": "string",
+            "title": "Order Number",
+            "description": "The order number or receipt reference"
+          },
+          "purchase_date": {
+            "type": "string",
+            "title": "Purchase Date",
+            "format": "date-time",
+            "description": "The date when the item was purchased"
+          },
+          "archive_strategy": {
+            "type": "string",
+            "title": "Archive Strategy",
+            "pattern": "^(remove_from_outfits|archive_outfits)$",
+            "description": "Strategy for handling outfits when archiving item: 'remove_from_outfits' or 'archive_outfits'"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "BrandSchema": {
+            "type": "object",
+            "title": "BrandSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The brand name"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized brand name for search/comparison"
+              }
+            }
+          },
+          "ColorSchema": {
+            "type": "object",
+            "title": "ColorSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The color name"
+              },
+              "hex_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Hex Code",
+                "description": "The hexadecimal color code (e.g., #FF0000)"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "color_family": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Color Family",
+                "description": "The color family category (e.g., red, blue, neutral)"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized color name for search/comparison"
+              }
+            }
+          },
+          "ImageSchema": {
+            "type": "object",
+            "title": "ImageSchema",
+            "required": [
+              "id",
+              "wardrobe_item_id",
+              "is_default_image"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "image_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Image Url"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "is_default_image": {
+                "type": "boolean",
+                "title": "Is Default Image"
+              },
+              "wardrobe_item_id": {
+                "type": "string",
+                "title": "Wardrobe Item Id",
+                "format": "uuid"
+              }
+            }
+          },
+          "MaterialSchema": {
+            "type": "object",
+            "title": "MaterialSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The material name"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized material name for search/comparison"
+              }
+            }
+          },
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          },
+          "StoreNestedSchema": {
+            "type": "object",
+            "title": "StoreNestedSchema",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Url"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name"
+              }
+            }
+          }
+        },
+        "title": "WardrobeItemResponse",
+        "required": [
+          "id",
+          "user_id",
+          "name",
+          "category"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "format": "uuid"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url",
+            "description": "URL link to the item (e.g., product page, purchase link)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name or title of the wardrobe item"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "description": "Custom tags for categorizing or organizing the item"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price",
+            "description": "The purchase price of the item"
+          },
+          "store": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/StoreNestedSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The store where this item was purchased"
+          },
+          "images": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ImageSchema"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Images",
+            "description": "Images of this wardrobe item"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "format": "uuid"
+          },
+          "category": {
+            "$ref": "#/$defs/ItemCategoryEnum",
+            "description": "The category of the item (e.g., tops, bottoms, shoes)"
+          },
+          "brand_rel": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/BrandSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The brand information for this item"
+          },
+          "color_rel": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ColorSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The color information for this item"
+          },
+          "is_paused": {
+            "type": "boolean",
+            "title": "Is Paused",
+            "default": false,
+            "description": "Whether the item is currently paused"
+          },
+          "item_size": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Size",
+            "description": "The size of the item (e.g., S, M, L, 32, 8)"
+          },
+          "materials": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/MaterialSchema"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Materials",
+            "description": "The materials used in this item"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "wear_count": {
+            "type": "number",
+            "title": "Wear Count",
+            "default": 0,
+            "description": "The total number of times the item has been worn"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Additional details or notes about the item"
+          },
+          "is_archived": {
+            "type": "boolean",
+            "title": "Is Archived",
+            "default": false,
+            "description": "Whether the item is archived"
+          },
+          "last_worn_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Worn At",
+            "description": "The date when the item was last worn"
+          },
+          "order_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Number",
+            "description": "The order number or receipt reference"
+          },
+          "cost_per_wear": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Per Wear",
+            "description": "The calculated cost per wear (price \u00f7 wear_count)"
+          },
+          "purchase_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date",
+            "description": "The date when the item was purchased"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_item",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Delete a wardrobe item.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    {
+      "name": "upload_images_from_urls",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Upload images for a specific wardrobe item from URLs. Designed for MCP tools to avoid base64 encoding overhead.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "item_id",
+          "image_urls"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid"
+          },
+          "image_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Image Urls",
+            "maxItems": 10,
+            "minItems": 1,
+            "description": "List of image URLs to upload. Each URL should point to a publicly accessible image."
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default",
+            "default": false,
+            "description": "Whether the image should be set as the default image for the wardrobe item."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "ImageSchema": {
+            "type": "object",
+            "title": "ImageSchema",
+            "required": [
+              "id",
+              "wardrobe_item_id",
+              "is_default_image"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "image_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Image Url"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "is_default_image": {
+                "type": "boolean",
+                "title": "Is Default Image"
+              },
+              "wardrobe_item_id": {
+                "type": "string",
+                "title": "Wardrobe Item Id",
+                "format": "uuid"
+              }
+            }
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ImageSchema"
+            },
+            "title": "Response Upload Images From Urls"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "delete_image",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Delete an image associated with a specific wardrobe item.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "item_id",
+          "image_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid"
+          },
+          "image_id": {
+            "type": "string",
+            "title": "Image Id",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    {
+      "name": "set_default_image",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Set a specific image as the default for a wardrobe item.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "item_id",
+          "image_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid"
+          },
+          "image_id": {
+            "type": "string",
+            "title": "Image Id",
+            "format": "uuid"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "ImageSchema",
+        "required": [
+          "id",
+          "wardrobe_item_id",
+          "is_default_image"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "format": "uuid"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "is_default_image": {
+            "type": "boolean",
+            "title": "Is Default Image"
+          },
+          "wardrobe_item_id": {
+            "type": "string",
+            "title": "Wardrobe Item Id",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_related_items",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Get all items that are related to the specified item.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "BrandSchema": {
+            "type": "object",
+            "title": "BrandSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The brand name"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized brand name for search/comparison"
+              }
+            }
+          },
+          "ColorSchema": {
+            "type": "object",
+            "title": "ColorSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The color name"
+              },
+              "hex_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Hex Code",
+                "description": "The hexadecimal color code (e.g., #FF0000)"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "color_family": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Color Family",
+                "description": "The color family category (e.g., red, blue, neutral)"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized color name for search/comparison"
+              }
+            }
+          },
+          "ImageSchema": {
+            "type": "object",
+            "title": "ImageSchema",
+            "required": [
+              "id",
+              "wardrobe_item_id",
+              "is_default_image"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "image_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Image Url"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "is_default_image": {
+                "type": "boolean",
+                "title": "Is Default Image"
+              },
+              "wardrobe_item_id": {
+                "type": "string",
+                "title": "Wardrobe Item Id",
+                "format": "uuid"
+              }
+            }
+          },
+          "MaterialSchema": {
+            "type": "object",
+            "title": "MaterialSchema",
+            "required": [
+              "id",
+              "name",
+              "normalized_name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The material name"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "normalized_name": {
+                "type": "string",
+                "title": "Normalized Name",
+                "description": "The normalized material name for search/comparison"
+              }
+            }
+          },
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          },
+          "StoreNestedSchema": {
+            "type": "object",
+            "title": "StoreNestedSchema",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Url"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name"
+              }
+            }
+          },
+          "WardrobeItemResponse": {
+            "type": "object",
+            "title": "WardrobeItemResponse",
+            "required": [
+              "id",
+              "user_id",
+              "name",
+              "category"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Url",
+                "description": "URL link to the item (e.g., product page, purchase link)"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The name or title of the wardrobe item"
+              },
+              "tags": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Tags",
+                "description": "Custom tags for categorizing or organizing the item"
+              },
+              "price": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Price",
+                "description": "The purchase price of the item"
+              },
+              "store": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/StoreNestedSchema"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The store where this item was purchased"
+              },
+              "images": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/ImageSchema"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Images",
+                "description": "Images of this wardrobe item"
+              },
+              "user_id": {
+                "type": "string",
+                "title": "User Id",
+                "format": "uuid"
+              },
+              "category": {
+                "$ref": "#/$defs/ItemCategoryEnum",
+                "description": "The category of the item (e.g., tops, bottoms, shoes)"
+              },
+              "brand_rel": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BrandSchema"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The brand information for this item"
+              },
+              "color_rel": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ColorSchema"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The color information for this item"
+              },
+              "is_paused": {
+                "type": "boolean",
+                "title": "Is Paused",
+                "default": false,
+                "description": "Whether the item is currently paused"
+              },
+              "item_size": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Item Size",
+                "description": "The size of the item (e.g., S, M, L, 32, 8)"
+              },
+              "materials": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/MaterialSchema"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Materials",
+                "description": "The materials used in this item"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "wear_count": {
+                "type": "number",
+                "title": "Wear Count",
+                "default": 0,
+                "description": "The total number of times the item has been worn"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Description",
+                "description": "Additional details or notes about the item"
+              },
+              "is_archived": {
+                "type": "boolean",
+                "title": "Is Archived",
+                "default": false,
+                "description": "Whether the item is archived"
+              },
+              "last_worn_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Last Worn At",
+                "description": "The date when the item was last worn"
+              },
+              "order_number": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Order Number",
+                "description": "The order number or receipt reference"
+              },
+              "cost_per_wear": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Cost Per Wear",
+                "description": "The calculated cost per wear (price \u00f7 wear_count)"
+              },
+              "purchase_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Purchase Date",
+                "description": "The date when the item was purchased"
+              }
+            }
+          }
+        },
+        "title": "RelatedItemsResponse",
+        "required": [
+          "item_id",
+          "related_items"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid",
+            "description": "The ID of the item for which related items are being returned"
+          },
+          "related_items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/WardrobeItemResponse"
+            },
+            "title": "Related Items",
+            "description": "List of items related to the specified item"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_item_relationship",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Create a new relationship between two items.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "item_id",
+          "item_id_2"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid"
+          },
+          "item_id_2": {
+            "type": "string",
+            "title": "Item Id 2",
+            "format": "uuid",
+            "description": "The ID of the item to relate to the current item"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "ItemRelationshipResponse",
+        "required": [
+          "id",
+          "item_id_1",
+          "item_id_2",
+          "created_by_user_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "format": "uuid"
+          },
+          "item_id_1": {
+            "type": "string",
+            "title": "Item Id 1",
+            "format": "uuid",
+            "description": "The ID of the first item in the relationship"
+          },
+          "item_id_2": {
+            "type": "string",
+            "title": "Item Id 2",
+            "format": "uuid",
+            "description": "The ID of the second item in the relationship"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "created_by_user_id": {
+            "type": "string",
+            "title": "Created By User Id",
+            "format": "uuid",
+            "description": "The ID of the user who created this relationship"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_item_relationship",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Delete a relationship between two items.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "item_id",
+          "other_item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid"
+          },
+          "other_item_id": {
+            "type": "string",
+            "title": "Other Item Id",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_item_wear_history",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Items"
+          ]
+        }
+      },
+      "description": "Get wear history for a specific item.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "WearItemType": {
+            "enum": [
+              "item",
+              "outfit"
+            ],
+            "type": "string",
+            "title": "WearItemType",
+            "description": "Types of items that can be worn and tracked."
+          },
+          "WearRecordResponse": {
+            "type": "object",
+            "title": "WearRecordResponse",
+            "required": [
+              "id",
+              "user_id",
+              "item_type",
+              "item_id",
+              "worn_at",
+              "created_at"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "item_id": {
+                "type": "string",
+                "title": "Item Id",
+                "format": "uuid",
+                "description": "The ID of the item or outfit being worn"
+              },
+              "user_id": {
+                "type": "string",
+                "title": "User Id",
+                "format": "uuid"
+              },
+              "worn_at": {
+                "type": "string",
+                "title": "Worn At",
+                "format": "date-time",
+                "description": "The date and time when the item was worn"
+              },
+              "item_type": {
+                "$ref": "#/$defs/WearItemType",
+                "description": "The type of item being worn (wardrobe item or outfit)"
+              },
+              "created_at": {
+                "type": "string",
+                "title": "Created At",
+                "format": "date-time",
+                "description": "The date and time when this wear record was created"
+              }
+            }
+          }
+        },
+        "title": "WearHistoryResponse",
+        "required": [
+          "wear_records",
+          "wear_count"
+        ],
+        "properties": {
+          "wear_count": {
+            "type": "number",
+            "title": "Wear Count",
+            "description": "Total number of times the item or outfit has been worn"
+          },
+          "last_worn_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Worn At",
+            "description": "The date and time when the item or outfit was last worn"
+          },
+          "wear_records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/WearRecordResponse"
+            },
+            "title": "Wear Records",
+            "description": "List of wear records for the item or outfit"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_outfits",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Outfits"
+          ]
+        }
+      },
+      "description": "Get a list of all outfits.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "skip": {
+            "type": "number",
+            "title": "Skip"
+          },
+          "limit": {
+            "type": "number",
+            "title": "Limit"
+          },
+          "include_paused": {
+            "type": "boolean",
+            "title": "Include Paused",
+            "default": false
+          },
+          "include_archived": {
+            "type": "boolean",
+            "title": "Include Archived",
+            "default": false
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "ImageSchema": {
+            "type": "object",
+            "title": "ImageSchema",
+            "required": [
+              "id",
+              "wardrobe_item_id",
+              "is_default_image"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "image_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Image Url"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "is_default_image": {
+                "type": "boolean",
+                "title": "Is Default Image"
+              },
+              "wardrobe_item_id": {
+                "type": "string",
+                "title": "Wardrobe Item Id",
+                "format": "uuid"
+              }
+            }
+          },
+          "OutfitResponse": {
+            "type": "object",
+            "title": "OutfitResponse",
+            "required": [
+              "name",
+              "id",
+              "user_id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The name or title of the outfit"
+              },
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/OutfitNestedItemSchema"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Items",
+                "description": "The wardrobe items that make up this outfit"
+              },
+              "user_id": {
+                "type": "string",
+                "title": "User Id",
+                "format": "uuid"
+              },
+              "is_paused": {
+                "type": "boolean",
+                "title": "Is Paused",
+                "default": false,
+                "description": "Whether the outfit is currently paused"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "wear_count": {
+                "type": "number",
+                "title": "Wear Count",
+                "default": 0,
+                "description": "The total number of times this outfit has been worn"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Description",
+                "description": "Description of the outfit"
+              },
+              "is_archived": {
+                "type": "boolean",
+                "title": "Is Archived",
+                "default": false,
+                "description": "Whether the outfit is archived"
+              },
+              "last_worn_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Last Worn At",
+                "description": "The date when this outfit was last worn"
+              },
+              "parent_outfit_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Parent Outfit Id",
+                "description": "The ID of the parent outfit if this was created from composition changes"
+              },
+              "is_composition_editable": {
+                "type": "boolean",
+                "title": "Is Composition Editable",
+                "default": true,
+                "description": "Whether the item composition of this outfit can be modified"
+              }
+            }
+          },
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          },
+          "OutfitNestedItemSchema": {
+            "type": "object",
+            "title": "OutfitNestedItemSchema",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The name of the wardrobe item"
+              },
+              "brand": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Brand",
+                "description": "The brand name of the item"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Color",
+                "description": "The primary color of the item"
+              },
+              "images": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/ImageSchema"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Images",
+                "description": "Images of this wardrobe item"
+              },
+              "category": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ItemCategoryEnum"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The category of the item (e.g., tops, bottoms, shoes)"
+              }
+            }
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/OutfitResponse"
+            },
+            "title": "Response List Outfits"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "create_outfit",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Outfits"
+          ]
+        }
+      },
+      "description": "Create a new outfit.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name or title of the outfit"
+          },
+          "item_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "Item Ids",
+            "description": "The IDs of the wardrobe items to include in this outfit"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Description of the outfit"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "ImageSchema": {
+            "type": "object",
+            "title": "ImageSchema",
+            "required": [
+              "id",
+              "wardrobe_item_id",
+              "is_default_image"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "image_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Image Url"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "is_default_image": {
+                "type": "boolean",
+                "title": "Is Default Image"
+              },
+              "wardrobe_item_id": {
+                "type": "string",
+                "title": "Wardrobe Item Id",
+                "format": "uuid"
+              }
+            }
+          },
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          },
+          "OutfitNestedItemSchema": {
+            "type": "object",
+            "title": "OutfitNestedItemSchema",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The name of the wardrobe item"
+              },
+              "brand": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Brand",
+                "description": "The brand name of the item"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Color",
+                "description": "The primary color of the item"
+              },
+              "images": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/ImageSchema"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Images",
+                "description": "Images of this wardrobe item"
+              },
+              "category": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ItemCategoryEnum"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The category of the item (e.g., tops, bottoms, shoes)"
+              }
+            }
+          }
+        },
+        "title": "OutfitResponse",
+        "required": [
+          "name",
+          "id",
+          "user_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name or title of the outfit"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/OutfitNestedItemSchema"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items",
+            "description": "The wardrobe items that make up this outfit"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "format": "uuid"
+          },
+          "is_paused": {
+            "type": "boolean",
+            "title": "Is Paused",
+            "default": false,
+            "description": "Whether the outfit is currently paused"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "wear_count": {
+            "type": "number",
+            "title": "Wear Count",
+            "default": 0,
+            "description": "The total number of times this outfit has been worn"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Description of the outfit"
+          },
+          "is_archived": {
+            "type": "boolean",
+            "title": "Is Archived",
+            "default": false,
+            "description": "Whether the outfit is archived"
+          },
+          "last_worn_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Worn At",
+            "description": "The date when this outfit was last worn"
+          },
+          "parent_outfit_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Outfit Id",
+            "description": "The ID of the parent outfit if this was created from composition changes"
+          },
+          "is_composition_editable": {
+            "type": "boolean",
+            "title": "Is Composition Editable",
+            "default": true,
+            "description": "Whether the item composition of this outfit can be modified"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_outfit_details",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Outfits"
+          ]
+        }
+      },
+      "description": "Get details of a specific outfit.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "outfit_id"
+        ],
+        "properties": {
+          "outfit_id": {
+            "type": "string",
+            "title": "Outfit Id",
+            "format": "uuid"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "ImageSchema": {
+            "type": "object",
+            "title": "ImageSchema",
+            "required": [
+              "id",
+              "wardrobe_item_id",
+              "is_default_image"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "image_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Image Url"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "is_default_image": {
+                "type": "boolean",
+                "title": "Is Default Image"
+              },
+              "wardrobe_item_id": {
+                "type": "string",
+                "title": "Wardrobe Item Id",
+                "format": "uuid"
+              }
+            }
+          },
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          },
+          "OutfitNestedItemSchema": {
+            "type": "object",
+            "title": "OutfitNestedItemSchema",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The name of the wardrobe item"
+              },
+              "brand": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Brand",
+                "description": "The brand name of the item"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Color",
+                "description": "The primary color of the item"
+              },
+              "images": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/ImageSchema"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Images",
+                "description": "Images of this wardrobe item"
+              },
+              "category": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ItemCategoryEnum"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The category of the item (e.g., tops, bottoms, shoes)"
+              }
+            }
+          }
+        },
+        "title": "OutfitResponse",
+        "required": [
+          "name",
+          "id",
+          "user_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name or title of the outfit"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/OutfitNestedItemSchema"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items",
+            "description": "The wardrobe items that make up this outfit"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "format": "uuid"
+          },
+          "is_paused": {
+            "type": "boolean",
+            "title": "Is Paused",
+            "default": false,
+            "description": "Whether the outfit is currently paused"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "wear_count": {
+            "type": "number",
+            "title": "Wear Count",
+            "default": 0,
+            "description": "The total number of times this outfit has been worn"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Description of the outfit"
+          },
+          "is_archived": {
+            "type": "boolean",
+            "title": "Is Archived",
+            "default": false,
+            "description": "Whether the outfit is archived"
+          },
+          "last_worn_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Worn At",
+            "description": "The date when this outfit was last worn"
+          },
+          "parent_outfit_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Outfit Id",
+            "description": "The ID of the parent outfit if this was created from composition changes"
+          },
+          "is_composition_editable": {
+            "type": "boolean",
+            "title": "Is Composition Editable",
+            "default": true,
+            "description": "Whether the item composition of this outfit can be modified"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_outfit",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Outfits"
+          ]
+        }
+      },
+      "description": "Update an existing outfit.\n\nWhen modifying the item composition of an outfit that has been worn, a new outfit\nwill be automatically created with the updated composition. The original outfit\nand its wear history will be preserved. The response will include the new outfit\nID and a flag indicating whether a new outfit was created.\n\nExamples:\n- Updating unworn outfit composition: Returns updated outfit with new_outfit_created=False\n- Updating worn outfit composition: Returns new outfit with new_outfit_created=True\n- Updating outfit metadata only: Returns updated outfit with new_outfit_created=False",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "outfit_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name or title of the outfit"
+          },
+          "item_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "Item Ids",
+            "description": "The IDs of the wardrobe items to include in this outfit"
+          },
+          "is_paused": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Paused",
+            "description": "Whether the outfit is currently paused"
+          },
+          "outfit_id": {
+            "type": "string",
+            "title": "Outfit Id",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Description of the outfit"
+          },
+          "is_archived": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Archived",
+            "description": "Whether the outfit is archived"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "ImageSchema": {
+            "type": "object",
+            "title": "ImageSchema",
+            "required": [
+              "id",
+              "wardrobe_item_id",
+              "is_default_image"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "image_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Image Url"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "is_default_image": {
+                "type": "boolean",
+                "title": "Is Default Image"
+              },
+              "wardrobe_item_id": {
+                "type": "string",
+                "title": "Wardrobe Item Id",
+                "format": "uuid"
+              }
+            }
+          },
+          "OutfitResponse": {
+            "type": "object",
+            "title": "OutfitResponse",
+            "required": [
+              "name",
+              "id",
+              "user_id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The name or title of the outfit"
+              },
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/OutfitNestedItemSchema"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Items",
+                "description": "The wardrobe items that make up this outfit"
+              },
+              "user_id": {
+                "type": "string",
+                "title": "User Id",
+                "format": "uuid"
+              },
+              "is_paused": {
+                "type": "boolean",
+                "title": "Is Paused",
+                "default": false,
+                "description": "Whether the outfit is currently paused"
+              },
+              "created_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Created At"
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Updated At"
+              },
+              "wear_count": {
+                "type": "number",
+                "title": "Wear Count",
+                "default": 0,
+                "description": "The total number of times this outfit has been worn"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Description",
+                "description": "Description of the outfit"
+              },
+              "is_archived": {
+                "type": "boolean",
+                "title": "Is Archived",
+                "default": false,
+                "description": "Whether the outfit is archived"
+              },
+              "last_worn_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Last Worn At",
+                "description": "The date when this outfit was last worn"
+              },
+              "parent_outfit_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Parent Outfit Id",
+                "description": "The ID of the parent outfit if this was created from composition changes"
+              },
+              "is_composition_editable": {
+                "type": "boolean",
+                "title": "Is Composition Editable",
+                "default": true,
+                "description": "Whether the item composition of this outfit can be modified"
+              }
+            }
+          },
+          "ItemCategoryEnum": {
+            "enum": [
+              "tops",
+              "bottoms",
+              "top_layers",
+              "dresses",
+              "shoes",
+              "jewelry",
+              "accessories"
+            ],
+            "type": "string",
+            "title": "ItemCategoryEnum",
+            "description": "Categories optimized for professional wardrobe management."
+          },
+          "OutfitNestedItemSchema": {
+            "type": "object",
+            "title": "OutfitNestedItemSchema",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "description": "The name of the wardrobe item"
+              },
+              "brand": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Brand",
+                "description": "The brand name of the item"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Color",
+                "description": "The primary color of the item"
+              },
+              "images": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/ImageSchema"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Images",
+                "description": "Images of this wardrobe item"
+              },
+              "category": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ItemCategoryEnum"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The category of the item (e.g., tops, bottoms, shoes)"
+              }
+            }
+          }
+        },
+        "title": "OutfitUpdateResponse",
+        "required": [
+          "outfit"
+        ],
+        "properties": {
+          "outfit": {
+            "$ref": "#/$defs/OutfitResponse",
+            "description": "The updated or newly created outfit"
+          },
+          "new_outfit_created": {
+            "type": "boolean",
+            "title": "New Outfit Created",
+            "default": false,
+            "description": "Whether a new outfit was created due to composition changes on a worn outfit"
+          }
+        },
+        "description": "Response for outfit update operations that may create a new outfit when composition changes."
+      }
+    },
+    {
+      "name": "delete_outfit",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Outfits"
+          ]
+        }
+      },
+      "description": "Delete an existing outfit.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "outfit_id"
+        ],
+        "properties": {
+          "outfit_id": {
+            "type": "string",
+            "title": "Outfit Id",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_outfit_wear_history",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Outfits"
+          ]
+        }
+      },
+      "description": "Get wear history for a specific outfit.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "outfit_id"
+        ],
+        "properties": {
+          "outfit_id": {
+            "type": "string",
+            "title": "Outfit Id",
+            "format": "uuid"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "WearItemType": {
+            "enum": [
+              "item",
+              "outfit"
+            ],
+            "type": "string",
+            "title": "WearItemType",
+            "description": "Types of items that can be worn and tracked."
+          },
+          "WearRecordResponse": {
+            "type": "object",
+            "title": "WearRecordResponse",
+            "required": [
+              "id",
+              "user_id",
+              "item_type",
+              "item_id",
+              "worn_at",
+              "created_at"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "item_id": {
+                "type": "string",
+                "title": "Item Id",
+                "format": "uuid",
+                "description": "The ID of the item or outfit being worn"
+              },
+              "user_id": {
+                "type": "string",
+                "title": "User Id",
+                "format": "uuid"
+              },
+              "worn_at": {
+                "type": "string",
+                "title": "Worn At",
+                "format": "date-time",
+                "description": "The date and time when the item was worn"
+              },
+              "item_type": {
+                "$ref": "#/$defs/WearItemType",
+                "description": "The type of item being worn (wardrobe item or outfit)"
+              },
+              "created_at": {
+                "type": "string",
+                "title": "Created At",
+                "format": "date-time",
+                "description": "The date and time when this wear record was created"
+              }
+            }
+          }
+        },
+        "title": "WearHistoryResponse",
+        "required": [
+          "wear_records",
+          "wear_count"
+        ],
+        "properties": {
+          "wear_count": {
+            "type": "number",
+            "title": "Wear Count",
+            "description": "Total number of times the item or outfit has been worn"
+          },
+          "last_worn_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Worn At",
+            "description": "The date and time when the item or outfit was last worn"
+          },
+          "wear_records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/WearRecordResponse"
+            },
+            "title": "Wear Records",
+            "description": "List of wear records for the item or outfit"
+          }
+        }
+      }
+    },
+    {
+      "name": "record_wear",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "Wear Tracking"
+          ]
+        }
+      },
+      "description": "Record that an item or outfit was worn at a specific date/time. Will default to now if not provided.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "WearItemType": {
+            "enum": [
+              "item",
+              "outfit"
+            ],
+            "type": "string",
+            "title": "WearItemType",
+            "description": "Types of items that can be worn and tracked."
+          }
+        },
+        "required": [
+          "item_type",
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "format": "uuid",
+            "description": "The ID of the item or outfit being worn"
+          },
+          "worn_at": {
+            "type": "string",
+            "title": "Worn At",
+            "format": "date-time",
+            "description": "The date and time when the item was worn (defaults to current time if not provided)"
+          },
+          "item_type": {
+            "enum": [
+              "item",
+              "outfit"
+            ],
+            "type": "string",
+            "title": "WearItemType",
+            "description": "Types of items that can be worn and tracked."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "WearItemType": {
+            "enum": [
+              "item",
+              "outfit"
+            ],
+            "type": "string",
+            "title": "WearItemType",
+            "description": "Types of items that can be worn and tracked."
+          },
+          "WearRecordResponse": {
+            "type": "object",
+            "title": "WearRecordResponse",
+            "required": [
+              "id",
+              "user_id",
+              "item_type",
+              "item_id",
+              "worn_at",
+              "created_at"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "format": "uuid"
+              },
+              "item_id": {
+                "type": "string",
+                "title": "Item Id",
+                "format": "uuid",
+                "description": "The ID of the item or outfit being worn"
+              },
+              "user_id": {
+                "type": "string",
+                "title": "User Id",
+                "format": "uuid"
+              },
+              "worn_at": {
+                "type": "string",
+                "title": "Worn At",
+                "format": "date-time",
+                "description": "The date and time when the item was worn"
+              },
+              "item_type": {
+                "$ref": "#/$defs/WearItemType",
+                "description": "The type of item being worn (wardrobe item or outfit)"
+              },
+              "created_at": {
+                "type": "string",
+                "title": "Created At",
+                "format": "date-time",
+                "description": "The date and time when this wear record was created"
+              }
+            }
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/WearRecordResponse"
+            },
+            "title": "Response Record Wear"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:23:26.562620+00:00",
+    "source": "smithery"
+  }
+}

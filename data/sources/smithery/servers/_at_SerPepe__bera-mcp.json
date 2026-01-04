@@ -1,0 +1,149 @@
+{
+  "qualifiedName": "@SerPepe/bera-mcp",
+  "displayName": "Ask Bera",
+  "description": "Ask Bera MCP is a powerful Model Context Protocol (MCP) server that gives AI agents instant access to the entire Berachain ecosystem. Built with RAG (Retrieval Augmented Generation), it's like having a knowledgeable bear by your side that never forgets where the honey is\u2014or in this case, where all the documentation lives!\n\nWhether you're building DeFi protocols, integrating oracles, or deploying smart contracts, Bera MCP helps you find answers faster than you can say \"Honey!\" \ud83c\udf6f",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/51dba1c7-2016-4cfa-8d07-25362e6fc73a.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@SerPepe/bera-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@SerPepe/bera-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "openrouterApiKey",
+          "upstashUrl",
+          "upstashToken"
+        ],
+        "properties": {
+          "topK": {
+            "type": "integer",
+            "description": "Number of top results to retrieve for RAG queries. Optional, defaults to 5. Can also be set via TOP_K environment variable.",
+            "exclusiveMinimum": 0
+          },
+          "llmModel": {
+            "type": "string",
+            "description": "LLM model to use for generating answers. Optional, defaults to \"google/gemini-2.5-flash-preview-09-2025\". Can also be set via LLM_MODEL environment variable."
+          },
+          "chunkSize": {
+            "type": "integer",
+            "description": "Document chunk size for indexing. Optional, defaults to 1000. Can also be set via CHUNK_SIZE environment variable.",
+            "exclusiveMinimum": 0
+          },
+          "upstashUrl": {
+            "type": "string",
+            "description": "Your Upstash Vector REST URL. Required if UPSTASH_VECTOR_REST_URL environment variable is not set. Get your URL from your Upstash dashboard."
+          },
+          "chunkOverlap": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Document chunk overlap for indexing. Optional, defaults to 200. Can also be set via CHUNK_OVERLAP environment variable."
+          },
+          "upstashToken": {
+            "type": "string",
+            "description": "Your Upstash Vector REST token. Required if UPSTASH_VECTOR_REST_TOKEN environment variable is not set. Get your token from your Upstash dashboard."
+          },
+          "openrouterApiKey": {
+            "type": "string",
+            "description": "Your OpenRouter API key. Required if OPENROUTER_API_KEY environment variable is not set. Get your key from https://openrouter.ai/keys"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_docs",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search Berachain documentation and guides using semantic search. Returns the most relevant document chunks with their metadata including file paths and section titles.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "topK": {
+            "type": "number",
+            "default": 5,
+            "description": "Number of results to return (default: 5)"
+          },
+          "query": {
+            "type": "string",
+            "description": "The search query to find relevant documentation"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_doc_section",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve a specific documentation section by file path. Useful when you know the exact location of the documentation you need.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "filePath",
+          "repo"
+        ],
+        "properties": {
+          "repo": {
+            "enum": [
+              "docs",
+              "guides",
+              "local"
+            ],
+            "type": "string",
+            "description": "The repository name: \"docs\", \"guides\", or \"local\""
+          },
+          "filePath": {
+            "type": "string",
+            "description": "The relative file path of the documentation file (e.g., \"core/getting-started.md\")"
+          }
+        }
+      }
+    },
+    {
+      "name": "ask_berachain",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Ask any question about Berachain development and get an AI-powered answer. This wizard tool uses RAG to search documentation and generates comprehensive, contextual answers using an LLM. Perfect for getting help with Berachain concepts, code examples, integration guides, and more.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "properties": {
+          "question": {
+            "type": "string",
+            "description": "The question about Berachain development"
+          },
+          "maxContextChunks": {
+            "type": "number",
+            "default": 5,
+            "description": "Maximum number of document chunks to use as context (default: 5)"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:25:49.002670+00:00",
+    "source": "smithery"
+  }
+}

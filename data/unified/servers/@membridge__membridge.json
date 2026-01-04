@@ -1,0 +1,159 @@
+{
+  "id": "@membridge/membridge",
+  "name": "@membridge/membridge",
+  "display_name": "Memory MCP Server",
+  "version": null,
+  "description": "MemBridge Memory MCP Server allows you to share your memory across multiple AI tools like Claude, ChatGPT, Cursor, and more. You save information once, and it becomes accessible from any AI tool you use. This eliminates the need to repeat the same context every time you switch tools.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/d74c0174-8a65-4f76-9902-45c5063caa00.svg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "MemBridge_list_records",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Retrieve a comprehensive list of all MemBridge Memory Records stored for the authenticated user. MemBridge Memory Records contain information that users have explicitly saved for future reference, such as personal preferences, project details, important facts, decisions, ongoing work, and cross-session context. Returns each memory record's ID, title, content preview, creation timestamp, and size. Memory records are sorted by creation date (newest first). This is the primary tool for discovering what memory records exist and obtaining their IDs for further operations like retrieve_record or delete_record.\n\nContext optimization: Set titleOnly to true to retrieve only titles and metadata without content, reducing context usage while searching for relevant records.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "titleOnly": {
+            "type": "boolean",
+            "description": "When true, returns only memory record titles and metadata without content, saving context tokens during record discovery. Default: false."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "MemBridge_create_record",
+      "annotations": {
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create and save a new MemBridge Memory Record when the user explicitly requests to save information for future reference. Records persist across chat sessions and AI tools.\n\nTypes of information users may want to save:\n\u2022 User preferences and personal details (favorite languages, frameworks, coding style, work hours, timezone)\n\u2022 Project-specific information (architecture decisions, naming conventions, tech stack, API endpoints, database schemas)\n\u2022 Important facts and context (business rules, domain knowledge, recurring tasks, team structure)\n\u2022 Decisions and rationale (why certain approaches were chosen, what alternatives were considered)\n\u2022 Ongoing work and progress (current tasks, blockers, next steps, incomplete features)\n\u2022 User instructions and guidelines (how they prefer code to be written, what to avoid, communication preferences)\n\u2022 Repeated information (if a user mentions something important multiple times)\n\u2022 Cross-session context (information that should be remembered for future conversations)\n\nBest practices for record organization:\n\u2022 Keep each record focused on a single topic or category (e.g., separate records for 'Work schedule' and 'Coffee preferences' rather than one 'Personal info' record)\n\u2022 You can call this tool multiple times to create separate records for different topics - this is encouraged for better organization\n\u2022 Splitting information into multiple records makes it easier to find, update, and delete specific information later\n\u2022 Well-organized records improve searchability and reduce the need to read through irrelevant information\n\u2022 Aim for records that are detailed enough to be useful but focused enough to have a clear purpose\n\nEach record is assigned a unique UUID and can be updated, retrieved, or deleted later. Subject to storage limits based on the user's plan. Use this tool only when the user asks to save, remember, or store information.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "title",
+          "content"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "A concise, descriptive title that clearly identifies what this record contains (e.g., 'My work schedule and timezone', 'Favorite coffee order', 'Weekly team meeting notes')"
+          },
+          "content": {
+            "type": "string",
+            "description": "The detailed information to preserve. Be specific and include relevant context. Examples: 'I work in PST timezone (UTC-8) and prefer morning meetings before 11 AM. I'm usually unavailable on Wednesdays.', 'I like oat milk lattes with one pump of vanilla, no sugar. Medium size preferred.', 'For coding projects: I prefer detailed explanations over quick fixes. Always ask before making major changes.'"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "MemBridge_update_record",
+      "annotations": {
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update an existing MemBridge Memory Record's content and title while preserving the original creation timestamp. The updated timestamp will be refreshed. Useful for consolidating related information, refining outdated details, or correcting inaccurate memory records. Use this when you need to modify existing information rather than creating a duplicate entry.\n\nBest practices for updating records:\n\u2022 Keep each record focused on a single topic or category for easier management\n\u2022 If the update introduces significantly different information, consider creating a separate record instead\n\u2022 Well-organized, topic-focused records are easier to find, update, and delete later",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "memoryId",
+          "title",
+          "content"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "New title for the memory record"
+          },
+          "content": {
+            "type": "string",
+            "description": "New content for the memory record"
+          },
+          "memoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier (UUID) of the MemBridge Memory Record to update. Obtain this from list_record results."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "MemBridge_retrieve_record",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Retrieve the full content and metadata of a specific MemBridge Memory Record by its ID. MemBridge Memory Records contain information that users have explicitly saved for future reference, such as personal preferences, project details, important facts, decisions, ongoing work, and cross-session context. Returns the complete memory record including title, content, creation timestamp, and last update timestamp. Use this when you need to access the detailed information of a particular MemBridge Memory Record that you've identified through list_record or that the user has referenced.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "memoryId"
+        ],
+        "properties": {
+          "memoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier (UUID) of the MemBridge Memory Record to retrieve. You can obtain this from list_record results."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "MemBridge_delete_record",
+      "annotations": {
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Permanently delete a specific MemBridge Memory Record by its ID. This action is irreversible and will completely remove the memory record from storage. Use this when information becomes outdated, incorrect, or is no longer needed. Always confirm with the user before deleting important memory records.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "memoryId"
+        ],
+        "properties": {
+          "memoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier (UUID) of the MemBridge Memory Record to delete. Obtain this from list_record results."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 5,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@membridge/membridge/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "MemBridge_list_records",
+    "MemBridge_create_record",
+    "MemBridge_update_record",
+    "MemBridge_retrieve_record",
+    "MemBridge_delete_record"
+  ]
+}

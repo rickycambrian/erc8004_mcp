@@ -1,0 +1,1574 @@
+{
+  "id": "@elijahdev0/mcp-runware",
+  "name": "@elijahdev0/mcp-runware",
+  "display_name": "mcp-runware",
+  "version": null,
+  "description": "Create high-quality images and videos fast from text or reference images. Personalize subjects, upscale, remove backgrounds, generate captions, and auto-mask faces, hands, and people. Upload local files or URLs, discover suitable models, and get shareable links to your results.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "imageInference",
+      "description": "\n    Generate an image using Runware's image inference API with all available parameters.\n    If user provides an image and asks to generate an image based on it, then use model \"bytedance:4@1\", and use seedImage parameter to pass the reference image.\n\n    This function accepts all IImageInference parameters directly and generates images\n    using the Runware API directly via HTTP requests. It supports the full range of parameters including basic\n    settings, advanced features, and specialized configurations.\n\n    Note: Display the url of the image inside the chat\n\n    IMPORTANT: For image inputs (seedImage, referenceImages, maskImage), only accept:\n    1. Publicly available URLs (e.g., \"https://example.com/image.jpg\")\n    2. File paths that can be processed by imageUpload tool first\n    3. Runware UUIDs from previously uploaded images\n    \n    Workflow: If user provides a local file path, first use imageUpload to get a Runware UUID, then use that UUID here.\n    \n    Args:\n        positivePrompt (str): Text instruction to guide the model on generating the image, If you wish to generate an image without any prompt guidance, you can use the special token __BLANK__\n        model (str): Model identifier (default: \"civitai:943001@1055701\")\n        height (int): Image height (128-2048, divisible by 64, default: 1024)\n        width (int): Image width (128-2048, divisible by 64, default: 1024)\n        numberResults (int): Number of images to generate (1-20, default: 1). If user says \"generate 4 images ...\" then numberResults should be 4, says \"create 2 images ... \" then numberResults should be 2, etc.\n        steps (int, optional): number of iterations the model will perform to generate the image (1-100, default: 20). The higher the number of steps, the more detailed the image will be\n        CFGScale (float, optional): Represents how closely the images will resemble the prompt or how much freedom the AI model has (0-50, default: 7). Higher values are closer to the prompt. Low values may reduce the quality of the results.\n        negativePrompt (str, optional): Negative guidance text. This parameter helps to avoid certain undesired results\n        seed (int, optional): Random seed for reproducible results\n        scheduler (str, optional): Inference scheduler. You can access list of available schedulers here https://runware.ai/docs/en/image-inference/schedulers\n        outputType (str, optional): Specifies the output type in which the image is returned ('URL', 'dataURI', 'base64Data', default: 'URL')\n        outputFormat (str, optional): Specifies the format of the output image ('JPG', 'PNG', 'WEBP', default: 'JPG')\n        checkNSFW(bool, optional): Enable NSFW content check. When enabled, the API will check if the image contains NSFW (not safe for work) content. This check is done using a pre-trained model that detects adult content in images. (default: false)\n        strength (float, optional): When doing image-to-image or inpainting, this parameter is used to determine the influence of the seedImage image in the generated output. A lower value results in more influence from the original image, while a higher value allows more creative deviation. (0-1, default: 0.8)\n        clipSkip (int, optional): Defines additional layer skips during prompt processing in the CLIP model. Some models already skip layers by default, this parameter adds extra skips on top of those. (0-2)\n        promptWeighting (str, optional): Prompt weighting method ('compel', 'sdEmbeds')\n        includeCost (bool, optional): Include cost in response (default: false)\n        vae (str, optional): VAE (Variational Autoencoder) model identifier\n        maskMargin (int, optional): Adds extra context pixels around the masked region during inpainting (32-128)\n        outputQuality (int, optional): Sets the compression quality of the output image. Higher values preserve more quality but increase file size, lower values reduce file size but decrease quality. (20-99, default: 95)\n        taskUUID (UUID, optional): Unique task identifier\n        uploadEndpoint (str, optional): Specifies a URL where the generated content will be automatically uploaded using the HTTP PUT method such as Cloud storage, Webhook services, CDN integration. The content data will be sent as the request body, allowing your endpoint to receive and process the generated image or video immediately upon completion.\n        seedImage (str, optional): When doing image-to-image, inpainting or outpainting, this parameter is required. Specifies the seed image to be used for the diffusion process. ACCEPTS ONLY: Public URLs, Runware UUIDs, or file paths (use imageUpload first to get UUID). Supported formats are: PNG, JPG and WEBP\n        referenceImages (List[str], optional): An array containing reference images used to condition the generation process. These images provide visual guidance to help the model generate content that aligns with the style, composition, or characteristics of the reference materials. ACCEPTS ONLY: Public URLs, Runware UUIDs, or file paths (use imageUpload first to get UUID).\n        maskImage (str, optional): When doing inpainting, this parameter is required. Specifies the mask image to be used for the inpainting process. ACCEPTS ONLY: Public URLs, Runware UUIDs, or file paths (use imageUpload first to get UUID). Supported formats are: PNG, JPG and WEBP.\n        acceleratorOptions (Dict[str, Any], optional): Advanced caching mechanisms to significantly speed up image generation by reducing redundant computation. teaCache  - {\"teaCache\": true  - Enables TeaCache for transformer-based models (e.g., Flux, SD 3) to accelerate iterative editing (default: false), \"teaCacheDistance\": 0.5  - Controls TeaCache reuse aggressiveness (0\u20131, default: 0.5); lower = better quality, higher = better speed} or deepCache- {\"deepCache\": true  - Enables DeepCache for UNet-based models (e.g., SDXL, SD 1.5) to cache internal feature maps for faster generation (default: false), \"deepCacheInterval\": 3  - Step interval between caching operations (min: 1, default: 3); higher = faster, lower = better quality, \"deepCacheBranchId\": 0  - Network branch index for caching depth (min: 0, default: 0); lower = faster, higher = more quality-preserving}\n        advancedFeatures (Dict[str, Any], optional): Advanced generation features and is only available for the FLUX model architecture  \"advancedFeatures\": { \"layerDiffuse\": true}\n        controlNet (List[Dict[str, Any]], optional): ControlNet provides a guide image to help the model generate images that align with the desired structure ControlNet configurations are \"controlNet\": [{\"model\": \"string\"  - ControlNet model ID (standard or AIR), \"guideImage\": \"string\"  - guide image (Public URLs, Runware UUIDs, or file paths - use imageUpload first to get UUID), \"weight\": 1.0  - strength of guidance (0\u20131, default 1), \"startStep\": 1  - step to start guidance, \"endStep\": 20  - step to end guidance, \"startStepPercentage\": 0  - alternative to startStep (0\u201399), \"endStepPercentage\": 100  - alternative to endStep (start+1\u2013100), \"controlMode\": \"balanced\"  - guide vs. prompt priority (\"prompt\", \"controlnet\", \"balanced\")}]\n        lora (List[Dict[str, Any]], optional): LoRA (Low-Rank Adaptation) to adapt a model to specific styles or features by emphasizing particular aspects of the data. model configurations \"lora\": [{\"model\": \"string\"  - AIR identifier of the LoRA model used to adapt style or features (e.g., \"civitai:132942@146296\"), \"weight\": 1.0  - Strength of the LoRA's influence (-4 to 4, default: 1); positive to apply style, negative to suppress it}]\n\n        lycoris (List[Dict[str, Any]], optional): LyCORIS model configurations \"lycoris {\"model\": model, \"weight\": weight}\n        embeddings (List[Dict[str, Any]], optional): Textual inversion embeddings\n        ipAdapters (List[Dict[str, Any]], optional):IP-Adapters enable image-prompted generation, allowing you to use reference images to guide the style and content of your generations. Multiple IP Adapters can be used simultaneously. IP-Adapter configurations \"ipAdapters\": [{\"model\": \"string\"  - AIR identifier of the IP-Adapter model used for image-based guidance (e.g., \"runware:55@2\"), \"guideImage\": \"string\"  - Reference image in Public URLs, Runware UUIDs, or file paths (use imageUpload first to get UUID) format (PNG/JPG/WEBP) to steer style/content, \"weight\": 1.0  - Influence strength (0\u20131, default: 1); 0 disables, 1 applies full guidance}]\n        refiner (Dict[str, Any], optional): Refiner models help create higher quality image outputs by incorporating specialized models designed to enhance image details and overall coherence. Refiner model configuration \"refiner\": {\"model\": \"string\"  - AIR identifier of the SDXL-based refiner model (e.g., \"civitai:101055@128080\") used to enhance quality and detail, \"startStep\": 30  - Step at which the refiner begins processing (min: 2, max: total steps), or use \"startStepPercentage\" instead (1\u201399) for percentage-based control}\n\n        outpaint (Dict[str, Any], optional): Outpainting configuration. Extends the image boundaries in specified directions. When using outpaint, you must provide the final dimensions using width and height parameters, which should account for the original image size plus the total extension (seedImage dimensions + top + bottom, left + right) \"outpaint\": {\"top\": 256  - Pixels to extend at the top (min: 0, multiple of 64), \"right\": 128  - Pixels to extend at the right (min: 0, multiple of 64), \"bottom\": 256  - Pixels to extend at the bottom (min: 0, multiple of 64), \"left\": 128  - Pixels to extend at the left (min: 0, multiple of 64), \"blur\": 16  - Blur radius (0\u201332, default: 0) to smooth transition between original and extended areas}\n\n        instantID (Dict[str, Any], optional): InstantID configuration for identity-preserving image generation. \"instantID\": {\"inputImage\": \"string\" - Reference image for identity preservation (Public URLs, Runware UUIDs, or file paths - use imageUpload first to get UUID) in PNG/JPG/WEBP format, \"poseImage\": \"string\" - Pose reference image for pose guidance (Public URLs, Runware UUIDs, or file paths - use imageUpload first to get UUID) in PNG/JPG/WEBP format}\n        acePlusPlus (Dict[str, Any], optional): acePlusPlus/ ACE++ for character-consistent generation. \"acePlusPlus\": {\"type\": \"portrait\"  - Task type (\"portrait\", \"subject\", \"local_editing\") for style or region-specific editing, \"inputImages\": [\"string\"]  - Reference image for identity/style preservation (Public URLs, Runware UUIDs, or file paths - use imageUpload first to get UUID), \"inputMasks\": [\"string\"]  - Mask image for targeted edits (white = edit, black = preserve), only used in local_editing, \"repaintingScale\": 0.5  - Controls balance between identity (0) and prompt adherence (1), default: 0}\n        extraArgs (Dict[str, Any], optional): Extra arguments for the request\n    \n    Returns:\n        dict: A dictionary containing the generation result with status, message, result data, parameters, and URL\n        \n    Example:\n        >>> result = await imageInference(\n        ...     positivePrompt=\"A beautiful sunset over mountains\",\n        ...     width=1024,\n        ...     height=1024\n        ... )\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "imageInferenceArguments",
+        "required": [
+          "positivePrompt"
+        ],
+        "properties": {
+          "vae": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vae",
+            "default": null
+          },
+          "lora": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lora",
+            "default": null
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "default": null
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": "civitai:943001@1055701"
+          },
+          "steps": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steps",
+            "default": 20
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "default": 1024
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "default": 1024
+          },
+          "lycoris": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lycoris",
+            "default": null
+          },
+          "refiner": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refiner",
+            "default": null
+          },
+          "CFGScale": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cfgscale",
+            "default": null
+          },
+          "clipSkip": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clipskip",
+            "default": null
+          },
+          "outpaint": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outpaint",
+            "default": null
+          },
+          "strength": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strength",
+            "default": null
+          },
+          "taskUUID": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taskuuid",
+            "default": null
+          },
+          "checkNSFW": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checknsfw",
+            "default": null
+          },
+          "extraArgs": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraargs",
+            "default": null
+          },
+          "instantID": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instantid",
+            "default": null
+          },
+          "maskImage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maskimage",
+            "default": null
+          },
+          "scheduler": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduler",
+            "default": null
+          },
+          "seedImage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seedimage",
+            "default": null
+          },
+          "controlNet": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Controlnet",
+            "default": null
+          },
+          "embeddings": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embeddings",
+            "default": null
+          },
+          "ipAdapters": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ipadapters",
+            "default": null
+          },
+          "maskMargin": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maskmargin",
+            "default": null
+          },
+          "outputType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputtype",
+            "default": null
+          },
+          "acePlusPlus": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aceplusplus",
+            "default": null
+          },
+          "includeCost": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Includecost",
+            "default": null
+          },
+          "outputFormat": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputformat",
+            "default": null
+          },
+          "numberResults": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numberresults",
+            "default": 1
+          },
+          "outputQuality": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputquality",
+            "default": null
+          },
+          "negativePrompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Negativeprompt",
+            "default": null
+          },
+          "positivePrompt": {
+            "type": "string",
+            "title": "Positiveprompt"
+          },
+          "uploadEndpoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uploadendpoint",
+            "default": null
+          },
+          "promptWeighting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promptweighting",
+            "default": null
+          },
+          "referenceImages": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenceimages",
+            "default": null
+          },
+          "advancedFeatures": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Advancedfeatures",
+            "default": null
+          },
+          "acceleratorOptions": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acceleratoroptions",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "imageInferenceOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "photoMaker",
+      "description": "\n    Transform and style images using PhotoMaker's advanced personalization technology.\n    Create consistent, high-quality image variations with precise subject fidelity and style control.\n\n    This function enables instant subject personalization without additional training. By providing up to\n    four reference images, you can generate new images that maintain subject fidelity while applying\n    various styles and compositions.\n\n    IMPORTANT: For inputImages, only accept:\n    1. Publicly available URLs (e.g., \"https://example.com/image.jpg\")\n    2. File paths that can be processed by imageUpload tool first\n    3. Runware UUIDs from previously uploaded images\n    \n    Workflow: If user provides a local file path, first use imageUpload to get a Runware UUID, then use that UUID here.\n\n    Args:\n        positivePrompt (str): Text instruction to guide the model (2-300 chars). The trigger word 'rwre' will be automatically prepended if not included in the prompt.\n        inputImages (List[str]): 1-4 reference images of the subject. ACCEPTS ONLY: Public URLs, Runware UUIDs, or file paths (use imageUpload first to get UUID). Must contain clear faces for best results.\n        model (str): SDXL-based model identifier (default: \"civitai:139562@344487\" - RealVisXL V4.0)\n        height (int): Image height (128-2048, divisible by 64, default: 1024)\n        width (int): Image width (128-2048, divisible by 64, default: 1024)\n        style (str): Artistic style to apply (\"No Style\", \"Cinematic\", \"Disney Character\", \"Digital Art\", \"Photographic\", \"Fantasy art\", \"Neonpunk\", \"Enhance\", \"Comic book\", \"Lowpoly\", \"Line art\")\n        strength (int): Balance between subject fidelity and transformation (15-50, default: 15). Lower values provide stronger subject fidelity.\n        numberResults (int): Number of images to generate (1-20, default: 1)\n        steps (int): Number of inference iterations (1-100, default: 20)\n        CFGScale (float): How closely images match the prompt (0-50, default: 7)\n        negativePrompt (str, optional): Text to guide what to avoid in generation\n        scheduler (str, optional): Inference scheduler name\n        outputType (str, optional): Output format ('URL', 'dataURI', 'base64Data', default: 'URL')\n        outputFormat (str, optional): Image format ('JPG', 'PNG', 'WEBP', default: 'JPG')\n        outputQuality (int, optional): Output image quality (20-99, default: 95)\n        uploadEndpoint (str, optional): URL for automatic upload of generated content\n        checkNSFW (bool, optional): Enable NSFW content check\n        includeCost (bool, optional): Include generation cost in response\n        taskUUID (UUID, optional): Unique task identifier\n        clipSkip (int, optional): Additional CLIP model layer skips (0-2)\n        seed (int, optional): Random seed for reproducible results\n\n    Returns:\n        dict: A dictionary containing the generation result with status, message, result data,\n        parameters, and both image data for direct display and URLs.\n        \n    Example:\n        >>> result = await photoMaker(\n        ...     positivePrompt=\"A professional headshot\",\n        ...     inputImages=[\"path/to/reference.jpg\"],\n        ...     style=\"Photographic\"\n        ... )\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "photoMakerArguments",
+        "required": [
+          "positivePrompt",
+          "inputImages"
+        ],
+        "properties": {
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "default": null
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": "civitai:139562@344487"
+          },
+          "steps": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steps",
+            "default": 20
+          },
+          "style": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style",
+            "default": "No Style"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "default": 1024
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "default": 1024
+          },
+          "CFGScale": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cfgscale",
+            "default": 7
+          },
+          "clipSkip": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clipskip",
+            "default": null
+          },
+          "strength": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strength",
+            "default": 15
+          },
+          "taskUUID": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taskuuid",
+            "default": null
+          },
+          "checkNSFW": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checknsfw",
+            "default": null
+          },
+          "scheduler": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduler",
+            "default": null
+          },
+          "outputType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputtype",
+            "default": null
+          },
+          "includeCost": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Includecost",
+            "default": null
+          },
+          "inputImages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Inputimages"
+          },
+          "outputFormat": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputformat",
+            "default": null
+          },
+          "numberResults": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numberresults",
+            "default": 1
+          },
+          "outputQuality": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputquality",
+            "default": 95
+          },
+          "negativePrompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Negativeprompt",
+            "default": null
+          },
+          "positivePrompt": {
+            "type": "string",
+            "title": "Positiveprompt"
+          },
+          "uploadEndpoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uploadendpoint",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "photoMakerOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "imageUpscale",
+      "description": "\n    Enhance the resolution and quality of images using Runware's advanced upscaling API.\n    Transform low-resolution images into sharp, high-definition visuals.\n\n    This function enables high-quality image upscaling with support for various input formats\n    and flexible output options. The maximum output size is 4096x4096 pixels - larger inputs\n    will be automatically resized to maintain this limit.\n\n    IMPORTANT: For inputImage, only accept:\n    1. Publicly available URLs (e.g., \"https://example.com/image.jpg\")\n    2. File paths that can be processed by imageUpload tool first\n    3. Runware UUIDs from previously uploaded images\n    \n    Workflow: If user provides a local file path, first use imageUpload to get a Runware UUID, then use that UUID here.\n\n    Args:\n        inputImage (str): Image to upscale. ACCEPTS ONLY: Public URLs, Runware UUIDs, or file paths (use imageUpload first to get UUID). Supported formats: PNG, JPG, WEBP\n        upscaleFactor (int): Level of upscaling (2-4). Each level multiplies image size by that factor.For example, factor 2 doubles the image size. (default: 2)\n        outputType (str, optional): Output format ('URL', 'dataURI', 'base64Data', default: 'URL')\n        outputFormat (str, optional): Image format ('JPG', 'PNG', 'WEBP', default: 'JPG').  Note: PNG required for transparency.\n        outputQuality (int, optional): Output image quality (20-99, default: 95)\n        includeCost (bool, optional): Include generation cost in response\n        taskUUID (UUID, optional): Unique task identifier\n\n    Returns:\n        dict: A dictionary containing the upscaling result with status, message, result data,\n        parameters, and both image data for direct display and URLs.\n\n    Note:\n        Maximum output size is 4096x4096. If input size * upscaleFactor would exceed this,\n        the input is automatically resized first. Example: 2048x2048 with factor 4 is reduced\n        to 1024x1024 before upscaling.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "imageUpscaleArguments",
+        "required": [
+          "inputImage"
+        ],
+        "properties": {
+          "taskUUID": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taskuuid",
+            "default": null
+          },
+          "inputImage": {
+            "type": "string",
+            "title": "Inputimage"
+          },
+          "outputType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputtype",
+            "default": null
+          },
+          "includeCost": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Includecost",
+            "default": null
+          },
+          "outputFormat": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputformat",
+            "default": null
+          },
+          "outputQuality": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputquality",
+            "default": 95
+          },
+          "upscaleFactor": {
+            "type": "integer",
+            "title": "Upscalefactor",
+            "default": 2
+          }
+        }
+      }
+    },
+    {
+      "name": "imageBackgroundRemoval",
+      "description": "\n    Remove backgrounds from images effortlessly using Runware's low-cost image editing API.\n    Isolate subjects from their backgrounds, creating images with transparent backgrounds.\n\n    This function enables high-quality background removal with support for various input formats\n    and advanced settings like alpha matting for enhanced edge quality.\n\n    IMPORTANT: For inputImage, only accept:\n    1. Publicly available URLs (e.g., \"https://example.com/image.jpg\")\n    2. File paths that can be processed by imageUpload tool first\n    3. Runware UUIDs from previously uploaded images\n    \n    Workflow: If user provides a local file path, first use imageUpload to get a Runware UUID, then use that UUID here.\n\n    Args:\n        inputImage (str): Image to process. ACCEPTS ONLY: Public URLs, Runware UUIDs, or file paths (use imageUpload first to get UUID). Supported formats: PNG, JPG, WEBP\n        model (str): Background removal model to use (default: \"runware:109@1\" - RemBG 1.4)\n            Available models:\n            - runware:109@1: RemBG 1.4\n            - runware:110@1: Bria RMBG 2.0\n            - runware:112@1: BiRefNet v1 Base\n            - runware:112@2: BiRefNet v1 Base - COD\n            - runware:112@3: BiRefNet Dis\n            - runware:112@5: BiRefNet General\n            - runware:112@6: BiRefNet General Resolution 512x512 FP16\n            - runware:112@7: BiRefNet HRSOD DHU\n            - runware:112@8: BiRefNet Massive TR DIS5K TR TES\n            - runware:112@9: BiRefNet Matting\n            - runware:112@10: BiRefNet Portrait\n        outputType (str, optional): Output format ('URL', 'dataURI', 'base64Data', default: 'URL')\n        outputFormat (str, optional): Image format ('JPG', 'PNG', 'WEBP', default: 'PNG')\n        outputQuality (int, optional): Output image quality (20-99, default: 95)\n        includeCost (bool, optional): Include generation cost in response\n        taskUUID (UUID, optional): Unique task identifier\n        settings (Dict[str, Any], optional): Advanced settings (RemBG 1.4 model only):\n            - rgba: [r, g, b, a] Background color and transparency (default: [255, 255, 255, 0])\n            - postProcessMask (bool): Enable mask post-processing (default: False)\n            - returnOnlyMask (bool): Return only the mask instead of processed image (default: False)\n            - alphaMatting (bool): Enable alpha matting for better edges (default: False)\n            - alphaMattingForegroundThreshold (int): Foreground threshold 1-255 (default: 240)\n            - alphaMattingBackgroundThreshold (int): Background threshold 1-255 (default: 10)\n            - alphaMattingErodeSize (int): Edge smoothing size 1-255 (default: 10)\n\n    Returns:\n        dict: A dictionary containing the background removal result with status, message,\n        result data, parameters, and both image data for direct display and URLs.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "imageBackgroundRemovalArguments",
+        "required": [
+          "inputImage"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": "runware:109@1"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Settings",
+            "default": null
+          },
+          "taskUUID": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taskuuid",
+            "default": null
+          },
+          "inputImage": {
+            "type": "string",
+            "title": "Inputimage"
+          },
+          "outputType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputtype",
+            "default": null
+          },
+          "includeCost": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Includecost",
+            "default": null
+          },
+          "outputFormat": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputformat",
+            "default": "PNG"
+          },
+          "outputQuality": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputquality",
+            "default": 95
+          }
+        }
+      }
+    },
+    {
+      "name": "imageCaption",
+      "description": "\n    Generate image descriptions using Runware's API. Analyzes images to produce accurate\n    and concise captions that can be used to create additional images or provide detailed\n    insights into visual content.\n\n    This function enables AI-powered image analysis to generate descriptive text prompts\n    from images. It's useful for understanding image content or generating prompts for\n    further image creation.\n\n    IMPORTANT: For inputImage, only accept:\n    1. Publicly available URLs (e.g., \"https://example.com/image.jpg\")\n    2. File paths that can be processed by imageUpload tool first\n    3. Runware UUIDs from previously uploaded images\n    \n    Workflow: If user provides a local file path, first use imageUpload to get a Runware UUID, then use that UUID here.\n\n    Args:\n        inputImage (str): Image to analyze. ACCEPTS ONLY: Public URLs, Runware UUIDs, or file paths (use imageUpload first to get UUID). Supported formats: PNG, JPG, WEBP\n        includeCost (bool, optional): Include generation cost in response\n        taskUUID (UUID, optional): Unique task identifier\n\n    Returns:\n        dict: A dictionary containing the caption generation result with status, message,\n        result data (including the generated text), and cost if requested.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "imageCaptionArguments",
+        "required": [
+          "inputImage"
+        ],
+        "properties": {
+          "taskUUID": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taskuuid",
+            "default": null
+          },
+          "inputImage": {
+            "type": "string",
+            "title": "Inputimage"
+          },
+          "includeCost": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Includecost",
+            "default": null
+          }
+        }
+      }
+    },
+    {
+      "name": "imageMasking",
+      "description": "\n    Generate precise masks automatically for faces, hands, and people using AI detection.\n    Enhance your inpainting workflow with smart, automated masking features.\n\n    This function provides intelligent detection and mask generation for specific elements\n    in images, particularly optimized for faces, hands, and people. Built on advanced\n    detection models, it enhances the inpainting workflow by automatically creating\n    precise masks around detected elements.\n\n    IMPORTANT: For inputImage, only accept:\n    1. Publicly available URLs (e.g., \"https://example.com/image.jpg\")\n    2. File paths that can be processed by imageUpload tool first\n    3. Runware UUIDs from previously uploaded images\n    \n    Workflow: If user provides a local file path, first use imageUpload to get a Runware UUID, then use that UUID here.\n\n    Args:\n        inputImage (str): Image to process. ACCEPTS ONLY: Public URLs, Runware UUIDs, or file paths (use imageUpload first to get UUID). Supported formats: PNG, JPG, WEBP\n        model (str): Detection model to use:\n            Face Detection Models:\n            - \"runware:35@1\" - face_yolov8n: Lightweight model for 2D/realistic face detection\n            - \"runware:35@2\" - face_yolov8s: Enhanced face detection with improved accuracy\n            - \"runware:35@6\" - mediapipe_face_full: Specialized for realistic face detection\n            - \"runware:35@7\" - mediapipe_face_short: Optimized face detection with reduced complexity\n            - \"runware:35@8\" - mediapipe_face_mesh: Advanced face detection with mesh mapping\n            \n            Specialized Face Features:\n            - \"runware:35@9\" - mediapipe_face_mesh_eyes_only: Focused detection of eye regions\n            - \"runware:35@15\" - eyes_mesh_mediapipe: Specialized eyes detection\n            - \"runware:35@13\" - nose_mesh_mediapipe: Specialized nose detection\n            - \"runware:35@14\" - lips_mesh_mediapipe: Specialized lips detection\n            - \"runware:35@10\" - eyes_lips_mesh: Detection of eyes and lips areas\n            - \"runware:35@11\" - nose_eyes_mesh: Detection of nose and eyes areas\n            - \"runware:35@12\" - nose_lips_mesh: Detection of nose and lips areas\n            \n            Hand & Person Detection:\n            - \"runware:35@3\" - hand_yolov8n: Specialized for 2D/realistic hand detection\n            - \"runware:35@4\" - person_yolov8n-seg: Person detection and segmentation\n            - \"runware:35@5\" - person_yolov8s-seg: Advanced person detection with higher precision\n        confidence (float, optional): Confidence threshold (0-1, default: 0.25).\n            Lower values detect more objects but may introduce false positives.\n        maxDetections (int, optional): Maximum elements to detect (1-20, default: 6).\n            Only highest confidence detections are included if limit exceeded.\n        maskPadding (int, optional): Extend/reduce mask area by pixels (default: 4).\n            Positive values create larger masks, negative values shrink masks.\n        maskBlur (int, optional): Blur mask edges by pixels (default: 4).\n            Creates smooth transitions between masked and unmasked regions.\n        outputType (str, optional): Output format ('URL', 'dataURI', 'base64Data', default: 'URL')\n        outputFormat (str, optional): Image format ('JPG', 'PNG', 'WEBP', default: 'JPG')\n        outputQuality (int, optional): Output quality (20-99, default: 95)\n        uploadEndpoint (str, optional): URL for automatic upload using HTTP PUT\n        includeCost (bool, optional): Include generation cost in response\n        taskUUID (UUID, optional): Unique task identifier\n\n    Returns:\n        dict: A dictionary containing the masking result with status, message, result data,\n        and parameters.\n\n    Note:\n        Generated masks can be used directly in inpainting workflows. When using\n        maskMargin parameter in inpainting, the model will zoom into masked areas\n        for enhanced detail generation.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "imageMaskingArguments",
+        "required": [
+          "inputImage"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": "runware:35@1"
+          },
+          "maskBlur": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maskblur",
+            "default": 4
+          },
+          "taskUUID": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taskuuid",
+            "default": null
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence",
+            "default": 0.25
+          },
+          "inputImage": {
+            "type": "string",
+            "title": "Inputimage"
+          },
+          "outputType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputtype",
+            "default": null
+          },
+          "includeCost": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Includecost",
+            "default": null
+          },
+          "maskPadding": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maskpadding",
+            "default": 4
+          },
+          "outputFormat": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputformat",
+            "default": null
+          },
+          "maxDetections": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maxdetections",
+            "default": 6
+          },
+          "outputQuality": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputquality",
+            "default": 95
+          },
+          "uploadEndpoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uploadendpoint",
+            "default": null
+          }
+        }
+      }
+    },
+    {
+      "name": "modelSearch",
+      "description": "\n    Search and discover AI models available in the Runware platform.\n    \n    This tool enables discovery of available models on the Runware platform, providing powerful search \n    and filtering capabilities. Whether exploring public models from the community or managing private \n    models within your organization, this API helps find the perfect model for any image generation task.\n    \n    Models discovered through this tool can be immediately used in image generation tasks by referencing \n    their AIR identifiers. This enables dynamic model selection in applications and helps discover new \n    models for specific artistic styles.\n    \n    Args:\n        search (str, optional): Search term to filter models. The search is performed across multiple fields:\n            - Model name as exact phrase (boost: 10)\n            - Model AIR identifier with wildcard matching (boost: 5)\n            - Model name with wildcard matching (boost: 5)\n            - Model version (exact word matching)\n            - Model tags (exact word matching)\n            The search is case-insensitive and results are ordered by relevance.\n        \n        tags (List[str], optional): Filter models by matching any of the provided tags. Models that contain \n            at least one of these tags will be included in the results.\n        \n        category (str, optional): Filter models by their category:\n            - \"checkpoint\": Base models that serve as the foundation for image generation\n            - \"lora\": LoRA (Low-Rank Adaptation) models for specific styles or concepts\n            - \"lycoris\": Alternative to LoRA models with different adaptation techniques\n            - \"controlnet\": Models for guided image generation with specific conditions\n            - \"vae\": Variational Autoencoders for improving image quality and details\n            - \"embeddings\": Textual embeddings for adding new concepts to the model's vocabulary\n        \n        type (str, optional): Filter checkpoint models by their type (only applicable when category is \"checkpoint\"):\n            - \"base\": Standard models for general image generation\n            - \"inpainting\": Models for filling in or modifying parts of existing images\n            - \"refiner\": Models that improve the quality and details of generated images\n        \n        architecture (str, optional): Filter models by their architecture:\n            FLUX Models: \"flux1s\", \"flux1d\", \"fluxpro\", \"fluxultra\", \"fluxkontextdev\", \"fluxkontextpro\", \"fluxkontextmax\"\n            Imagen Models: \"imagen3\", \"imagen3fast\", \"imagen4preview\", \"imagen4ultra\", \"imagen4fast\"\n            HiDream Models: \"hidreamfast\", \"hidreamdev\", \"hidreamfull\"\n            SD Models: \"sd1x\", \"sdhyper\", \"sd1xlcm\", \"sdxl\", \"sdxllcm\", \"sdxldistilled\", \"sdxlhyper\", \"sdxllightning\", \"sdxlturbo\", \"sd3\"\n            Other: \"pony\"\n        \n        conditioning (str, optional): Filter ControlNet models by their conditioning type (only applicable when category is \"controlnet\"):\n            Edge Detection: \"blur\", \"canny\", \"hed\", \"lineart\", \"softedge\"\n            Spatial: \"depth\", \"normal\", \"seg\"\n            Creative: \"inpaint\", \"inpaintdepth\", \"pix2pix\", \"scribble\", \"sketch\"\n            Specialized: \"gray\", \"lowquality\", \"openmlsd\", \"openpose\", \"outfit\", \"qrcode\", \"shuffle\", \"tile\"\n        \n        visibility (str): Filter models by visibility status and ownership:\n            - \"public\": Show only your organization's public models\n            - \"private\": Show only your organization's private models\n            - \"all\": Show both community models and all your organization's models (default)\n        \n        limit (int): Maximum number of items to return (1-100, default: 20). Used for pagination.\n        offset (int): Number of items to skip in the result set (min: 0, default: 0). Used for pagination.\n        taskUUID (UUID, optional): Unique task identifier\n    \n    Returns:\n        dict: A dictionary containing the model search results with status, message, result data,\n        and comprehensive model information including AIR identifiers for immediate use.\n    \n    Note:\n        For optimal search performance, consider using specific filters to narrow results and \n        combining multiple criteria to find the most relevant models. Results are returned in \n        paginated format for efficient processing of large result sets.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "modelSearchArguments",
+        "properties": {
+          "tags": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "default": null
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 20
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": 0
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Search",
+            "default": null
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category",
+            "default": null
+          },
+          "taskUUID": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taskuuid",
+            "default": null
+          },
+          "visibility": {
+            "type": "string",
+            "title": "Visibility",
+            "default": "all"
+          },
+          "architecture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Architecture",
+            "default": null
+          },
+          "conditioning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conditioning",
+            "default": null
+          }
+        }
+      }
+    },
+    {
+      "name": "videoInference",
+      "description": "\n    Generate videos from text prompts and/or reference images using Runware's video generation API.\n    \n    Model Recommendations:\n    - For Image-to-Video (I2V): Use 'klingai:5@2' if model is not provided, and use frameImages to guide the video generation, and do not use steps, CFGScale, or numberResults.\n    - For Text-to-Video (T2V): Use 'google:3@1' if model is not provided, for pure text-based generation\n    \n    Args:\n        positivePrompt: Text description of the video to generate\n        model: Video generation model ID (recommended: klingai:5@2 (\"width\": 1920, \"height\": 1080) for I2V, google:3@1 (\"width\": 1280, \"height\": 720) for T2V)\n        duration: The length of the generated video in seconds (min: 1, max: 10). This parameter directly affects the total number of frames produced based on the specified frame rate. Total frames are calculated as duration \u00d7 fps. For example, a 5-second video at 24 fps will contain 120 frames. Longer durations require significantly more processing time and computational resources. Consider your specific use case when choosing duration length.\n        width: Video width in pixels (optional, will be validated against model requirements)\n        height: Video height in pixels (optional, will be validated against model requirements)\n        outputType: Specifies the output type in which the video is returned. Currently, only URL delivery is supported for video outputs( default: \"url\")\n        outputFormat: Specifies the format of the output video. Supported formats are: MP4 and WEBM (default: \"mp4\")\n        outputQuality: Sets the compression quality of the output video. Higher values preserve more quality but increase file size, lower values reduce file size but decrease quality. (default: 95)\n        uploadEndpoint: uploadEndpoint (str, optional): Specifies a URL where the generated content will be automatically uploaded using the HTTP PUT method such as Cloud storage, Webhook services, CDN integration. The content data will be sent as the request body, allowing your endpoint to receive and process the generated image or video immediately upon completion.\n        includeCost: Whether to include cost information in response (default: False)\n        negativePrompt: Text describing what NOT to include in the video. Common negative prompts for video include terms like \"blurry\", \"low quality\", \"distorted\", \"static\", \"flickering\", or specific content you want to exclude.\n        frameImages: Array of frame objects that define key frames to guide video generation. Each object specifies an input image and optionally its position within the video timeline. This allows constraining specific frames within the video sequence, ensuring particular visual content appears at designated points (different from referenceImages which provide overall visual guidance without timeline constraints).\n        \n            Frame positioning options:\n            - Omit frame parameter: Automatic distribution applies\n            * 1 image: Used as first frame\n            * 2 images: First and last frames  \n            * 3+ images: First, last, and evenly spaced intermediate frames\n            - Named positions: \"first\" or \"last\"\n            - Numeric positions: 0 (first frame) or any positive integer within frame count\n            \n            Example structures:\n            - Single frame: [{\"inputImage\": \"uuid_or_url\"}]\n            - First/last: [{\"inputImage\": \"uuid1\", \"frame\": \"first\"}, {\"inputImage\": \"uuid2\", \"frame\": \"last\"}]\n            - Mixed: [{\"inputImage\": \"uuid1\", \"frame\": 0}, {\"inputImage\": \"uuid2\", \"frame\": 48}, {\"inputImage\": \"uuid3\", \"frame\": \"last\"}]\n            \n            inputImage accepts: UUID strings, data URIs, base64 data, or public URLs (PNG/JPG/WEBP)\n            \n        referenceImages: Array containing reference images used to condition the generation process. These images provide visual guidance to help the model generate content that aligns with the style, composition, or characteristics of the reference materials. Unlike frameImages which constrain specific timeline positions, reference images guide the general appearance that should appear consistently across the video. Reference images work in combination with your text prompt to provide both textual and visual guidance for the generation process.\n        \n            Each image can be specified in one of the following formats:\n            - UUID v4 string of a previously uploaded image or generated image\n            - Data URI string in format: data:<mediaType>;base64,<base64_data>\n            - Base64 encoded image without data URI prefix\n            - Public URL pointing to the image (PNG/JPG/WEBP supported)\n            \n            Example: [\"aac49721-1964-481a-ae78-8a4e29b91402\"] or [\"https://example.com/image.jpg\"]\n        \n        fps: The frame rate (frames per second) of the generated video. Higher frame rates create smoother motion but require more processing time and result in larger file sizes. example: 24 fps, 30 fps, 60 fps (default: 24 fps). Note: Using the same duration with higher frame rates creates smoother motion by generating more intermediate frames. The frame rate combines with duration to determine total frame count: duration \u00d7 fps = total frames.\n        \n        steps: The number of denoising steps the model performs during video generation. More steps typically result in higher quality output but require longer processing time.\n    \n        seed: Random seed for reproducible results\n        \n        CFGScale: Controls how closely the video generation follows your prompt. Higher values make the model adhere more strictly to your text description, while lower values allow more creative freedom. range: 0 - 50.0\n        \n        numberResults: Specifies how many videos to generate for the given parameters (default: 1)\n        \n        providerSettings: Additional provider-specific settings\n        \n        deliveryMethod: Determines how the video generation results are delivered. Currently, video inference only supports asynchronous processing due to the computational intensity of video generation. (default: \"async\")\n        \n        taskUUID: Custom task UUID (auto-generated if not provided)\n    \n    Returns:\n        Dictionary containing video generation status and results\n        \n    Note:\n        - Width and height will be automatically validated against the selected model's supported dimensions\n        - For image-to-video generation, provide referenceImages or frameImages\n        - For text-to-video generation, only positivePrompt is required\n        - The tool automatically polls for completion when deliveryMethod is \"async\"\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "videoInferenceArguments",
+        "required": [
+          "positivePrompt"
+        ],
+        "properties": {
+          "fps": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fps",
+            "default": null
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "default": null
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model",
+            "default": null
+          },
+          "steps": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steps",
+            "default": null
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "default": null
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "default": null
+          },
+          "CFGScale": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cfgscale",
+            "default": null
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration",
+            "default": 5
+          },
+          "taskUUID": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taskuuid",
+            "default": null
+          },
+          "outputType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputtype",
+            "default": null
+          },
+          "frameImages": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frameimages",
+            "default": null
+          },
+          "includeCost": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Includecost",
+            "default": null
+          },
+          "outputFormat": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputformat",
+            "default": null
+          },
+          "numberResults": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numberresults",
+            "default": null
+          },
+          "deliveryMethod": {
+            "type": "string",
+            "title": "Deliverymethod",
+            "default": "async"
+          },
+          "negativePrompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Negativeprompt",
+            "default": null
+          },
+          "positivePrompt": {
+            "type": "string",
+            "title": "Positiveprompt"
+          },
+          "uploadEndpoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uploadendpoint",
+            "default": null
+          },
+          "referenceImages": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenceimages",
+            "default": null
+          },
+          "providerSettings": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Providersettings",
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "videoInferenceOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "listVideoModels",
+      "description": "\n    List all available video models and their supported dimensions.\n    \n    This tool provides a comprehensive overview of all supported video generation models\n    on the Runware platform, organized by provider with their specific dimension requirements.\n    \n    Returns:\n        dict: A dictionary containing all supported video models organized by provider,\n        with their identifiers and supported dimensions.\n    \n    Note:\n        Use the returned model identifiers directly in the videoInference tool.\n        Each model has specific dimension requirements that must be followed.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "listVideoModelsArguments",
+        "properties": {}
+      }
+    },
+    {
+      "name": "getVideoModelInfo",
+      "description": "\n    Get detailed information about a specific video model including supported dimensions.\n    \n    This tool provides comprehensive information about a specific video generation model,\n    including its supported dimensions, provider, and usage recommendations.\n    \n    Args:\n        model_id (str): The model identifier (e.g., \"bytedance:2@1\", \"klingai:1@2\")\n    \n    Returns:\n        dict: A dictionary containing detailed model information including supported dimensions,\n        provider details, and usage recommendations.\n    \n    Note:\n        Use the returned dimensions in your videoInference requests to avoid errors.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "getVideoModelInfoArguments",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "title": "Model Id"
+          }
+        }
+      }
+    },
+    {
+      "name": "imageUpload",
+      "description": "\n    Upload an image to Runware by providing a file path on the local file system or publicurl.\n    \n    This function reads the image file directly from the file path or public url and uploads it to Runware.\n    It returns a Runware UUID that can be used in other tools that require image inputs.\n    \n    IMPORTANT: This tool should be used FIRST when you need to process local images with other Runware tools.\n    The returned UUID can then be used as input for tools like imageInference, photoMaker, imageUpscale, etc.\n    \n    Workflow:\n    1. Use this tool to upload a local image and get a Runware UUID\n    2. Use the returned UUID in other Runware tools that require image inputs\n    3. This prevents context pollution and ensures proper image handling\n\n    Args:\n        file_path (str): Path to the image file on the local file system\n            Examples: \"/path/to/image.jpg\", \"images/photo.png\", \"./uploads/file.webp\"\n            Supported formats: PNG, JPG, WEBP, JPEG, BMP, GIF\n    \n    Returns:\n        dict: A dictionary containing the upload result with status, message, result data,\n        and the uploaded image UUID for future reference.\n    \n    Note:\n        - Images are deleted 30 days after last use, but remain available indefinitely while in use\n        - File path must be accessible\n        - Use the returned UUID in other Runware tools instead of file paths or base64 data\n    ",
+      "inputSchema": {
+        "type": "object",
+        "title": "imageUploadArguments",
+        "required": [
+          "file_path"
+        ],
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "title": "File Path"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 11,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@elijahdev0/mcp-runware/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "imageInference",
+    "photoMaker",
+    "imageUpscale",
+    "imageBackgroundRemoval",
+    "imageCaption",
+    "imageMasking",
+    "modelSearch",
+    "videoInference",
+    "listVideoModels",
+    "getVideoModelInfo",
+    "imageUpload"
+  ]
+}

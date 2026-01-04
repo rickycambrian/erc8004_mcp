@@ -1,0 +1,2175 @@
+{
+  "id": "calendly",
+  "name": "calendly",
+  "display_name": "Calendly",
+  "version": null,
+  "description": "Calendly is an appointment scheduling tool that automates meeting invitations, availability checks, and reminders, helping individuals and teams avoid email back-and-forth",
+  "icon_url": "https://logos.composio.dev/api/calendly",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "CALENDLY_CANCEL_EVENT",
+      "description": "Permanently cancels an existing, active scheduled event by its `uuid`, optionally providing a `reason`, which may trigger notifications to invitees.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CancelEventRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "f1f2f3f4-f5f6-f7f8-f9f0-fabcdef12345"
+            ],
+            "description": "Unique identifier (UUID) of the event to be canceled."
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "description": "Reason for canceling the event; may be included in the cancellation notification to the invitee."
+          }
+        },
+        "description": "Defines the parameters for canceling a scheduled event."
+      }
+    },
+    {
+      "name": "CALENDLY_CREATE_INVITEE_NO_SHOW",
+      "description": "Marks an Invitee, identified by their existing and valid URI, as a 'No Show' for a scheduled event.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateInviteeNoShowRequest",
+        "properties": {
+          "invitee": {
+            "type": "string",
+            "title": "Invitee",
+            "format": "uri",
+            "examples": [
+              "https://api.calendly.com/scheduled_events/GBGBDCAADAEDCRZ2/invitees/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the Invitee to be marked as a no-show."
+          }
+        },
+        "description": "Request schema for marking an Invitee as a no-show."
+      }
+    },
+    {
+      "name": "CALENDLY_CREATE_ONE_OFF_EVENT_TYPE",
+      "description": "Creates a temporary Calendly one-off event type for unique meetings outside regular availability, requiring valid host/co-host URIs, a future date/range for `date_setting`, and a positive `duration`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateOneOffEventTypeRequest",
+        "required": [
+          "name",
+          "host",
+          "duration",
+          "date_setting"
+        ],
+        "properties": {
+          "host": {
+            "type": "string",
+            "title": "Host",
+            "description": "The URI of the user who will be the host of the one-off event"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Name of the one-off event type"
+          },
+          "duration": {
+            "type": "integer",
+            "title": "Duration",
+            "description": "Duration of the event in minutes"
+          },
+          "location": {
+            "type": "object",
+            "title": "Location",
+            "default": null,
+            "examples": [
+              {
+                "kind": "zoom_conference",
+                "connected": true
+              },
+              {
+                "kind": "physical"
+              },
+              {
+                "kind": "ask_invitee"
+              }
+            ],
+            "nullable": true,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "ask_invitee",
+                  "custom",
+                  "google_conference",
+                  "gotomeeting_conference",
+                  "inbound_call",
+                  "microsoft_teams_conference",
+                  "outbound_call",
+                  "physical",
+                  "webex_conference",
+                  "zoom_conference"
+                ],
+                "type": "string",
+                "title": "Kind",
+                "examples": [
+                  "zoom_conference",
+                  "physical",
+                  "ask_invitee"
+                ],
+                "description": "Type of location for the event. Determines how the meeting will be conducted."
+              },
+              "location": {
+                "type": "string",
+                "title": "Location",
+                "default": null,
+                "nullable": true,
+                "description": "Location string required when kind is 'custom'. Must be a non-empty string."
+              },
+              "connected": {
+                "type": "boolean",
+                "title": "Connected",
+                "default": null,
+                "examples": [
+                  true,
+                  false
+                ],
+                "nullable": true,
+                "description": "Whether the location service is connected to the host's account. Required for conference-type locations like Zoom, Google Meet, etc."
+              }
+            },
+            "description": "Location configuration for the event.",
+            "additionalProperties": false
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": "UTC",
+            "examples": [
+              "America/New_York",
+              "Europe/London",
+              "Asia/Tokyo",
+              "UTC"
+            ],
+            "description": "IANA timezone identifier for the event scheduling. Determines how times are interpreted and displayed to invitees."
+          },
+          "date_setting": {
+            "type": "object",
+            "title": "DateRangeSetting",
+            "examples": [
+              {
+                "days": 30,
+                "type": "days_in_future",
+                "only_weekdays": false
+              },
+              {
+                "type": "date_range",
+                "end_date": "2025-12-31",
+                "start_date": "2025-01-01"
+              },
+              {
+                "type": "spots",
+                "spots": [
+                  {
+                    "end_time": "2025-06-25T11:00:00Z",
+                    "start_time": "2025-06-25T10:00:00Z"
+                  }
+                ]
+              }
+            ],
+            "required": [
+              "type",
+              "start_date",
+              "end_date"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "date_range",
+                "title": "Type",
+                "description": "Must be 'date_range' for this setting type"
+              },
+              "end_date": {
+                "type": "string",
+                "title": "End Date",
+                "format": "date",
+                "examples": [
+                  "2025-12-31",
+                  "2025-07-15"
+                ],
+                "description": "End date for event availability in YYYY-MM-DD format"
+              },
+              "start_date": {
+                "type": "string",
+                "title": "Start Date",
+                "format": "date",
+                "examples": [
+                  "2025-01-01",
+                  "2025-06-15"
+                ],
+                "description": "Start date for event availability in YYYY-MM-DD format"
+              }
+            },
+            "description": "Date range setting for events available within a specific date range.",
+            "additionalProperties": false
+          }
+        },
+        "description": "Request model for creating a one-off event type."
+      }
+    },
+    {
+      "name": "CALENDLY_CREATE_SCHEDULING_LINK",
+      "description": "Create a single-use scheduling link. Creates a scheduling link that can be used to book an event. The link allows invitees to schedule up to the specified maximum number of events. Once the limit is reached, the link becomes inactive.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateSchedulingLinkRequest",
+        "required": [
+          "owner"
+        ],
+        "properties": {
+          "owner": {
+            "type": "string",
+            "title": "Owner",
+            "description": "Event type URI (e.g., 'https://api.calendly.com/event_types/...')"
+          },
+          "owner_type": {
+            "type": "string",
+            "title": "Owner Type",
+            "default": "EventType",
+            "description": "Type of owner, typically 'EventType'"
+          },
+          "max_event_count": {
+            "type": "integer",
+            "title": "Max Event Count",
+            "default": 1,
+            "description": "The max number of events that can be scheduled using this scheduling link. Must be exactly 1 for single-use scheduling links."
+          }
+        },
+        "description": "Request model for creating a single-use scheduling link."
+      }
+    },
+    {
+      "name": "CALENDLY_CREATE_SHARE",
+      "description": "Creates a customizable, one-time share link for a Calendly event type, allowing specific overrides to its settings (e.g., duration, availability, location) without altering the original event type.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateShareRequest",
+        "required": [
+          "event_type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Quick Chat with John"
+            ],
+            "description": "Custom name for the shared link; defaults to event type name if unspecified."
+          },
+          "duration": {
+            "type": "integer",
+            "title": "Duration",
+            "examples": [
+              "30",
+              "60"
+            ],
+            "description": "Custom event duration in minutes, overriding event type default."
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "format": "date",
+            "examples": [
+              "2024-12-31"
+            ],
+            "description": "End date (YYYY-MM-DD) for shared link availability; required if `period_type` is 'fixed'."
+          },
+          "event_type": {
+            "type": "string",
+            "title": "Event Type",
+            "format": "uri",
+            "examples": [
+              "https://api.calendly.com/event_types/GBGBDCAADAEDCRZ2"
+            ],
+            "description": "URI of the event type to base this share on."
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ],
+            "description": "Start date (YYYY-MM-DD) for shared link availability; required if `period_type` is 'fixed'."
+          },
+          "period_type": {
+            "enum": [
+              "available_moving",
+              "moving",
+              "fixed",
+              "unlimited"
+            ],
+            "type": "string",
+            "title": "Period Type",
+            "description": "Availability period type: 'available_moving' (shows actual available slots for `max_booking_time` days), 'moving' (available for `max_booking_time` days), 'fixed' (within `start_date`/`end_date`), 'unlimited'."
+          },
+          "hide_location": {
+            "type": "boolean",
+            "title": "Hide Location",
+            "description": "If true, hides event location until booking (only if event type has a single custom location)."
+          },
+          "duration_options": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "properties": {}
+            },
+            "title": "Duration Options",
+            "examples": [
+              "[15, 30, 45]"
+            ],
+            "description": "Alternative selectable durations in minutes, overriding event type options."
+          },
+          "max_booking_time": {
+            "type": "integer",
+            "title": "Max Booking Time",
+            "examples": [
+              "60"
+            ],
+            "description": "Max days in advance an invitee can book; required if `period_type` is 'moving' or 'available_moving'."
+          },
+          "location_configurations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "LocationConfiguration",
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "title": "Kind",
+                  "examples": [
+                    "physical",
+                    "zoom_conference",
+                    "google_conference",
+                    "custom"
+                  ],
+                  "description": "Type of location. Common values include 'physical', 'zoom_conference', 'google_conference', 'microsoft_teams_conference', 'custom', 'ask_invitee'."
+                },
+                "location": {
+                  "type": "string",
+                  "title": "Location",
+                  "default": null,
+                  "examples": [
+                    "123 Main St, Suite 100",
+                    "+1-555-0123",
+                    "Building A, Room 201"
+                  ],
+                  "nullable": true,
+                  "description": "Specific location details like address, phone number, or meeting room"
+                },
+                "additional_info": {
+                  "type": "string",
+                  "title": "Additional Info",
+                  "default": null,
+                  "examples": [
+                    "Conference Room A",
+                    "Zoom link will be provided",
+                    "Call for address"
+                  ],
+                  "nullable": true,
+                  "description": "Additional information about the location, such as instructions or details"
+                }
+              },
+              "description": "Location override configuration for the shared event."
+            },
+            "title": "Location Configurations",
+            "default": null,
+            "examples": [
+              [
+                {
+                  "kind": "physical",
+                  "location": "123 Business Ave, Suite 200",
+                  "additional_info": "Main conference room"
+                },
+                {
+                  "kind": "zoom_conference",
+                  "additional_info": "Zoom link provided upon booking"
+                }
+              ],
+              [
+                {
+                  "kind": "custom",
+                  "location": "Phone: +1-555-0123",
+                  "additional_info": "Call for details"
+                }
+              ]
+            ],
+            "nullable": true,
+            "description": "Custom location settings that override the event type's default locations. Each configuration specifies a location type and associated details."
+          },
+          "availability__rule__rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "AvailabilityRule",
+              "required": [
+                "type",
+                "wday",
+                "intervals"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "wday",
+                  "title": "Type",
+                  "description": "Rule type \u2013 must be the literal string `'wday'`"
+                },
+                "wday": {
+                  "enum": [
+                    "monday",
+                    "tuesday",
+                    "wednesday",
+                    "thursday",
+                    "friday",
+                    "saturday",
+                    "sunday"
+                  ],
+                  "type": "string",
+                  "title": "Wday",
+                  "examples": [
+                    "monday",
+                    "tuesday",
+                    "friday"
+                  ],
+                  "description": "Day of the week (field name **'wday'**, not 'weekday')."
+                },
+                "intervals": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "TimeInterval",
+                    "required": [
+                      "from",
+                      "to"
+                    ],
+                    "properties": {
+                      "to": {
+                        "type": "string",
+                        "title": "To",
+                        "examples": [
+                          "17:00",
+                          "12:00",
+                          "18:30"
+                        ],
+                        "description": "**Key must be exactly 'to'** \u2013 end time in 24-hour HH:MM format."
+                      },
+                      "from": {
+                        "type": "string",
+                        "title": "From",
+                        "examples": [
+                          "09:00",
+                          "13:30",
+                          "08:00"
+                        ],
+                        "description": "**Key must be exactly 'from'** \u2013 start time in 24-hour HH:MM format."
+                      }
+                    },
+                    "description": "Time interval specification for availability windows."
+                  },
+                  "title": "Intervals",
+                  "examples": [
+                    [
+                      {
+                        "to": "12:00",
+                        "from": "09:00"
+                      },
+                      {
+                        "to": "17:00",
+                        "from": "14:00"
+                      }
+                    ],
+                    [
+                      {
+                        "to": "16:00",
+                        "from": "10:00"
+                      }
+                    ],
+                    []
+                  ],
+                  "description": "List of time intervals when the host is available on this weekday. Empty list means unavailable all day."
+                }
+              },
+              "description": "Custom availability rule for specific weekdays and time intervals."
+            },
+            "title": "Availability  Rule  Rules",
+            "default": null,
+            "examples": [
+              [
+                {
+                  "type": "wday",
+                  "wday": "monday",
+                  "intervals": [
+                    {
+                      "to": "17:00",
+                      "from": "09:00"
+                    }
+                  ]
+                },
+                {
+                  "type": "wday",
+                  "wday": "tuesday",
+                  "intervals": [
+                    {
+                      "to": "16:00",
+                      "from": "10:00"
+                    }
+                  ]
+                },
+                {
+                  "type": "wday",
+                  "wday": "wednesday",
+                  "intervals": []
+                }
+              ]
+            ],
+            "nullable": true,
+            "description": "List of custom availability rules that override the event type's default schedule. Provide an array of objects EACH containing: `type`=`'wday'`, `wday` (weekday), and `intervals` (list of `{from, to}` times). Field names are case-sensitive \u2013 use **`wday`, `from`, `to`** exactly. Must be combined with `availability_rule_timezone`."
+          },
+          "availability__rule__timezone": {
+            "type": "string",
+            "title": "Availability  Rule  Timezone",
+            "examples": [
+              "America/New_York",
+              "Europe/London"
+            ],
+            "description": "IANA timezone (e.g., 'America/New_York') for custom availability rules. Required with `availability_rule_rules`."
+          }
+        },
+        "description": "Request to create a customized, one-time share link for an event type."
+      }
+    },
+    {
+      "name": "CALENDLY_CREATE_SINGLE_USE_SCHEDULING_LINK",
+      "description": "Creates a one-time, single-use scheduling link for an active Calendly event type, expiring after one booking.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateSingleUseSchedulingLinkRequest",
+        "required": [
+          "max_event_count",
+          "owner",
+          "owner_type"
+        ],
+        "properties": {
+          "owner": {
+            "type": "string",
+            "title": "Owner",
+            "format": "uri",
+            "examples": [
+              "https://api.calendly.com/event_types/GBGBDCAADAEDCRZ2"
+            ],
+            "description": "The URI of the Calendly Event Type that will own this single-use scheduling link. This Event Type's settings (e.g., duration, availability) will apply to the scheduled meeting."
+          },
+          "owner_type": {
+            "enum": [
+              "EventType"
+            ],
+            "type": "string",
+            "title": "Owner Type",
+            "examples": [
+              "EventType"
+            ],
+            "description": "Identifies the owner resource type, which is 'EventType'."
+          },
+          "max_event_count": {
+            "type": "integer",
+            "title": "Max Event Count",
+            "examples": [
+              "1"
+            ],
+            "description": "The maximum number of events that can be scheduled using this link. For a single-use link, this value must be 1."
+          }
+        },
+        "description": "Request schema for `CreateSingleUseSchedulingLink`"
+      }
+    },
+    {
+      "name": "CALENDLY_CREATE_WEBHOOK_SUBSCRIPTION",
+      "description": "Creates a Calendly webhook subscription to notify a specified `url` (which must be a publicly accessible HTTPS endpoint) for selected `events` within a given `organization` and `scope`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateWebhookSubscriptionRequest",
+        "required": [
+          "events",
+          "organization",
+          "scope",
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "format": "uri",
+            "examples": [
+              "https://yourapp.com/webhook/calendly"
+            ],
+            "description": "Publicly accessible and active callback URL to receive POST requests for subscribed events."
+          },
+          "user": {
+            "type": "string",
+            "title": "User",
+            "format": "uri",
+            "examples": [
+              "https://api.calendly.com/users/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the user for the webhook; required if 'scope' is 'user'."
+          },
+          "group": {
+            "type": "string",
+            "title": "Group",
+            "format": "uri",
+            "examples": [
+              "https://api.calendly.com/groups/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the group for the webhook; required if 'scope' is 'group'."
+          },
+          "scope": {
+            "enum": [
+              "organization",
+              "user",
+              "group"
+            ],
+            "type": "string",
+            "title": "Scope",
+            "examples": [
+              "organization",
+              "user",
+              "group"
+            ],
+            "description": "Scope of the webhook: 'organization', 'user', or 'group'."
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "invitee.canceled",
+                "invitee.created",
+                "invitee_no_show.created",
+                "invitee_no_show.deleted",
+                "routing_form_submission.created"
+              ],
+              "type": "string",
+              "title": "EventsEnm",
+              "properties": {}
+            },
+            "title": "Events",
+            "examples": [
+              "invitee.canceled",
+              "invitee.created",
+              "invitee_no_show.created",
+              "invitee_no_show.deleted",
+              "routing_form_submission.created"
+            ],
+            "description": "Event types to subscribe to."
+          },
+          "signing_key": {
+            "type": "string",
+            "title": "Signing Key",
+            "examples": [
+              "mysecretkey123"
+            ],
+            "description": "Optional secret key (6-24 characters) for signing webhook events to verify their authenticity."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "format": "uri",
+            "examples": [
+              "https://api.calendly.com/organizations/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the organization for the webhook."
+          }
+        },
+        "description": "Request for creating a webhook subscription for Calendly event notifications."
+      }
+    },
+    {
+      "name": "CALENDLY_DELETE_INVITEE_DATA",
+      "description": "Permanently removes all invitee data associated with the provided emails from past organization events, for data privacy compliance (requires Enterprise subscription; deletion may take up to one week).",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteInviteeDataRequest",
+        "required": [
+          "emails"
+        ],
+        "properties": {
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Emails",
+            "examples": [
+              [
+                "test_user1@example.com",
+                "test_user2@example.com"
+              ]
+            ],
+            "description": "Invitee email addresses for whom all associated data will be permanently removed."
+          }
+        },
+        "description": "Specifies the emails of invitees whose data should be removed."
+      }
+    },
+    {
+      "name": "CALENDLY_DELETE_INVITEE_NO_SHOW",
+      "description": "Deletes an Invitee No-Show record by its `uuid` to reverse an invitee's 'no-show' status; the `uuid` must refer to an existing record.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteInviteeNoShowRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "FHKLMNPQRSTUVWXY1234567890"
+            ],
+            "description": "The unique identifier (UUID) of the Invitee No-Show record to be removed."
+          }
+        },
+        "description": "Request schema for `DeleteInviteeNoShow`"
+      }
+    },
+    {
+      "name": "CALENDLY_DELETE_SCHEDULED_EVENT_DATA",
+      "description": "For Enterprise users, initiates deletion of an organization's scheduled event data between a `start_time` and `end_time` (inclusive, where `start_time` must be <= `end_time`); actual data deletion may take up to 7 days to complete.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteScheduledEventDataRequest",
+        "required": [
+          "end_time",
+          "start_time"
+        ],
+        "properties": {
+          "end_time": {
+            "type": "string",
+            "title": "End Time",
+            "format": "date-time",
+            "examples": [
+              "2023-12-31T23:59:59Z"
+            ],
+            "description": "Defines the end of the data deletion period (UTC). Events ending at or before this time will be included. Must be within the past 24 months."
+          },
+          "start_time": {
+            "type": "string",
+            "title": "Start Time",
+            "format": "date-time",
+            "examples": [
+              "2023-01-01T00:00:00Z"
+            ],
+            "description": "Defines the start of the data deletion period (UTC). Events starting at or after this time will be included. Must be within the past 24 months."
+          }
+        },
+        "description": "Request to delete scheduled event data within a specified time range."
+      }
+    },
+    {
+      "name": "CALENDLY_DELETE_WEBHOOK_SUBSCRIPTION",
+      "description": "Deletes an existing webhook subscription to stop Calendly sending event notifications to its registered callback URL; this operation is idempotent.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteWebhookSubscriptionRequest",
+        "required": [
+          "webhook_uuid"
+        ],
+        "properties": {
+          "webhook_uuid": {
+            "type": "string",
+            "title": "Webhook Uuid",
+            "examples": [
+              "f4c1f357-3de3-4c28-905b-8a07b605717d"
+            ],
+            "description": "The unique identifier (UUID) of the webhook subscription to be deleted."
+          }
+        },
+        "description": "Request schema for `DeleteWebhookSubscription` action, used to specify the webhook to be deleted."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_CURRENT_USER",
+      "description": "Retrieves detailed information about the currently authenticated Calendly user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCurrentUserRequest",
+        "properties": {},
+        "description": "Request model for retrieving information about the current Calendly user."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_EVENT",
+      "description": "Use to retrieve a specific Calendly scheduled event by its UUID, provided the event exists in the user's Calendly account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetEventRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "AAAAAAAAAAAAAAAA",
+              "BBBBBBBBBBBBBBBB"
+            ],
+            "description": "Unique identifier (UUID) of the Calendly event."
+          }
+        },
+        "description": "Input for retrieving a specific Calendly event."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_EVENT_INVITEE",
+      "description": "Retrieves detailed information about a specific invitee of a scheduled event, using their unique UUIDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetEventInviteeRequest",
+        "required": [
+          "event_uuid",
+          "invitee_uuid"
+        ],
+        "properties": {
+          "event_uuid": {
+            "type": "string",
+            "title": "Event Uuid",
+            "examples": [
+              "f1b2c3d4-e5f6-7890-1234-56789abcdef0"
+            ],
+            "description": "The unique identifier (UUID) of the scheduled event."
+          },
+          "invitee_uuid": {
+            "type": "string",
+            "title": "Invitee Uuid",
+            "examples": [
+              "gfedcba0-1234-5678-90fe-dcba98765432"
+            ],
+            "description": "The unique identifier (UUID) of the invitee for the specified event."
+          }
+        },
+        "description": "Request schema for `GetEventInvitee`"
+      }
+    },
+    {
+      "name": "CALENDLY_GET_EVENT_TYPE",
+      "description": "Retrieves details for a specific Calendly event type, identified by its UUID, which must be valid and correspond to an existing event type.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetEventTypeRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "AAAAAAAAAAAAAAAA"
+            ],
+            "description": "Unique identifier (UUID) for the event type."
+          }
+        },
+        "description": "Retrieves a specific event type by its UUID."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_GROUP",
+      "description": "Retrieves all attributes of a specific Calendly group by its UUID; the group must exist.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetGroupRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "f73d2bab-7586-4679-8c11-8ebb2gh9fca7"
+            ],
+            "description": "Unique identifier (UUID) of the Calendly group."
+          }
+        },
+        "description": "Request schema for `GetGroup`"
+      }
+    },
+    {
+      "name": "CALENDLY_GET_GROUP_RELATIONSHIP",
+      "description": "Retrieves a specific Calendly group relationship by its valid and existing UUID, providing details on user-group associations and membership.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetGroupRelationshipRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "GRPUUIDEXAMPLE123"
+            ],
+            "description": "The unique identifier (UUID) of the group relationship to be retrieved."
+          }
+        },
+        "description": "Request to retrieve a specific group relationship by its UUID."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_INVITEE_NO_SHOW",
+      "description": "Retrieves details for a specific Invitee No Show record by its UUID; an Invitee No Show is marked when an invitee does not attend a scheduled event.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetInviteeNoShowRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "NO_SHOW_UUID_123"
+            ],
+            "description": "The unique identifier (UUID) of the Invitee No Show record to retrieve."
+          }
+        },
+        "description": "Request schema for retrieving details about a specific Invitee No Show."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_ORGANIZATION_INVITATION",
+      "description": "Retrieves a specific Calendly organization invitation using its UUID and the parent organization's UUID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetOrganizationInvitationRequest",
+        "required": [
+          "org_uuid",
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "11111111-2222-3333-4444-555555555555"
+            ],
+            "description": "The unique identifier (UUID) of the specific organization invitation to retrieve."
+          },
+          "org_uuid": {
+            "type": "string",
+            "title": "Org Uuid",
+            "examples": [
+              "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+            ],
+            "description": "The unique identifier (UUID) of the Calendly organization to which the invitation belongs."
+          }
+        },
+        "description": "Request schema for retrieving a specific Calendly organization invitation."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_ORGANIZATION_MEMBERSHIP",
+      "description": "Retrieves a specific Calendly organization membership by its UUID, returning all its attributes.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetOrganizationMembershipRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "The unique identifier (UUID) of the organization membership to retrieve."
+          }
+        },
+        "description": "Request schema for retrieving a specific organization membership."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_ROUTING_FORM",
+      "description": "Retrieves a specific routing form by its UUID, providing its configuration details including questions and routing logic.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetRoutingFormRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "cCHLAd369cc32c96707e"
+            ],
+            "description": "The unique identifier (UUID) of the routing form to retrieve."
+          }
+        },
+        "description": "Request schema for retrieving a specific routing form by its UUID."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_USER",
+      "description": "Retrieves comprehensive details for an existing Calendly user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUserRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "me"
+            ],
+            "description": "The unique identifier (UUID) of the user. Alternatively, use the literal string \"me\" to refer to the currently authenticated user (the caller)."
+          }
+        },
+        "description": "Request schema for retrieving a specific user by their UUID."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_USER_AVAILABILITY_SCHEDULE",
+      "description": "Retrieves an existing user availability schedule by its UUID; this schedule defines the user's default hours of availability.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUserAvailabilityScheduleRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "AAAAAAAAAAAAAAAA"
+            ],
+            "description": "Unique identifier (UUID) of the availability schedule."
+          }
+        },
+        "description": "Request to retrieve a user availability schedule."
+      }
+    },
+    {
+      "name": "CALENDLY_GET_WEBHOOK_SUBSCRIPTION",
+      "description": "Retrieves the details of an existing webhook subscription, identified by its UUID, including its callback URL, subscribed events, scope, and state.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetWebhookSubscriptionRequest",
+        "required": [
+          "webhook_uuid"
+        ],
+        "properties": {
+          "webhook_uuid": {
+            "type": "string",
+            "title": "Webhook Uuid",
+            "examples": [
+              "whk_2125920c7f5b4c979351d2f00c09a583"
+            ],
+            "description": "Unique identifier (UUID) of the webhook subscription to retrieve."
+          }
+        },
+        "description": "Schema for retrieving a webhook subscription by its UUID."
+      }
+    },
+    {
+      "name": "CALENDLY_INVITE_USER_TO_ORGANIZATION",
+      "description": "Invites a user to the specified Calendly organization by email, if they aren't already a member and lack a pending invitation to it.",
+      "inputSchema": {
+        "type": "object",
+        "title": "InviteUserToOrganizationRequest",
+        "required": [
+          "uuid",
+          "email"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "GRFRTHTHYJUKKWERFWER"
+            ],
+            "description": "Unique identifier (UUID) of the organization to which the user will be invited."
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "format": "email",
+            "examples": [
+              "new.member@example.com"
+            ],
+            "description": "The email address of the user to be invited to the organization. An invitation link will be sent to this email."
+          }
+        },
+        "description": "Request schema for inviting a user to an organization."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_ACTIVITY_LOG_ENTRIES",
+      "description": "Retrieves a list of activity log entries for a specified Calendly organization (requires an active Enterprise subscription), supporting filtering, sorting, and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListActivityLogEntriesRequest",
+        "required": [
+          "organization"
+        ],
+        "properties": {
+          "sort": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "action:asc",
+                "action:desc",
+                "actor.display_name:asc",
+                "actor.display_name:desc",
+                "actor.uri:asc",
+                "actor.uri:desc",
+                "namespace:asc",
+                "namespace:desc",
+                "occurred_at:asc",
+                "occurred_at:desc"
+              ],
+              "type": "string",
+              "title": "SortEnm",
+              "properties": {}
+            },
+            "title": "Sort",
+            "default": [
+              "occurred_at:desc"
+            ],
+            "examples": [
+              "[\"occurred_at:desc\"]",
+              "[\"action:asc\", \"actor.display_name:desc\"]",
+              "[\"namespace:asc\"]"
+            ],
+            "description": "Specifies the sort order for the results. Provide a list of sort criteria strings, each in the format 'field:direction' (e.g., 'occurred_at:asc'). Valid fields and directions are defined by SortEnm."
+          },
+          "actor": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Actor",
+            "examples": [
+              "[\"https://api.calendly.com/users/BBBBBBBBBBBBBBBB\"]",
+              "[\"https://api.calendly.com/users/CCCCCCCCCCCCCCCCCC\", \"https://api.calendly.com/users/DDDDDDDDDDDDDDDD\"]"
+            ],
+            "description": "Filters activity log entries by the users who performed the actions. Provide a list of user URIs."
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "examples": [
+              "10",
+              "50",
+              "100"
+            ],
+            "description": "The maximum number of activity log entries to return per page."
+          },
+          "action": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Action",
+            "examples": [
+              "[\"user.created\", \"event_type.updated\"]",
+              "[\"group.deleted\"]",
+              "[\"user.invited\"]"
+            ],
+            "description": "Filters entries by the specific action performed (e.g., 'user.created', 'event_type.updated'). Provide a list of action strings."
+          },
+          "namespace": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Namespace",
+            "examples": [
+              "[\"user_management\", \"event_type_management\"]",
+              "[\"team_management\"]",
+              "[\"webhook_subscription_management\"]"
+            ],
+            "description": "Filters entries by their category or domain (namespace). Provide a list of namespace strings. Common examples include 'user_management' or 'event_type_management'."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              "LXhZW M1NmZNGM2YtoyNjc",
+              "bnFGWUwzUnVaQzQ0TlhSMjdMcQ=="
+            ],
+            "description": "Token for pagination, used to fetch the next page of results if the collection spans multiple pages."
+          },
+          "search_term": {
+            "type": "string",
+            "title": "Search Term",
+            "examples": [
+              "user.created",
+              "\"Jane Doe\"",
+              "event.created + \"Product Demo\"",
+              "(user.deleted | group.created) -auditor",
+              "user.email_address:*@company.com"
+            ],
+            "description": "Filters entries based on the search term. Supported operators: `|` (OR, e.g., `user.created | group.created`), `+` (AND, e.g., `user.created + user.invited`), `\" \"` (exact phrase, e.g., `\"John Doe\"`), `-` (exclude term, e.g., `user.created -admin`), `()` (precedence, e.g., `(user.created | user.invited) + team1`), and `*` (prefix search, e.g., `user.email_address:*@example.com`)."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "examples": [
+              "https://api.calendly.com/organizations/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the Calendly organization for which to retrieve activity log entries."
+          },
+          "max_occurred_at": {
+            "type": "string",
+            "title": "Max Occurred At",
+            "examples": [
+              "2023-12-31T23:59:59.999Z",
+              "2024-07-15T18:00:00.000Z"
+            ],
+            "description": "Timestamp in ISO 8601 UTC format (e.g., '2020-01-02T03:04:05.678Z'). Filters entries to include only those that occurred at or before this time."
+          },
+          "min_occurred_at": {
+            "type": "string",
+            "title": "Min Occurred At",
+            "examples": [
+              "2023-01-01T00:00:00.000Z",
+              "2024-07-15T10:30:00Z"
+            ],
+            "description": "Timestamp in ISO 8601 UTC format (e.g., '2020-01-02T03:04:05.678Z'). Filters entries to include only those that occurred at or after this time."
+          }
+        },
+        "description": "Request schema for `ListActivityLogEntries`"
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_EVENT_INVITEES",
+      "description": "Retrieves a list of invitees for a specified Calendly event UUID, with options to filter by status or email, and sort by creation time.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListEventInviteesRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "default": "created_at:asc",
+            "examples": [
+              "created_at:asc",
+              "created_at:desc"
+            ],
+            "description": "Order results by the `created_at` field; use 'created_at:asc' for ascending or 'created_at:desc' for descending."
+          },
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "description": "The unique identifier (UUID) of the event for which to list invitees."
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "description": "The number of invitees to return per page. Default is 20."
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "examples": [
+              "invitee@example.com"
+            ],
+            "description": "Filter results by a specific invitee's email address."
+          },
+          "status": {
+            "enum": [
+              "active",
+              "canceled"
+            ],
+            "type": "string",
+            "title": "Status",
+            "examples": [
+              "active",
+              "canceled"
+            ],
+            "description": "Filter invitees by their status. Can be 'active' or 'canceled'."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "description": "A token to retrieve the next or previous page of results in a paginated collection."
+          }
+        },
+        "description": "Request schema for retrieving a list of invitees for a specific event."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_EVENTS",
+      "description": "Retrieves a list of scheduled Calendly events. Exactly one of `user`, `organization`, or `group` must be provided to scope the query. The `invitee_email` parameter is a filter and cannot be used as a scope. Admin rights may be needed when filtering by `organization` or `group`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListEventsRequest",
+        "properties": {
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "examples": [
+              "start_time:asc",
+              "start_time:desc"
+            ],
+            "description": "Sort order for the results. Accepts comma-separated `field:direction` values. Supported field: `start_time`. Supported directions: `asc` (ascending), `desc` (descending)."
+          },
+          "user": {
+            "type": "string",
+            "title": "User",
+            "examples": [
+              "https://api.calendly.com/users/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the user whose events you want to list. Exactly ONE of `user`, `organization`, or `group` must be supplied to scope the query. Cannot be used together with `invitee_email` as a scope filter."
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "examples": [
+              "10",
+              "20",
+              "50"
+            ],
+            "description": "The number of events to return per page."
+          },
+          "group": {
+            "type": "string",
+            "title": "Group",
+            "examples": [
+              "https://api.calendly.com/groups/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the group (team) whose events you want to list. Exactly ONE of `user`, `organization`, or `group` must be provided to scope the query."
+          },
+          "status": {
+            "enum": [
+              "active",
+              "canceled"
+            ],
+            "type": "string",
+            "title": "Status",
+            "examples": [
+              "active",
+              "canceled"
+            ],
+            "description": "Filter events by their status."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              "dGhpcyBpcyB0aGUgbmV4dCBwYWdlIHRva2Vu"
+            ],
+            "description": "Token for pagination to retrieve the next or previous set of results from the collection."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "examples": [
+              "https://api.calendly.com/organizations/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the organization whose events you want to list. Exactly ONE of `user`, `organization`, or `group` is required. Admin privileges may be required."
+          },
+          "invitee_email": {
+            "type": "string",
+            "title": "Invitee Email",
+            "examples": [
+              "invitee@example.com"
+            ],
+            "description": "Invitee's email address to filter events by. This is a filter parameter and cannot be used as a scope. Exactly one of `user`, `organization`, or `group` must be provided to scope the query."
+          },
+          "max_start_time": {
+            "type": "string",
+            "title": "Max Start Time",
+            "examples": [
+              "2024-01-31T23:59:59.999999Z"
+            ],
+            "description": "Include events with start times at or before this UTC timestamp (e.g., '2020-01-02T03:04:05.678123Z')."
+          },
+          "min_start_time": {
+            "type": "string",
+            "title": "Min Start Time",
+            "examples": [
+              "2024-01-01T00:00:00.000000Z"
+            ],
+            "description": "Include events with start times at or after this UTC timestamp (e.g., '2020-01-02T03:04:05.678123Z')."
+          }
+        },
+        "description": "Request schema for `ListEvents` to retrieve a list of scheduled Calendly events."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_EVENT_TYPE_AVAILABLE_TIMES",
+      "description": "Fetches available time slots for a Calendly event type within a specified time range; results are not paginated.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListEventTypeAvailableTimesRequest",
+        "required": [
+          "event_type",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "end_time": {
+            "type": "string",
+            "title": "End Time",
+            "examples": [
+              "2023-10-27T17:00:00Z"
+            ],
+            "description": "End datetime (exclusive) of the requested availability range, in UTC ISO 8601 format (e.g., 'YYYY-MM-DDTHH:MM:SSZ'). The duration between start_time and end_time cannot exceed 7 days."
+          },
+          "event_type": {
+            "type": "string",
+            "title": "Event Type",
+            "examples": [
+              "https://api.calendly.com/event_types/GBGBDCAADAEDCRZ2"
+            ],
+            "description": "The URI of the event type for which to find available times. This can be obtained by listing event types or from an event type object."
+          },
+          "start_time": {
+            "type": "string",
+            "title": "Start Time",
+            "examples": [
+              "2023-10-26T09:00:00Z"
+            ],
+            "description": "Start datetime (inclusive) of the requested availability range, in UTC ISO 8601 format (e.g., 'YYYY-MM-DDTHH:MM:SSZ')."
+          }
+        },
+        "description": "Request model for fetching available times for a Calendly event type."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_EVENT_TYPE_HOSTS",
+      "description": "Retrieves a list of hosts (users) assigned to a specific, existing Calendly event type, identified by its URI.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListEventTypeHostsRequest",
+        "required": [
+          "event_type"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "description": "Number of event type hosts to return per page."
+          },
+          "event_type": {
+            "type": "string",
+            "title": "Event Type",
+            "examples": [
+              "https://api.calendly.com/event_types/GBGBDCAADAEDCRZ2"
+            ],
+            "description": "URI of an existing event type for which to list hosts."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "description": "Token from a previous list call to get the next/previous page of results."
+          }
+        },
+        "description": "Request schema for `ListEventTypeHosts`"
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_GROUP_RELATIONSHIPS",
+      "description": "Retrieves a list of group relationships defining an owner's role (e.g., member, admin) within a group; an owner can have one membership per group but multiple admin roles across different groups.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListGroupRelationshipsRequest",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "examples": [
+              20,
+              50,
+              100
+            ],
+            "description": "Number of records per page (max 100)."
+          },
+          "group": {
+            "type": "string",
+            "title": "Group",
+            "examples": [
+              "https://api.calendly.com/groups/GROUP_UUID"
+            ],
+            "description": "Filter results by group URI."
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner",
+            "examples": [
+              "https://api.calendly.com/organization_memberships/MEMBERSHIP_UUID",
+              "https://api.calendly.com/organizations/ORG_UUID/invitations/INVITATION_UUID"
+            ],
+            "description": "Filter results by owner URI (Organization Membership or Invitation URI)."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              "NEXT_PAGE_TOKEN_EXAMPLE"
+            ],
+            "description": "Token for retrieving a specific page of results, obtained from `next_page_token` or `previous_page_token` in a previous response."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "examples": [
+              "https://api.calendly.com/organizations/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "Filter results by organization URI."
+          }
+        },
+        "description": "Request schema for listing group relationships, allowing pagination and filtering."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_GROUPS",
+      "description": "Returns a list of groups for a specified Calendly organization URI, supporting pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListGroupsRequest",
+        "required": [
+          "organization"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "examples": [
+              10,
+              20,
+              50
+            ],
+            "description": "The maximum number of groups to return per page. The value can range from 1 to 100."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              "NEXT_PAGE_TOKEN_EXAMPLE"
+            ],
+            "description": "A token to retrieve a specific page of results. Pass this value from a previous response's 'next_page_token' to fetch the next set of groups, or 'previous_page_token' for the previous set."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "examples": [
+              "https://api.calendly.com/organizations/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "The URI of the organization to filter groups by. For example, 'https://api.calendly.com/organizations/ORGANIZATION_UUID'."
+          }
+        },
+        "description": "Request schema for retrieving a list of groups associated with an organization."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_ORGANIZATION_INVITATIONS",
+      "description": "Retrieves a list of invitations for a specific organization, identified by its UUID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListOrganizationInvitationsRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "default": "created_at:asc",
+            "examples": [
+              "created_at:desc",
+              "email:asc",
+              "status:asc,created_at:desc"
+            ],
+            "description": "Order of results by field(s) and direction (asc/desc); e.g., 'created_at:asc' or 'email:desc,status:asc'."
+          },
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "org_00123456789abcdef"
+            ],
+            "description": "Unique identifier (UUID) of the organization."
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "examples": [
+              10,
+              50
+            ],
+            "description": "Number of results to return per page."
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "examples": [
+              "test@example.com"
+            ],
+            "description": "Filter by the recipient's email address."
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "accepted",
+              "declined"
+            ],
+            "type": "string",
+            "title": "Status",
+            "examples": [
+              "pending",
+              "accepted"
+            ],
+            "description": "Filter by invitation status."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              " nextPageTokenXYZ=="
+            ],
+            "description": "Pagination token to access a specific page of results."
+          }
+        },
+        "description": "Parameters for listing organization invitations."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_ORGANIZATION_MEMBERSHIPS",
+      "description": "Retrieves a list of organization memberships.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListOrganizationMembershipsRequest",
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User",
+            "examples": [
+              "https://api.calendly.com/users/AAABBBBCCCCDDDDEEEEE"
+            ],
+            "description": "Filter memberships by the URI of the user. For example, 'https://api.calendly.com/users/USER_UUID'."
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "examples": [
+              10,
+              20,
+              50
+            ],
+            "description": "The number of membership records to return per page. Must be an integer between 1 and 100, inclusive."
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "examples": [
+              "test_user@example.com"
+            ],
+            "description": "Filter memberships by the email address of the user. For example, 'user@example.com'."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              "NEXT_PAGE_TOKEN",
+              "PREVIOUS_PAGE_TOKEN"
+            ],
+            "description": "The token to retrieve the next or previous page of results in a paginated collection."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "examples": [
+              "https://api.calendly.com/organizations/EBHAAFHDCAEQTSEZ"
+            ],
+            "description": "Filter memberships by the URI of the organization. For example, 'https://api.calendly.com/organizations/ORGANIZATION_UUID'."
+          }
+        },
+        "description": "Request schema for listing organization memberships, allowing pagination and filtering by email, organization, or user."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_OUTGOING_COMMUNICATIONS",
+      "description": "Retrieves a list of outgoing SMS communications for a specified organization; requires an Enterprise subscription and if filtering by creation date, both `min_created_at` and `max_created_at` must be provided to form a valid range.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListOutgoingCommunicationsRequest",
+        "required": [
+          "organization"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "description": "The number of records to return per page. Must be between 1 and 100, inclusive."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              "NEXT_PAGE_TOKEN"
+            ],
+            "description": "The token to retrieve the next page of results. Provided in the `next_page_token` field of a previous response."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "examples": [
+              "https://api.calendly.com/organizations/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "The URI of the organization whose outgoing communications are to be retrieved."
+          },
+          "max_created_at": {
+            "type": "string",
+            "title": "Max Created At",
+            "examples": [
+              "2020-01-02T03:04:05.678Z"
+            ],
+            "description": "Include outgoing communications that were created before this timestamp. Formatted as \"YYYY-MM-DDTHH:MM:SS.sssZ\" in UTC."
+          },
+          "min_created_at": {
+            "type": "string",
+            "title": "Min Created At",
+            "examples": [
+              "2020-01-02T03:04:05.678Z"
+            ],
+            "description": "Include outgoing communications that were created after this timestamp. Formatted as \"YYYY-MM-DDTHH:MM:SS.sssZ\" in UTC."
+          }
+        },
+        "description": "Request schema for `ListOutgoingCommunications`"
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_ROUTING_FORMS",
+      "description": "Retrieves routing forms for a specified organization; routing forms are questionnaires used to direct invitees to appropriate booking pages or external URLs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListRoutingFormsRequest",
+        "required": [
+          "organization"
+        ],
+        "properties": {
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "examples": [
+              "created_at:desc",
+              "created_at:asc"
+            ],
+            "description": "Specifies the order of results. Use a comma-separated list of `field:direction` pairs. Supported field: `created_at`. Supported directions: `asc` (ascending), `desc` (descending)."
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "examples": [
+              "10",
+              "20",
+              "50"
+            ],
+            "description": "The number of routing forms to return per page."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              "nextPageTokenABC",
+              "prevPageTokenXYZ"
+            ],
+            "description": "Token to retrieve a specific page of results, usually from a previous response's pagination details."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "examples": [
+              "https://api.calendly.com/organizations/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "The URI of the organization for which to retrieve routing forms."
+          }
+        },
+        "description": "Request schema for retrieving a list of routing forms."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_USER_AVAILABILITY_SCHEDULES",
+      "description": "Retrieves all availability schedules for the specified Calendly user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListUserAvailabilitySchedulesRequest",
+        "required": [
+          "user"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User",
+            "examples": [
+              "https://api.calendly.com/users/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the user whose availability schedules are to be listed; must be a valid Calendly user URI."
+          }
+        },
+        "description": "Request to retrieve all availability schedules for a specified Calendly user."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_USER_BUSY_TIMES",
+      "description": "Fetches a user's busy time intervals (internal and external calendar events) in ascending order for a period up to 7 days; keyset pagination is not supported.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListUserBusyTimesRequest",
+        "required": [
+          "user",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User",
+            "examples": [
+              "https://api.calendly.com/users/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "The URI of the user whose busy times are being queried. This is typically the user's Calendly API URI."
+          },
+          "end_time": {
+            "type": "string",
+            "title": "End Time",
+            "examples": [
+              "2024-03-25T17:00:00Z"
+            ],
+            "description": "The end of the time range for which to fetch busy times, in RFC3339 format (e.g., '2023-10-26T11:00:00Z'). Must be after start_time."
+          },
+          "start_time": {
+            "type": "string",
+            "title": "Start Time",
+            "examples": [
+              "2024-03-25T08:00:00Z"
+            ],
+            "description": "The start of the time range for which to fetch busy times, in RFC3339 format (e.g., '2023-10-26T10:00:00Z')."
+          }
+        },
+        "description": "Request schema for fetching a user's busy time intervals from Calendly."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_USER_S_EVENT_TYPES",
+      "description": "Retrieves event types for a user or organization; requires either the `user` or `organization` URI.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListUserSEventTypesRequest",
+        "properties": {
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "default": "name:asc",
+            "examples": [
+              "name:asc",
+              "created_at:desc",
+              "name:asc,position:desc"
+            ],
+            "description": "Order results by field(s) and direction ('asc' or 'desc'), e.g., 'name:asc,created_at:desc'. Supported fields: name, position, created_at, updated_at."
+          },
+          "user": {
+            "type": "string",
+            "title": "User",
+            "examples": [
+              "https://api.calendly.com/users/BBBBBBBBBBBBBBBB"
+            ],
+            "description": "URI of the **user** whose event types to list. Provide **either** `user` **or** `organization` (exactly one is required)."
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "examples": [
+              20,
+              50,
+              100
+            ],
+            "description": "Number of event types per page (max 100)."
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "description": "Filter by active status (true for active, false for inactive). If omitted, all event types are returned."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              "NEXT_PAGE_TOKEN"
+            ],
+            "description": "Token for retrieving the next or previous page of event types."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "examples": [
+              "https://api.calendly.com/organizations/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the **organization** whose event types to list. Provide **either** `organization` **or** `user` (exactly one is required)."
+          },
+          "admin_managed": {
+            "type": "boolean",
+            "title": "Admin Managed",
+            "description": "Filter by admin management: true for admin-managed only, false to exclude admin-managed. If omitted, all types are returned (respecting other filters)."
+          },
+          "user_availability_schedule": {
+            "type": "string",
+            "title": "User Availability Schedule",
+            "examples": [
+              "https://api.calendly.com/user_availability_schedules/CCCCCCCCCCCCCCCC"
+            ],
+            "description": "URI of the user's availability schedule; use with `user` to filter event types by this primary schedule. Example: 'https://api.calendly.com/user_availability_schedules/SCHEDULE_UUID'."
+          }
+        },
+        "description": "Lists event types for a user or organization."
+      }
+    },
+    {
+      "name": "CALENDLY_LIST_WEBHOOK_SUBSCRIPTIONS",
+      "description": "Retrieves webhook subscriptions for a Calendly organization; `scope` determines if `user` or `group` URI is also required for filtering.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListWebhookSubscriptionsRequest",
+        "required": [
+          "organization",
+          "scope"
+        ],
+        "properties": {
+          "sort": {
+            "type": "string",
+            "title": "Sort",
+            "examples": [
+              "created_at:asc",
+              "updated_at:desc",
+              "created_at:asc,updated_at:desc"
+            ],
+            "description": "Sort order for results (e.g., 'created_at:asc'). Supported fields: `created_at`, `updated_at`. Supported directions: `asc`, `desc`."
+          },
+          "user": {
+            "type": "string",
+            "title": "User",
+            "examples": [
+              "https://api.calendly.com/users/BBBBBBBBBBBBBBBB"
+            ],
+            "description": "URI of the Calendly user; required if `scope` is 'user'."
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "default": 20,
+            "examples": [
+              "10",
+              "20",
+              "50",
+              "100"
+            ],
+            "description": "Number of results per page (maximum 100)."
+          },
+          "group": {
+            "type": "string",
+            "title": "Group",
+            "examples": [
+              "https://api.calendly.com/groups/CCCCCCCCCCCCCCCC"
+            ],
+            "description": "URI of the Calendly group; required if `scope` is 'group'."
+          },
+          "scope": {
+            "enum": [
+              "organization",
+              "user",
+              "group"
+            ],
+            "type": "string",
+            "title": "Scope",
+            "examples": [
+              "organization",
+              "user",
+              "group"
+            ],
+            "description": "Scope of the webhook subscriptions: 'organization', 'user', or 'group'."
+          },
+          "page_token": {
+            "type": "string",
+            "title": "Page Token",
+            "examples": [
+              " nextPageTokenExample123"
+            ],
+            "description": "Token for paginating to the next or previous page of results."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "examples": [
+              "https://api.calendly.com/organizations/AAAAAAAAAAAAAAAA"
+            ],
+            "description": "URI of the Calendly organization for which to list webhook subscriptions."
+          }
+        },
+        "description": "Request schema for `ListWebhookSubscriptions`"
+      }
+    },
+    {
+      "name": "CALENDLY_REMOVE_USER_FROM_ORGANIZATION",
+      "description": "Removes a user (who is not an owner) from an organization by their membership UUID, requiring administrative privileges.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RemoveUserFromOrganizationRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "GARNV3XBYEROA6PA"
+            ],
+            "description": "The unique identifier of the organization membership to be removed."
+          }
+        },
+        "description": "Request schema for removing a user from an organization."
+      }
+    },
+    {
+      "name": "CALENDLY_REVOKE_USER_S_ORGANIZATION_INVITATION",
+      "description": "Revokes a pending and revokable (not yet accepted or expired) organization invitation using its UUID and the organization's UUID, rendering the invitation link invalid.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RevokeUserSOrganizationInvitationRequest",
+        "required": [
+          "org_uuid",
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "INVabcde12345"
+            ],
+            "description": "The unique identifier of the organization invitation to be revoked."
+          },
+          "org_uuid": {
+            "type": "string",
+            "title": "Org Uuid",
+            "examples": [
+              "ORGAbcde12345"
+            ],
+            "description": "The unique identifier of the organization."
+          }
+        },
+        "description": "Request schema for revoking an organization invitation for a user."
+      }
+    }
+  ],
+  "tool_count": 42,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/calendly/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "CALENDLY_CANCEL_EVENT",
+    "CALENDLY_CREATE_INVITEE_NO_SHOW",
+    "CALENDLY_CREATE_ONE_OFF_EVENT_TYPE",
+    "CALENDLY_CREATE_SCHEDULING_LINK",
+    "CALENDLY_CREATE_SHARE",
+    "CALENDLY_CREATE_SINGLE_USE_SCHEDULING_LINK",
+    "CALENDLY_CREATE_WEBHOOK_SUBSCRIPTION",
+    "CALENDLY_DELETE_INVITEE_DATA",
+    "CALENDLY_DELETE_INVITEE_NO_SHOW",
+    "CALENDLY_DELETE_SCHEDULED_EVENT_DATA",
+    "CALENDLY_DELETE_WEBHOOK_SUBSCRIPTION",
+    "CALENDLY_GET_CURRENT_USER",
+    "CALENDLY_GET_EVENT",
+    "CALENDLY_GET_EVENT_INVITEE",
+    "CALENDLY_GET_EVENT_TYPE",
+    "CALENDLY_GET_GROUP",
+    "CALENDLY_GET_GROUP_RELATIONSHIP",
+    "CALENDLY_GET_INVITEE_NO_SHOW",
+    "CALENDLY_GET_ORGANIZATION_INVITATION",
+    "CALENDLY_GET_ORGANIZATION_MEMBERSHIP",
+    "CALENDLY_GET_ROUTING_FORM",
+    "CALENDLY_GET_USER",
+    "CALENDLY_GET_USER_AVAILABILITY_SCHEDULE",
+    "CALENDLY_GET_WEBHOOK_SUBSCRIPTION",
+    "CALENDLY_INVITE_USER_TO_ORGANIZATION",
+    "CALENDLY_LIST_ACTIVITY_LOG_ENTRIES",
+    "CALENDLY_LIST_EVENT_INVITEES",
+    "CALENDLY_LIST_EVENTS",
+    "CALENDLY_LIST_EVENT_TYPE_AVAILABLE_TIMES",
+    "CALENDLY_LIST_EVENT_TYPE_HOSTS",
+    "CALENDLY_LIST_GROUP_RELATIONSHIPS",
+    "CALENDLY_LIST_GROUPS",
+    "CALENDLY_LIST_ORGANIZATION_INVITATIONS",
+    "CALENDLY_LIST_ORGANIZATION_MEMBERSHIPS",
+    "CALENDLY_LIST_OUTGOING_COMMUNICATIONS",
+    "CALENDLY_LIST_ROUTING_FORMS",
+    "CALENDLY_LIST_USER_AVAILABILITY_SCHEDULES",
+    "CALENDLY_LIST_USER_BUSY_TIMES",
+    "CALENDLY_LIST_USER_S_EVENT_TYPES",
+    "CALENDLY_LIST_WEBHOOK_SUBSCRIPTIONS",
+    "CALENDLY_REMOVE_USER_FROM_ORGANIZATION",
+    "CALENDLY_REVOKE_USER_S_ORGANIZATION_INVITATION"
+  ]
+}

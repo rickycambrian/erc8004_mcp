@@ -1,0 +1,545 @@
+{
+  "id": "@synaptic-ai-consulting/nouri",
+  "name": "@synaptic-ai-consulting/nouri",
+  "display_name": "nouri",
+  "version": null,
+  "description": "Plan smarter grocery runs with prioritized lists that learn from your edits. Find the best deals and compare prices across multiple stores to maximize savings. Track and edit lists with insights that keep your family on budget.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/1d574713-cd86-4984-8096-8e55ba154503.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "generate_list",
+      "_meta": {
+        "tags": [
+          "grocery",
+          "list",
+          "planning"
+        ],
+        "agent": "smart_list_manager",
+        "component": "component:list-card",
+        "discovery_phrase": [
+          "shopping list",
+          "grocery list",
+          "generate list"
+        ]
+      },
+      "title": "Generate Shopping List",
+      "description": "Produce prioritized shopping list based on user needs, preferences, and shopping history",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional target categories or items to prioritize"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User identifier"
+          },
+          "constraints": {
+            "type": "object",
+            "properties": {
+              "max_items": {
+                "type": "integer"
+              },
+              "budget_limit": {
+                "type": "number"
+              },
+              "dietary_restrictions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Optional constraints for list generation"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "list_id",
+          "items",
+          "summary"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "quantity"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "list_id": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "add_item",
+      "_meta": {
+        "tags": [
+          "grocery",
+          "list",
+          "modify"
+        ],
+        "agent": "smart_list_manager",
+        "scope": "write",
+        "component": "component:list-card",
+        "discovery_phrase": [
+          "add",
+          "append",
+          "include"
+        ]
+      },
+      "title": "Add Item to List",
+      "description": "Append an item to an existing shopping list",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "list_id",
+          "item"
+        ],
+        "properties": {
+          "item": {
+            "type": "object",
+            "required": [
+              "name",
+              "quantity"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Product name"
+              },
+              "notes": {
+                "type": "string",
+                "description": "Optional notes"
+              },
+              "quantity": {
+                "type": "string",
+                "description": "Quantity (e.g., '2', '1 lb')"
+              }
+            }
+          },
+          "list_id": {
+            "type": "string",
+            "description": "Shopping list identifier"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "list",
+          "confirmation"
+        ],
+        "properties": {
+          "list": {
+            "type": "object",
+            "description": "Updated shopping list"
+          },
+          "confirmation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove_item",
+      "_meta": {
+        "tags": [
+          "grocery",
+          "list",
+          "modify"
+        ],
+        "agent": "smart_list_manager",
+        "scope": "write",
+        "component": "component:list-card",
+        "redact_pii": true,
+        "discovery_phrase": [
+          "remove",
+          "delete",
+          "exclude"
+        ]
+      },
+      "title": "Remove Item from List",
+      "description": "Remove an item from a shopping list",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "list_id",
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "description": "Item identifier to remove"
+          },
+          "list_id": {
+            "type": "string",
+            "description": "Shopping list identifier"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "list",
+          "confirmation"
+        ],
+        "properties": {
+          "list": {
+            "type": "object",
+            "description": "Updated shopping list"
+          },
+          "confirmation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_list",
+      "_meta": {
+        "tags": [
+          "grocery",
+          "list",
+          "read"
+        ],
+        "agent": "smart_list_manager",
+        "scope": "read",
+        "component": "component:list-card",
+        "resources": {
+          "component": "component:list-card"
+        },
+        "discovery_phrase": [
+          "show list",
+          "view list",
+          "get list"
+        ]
+      },
+      "title": "Get Shopping List",
+      "description": "Retrieve a shopping list for display",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "list_id"
+        ],
+        "properties": {
+          "list_id": {
+            "type": "string",
+            "description": "Shopping list identifier"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "items",
+          "metadata"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "list_id": {
+                "type": "string"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "search_deals",
+      "_meta": {
+        "tags": [
+          "grocery",
+          "deals",
+          "pricing"
+        ],
+        "agent": "deal_hunter",
+        "component": "component:deal-table",
+        "discovery_phrase": [
+          "deals",
+          "discounts",
+          "sales",
+          "best price"
+        ]
+      },
+      "title": "Search for Deals",
+      "description": "Find best deals across multiple stores for specified items",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Item names or categories to search"
+          },
+          "preferences": {
+            "type": "object",
+            "properties": {
+              "max_distance": {
+                "type": "number"
+              },
+              "preferred_stores": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Optional shopping preferences"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "deals",
+          "analysis"
+        ],
+        "properties": {
+          "deals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "store",
+                "item",
+                "price"
+              ],
+              "properties": {
+                "item": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "string"
+                },
+                "store": {
+                  "type": "string"
+                },
+                "deal_id": {
+                  "type": "string"
+                },
+                "savings": {
+                  "type": "string"
+                },
+                "valid_until": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "analysis": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "compare_prices",
+      "_meta": {
+        "tags": [
+          "grocery",
+          "pricing",
+          "comparison"
+        ],
+        "agent": "deal_hunter",
+        "component": "component:deal-table",
+        "resources": {
+          "component": "component:deal-table"
+        },
+        "discovery_phrase": [
+          "compare",
+          "price",
+          "cheapest",
+          "best deal"
+        ]
+      },
+      "title": "Compare Prices",
+      "description": "Get detailed price comparison for a specific item across stores",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "item"
+        ],
+        "properties": {
+          "item": {
+            "type": "string",
+            "description": "Item name to compare"
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of measurement (e.g., 'lb', 'oz', 'each')"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "comparisons",
+          "cheapest_store"
+        ],
+        "properties": {
+          "comparisons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "store",
+                "price",
+                "availability"
+              ],
+              "properties": {
+                "price": {
+                  "type": "string"
+                },
+                "store": {
+                  "type": "string"
+                },
+                "unit_price": {
+                  "type": "string"
+                },
+                "availability": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "cheapest_store": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_insights",
+      "_meta": {
+        "tags": [
+          "grocery",
+          "insights",
+          "tips"
+        ],
+        "agent": "smart_list_manager",
+        "scope": "read",
+        "component": "component:insight-banner",
+        "discovery_phrase": [
+          "insights",
+          "tips",
+          "suggestions",
+          "help"
+        ]
+      },
+      "title": "Get List Insights",
+      "description": "Provide usage insights and tips for a shopping list",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "list_id"
+        ],
+        "properties": {
+          "list_id": {
+            "type": "string",
+            "description": "Shopping list identifier"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "insights",
+          "next_best_action"
+        ],
+        "properties": {
+          "insights": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of insights and tips"
+          },
+          "next_best_action": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 7,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@synaptic-ai-consulting/nouri/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "generate_list",
+    "add_item",
+    "remove_item",
+    "get_list",
+    "search_deals",
+    "compare_prices",
+    "list_insights"
+  ]
+}

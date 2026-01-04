@@ -1,0 +1,1106 @@
+{
+  "id": "@Hint-Services/mcp-todoist",
+  "name": "@Hint-Services/mcp-todoist",
+  "display_name": "Todoist ",
+  "version": null,
+  "description": "Manage tasks, projects, sections, and labels in Todoist from your workflow. Create, update, complete, and batch-edit items using natural language and flexible filters. Streamline daily planning, project organization, and team coordination without switching contexts.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/5a2d176c-0e7b-4f3f-9a6d-a2e2cd1316a3.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "todoist_create_task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create one or more tasks in Todoist. Supports both single task creation and batch operations. Include details like due dates, priorities, labels, and project assignments.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "order": {
+            "type": "number",
+            "description": "Task order in list"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "content"
+              ],
+              "properties": {
+                "order": {
+                  "type": "number"
+                },
+                "labels": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "content": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "due_date": {
+                  "type": "string"
+                },
+                "due_lang": {
+                  "type": "string"
+                },
+                "duration": {
+                  "type": "number"
+                },
+                "priority": {
+                  "type": "number",
+                  "maximum": 4,
+                  "minimum": 1
+                },
+                "parent_id": {
+                  "type": "string"
+                },
+                "due_string": {
+                  "type": "string"
+                },
+                "project_id": {
+                  "type": "string"
+                },
+                "section_id": {
+                  "type": "string"
+                },
+                "assignee_id": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "due_datetime": {
+                  "type": "string"
+                },
+                "deadline_date": {
+                  "type": "string"
+                },
+                "deadline_lang": {
+                  "type": "string"
+                },
+                "duration_unit": {
+                  "enum": [
+                    "minute",
+                    "day"
+                  ],
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of tasks to create (for batch operations)"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Label names"
+          },
+          "content": {
+            "type": "string",
+            "description": "Task content/title (for single task)"
+          },
+          "due_date": {
+            "type": "string",
+            "description": "Specific due date in YYYY-MM-DD format (mutually exclusive with due_datetime)"
+          },
+          "due_lang": {
+            "type": "string",
+            "description": "Language for parsing due_string (e.g., 'en', 'de', 'fr')"
+          },
+          "duration": {
+            "type": "number",
+            "description": "Task duration amount (use with duration_unit)"
+          },
+          "priority": {
+            "type": "number",
+            "maximum": 4,
+            "minimum": 1,
+            "description": "Priority (1-4, where 1=normal, 4=urgent)"
+          },
+          "parent_id": {
+            "type": "string",
+            "description": "Parent task ID (for subtasks)"
+          },
+          "due_string": {
+            "type": "string",
+            "description": "Natural language due date (e.g., 'tomorrow', 'next Monday at 2pm')"
+          },
+          "project_id": {
+            "type": "string",
+            "description": "Project ID"
+          },
+          "section_id": {
+            "type": "string",
+            "description": "Section ID"
+          },
+          "assignee_id": {
+            "type": "string",
+            "description": "User ID to assign task to"
+          },
+          "description": {
+            "type": "string",
+            "description": "Task description"
+          },
+          "due_datetime": {
+            "type": "string",
+            "description": "Specific due datetime in RFC3339 format (mutually exclusive with due_date)"
+          },
+          "duration_unit": {
+            "enum": [
+              "minute",
+              "day"
+            ],
+            "type": "string",
+            "description": "Unit for duration: 'minute' or 'day'"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_get_tasks",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve tasks from Todoist with flexible filtering options. Filter by project, section, label, priority, or use natural language filters like 'today', 'tomorrow', 'overdue'.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by specific task IDs"
+          },
+          "lang": {
+            "type": "string",
+            "description": "Language for date parsing (e.g., 'en', 'de', 'fr')"
+          },
+          "label": {
+            "type": "string",
+            "description": "Filter tasks by label name"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Maximum number of tasks to return (default: 10)"
+          },
+          "filter": {
+            "type": "string",
+            "description": "Natural language filter like 'today', 'tomorrow', 'next week', 'overdue', etc."
+          },
+          "priority": {
+            "type": "number",
+            "maximum": 4,
+            "minimum": 1,
+            "description": "Filter by priority level (1=normal, 2=medium, 3=high, 4=urgent)"
+          },
+          "project_id": {
+            "type": "string",
+            "description": "Filter tasks by project ID"
+          },
+          "section_id": {
+            "type": "string",
+            "description": "Filter tasks by section ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_update_task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update one or more existing tasks in Todoist. Supports both single task updates and batch operations. Can update by task ID or search by task name.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "labels": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "content": {
+                  "type": "string"
+                },
+                "task_id": {
+                  "type": "string"
+                },
+                "due_date": {
+                  "type": "string"
+                },
+                "due_lang": {
+                  "type": "string"
+                },
+                "duration": {
+                  "type": "number"
+                },
+                "priority": {
+                  "type": "number",
+                  "maximum": 4,
+                  "minimum": 1
+                },
+                "task_name": {
+                  "type": "string"
+                },
+                "due_string": {
+                  "type": "string"
+                },
+                "project_id": {
+                  "type": "string"
+                },
+                "section_id": {
+                  "type": "string"
+                },
+                "assignee_id": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "due_datetime": {
+                  "type": "string"
+                },
+                "deadline_date": {
+                  "type": "string"
+                },
+                "deadline_lang": {
+                  "type": "string"
+                },
+                "duration_unit": {
+                  "enum": [
+                    "minute",
+                    "day"
+                  ],
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of tasks to update (for batch operations)"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "New labels"
+          },
+          "content": {
+            "type": "string",
+            "description": "New task content"
+          },
+          "task_id": {
+            "type": "string",
+            "description": "Task ID to update"
+          },
+          "due_date": {
+            "type": "string",
+            "description": "Specific due date in YYYY-MM-DD format (mutually exclusive with due_datetime)"
+          },
+          "due_lang": {
+            "type": "string",
+            "description": "Language for parsing due_string (e.g., 'en', 'de', 'fr')"
+          },
+          "duration": {
+            "type": "number",
+            "description": "Task duration amount (use with duration_unit)"
+          },
+          "priority": {
+            "type": "number",
+            "maximum": 4,
+            "minimum": 1,
+            "description": "New priority (1-4, where 1=normal, 4=urgent)"
+          },
+          "task_name": {
+            "type": "string",
+            "description": "Task name to search for (if ID not provided)"
+          },
+          "due_string": {
+            "type": "string",
+            "description": "Natural language due date (e.g., 'tomorrow', 'next Monday at 2pm')"
+          },
+          "project_id": {
+            "type": "string",
+            "description": "Move to project ID"
+          },
+          "section_id": {
+            "type": "string",
+            "description": "Move to section ID"
+          },
+          "assignee_id": {
+            "type": "string",
+            "description": "User ID to assign task to"
+          },
+          "description": {
+            "type": "string",
+            "description": "New description"
+          },
+          "due_datetime": {
+            "type": "string",
+            "description": "Specific due datetime in RFC3339 format (mutually exclusive with due_date)"
+          },
+          "duration_unit": {
+            "enum": [
+              "minute",
+              "day"
+            ],
+            "type": "string",
+            "description": "Unit for duration: 'minute' or 'day'"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_delete_task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete one or more tasks from Todoist. Supports both single task deletion and batch operations. Can delete by task ID or search by task name.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "task_id": {
+                  "type": "string"
+                },
+                "task_name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of tasks to delete (for batch operations)"
+          },
+          "task_id": {
+            "type": "string",
+            "description": "Task ID to delete"
+          },
+          "task_name": {
+            "type": "string",
+            "description": "Task name to search for (if ID not provided)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_complete_task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Mark one or more tasks as complete in Todoist. Supports both single task completion and batch operations. Can complete by task ID or search by task name.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "task_id": {
+                  "type": "string"
+                },
+                "task_name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of tasks to complete (for batch operations)"
+          },
+          "task_id": {
+            "type": "string",
+            "description": "Task ID to complete"
+          },
+          "task_name": {
+            "type": "string",
+            "description": "Task name to search for (if ID not provided)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_move_task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Move one or more tasks to a different project, section, or parent task. Use this instead of update when changing task location. Exactly one destination (project_id, section_id, or parent_id) must be specified.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "task_id": {
+                  "type": "string"
+                },
+                "parent_id": {
+                  "type": "string"
+                },
+                "task_name": {
+                  "type": "string"
+                },
+                "project_id": {
+                  "type": "string"
+                },
+                "section_id": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of tasks to move (for batch operations)"
+          },
+          "task_id": {
+            "type": "string",
+            "description": "Task ID to move"
+          },
+          "parent_id": {
+            "type": "string",
+            "description": "Parent task ID (make this a subtask)"
+          },
+          "task_name": {
+            "type": "string",
+            "description": "Task name to search for (if ID not provided)"
+          },
+          "project_id": {
+            "type": "string",
+            "description": "Destination project ID (move to project)"
+          },
+          "section_id": {
+            "type": "string",
+            "description": "Destination section ID (move to section)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_get_projects",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve all projects from Todoist. Optionally include sections and hierarchy information to understand parent-child project relationships.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "project_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by specific project IDs (returns all if not specified)"
+          },
+          "include_sections": {
+            "type": "boolean",
+            "description": "Include sections for each project (default: false)"
+          },
+          "include_hierarchy": {
+            "type": "boolean",
+            "description": "Include parent-child project relationships (default: false)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_create_project",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create one or more projects in Todoist. Supports both single project creation and batch operations. Can create nested projects and optionally add sections during creation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Project name (for single project)"
+          },
+          "color": {
+            "type": "string",
+            "description": "Project color"
+          },
+          "favorite": {
+            "type": "boolean",
+            "description": "Mark as favorite"
+          },
+          "projects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "color": {
+                  "enum": [
+                    "berry_red",
+                    "red",
+                    "orange",
+                    "yellow",
+                    "olive_green",
+                    "lime_green",
+                    "green",
+                    "mint_green",
+                    "teal",
+                    "sky_blue",
+                    "light_blue",
+                    "blue",
+                    "grape",
+                    "violet",
+                    "lavender",
+                    "magenta",
+                    "salmon",
+                    "charcoal",
+                    "grey",
+                    "taupe"
+                  ],
+                  "type": "string"
+                },
+                "favorite": {
+                  "type": "boolean"
+                },
+                "sections": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "parent_id": {
+                  "type": "string"
+                },
+                "view_style": {
+                  "enum": [
+                    "list",
+                    "board"
+                  ],
+                  "type": "string"
+                },
+                "parent_name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of projects to create (for batch operations)"
+          },
+          "parent_id": {
+            "type": "string",
+            "description": "Parent project ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_update_project",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update one or more existing projects in Todoist. Supports both single project updates and batch operations. Can update by project ID or search by project name.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New project name"
+          },
+          "color": {
+            "type": "string",
+            "description": "New color"
+          },
+          "favorite": {
+            "type": "boolean",
+            "description": "New favorite status"
+          },
+          "projects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "color": {
+                  "enum": [
+                    "berry_red",
+                    "red",
+                    "orange",
+                    "yellow",
+                    "olive_green",
+                    "lime_green",
+                    "green",
+                    "mint_green",
+                    "teal",
+                    "sky_blue",
+                    "light_blue",
+                    "blue",
+                    "grape",
+                    "violet",
+                    "lavender",
+                    "magenta",
+                    "salmon",
+                    "charcoal",
+                    "grey",
+                    "taupe"
+                  ],
+                  "type": "string"
+                },
+                "favorite": {
+                  "type": "boolean"
+                },
+                "project_id": {
+                  "type": "string"
+                },
+                "view_style": {
+                  "enum": [
+                    "list",
+                    "board"
+                  ],
+                  "type": "string"
+                },
+                "project_name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of projects to update (for batch operations)"
+          },
+          "project_id": {
+            "type": "string",
+            "description": "Project ID to update"
+          },
+          "view_style": {
+            "enum": [
+              "list",
+              "board"
+            ],
+            "type": "string",
+            "description": "Project view style"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "Project name to search for (if ID not provided)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_get_project_sections",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve sections from one or more projects in Todoist. Sections help organize tasks within a project. Supports batch operations.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "projects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "project_id": {
+                  "type": "string"
+                },
+                "project_name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of projects to get sections from (batch)"
+          },
+          "project_id": {
+            "type": "string",
+            "description": "Project ID"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "Project name (if ID not provided)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_create_project_section",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create one or more sections within Todoist projects. Sections help organize tasks. Supports both single section creation and batch operations.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Section name"
+          },
+          "order": {
+            "type": "number",
+            "description": "Section order"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "order": {
+                  "type": "number"
+                },
+                "project_id": {
+                  "type": "string"
+                },
+                "project_name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of sections to create (for batch operations)"
+          },
+          "project_id": {
+            "type": "string",
+            "description": "Project ID (for single section)"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "Project name (if ID not provided)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_get_personal_labels",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve all personal labels from Todoist. Labels help categorize and organize tasks across projects.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_get_personal_label",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve a specific personal label by its ID from Todoist.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "label_id"
+        ],
+        "properties": {
+          "label_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The unique ID of the label to retrieve"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_create_personal_label",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create one or more personal labels in Todoist. Supports both single label creation and batch operations. Labels can have colors and be marked as favorites.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Label name (for single label)"
+          },
+          "color": {
+            "type": "string",
+            "description": "Label color"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "color": {
+                  "enum": [
+                    "berry_red",
+                    "red",
+                    "orange",
+                    "yellow",
+                    "olive_green",
+                    "lime_green",
+                    "green",
+                    "mint_green",
+                    "teal",
+                    "sky_blue",
+                    "light_blue",
+                    "blue",
+                    "grape",
+                    "violet",
+                    "lavender",
+                    "magenta",
+                    "salmon",
+                    "charcoal",
+                    "grey",
+                    "taupe"
+                  ],
+                  "type": "string"
+                },
+                "order": {
+                  "type": "number"
+                },
+                "is_favorite": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of labels to create (for batch operations)"
+          },
+          "is_favorite": {
+            "type": "boolean",
+            "description": "Mark as favorite"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_update_personal_label",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update one or more existing personal labels in Todoist. Supports both single label updates and batch operations. Can update by label ID or search by label name.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New label name"
+          },
+          "color": {
+            "type": "string",
+            "description": "New color"
+          },
+          "order": {
+            "type": "number",
+            "description": "Label order"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "color": {
+                  "enum": [
+                    "berry_red",
+                    "red",
+                    "orange",
+                    "yellow",
+                    "olive_green",
+                    "lime_green",
+                    "green",
+                    "mint_green",
+                    "teal",
+                    "sky_blue",
+                    "light_blue",
+                    "blue",
+                    "grape",
+                    "violet",
+                    "lavender",
+                    "magenta",
+                    "salmon",
+                    "charcoal",
+                    "grey",
+                    "taupe"
+                  ],
+                  "type": "string"
+                },
+                "order": {
+                  "type": "number"
+                },
+                "label_id": {
+                  "type": "string"
+                },
+                "label_name": {
+                  "type": "string"
+                },
+                "is_favorite": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of labels to update (for batch operations)"
+          },
+          "label_id": {
+            "type": "string",
+            "description": "Label ID to update"
+          },
+          "label_name": {
+            "type": "string",
+            "description": "Label name to search for (if ID not provided)"
+          },
+          "is_favorite": {
+            "type": "boolean",
+            "description": "New favorite status"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "todoist_delete_personal_label",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete a personal label from Todoist. This will remove the label from all tasks that use it.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "label_id"
+        ],
+        "properties": {
+          "label_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The unique ID of the label to delete (WARNING: This will remove the label from all tasks)"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 16,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@Hint-Services/mcp-todoist/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "todoist_create_task",
+    "todoist_get_tasks",
+    "todoist_update_task",
+    "todoist_delete_task",
+    "todoist_complete_task",
+    "todoist_move_task",
+    "todoist_get_projects",
+    "todoist_create_project",
+    "todoist_update_project",
+    "todoist_get_project_sections",
+    "todoist_create_project_section",
+    "todoist_get_personal_labels",
+    "todoist_get_personal_label",
+    "todoist_create_personal_label",
+    "todoist_update_personal_label",
+    "todoist_delete_personal_label"
+  ]
+}

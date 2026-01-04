@@ -1,0 +1,159 @@
+{
+  "id": "moda.ai/remote-camera",
+  "name": "moda.ai/remote-camera",
+  "display_name": "Remote Camera",
+  "version": "1.0.0",
+  "description": "Capture photos remotely from mobile devices via S3-backed upload URLs",
+  "icon_url": "https://remote-camera-mcp.email.ai.moda/bimi/logo.svg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": "2025-10-27T19:16:27.548449Z",
+  "tools": [
+    {
+      "name": "generate_upload_url",
+      "description": "Generate a URL for remote camera upload. Send this URL to a mobile device to capture and upload a photo. The capture URL can be reused multiple times to upload different photos without generating a new URL. The URL will be in format: https://www.ai.moda/mcp-servers/remote-camera/capture/?url=PRESIGNED_URL",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Instructions/message to display to the user on the capture page (max 200 characters)",
+            "examples": [
+              "Take a photo of the chip markings on the main IC",
+              "Capture the PCB trace layout near the connector",
+              "Show me the part number on that sensor module"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "capture_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Full URL to send to mobile device for photo capture",
+            "examples": [
+              "https://www.ai.moda/mcp-servers/remote-camera/capture/?url=https%3A%2F%2Fs3.us-east-005.backblazeb2.com%2F..."
+            ]
+          },
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Session ID used for this upload, in UUID format"
+          }
+        },
+        "required": [
+          "capture_url",
+          "session_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "poll_for_upload",
+      "description": "Poll S3 bucket waiting for photo upload to complete. Returns a presigned download URL when the file is ready. The same session_id can be used to poll for new uploads multiple times, allowing the capture URL to be reused.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Session ID to poll for, in UUID format"
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 600,
+            "default": 50,
+            "description": "Max seconds to wait for upload"
+          },
+          "modified_since": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Only detect files modified after this date in ISO 8601 or HTTP date format",
+            "examples": [
+              "2026-01-03T00:00:00.000Z",
+              "Sun, 28 Dec 2025 00:00:00 GMT",
+              "2026-01-02T00:00:00.000Z"
+            ]
+          },
+          "not_etag": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 130,
+            "description": "Only detect files with different ETag than this value, used to poll for new uploads",
+            "examples": [
+              "d41d8cd98f00b204e9800998ecf8427e",
+              "\"1a2b3c4d5e6f7g8h9i0j\"",
+              "a3bb189e8bf94c5e8d7a1e5f5e5e5e5e-2"
+            ]
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "download_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Presigned GET URL to download the uploaded photo, valid for 7 days",
+            "examples": [
+              "https://s3.us-east-005.backblazeb2.com/bucket/remote-camera-mcp/a3bb189e-8bf9-4c5e-8d7a-1e5f5e5e5e5e?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=..."
+            ]
+          },
+          "etag": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 130,
+            "description": "ETag of the uploaded file, can be used with not_etag parameter for subsequent polls",
+            "examples": [
+              "d41d8cd98f00b204e9800998ecf8427e",
+              "1a2b3c4d5e6f7g8h9i0j",
+              "a3bb189e8bf94c5e8d7a1e5f5e5e5e5e-2"
+            ]
+          },
+          "last_modified": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last modified timestamp of the uploaded file from S3"
+          }
+        },
+        "required": [
+          "download_url",
+          "etag"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    }
+  ],
+  "tool_count": 2,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://www.ai.moda/mcp-servers/remote-camera/mcp",
+  "packages": [],
+  "sources": [
+    "official"
+  ],
+  "primary_source": "official",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "generate_upload_url",
+    "poll_for_upload"
+  ]
+}

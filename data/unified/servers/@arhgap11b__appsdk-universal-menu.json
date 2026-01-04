@@ -1,0 +1,259 @@
+{
+  "id": "@arhgap11b/appsdk-universal-menu",
+  "name": "@arhgap11b/appsdk-universal-menu",
+  "display_name": "Universal Menu",
+  "version": null,
+  "description": "Guide users with a concise next-step menu at the end of responses. Offer actionable buttons and update the menu as choices are made. Keep conversations flowing with clear, contextual options.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "get_menu",
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/menu.html",
+        "openai/widgetAccessible": true,
+        "openai/toolInvocation/invoked": "Menu ready",
+        "openai/toolInvocation/invoking": "Preparing menu..."
+      },
+      "title": "Build next-step menu",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "description": "Use this when crafting the assistant reply to surface contextual next steps. Always call after every assistant message so the user can choose how to continue. Do not call after the user has already picked an item; use do_action instead.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Optional custom title to override the configured fallback for this specific turn."
+          },
+          "locale": {
+            "enum": [
+              "uk",
+              "ru",
+              "en"
+            ],
+            "type": "string",
+            "default": "en",
+            "description": "BCP-47 locale driving any default copy or heuristics."
+          },
+          "context": {
+            "type": "string",
+            "description": "Optional free-form context about the surrounding conversation turn."
+          },
+          "proposedItems": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "label"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 40,
+                  "minLength": 1,
+                  "description": "Stable identifier for the menu item, echoed back through do_action."
+                },
+                "hint": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "description": "Optional supporting copy that clarifies what happens on selection."
+                },
+                "icon": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "description": "Optional short icon token (emoji, initial, or glyph id) for visual affordance."
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 60,
+                  "minLength": 1,
+                  "description": "Primary label shown to the user inside the menu."
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Optional list of menu items supplied by the caller. When absent, defaults will be generated."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "title",
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "label"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 40,
+                  "minLength": 1,
+                  "description": "Stable identifier for the menu item, echoed back through do_action."
+                },
+                "hint": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "description": "Optional supporting copy that clarifies what happens on selection."
+                },
+                "icon": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "description": "Optional short icon token (emoji, initial, or glyph id) for visual affordance."
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 60,
+                  "minLength": 1,
+                  "description": "Primary label shown to the user inside the menu."
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Ordered list of actionable next steps for the user to choose from."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Visible menu heading conveying the current decision context."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "do_action",
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/menu.html",
+        "openai/widgetAccessible": true,
+        "openai/toolInvocation/invoked": "Completed",
+        "openai/toolInvocation/invoking": "Running action..."
+      },
+      "title": "Execute menu action",
+      "description": "Use this when the user selects an item from the menu to confirm the action, run any follow-up logic, and refresh the menu. Do not call unless the user has explicitly chosen an item.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Identifier of the menu item the user selected."
+          },
+          "label": {
+            "type": "string",
+            "description": "Label of the selection when available (mirrors MenuItem.label)."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "done",
+          "message"
+        ],
+        "properties": {
+          "done": {
+            "type": "boolean",
+            "description": "Signals that the action completed synchronously."
+          },
+          "menu": {
+            "type": "object",
+            "required": [
+              "title",
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "label"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 40,
+                      "minLength": 1,
+                      "description": "Stable identifier for the menu item, echoed back through do_action."
+                    },
+                    "hint": {
+                      "type": "string",
+                      "maxLength": 120,
+                      "description": "Optional supporting copy that clarifies what happens on selection."
+                    },
+                    "icon": {
+                      "type": "string",
+                      "maxLength": 64,
+                      "description": "Optional short icon token (emoji, initial, or glyph id) for visual affordance."
+                    },
+                    "label": {
+                      "type": "string",
+                      "maxLength": 60,
+                      "minLength": 1,
+                      "description": "Primary label shown to the user inside the menu."
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "description": "Ordered list of actionable next steps for the user to choose from."
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Visible menu heading conveying the current decision context."
+              }
+            },
+            "description": "Optional refreshed menu so the user can continue the flow.",
+            "additionalProperties": false
+          },
+          "message": {
+            "type": "string",
+            "description": "Summary of what happened after the action executed."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 2,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@arhgap11b/appsdk-universal-menu/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "get_menu",
+    "do_action"
+  ]
+}

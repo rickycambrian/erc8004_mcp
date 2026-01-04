@@ -1,0 +1,1141 @@
+{
+  "id": "servicem8",
+  "name": "servicem8",
+  "display_name": "Servicem8",
+  "version": null,
+  "description": "ServiceM8 helps field service businesses schedule jobs, send quotes, and manage invoices, offering staff mobile apps and real-time job status tracking",
+  "icon_url": "https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/servicem8.svg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "SERVICEM8_CREATE_JOB_NOTE",
+      "description": "Tool to create a new job note in ServiceM8. Use when you need to attach additional information to a specific job after obtaining its UUID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateJobNoteRequest",
+        "required": [
+          "related_object",
+          "related_object_uuid",
+          "note"
+        ],
+        "properties": {
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "examples": [
+              "Left voicemail requesting confirmation."
+            ],
+            "description": "Content of the note."
+          },
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "default": null,
+            "examples": [
+              "123e4567-e89b-12d3-a456-426655440000"
+            ],
+            "nullable": true,
+            "description": "Unique identifier for this note record. If omitted, a UUID will be generated."
+          },
+          "active": {
+            "type": "integer",
+            "title": "Active",
+            "default": 1,
+            "maximum": 1,
+            "minimum": 0,
+            "examples": [
+              1
+            ],
+            "description": "Record active flag: 1 = active (default), 0 = deleted."
+          },
+          "create_date": {
+            "type": "string",
+            "title": "Create Date",
+            "default": null,
+            "examples": [
+              "2023-07-01T12:34:56Z"
+            ],
+            "nullable": true,
+            "description": "Timestamp when record was last modified (ISO 8601). Server overrides if omitted."
+          },
+          "related_object": {
+            "type": "string",
+            "title": "Related Object",
+            "examples": [
+              "job"
+            ],
+            "description": "Type of the related object. Use 'job' for job notes."
+          },
+          "action_required": {
+            "type": "string",
+            "title": "Action Required",
+            "default": null,
+            "examples": [
+              "Client to confirm schedule."
+            ],
+            "nullable": true,
+            "description": "Optional follow-up action required description."
+          },
+          "related_object_uuid": {
+            "type": "string",
+            "title": "Related Object Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426655440001"
+            ],
+            "description": "UUID of the related job."
+          },
+          "action_completed_by_staff_uuid": {
+            "type": "string",
+            "title": "Action Completed By Staff Uuid",
+            "default": null,
+            "examples": [
+              "abcdef12-3456-7890-abcd-ef1234567890"
+            ],
+            "nullable": true,
+            "description": "UUID of staff member who completed the required action."
+          }
+        },
+        "description": "Request model for creating a new ServiceM8 Job Note."
+      }
+    },
+    {
+      "name": "SERVICEM8_CREATE_JOB_PAYMENT",
+      "description": "Tool to create a new job payment in ServiceM8. Use when you have collected payment details and need to record payment against a job. Example: \"Create a 100.00 cash payment for job 123e4567-e89b-12d3-a456-426614174000 at 2023-01-01 13:00:00.\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateJobPaymentRequest",
+        "required": [
+          "active",
+          "edit_date",
+          "job_uuid",
+          "actioned_by_uuid",
+          "timestamp",
+          "amount",
+          "method"
+        ],
+        "properties": {
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": null,
+            "examples": [
+              "Customer paid in full."
+            ],
+            "nullable": true,
+            "description": "Additional notes regarding the payment."
+          },
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "default": null,
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174003"
+            ],
+            "nullable": true,
+            "description": "Optional unique identifier for the job payment."
+          },
+          "active": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "title": "Active",
+            "examples": [
+              1
+            ],
+            "description": "1 if the payment is active; 0 if archived."
+          },
+          "amount": {
+            "type": "string",
+            "title": "Amount",
+            "examples": [
+              "100.00"
+            ],
+            "description": "Amount of the payment."
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "examples": [
+              "cash"
+            ],
+            "description": "Payment method used."
+          },
+          "job_uuid": {
+            "type": "string",
+            "title": "Job Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "UUID of the associated job."
+          },
+          "edit_date": {
+            "type": "string",
+            "title": "Edit Date",
+            "examples": [
+              "2023-01-01 12:00:00"
+            ],
+            "description": "Timestamp of last edit in 'YYYY-MM-DD HH:MM:SS' format."
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp",
+            "examples": [
+              "2023-01-01 13:00:00"
+            ],
+            "description": "Timestamp of the payment in 'YYYY-MM-DD HH:MM:SS' format."
+          },
+          "is_deposit": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "title": "Is Deposit",
+            "default": null,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "1 if this payment is a deposit; 0 otherwise."
+          },
+          "attachment_uuid": {
+            "type": "string",
+            "title": "Attachment Uuid",
+            "default": null,
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174002"
+            ],
+            "nullable": true,
+            "description": "UUID of any attachment related to the payment."
+          },
+          "actioned_by_uuid": {
+            "type": "string",
+            "title": "Actioned By Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174001"
+            ],
+            "description": "UUID of the staff member who actioned the payment."
+          }
+        },
+        "description": "Request model for creating a new ServiceM8 Job Payment."
+      }
+    },
+    {
+      "name": "SERVICEM8_CREATE_JOBS",
+      "description": "Tool to create a new Job in ServiceM8. Use when you have gathered all job details and need to push a record. Example: \"Create a Quote job for 123 Main St with PO #1234.\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateJobsRequest",
+        "required": [
+          "status",
+          "job_address"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "default": null,
+            "nullable": true,
+            "description": "Date the job is scheduled or created (YYYY-MM-DD)."
+          },
+          "active": {
+            "type": "integer",
+            "title": "Active",
+            "default": 1,
+            "maximum": 1,
+            "minimum": 0,
+            "description": "Active flag (1 = active, 0 = deleted). Defaults to 1."
+          },
+          "badges": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Badges",
+            "default": null,
+            "nullable": true,
+            "description": "List of badge UUIDs to apply (comma-separated)."
+          },
+          "status": {
+            "enum": [
+              "Quote",
+              "Work Order",
+              "Unsuccessful",
+              "Completed"
+            ],
+            "type": "string",
+            "title": "Status",
+            "description": "Current status of the job. Controls dispatch board placement."
+          },
+          "queue_uuid": {
+            "type": "string",
+            "title": "Queue Uuid",
+            "default": null,
+            "nullable": true,
+            "description": "UUID of the queue to assign this job to."
+          },
+          "job_address": {
+            "type": "string",
+            "title": "Job Address",
+            "maxLength": 500,
+            "description": "Physical address where the job is to be performed."
+          },
+          "company_uuid": {
+            "type": "string",
+            "title": "Company Uuid",
+            "default": null,
+            "nullable": true,
+            "description": "UUID of the customer/company associated with this job."
+          },
+          "category_uuid": {
+            "type": "string",
+            "title": "Category Uuid",
+            "default": null,
+            "nullable": true,
+            "description": "UUID of the job category."
+          },
+          "job_description": {
+            "type": "string",
+            "title": "Job Description",
+            "default": null,
+            "nullable": true,
+            "description": "Brief description of the work to be done."
+          },
+          "created_by_staff_uuid": {
+            "type": "string",
+            "title": "Created By Staff Uuid",
+            "default": null,
+            "nullable": true,
+            "description": "UUID of the staff member creating this job."
+          },
+          "purchase_order_number": {
+            "type": "string",
+            "title": "Purchase Order Number",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Client purchase order reference number."
+          }
+        },
+        "description": "Request parameters for creating a new Job in ServiceM8."
+      }
+    },
+    {
+      "name": "SERVICEM8_DELETE_JOB_NOTE",
+      "description": "Tool to delete a specific job note. Use when you need to archive a note by its UUID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ServiceM8DeleteJobNoteRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "description": "UUID of the job note to delete. Example: '123e4567-e89b-12d3-a456-426614174000'"
+          }
+        },
+        "description": "Request model for deleting a specific ServiceM8 job note."
+      }
+    },
+    {
+      "name": "SERVICEM8_DELETE_JOB_PAYMENT",
+      "description": "Tool to delete (archive) a specific job payment by its UUID. Use when you need to archive a payment record.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteJobPaymentRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426655440000"
+            ],
+            "description": "The UUID of the job payment to delete (archive)."
+          }
+        },
+        "description": "Request model for deleting (archiving) a ServiceM8 Job Payment by UUID."
+      }
+    },
+    {
+      "name": "SERVICEM8_LIST_ALL_ASSETS",
+      "description": "Tool to list all ServiceM8 assets. Use when you need a comprehensive asset registry, including custom fields, for inventory or reporting.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAllAssetsRequest",
+        "properties": {
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "active eq 1"
+            ],
+            "nullable": true,
+            "description": "Filter expression to narrow down assets; use ServiceM8 filtering syntax, e.g., 'active eq 1'."
+          }
+        },
+        "description": "Request model for listing all ServiceM8 assets. Supports optional filtering."
+      }
+    },
+    {
+      "name": "SERVICEM8_LIST_ALL_CLIENTS",
+      "description": "Tool to list all ServiceM8 clients. Use when you need a complete set of customer records for integrations or reporting.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAllClientsRequest",
+        "properties": {
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "active eq true"
+            ],
+            "nullable": true,
+            "description": "Filter expression to narrow down clients; use ServiceM8 filtering syntax, e.g., 'active eq true'."
+          }
+        },
+        "description": "Request model for listing all ServiceM8 clients. Supports optional filtering."
+      }
+    },
+    {
+      "name": "SERVICEM8_LIST_ALL_DOCUMENT_TEMPLATES",
+      "description": "Tool to list document templates. Use when you need to retrieve available template UUIDs and names before generating job documents.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAllDocumentTemplatesRequest",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Maximum number of templates to return (must be \u22651)."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "name eq \"Invoice\""
+            ],
+            "nullable": true,
+            "description": "Filter expression to narrow document templates; use ServiceM8 filtering syntax, e.g., 'name eq \"Invoice\"'."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Number of templates to skip before returning results (must be \u22650)."
+          }
+        },
+        "description": "Request model for listing document templates. Supports optional filtering and pagination."
+      }
+    },
+    {
+      "name": "SERVICEM8_LIST_ALL_FORMS",
+      "description": "Tool to list all ServiceM8 forms. Use when you need to fetch available form templates with optional filters.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAllFormsRequest",
+        "properties": {
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "active eq true"
+            ],
+            "nullable": true,
+            "description": "Filter expression to narrow down forms; use ServiceM8 filtering syntax, e.g., 'active eq true'."
+          }
+        },
+        "description": "Request model for listing all ServiceM8 forms. Supports optional filtering."
+      }
+    },
+    {
+      "name": "SERVICEM8_LIST_ALL_JOB_NOTES",
+      "description": "Tool to list all job notes in ServiceM8. Use when you need to fetch notes, optionally filtered or paginated.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAllJobNotesRequest",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Maximum number of notes to return (must be >=1)."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "job_uuid eq '123e4567-e89b-12d3-a456-426614174000'"
+            ],
+            "nullable": true,
+            "description": "ServiceM8 OData filter expression; only one filter per request."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Number of notes to skip (must be >=0)."
+          }
+        },
+        "description": "Request model for listing all job notes. Supports optional filtering and pagination."
+      }
+    },
+    {
+      "name": "SERVICEM8_LIST_ALL_JOB_QUEUES",
+      "description": "Tool to list all job queues in ServiceM8. Use when you need to fetch configured queues before dispatching jobs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAllJobQueuesRequest",
+        "properties": {},
+        "description": "Request model for listing all ServiceM8 job queues."
+      }
+    },
+    {
+      "name": "SERVICEM8_LIST_ALL_JOBS",
+      "description": "Tool to list all jobs. Use when you need to fetch all job records from your ServiceM8 account.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAllJobsRequest",
+        "properties": {
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "status='Work Order'"
+            ],
+            "nullable": true,
+            "description": "Filter criteria to narrow down jobs. Use ServiceM8 filtering syntax, e.g. \"status='Completed'\"."
+          }
+        },
+        "description": "Query parameters for listing ServiceM8 jobs."
+      }
+    },
+    {
+      "name": "SERVICEM8_LIST_ALL_LOCATIONS",
+      "description": "Tool to list all ServiceM8 locations. Use when you need to fetch every configured location for assignments or mapping.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAllLocationsRequest",
+        "properties": {},
+        "description": "Request model for listing all ServiceM8 locations. No parameters supported."
+      }
+    },
+    {
+      "name": "SERVICEM8_LIST_ALL_MATERIALS",
+      "description": "Tool to list all materials. Use when you need a full inventory dump after authenticating with read_inventory scope.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAllMaterialsRequest",
+        "properties": {},
+        "description": "Request model for listing all materials. No query parameters supported."
+      }
+    },
+    {
+      "name": "SERVICEM8_LIST_ALL_TASKS",
+      "description": "Tool to list all tasks in a ServiceM8 account. Use when you need to fetch task records, optionally filtered. Requires 'read_tasks' OAuth scope.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListAllTasksRequest",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Maximum number of tasks to return (must be \u22651)."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "completed eq false"
+            ],
+            "nullable": true,
+            "description": "Filter expression to narrow task results; use OData syntax, e.g., \"completed eq false\"."
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": null,
+            "minimum": 0,
+            "nullable": true,
+            "description": "Number of tasks to skip (must be \u22650)."
+          }
+        },
+        "description": "Request model for listing all tasks. Supports optional filtering and pagination."
+      }
+    },
+    {
+      "name": "SERVICEM8_RETRIEVE_CLIENT",
+      "description": "Tool to retrieve details of a specific client by its UUID. Use after confirming the client's UUID is valid.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveClientRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "UUID of the company (client) to retrieve"
+          }
+        },
+        "description": "Request model for retrieving a specific ServiceM8 client."
+      }
+    },
+    {
+      "name": "SERVICEM8_RETRIEVE_FORM",
+      "description": "Tool to retrieve details of a specific form by its UUID. Use when you need up-to-date form metadata given a known form UUID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveFormRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "description": "The unique identifier (UUID) of the form to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a specific ServiceM8 form by UUID."
+      }
+    },
+    {
+      "name": "SERVICEM8_RETRIEVE_JOB",
+      "description": "Tool to retrieve details of a specific job by its UUID. Use when you have the Job UUID and need its full record.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveJobRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426655440000"
+            ],
+            "description": "The UUID of the job to retrieve"
+          }
+        },
+        "description": "Request model for retrieving a ServiceM8 Job by UUID."
+      }
+    },
+    {
+      "name": "SERVICEM8_RETRIEVE_JOB_ACTIVITY",
+      "description": "Tool to retrieve details of a specific job activity by its UUID. Use when you have the job activity UUID and need its full details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveJobActivityRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-92d2-45a0-b890-22af748ce73b"
+            ],
+            "description": "UUID of the ServiceM8 job activity to retrieve"
+          }
+        },
+        "description": "Request model for retrieving a specific ServiceM8 job activity by UUID."
+      }
+    },
+    {
+      "name": "SERVICEM8_RETRIEVE_JOB_NOTE",
+      "description": "Tool to retrieve details of a specific job note by its UUID. Use when you have the note UUID (e.g., after listing notes) and need its full record before processing or display.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveJobNoteRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "UUID of the job note to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a ServiceM8 job note by its UUID."
+      }
+    },
+    {
+      "name": "SERVICEM8_RETRIEVE_JOB_PAYMENT",
+      "description": "Tool to retrieve details of a specific job payment by its UUID. Use when you have the payment UUID and need its full record and metadata.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveJobPaymentRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426655440000"
+            ],
+            "description": "The UUID of the job payment to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a ServiceM8 Job Payment by UUID."
+      }
+    },
+    {
+      "name": "SERVICEM8_RETRIEVE_JOB_QUEUE",
+      "description": "Tool to retrieve details of a specific job queue by its UUID. Use when you need full queue metadata before dispatching work.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveJobQueueRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "UUID of the job queue to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a ServiceM8 job queue by UUID."
+      }
+    },
+    {
+      "name": "SERVICEM8_RETRIEVE_LOCATION",
+      "description": "Tool to retrieve details of a specific location by its UUID. Use when you already have the location's UUID and need full location details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveLocationRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "10420f98-7626-4405-bf43-043f1036623b"
+            ],
+            "description": "UUID of the ServiceM8 location to retrieve."
+          }
+        },
+        "description": "Request model for retrieving a ServiceM8 location by UUID."
+      }
+    },
+    {
+      "name": "SERVICEM8_RETRIEVE_MATERIAL",
+      "description": "Tool to retrieve details of a specific material by its UUID. Use when you have a material UUID and need current inventory or pricing details.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveMaterialRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "UUID of the material to retrieve"
+          }
+        },
+        "description": "Request model for retrieving a specific ServiceM8 material."
+      }
+    },
+    {
+      "name": "SERVICEM8_RETRIEVE_STAFF_MEMBER",
+      "description": "Tool to retrieve details of a specific staff member by their UUID. Use when you need up-to-date staff information given a known staff UUID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "RetrieveStaffMemberRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "description": "The unique identifier (UUID) of the staff member to retrieve."
+          }
+        },
+        "description": "Request parameters for retrieving a specific staff member."
+      }
+    },
+    {
+      "name": "SERVICEM8_SERVICE_M8_CREATE_JOB",
+      "description": "Tool to create a new job in ServiceM8. Use when you have all job details and need to push a record into ServiceM8. Example: \"Create a Quote job for 123 Main St with PO #1234.\"",
+      "inputSchema": {
+        "type": "object",
+        "title": "ServiceM8CreateJobRequest",
+        "required": [
+          "status",
+          "job_address"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "default": null,
+            "nullable": true,
+            "description": "Date the job is scheduled or created (YYYY-MM-DD)."
+          },
+          "active": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "title": "Active",
+            "default": 1,
+            "nullable": true,
+            "description": "Active flag (1=active, 0=deleted). Defaults to 1."
+          },
+          "badges": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Badges",
+            "default": null,
+            "nullable": true,
+            "description": "List of badge UUIDs to apply (visual indicators on dispatch board)."
+          },
+          "status": {
+            "enum": [
+              "Quote",
+              "Work Order",
+              "Unsuccessful",
+              "Completed"
+            ],
+            "type": "string",
+            "title": "Status",
+            "description": "Current status of the job (controls dispatch board placement)."
+          },
+          "queue_uuid": {
+            "type": "string",
+            "title": "Queue Uuid",
+            "default": null,
+            "nullable": true,
+            "description": "UUID of the queue to assign this job to."
+          },
+          "job_address": {
+            "type": "string",
+            "title": "Job Address",
+            "maxLength": 500,
+            "description": "Physical address where the job is to be performed."
+          },
+          "company_uuid": {
+            "type": "string",
+            "title": "Company Uuid",
+            "default": null,
+            "nullable": true,
+            "description": "UUID of the customer/company associated with this job."
+          },
+          "category_uuid": {
+            "type": "string",
+            "title": "Category Uuid",
+            "default": null,
+            "nullable": true,
+            "description": "UUID of the job category (e.g., Plumbing, Electrical)."
+          },
+          "job_description": {
+            "type": "string",
+            "title": "Job Description",
+            "default": null,
+            "nullable": true,
+            "description": "Brief description of the work to be done."
+          },
+          "created_by_staff_uuid": {
+            "type": "string",
+            "title": "Created By Staff Uuid",
+            "default": null,
+            "nullable": true,
+            "description": "UUID of the staff member creating this job."
+          },
+          "purchase_order_number": {
+            "type": "string",
+            "title": "Purchase Order Number",
+            "default": null,
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Client purchase order reference number."
+          }
+        },
+        "description": "Request model for creating a new ServiceM8 Job."
+      }
+    },
+    {
+      "name": "SERVICEM8_UPDATE_JOB_NOTE",
+      "description": "Tool to update details of an existing job note. Use when modifying a note after its creation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateJobNoteRequest",
+        "required": [
+          "uuid"
+        ],
+        "properties": {
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": null,
+            "examples": [
+              "Rescheduled to next Tuesday at 10 AM."
+            ],
+            "nullable": true,
+            "description": "New content for the job note"
+          },
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "UUID of the job note to update"
+          },
+          "active": {
+            "type": "integer",
+            "title": "Active",
+            "default": null,
+            "maximum": 1,
+            "minimum": 0,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Active flag: 1=active, 0=archived"
+          },
+          "edit_date": {
+            "type": "string",
+            "title": "Edit Date",
+            "default": null,
+            "examples": [
+              "2023-10-01 15:30:00"
+            ],
+            "nullable": true,
+            "description": "Timestamp when the note was last edited in 'YYYY-MM-DD HH:MM:SS' format"
+          }
+        },
+        "description": "Request model for updating a ServiceM8 job note. Provide the note UUID and at least one field to modify."
+      }
+    },
+    {
+      "name": "SERVICEM8_UPDATE_JOB_PAYMENT",
+      "description": "Tool to update details of an existing job payment. Use after confirming the payment UUID and desired changes.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateJobPaymentRequest",
+        "required": [
+          "uuid",
+          "job_uuid",
+          "amount"
+        ],
+        "properties": {
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": null,
+            "examples": [
+              "Customer paid in full."
+            ],
+            "nullable": true,
+            "description": "Optional note for the payment"
+          },
+          "uuid": {
+            "type": "string",
+            "title": "Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426655440000"
+            ],
+            "description": "UUID of the job payment to update"
+          },
+          "active": {
+            "type": "integer",
+            "title": "Active",
+            "default": null,
+            "maximum": 1,
+            "minimum": 0,
+            "examples": [
+              1
+            ],
+            "nullable": true,
+            "description": "Active flag: 1=active, 0=archived"
+          },
+          "amount": {
+            "type": "string",
+            "title": "Amount",
+            "examples": [
+              "100.00"
+            ],
+            "description": "Amount of the payment"
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": null,
+            "examples": [
+              "credit_card"
+            ],
+            "nullable": true,
+            "description": "Payment method used, e.g., 'cash' or 'credit_card'"
+          },
+          "job_uuid": {
+            "type": "string",
+            "title": "Job Uuid",
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ],
+            "description": "UUID of the associated job"
+          },
+          "edit_date": {
+            "type": "string",
+            "title": "Edit Date",
+            "default": null,
+            "examples": [
+              "2023-01-01 12:00:00"
+            ],
+            "nullable": true,
+            "description": "Last edited timestamp in 'YYYY-MM-DD HH:MM:SS' format"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp",
+            "default": null,
+            "examples": [
+              "2023-01-01 13:00:00"
+            ],
+            "nullable": true,
+            "description": "Payment timestamp in 'YYYY-MM-DD HH:MM:SS' format"
+          },
+          "is_deposit": {
+            "type": "integer",
+            "title": "Is Deposit",
+            "default": null,
+            "maximum": 1,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Deposit flag: 1=deposit, 0=not a deposit"
+          },
+          "attachment_uuid": {
+            "type": "string",
+            "title": "Attachment Uuid",
+            "default": null,
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174002"
+            ],
+            "nullable": true,
+            "description": "UUID of an attachment related to the payment"
+          },
+          "actioned_by_uuid": {
+            "type": "string",
+            "title": "Actioned By Uuid",
+            "default": null,
+            "examples": [
+              "123e4567-e89b-12d3-a456-426614174001"
+            ],
+            "nullable": true,
+            "description": "UUID of the staff member who actioned the payment"
+          }
+        },
+        "description": "Request model for updating a ServiceM8 job payment record. Provide the UUID of the payment and any fields to update."
+      }
+    }
+  ],
+  "tool_count": 28,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/servicem8/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "SERVICEM8_CREATE_JOB_NOTE",
+    "SERVICEM8_CREATE_JOB_PAYMENT",
+    "SERVICEM8_CREATE_JOBS",
+    "SERVICEM8_DELETE_JOB_NOTE",
+    "SERVICEM8_DELETE_JOB_PAYMENT",
+    "SERVICEM8_LIST_ALL_ASSETS",
+    "SERVICEM8_LIST_ALL_CLIENTS",
+    "SERVICEM8_LIST_ALL_DOCUMENT_TEMPLATES",
+    "SERVICEM8_LIST_ALL_FORMS",
+    "SERVICEM8_LIST_ALL_JOB_NOTES",
+    "SERVICEM8_LIST_ALL_JOB_QUEUES",
+    "SERVICEM8_LIST_ALL_JOBS",
+    "SERVICEM8_LIST_ALL_LOCATIONS",
+    "SERVICEM8_LIST_ALL_MATERIALS",
+    "SERVICEM8_LIST_ALL_TASKS",
+    "SERVICEM8_RETRIEVE_CLIENT",
+    "SERVICEM8_RETRIEVE_FORM",
+    "SERVICEM8_RETRIEVE_JOB",
+    "SERVICEM8_RETRIEVE_JOB_ACTIVITY",
+    "SERVICEM8_RETRIEVE_JOB_NOTE",
+    "SERVICEM8_RETRIEVE_JOB_PAYMENT",
+    "SERVICEM8_RETRIEVE_JOB_QUEUE",
+    "SERVICEM8_RETRIEVE_LOCATION",
+    "SERVICEM8_RETRIEVE_MATERIAL",
+    "SERVICEM8_RETRIEVE_STAFF_MEMBER",
+    "SERVICEM8_SERVICE_M8_CREATE_JOB",
+    "SERVICEM8_UPDATE_JOB_NOTE",
+    "SERVICEM8_UPDATE_JOB_PAYMENT"
+  ]
+}

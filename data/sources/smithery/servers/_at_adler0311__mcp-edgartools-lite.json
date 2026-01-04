@@ -1,0 +1,184 @@
+{
+  "qualifiedName": "@adler0311/mcp-edgartools-lite",
+  "displayName": "mcp-edgartools-lite",
+  "description": "Research SEC filings by ticker or CIK to get company details, recent forms, and insider transactions. Extract targeted sections from 10-K, 10-Q, and 8-K to surface the information you need. Streamline due diligence and monitoring with fast, focused access to official disclosures.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@adler0311/mcp-edgartools-lite",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@adler0311/mcp-edgartools-lite/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "find_company_info",
+      "description": "\n            [Tool 1: Find Company Info]\n            Fetches core company information (CIK, official name, industry classification (SIC))\n            using a ticker (e.g., \"AAPL\") or CIK (e.g., \"320193\").\n            This is often the first step before using other tools.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "find_company_infoArguments",
+        "required": [
+          "ticker_or_cik"
+        ],
+        "properties": {
+          "ticker_or_cik": {
+            "type": "string",
+            "title": "Ticker Or Cik"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "find_company_infoOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_recent_filings",
+      "description": "\n            [Tool 2: Search Recent Filings]\n            Searches for a list of recent company filings (e.g., \"10-K\", \"8-K\", \"13F\"),\n            returning their key metadata: 'accession_no', 'form_type', and 'filing_date'.\n            This tool does NOT return the document content.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_recent_filingsArguments",
+        "required": [
+          "ticker_or_cik"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 5
+          },
+          "form_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Form Type",
+            "default": null
+          },
+          "ticker_or_cik": {
+            "type": "string",
+            "title": "Ticker Or Cik"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "search_recent_filingsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "extract_text_section",
+      "description": "\n            [Tool 3: Extract Text Section] (For text-based reports like 10-K, 8-K)\n            Parses a filing's original HTML (found via accession_no) to extract the text\n            content of a specific 'section_keyword'.\n            (Internally uses filing.obj() and .get_section_text())\n\n            Args:\n                ticker_or_cik (str): The company ticker (e.g., \"AAPL\") or CIK.\n                accession_no (str): The accession number obtained from 'search_recent_filings'.\n                section_keyword (str): (Important) The exact English keyword for the desired section.\n                    Valid keywords for 10-K/10-Q include:\n                    'business', 'risk_factors', 'management_discussion', 'legal_proceedings'\n                    Valid keywords for 8-K include:\n                    'item' (to get the main event text, e.g., \"Item 1.01\")\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "extract_text_sectionArguments",
+        "required": [
+          "ticker_or_cik",
+          "accession_no",
+          "section_keyword"
+        ],
+        "properties": {
+          "accession_no": {
+            "type": "string",
+            "title": "Accession No"
+          },
+          "ticker_or_cik": {
+            "type": "string",
+            "title": "Ticker Or Cik"
+          },
+          "section_keyword": {
+            "enum": [
+              "business",
+              "risk_factors",
+              "management_discussion",
+              "legal_proceedings",
+              "balance_sheet",
+              "income_statement",
+              "cashflow_statement",
+              "item"
+            ],
+            "type": "string",
+            "title": "Section Keyword"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "extract_text_sectionOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_insider_transactions",
+      "description": "\n            [Tool 4: Get Insider Transactions]\n            Fetches a list of insider transactions (Form 4 filings), showing\n            stock purchases or sales by company insiders (e.g., CEO, CFO, Directors)\n            within the last 'days_ago' days.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_insider_transactionsArguments",
+        "required": [
+          "ticker_or_cik"
+        ],
+        "properties": {
+          "days_ago": {
+            "type": "integer",
+            "title": "Days Ago",
+            "default": 90
+          },
+          "ticker_or_cik": {
+            "type": "string",
+            "title": "Ticker Or Cik"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_insider_transactionsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:21:45.957990+00:00",
+    "source": "smithery"
+  }
+}

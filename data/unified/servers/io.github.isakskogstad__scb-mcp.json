@@ -1,0 +1,492 @@
+{
+  "id": "io.github.isakskogstad/scb-mcp",
+  "name": "io.github.isakskogstad/scb-mcp",
+  "display_name": "io.github.isakskogstad/scb-mcp",
+  "version": "2.5.3",
+  "description": "MCP server for Statistics Sweden (SCB) - 1200+ tables with population, economy, environment data",
+  "icon_url": null,
+  "repository_url": "https://github.com/isakskogstad/SCB-MCP",
+  "status": "active",
+  "published_at": "2025-11-28T19:17:13.263099Z",
+  "tools": [
+    {
+      "name": "scb_get_api_status",
+      "description": "Get API configuration and rate limit information from Statistics Sweden",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "title": "API Status",
+        "readOnlyHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "scb_search_tables",
+      "description": "Search for statistical tables in the SCB database. IMPORTANT: Swedish search terms give MUCH better results. Use \"befolkning\" not \"population\", \"arbetsl\u00f6shet\" not \"unemployment\", \"inkomst\" not \"income\".",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search term - USE SWEDISH for best results. Examples: \"befolkning\" (population), \"arbetsl\u00f6shet\" (unemployment), \"inkomst\" (income), \"bost\u00e4der\" (housing), \"milj\u00f6\" (environment)."
+          },
+          "pastDays": {
+            "type": "number",
+            "description": "Only show tables updated in the last N days"
+          },
+          "includeDiscontinued": {
+            "type": "boolean",
+            "description": "Include discontinued tables",
+            "default": false
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Number of results per page (max 100)",
+            "default": 20
+          },
+          "pageNumber": {
+            "type": "number",
+            "description": "Page number",
+            "default": 1
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code: \"sv\" (Swedish, recommended) or \"en\" (English)",
+            "default": "sv"
+          },
+          "category": {
+            "type": "string",
+            "description": "Filter by category: \"population\", \"labour\", \"economy\", \"housing\", \"environment\", \"education\", \"health\", \"transport\""
+          }
+        }
+      },
+      "annotations": {
+        "title": "Search Tables",
+        "readOnlyHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "scb_get_table_info",
+      "description": "Get detailed metadata about a specific statistical table",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tableId": {
+            "type": "string",
+            "description": "Table ID (e.g., \"TAB4552\", \"TAB4560\")"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code: \"sv\" (Swedish, recommended) or \"en\" (English)",
+            "default": "sv"
+          }
+        },
+        "required": [
+          "tableId"
+        ]
+      },
+      "annotations": {
+        "title": "Get Table Info",
+        "readOnlyHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "scb_get_table_data",
+      "description": "Get statistical data from a table with optional filtering. Without selection, returns a smart default subset (latest time period, all categories). Use scb_preview_data for a quick preview first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tableId": {
+            "type": "string",
+            "description": "Table ID (e.g., \"TAB4552\", \"TAB4560\")"
+          },
+          "selection": {
+            "type": "object",
+            "description": "Optional variable selection. Format: {\"VariableName\": [\"value1\", \"value2\"]}. Use \"*\" for all values, \"TOP(5)\" for latest 5. If omitted, API uses smart defaults.",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code: \"sv\" (Swedish, recommended) or \"en\" (English)",
+            "default": "sv"
+          }
+        },
+        "required": [
+          "tableId"
+        ]
+      },
+      "annotations": {
+        "title": "Get Table Data",
+        "readOnlyHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "scb_check_usage",
+      "description": "Check current API usage and rate limit status",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "title": "Check Usage",
+        "readOnlyHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "scb_search_regions",
+      "description": "Search for region codes by name (e.g., find code for \"Lerum\", \"Stockholm\"). Supports fuzzy matching for Swedish characters.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Region name to search for (e.g., \"Lerum\", \"Stockholm\", \"Goteborg\")"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code: \"sv\" (Swedish, recommended) or \"en\" (English)",
+            "default": "sv"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "annotations": {
+        "title": "Search Regions",
+        "readOnlyHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "scb_get_table_variables",
+      "description": "Get available variables and their possible values for a table (essential before fetching data)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tableId": {
+            "type": "string",
+            "description": "Table ID (e.g., \"TAB6534\")"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code: \"sv\" (Swedish, recommended) or \"en\" (English)",
+            "default": "sv"
+          },
+          "variableName": {
+            "type": "string",
+            "description": "Optional: Show values for specific variable only (e.g., \"region\", \"k\u00f6n\")"
+          }
+        },
+        "required": [
+          "tableId"
+        ]
+      },
+      "annotations": {
+        "title": "Get Table Variables",
+        "readOnlyHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "scb_find_region_code",
+      "description": "Find the exact region code for a specific municipality or area. Supports fuzzy matching (e.g., \"Goteborg\" matches \"G\u00f6teborg\").",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Municipality or region name (e.g., \"Lerum\", \"Stockholm\", \"Goteborg\")"
+          },
+          "tableId": {
+            "type": "string",
+            "description": "Optional: Specific table to search for region codes (ensures compatibility)"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code: \"sv\" (Swedish, recommended) or \"en\" (English)",
+            "default": "sv"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "annotations": {
+        "title": "Find Region Code",
+        "readOnlyHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "scb_test_selection",
+      "description": "Test if a data selection is valid without retrieving data (prevents API errors). Always use this before scb_get_table_data.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tableId": {
+            "type": "string",
+            "description": "Table ID (e.g., \"TAB4552\")"
+          },
+          "selection": {
+            "type": "object",
+            "description": "Variable selection to test (optional). Format: { \"VariableName\": [\"value1\", \"value2\"] }. Empty selection will validate that defaults can be used.",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code: \"sv\" (Swedish, recommended) or \"en\" (English)",
+            "default": "sv"
+          }
+        },
+        "required": [
+          "tableId"
+        ]
+      },
+      "annotations": {
+        "title": "Test Selection",
+        "readOnlyHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "scb_preview_data",
+      "description": "Get a small preview of data (max ~50 rows) to verify table structure and selection before fetching full data. Safer than scb_get_table_data for initial exploration.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tableId": {
+            "type": "string",
+            "description": "Table ID (e.g., \"TAB4552\", \"TAB4560\")"
+          },
+          "selection": {
+            "type": "object",
+            "description": "Optional variable selection (automatically limited to small sample). If omitted, uses smart defaults.",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code: \"sv\" (Swedish, recommended) or \"en\" (English)",
+            "default": "sv"
+          }
+        },
+        "required": [
+          "tableId"
+        ]
+      },
+      "annotations": {
+        "title": "Preview Data",
+        "readOnlyHint": true,
+        "openWorldHint": true
+      }
+    }
+  ],
+  "tool_count": 10,
+  "prompts": [
+    {
+      "name": "analyze-regional-statistics",
+      "description": "Analysera regional statistik f\u00f6r en specifik kommun eller l\u00e4n",
+      "arguments": [
+        {
+          "name": "region_name",
+          "description": "Namn p\u00e5 kommun eller l\u00e4n (t.ex. \"Stockholm\", \"G\u00f6teborg\", \"Kung\u00e4lv\")",
+          "required": true
+        },
+        {
+          "name": "topic",
+          "description": "Statistikomr\u00e5de att analysera (t.ex. \"befolkning\", \"arbetsl\u00f6shet\", \"syssels\u00e4ttning\", \"utbildning\")",
+          "required": true
+        },
+        {
+          "name": "time_period",
+          "description": "Tidsperiod att analysera (t.ex. \"2024\", \"senaste \u00e5ret\", \"2020-2024\")",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "compare-municipalities",
+      "description": "J\u00e4mf\u00f6r statistik mellan tv\u00e5 eller flera kommuner",
+      "arguments": [
+        {
+          "name": "municipalities",
+          "description": "Kommaseparerad lista av kommuner att j\u00e4mf\u00f6ra (t.ex. \"Stockholm,G\u00f6teborg,Malm\u00f6\")",
+          "required": true
+        },
+        {
+          "name": "metric",
+          "description": "Vilken statistik att j\u00e4mf\u00f6ra (t.ex. \"befolkning\", \"arbetsl\u00f6shet\", \"inkomst\")",
+          "required": true
+        },
+        {
+          "name": "year",
+          "description": "\u00c5r att j\u00e4mf\u00f6ra (t.ex. \"2024\")",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "find-statistics-table",
+      "description": "Hj\u00e4lp anv\u00e4ndaren hitta r\u00e4tt SCB-tabell f\u00f6r sitt \u00e4ndam\u00e5l",
+      "arguments": [
+        {
+          "name": "topic",
+          "description": "Beskriv vilken typ av statistik du letar efter (t.ex. \"befolkningsutveckling\", \"f\u00f6retagsetableringar\", \"bostadspriser\")",
+          "required": true
+        },
+        {
+          "name": "region_type",
+          "description": "Regional niv\u00e5: \"kommun\", \"l\u00e4n\", \"riket\", eller \"alla\"",
+          "required": false
+        },
+        {
+          "name": "time_period",
+          "description": "\u00d6nskad tidsperiod (t.ex. \"m\u00e5nadsvis\", \"\u00e5rsvis\", \"kvartalsvis\")",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "build-custom-query",
+      "description": "Steg-f\u00f6r-steg guide f\u00f6r att bygga en komplex SCB-query med r\u00e4tt variabler och v\u00e4rden",
+      "arguments": [
+        {
+          "name": "table_id",
+          "description": "ID f\u00f6r SCB-tabellen att h\u00e4mta data fr\u00e5n (t.ex. \"TAB5663\")",
+          "required": true
+        },
+        {
+          "name": "description",
+          "description": "Beskriv vad du vill ha ut ur tabellen",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "employment-trend-analysis",
+      "description": "Analysera syssels\u00e4ttnings- och arbetsl\u00f6shetstrend f\u00f6r en region \u00f6ver tid",
+      "arguments": [
+        {
+          "name": "region",
+          "description": "Region att analysera (kommun, l\u00e4n eller riket)",
+          "required": true
+        },
+        {
+          "name": "months",
+          "description": "Antal m\u00e5nader tillbaka att analysera (t.ex. \"6\", \"12\", \"24\")",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "population-demographics",
+      "description": "H\u00e4mta demografisk information f\u00f6r en region (\u00e5lder, k\u00f6n, f\u00f6delse\u00f6verskott, etc.)",
+      "arguments": [
+        {
+          "name": "region",
+          "description": "Region att analysera",
+          "required": true
+        },
+        {
+          "name": "breakdown",
+          "description": "Typ av uppdelning: \"age\", \"sex\", \"both\"",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "uri": "scb://guide/instructions",
+      "name": "LLM Instructions (Start Here!)",
+      "description": "Complete instructions for AI assistants using SCB MCP Server - read this first!",
+      "mimeType": "text/markdown"
+    },
+    {
+      "uri": "scb://guide/categories",
+      "name": "Statistics Categories",
+      "description": "Detailed guide to SCB statistical categories with search terms",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "scb://regions/all",
+      "name": "All Swedish Regions (312)",
+      "description": "Complete database of all Swedish regions - 21 counties and 290 municipalities",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "scb://regions/counties",
+      "name": "Swedish Counties (L\u00e4n)",
+      "description": "List of all 21 Swedish counties with their region codes",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "scb://regions/municipalities",
+      "name": "All Swedish Municipalities (290)",
+      "description": "Complete list of all 290 Swedish municipalities with their region codes",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "scb://tables/popular",
+      "name": "Popular Tables",
+      "description": "Commonly used SCB statistical tables",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "scb://categories",
+      "name": "Search Categories",
+      "description": "Available categories for filtering table searches",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "scb://guide/search-tips",
+      "name": "Search Tips",
+      "description": "Tips for effective searching in SCB database",
+      "mimeType": "text/plain"
+    }
+  ],
+  "remote_endpoint": "https://scb-mcp.onrender.com/mcp",
+  "packages": [],
+  "sources": [
+    "official"
+  ],
+  "primary_source": "official",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "scb_get_api_status",
+    "scb_search_tables",
+    "scb_get_table_info",
+    "scb_get_table_data",
+    "scb_check_usage",
+    "scb_search_regions",
+    "scb_get_table_variables",
+    "scb_find_region_code",
+    "scb_test_selection",
+    "scb_preview_data"
+  ]
+}

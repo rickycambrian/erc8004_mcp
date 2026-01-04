@@ -1,0 +1,282 @@
+{
+  "id": "@ofurkanuygur/tcmb_mcp",
+  "name": "@ofurkanuygur/tcmb_mcp",
+  "display_name": "tcmb_mcp",
+  "version": null,
+  "description": "Fetch today's and historical exchange rates from the Turkish Central Bank dating back to 1996. Convert between currencies and compare trends with summary statistics. Rely on holiday-aware lookups to always return the latest available data.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "tcmb_get_current_rates",
+      "description": "Get current exchange rates from the Turkish Central Bank (TCMB).\n\n    Returns today's official exchange rates including buying/selling rates for forex and banknotes.\n    Data is sourced directly from TCMB's public XML API.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "currencies": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currencies",
+            "default": null,
+            "description": "Currency codes to filter, e.g. ['USD', 'EUR']. Returns all if empty."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "tcmb_get_historical_rates",
+      "description": "Get historical exchange rates from TCMB for a specific date.\n\n    Retrieves archived exchange rates from TCMB. Data available since 1996.\n    Automatically handles Turkish holidays by falling back to the previous business day.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "date"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "description": "Date (YYYY-MM-DD or DD.MM.YYYY) or 'yesterday'/'d\u00fcn'"
+          },
+          "currencies": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currencies",
+            "default": null,
+            "description": "List of currency codes to filter (e.g., ['USD', 'EUR'])"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "tcmb_list_currencies",
+      "description": "List all available currencies supported by TCMB.\n\n    Returns currency codes, names (in Turkish and English), and optionally current rates.\n    Useful for discovering which currencies can be queried.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "include_rates": {
+            "type": "boolean",
+            "title": "Include Rates",
+            "default": false,
+            "description": "If true, includes current exchange rates for each currency"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "tcmb_convert_currency",
+      "description": "Convert between currencies using TCMB rates.\n\n    Supports conversion between any currencies including TRY.\n    Uses official TCMB exchange rates for accurate conversions.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "amount",
+          "from_currency",
+          "to_currency"
+        ],
+        "properties": {
+          "amount": {
+            "type": "number",
+            "title": "Amount",
+            "description": "Amount to convert (e.g., 1000)"
+          },
+          "rate_type": {
+            "type": "string",
+            "title": "Rate Type",
+            "default": "selling",
+            "description": "Rate type: 'buying' (al\u0131\u015f) or 'selling' (sat\u0131\u015f)"
+          },
+          "to_currency": {
+            "type": "string",
+            "title": "To Currency",
+            "description": "Target currency code (e.g., 'TRY', 'USD', 'EUR')"
+          },
+          "from_currency": {
+            "type": "string",
+            "title": "From Currency",
+            "description": "Source currency code (e.g., 'USD', 'EUR', 'TRY')"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "tcmb_get_rate_history",
+      "description": "Get exchange rate history with statistics for a date range.\n\n    Returns daily rates and calculates statistics including min, max, average,\n    and percentage change over the period. Maximum range is 365 days.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "currency",
+          "start_date",
+          "end_date"
+        ],
+        "properties": {
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "description": "Currency code to get history for (e.g., 'USD', 'EUR')"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "description": "End date in YYYY-MM-DD format"
+          },
+          "rate_type": {
+            "type": "string",
+            "title": "Rate Type",
+            "default": "selling",
+            "description": "Rate type: 'buying' or 'selling'"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "description": "Start date in YYYY-MM-DD format"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "tcmb_compare_currencies",
+      "description": "Compare multiple currencies over a time period.\n\n    Shows current rates and historical performance statistics for multiple\n    currencies against a base currency. Useful for analyzing currency trends.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "target_currencies"
+        ],
+        "properties": {
+          "days": {
+            "type": "integer",
+            "title": "Days",
+            "default": 30,
+            "description": "Number of days to look back for comparison (default: 30)"
+          },
+          "base_currency": {
+            "type": "string",
+            "title": "Base Currency",
+            "default": "TRY",
+            "description": "Base currency for comparison (default: 'TRY')"
+          },
+          "target_currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Currencies",
+            "description": "List of currency codes to compare (e.g., ['USD', 'EUR', 'GBP'])"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 6,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@ofurkanuygur/tcmb_mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "tcmb_get_current_rates",
+    "tcmb_get_historical_rates",
+    "tcmb_list_currencies",
+    "tcmb_convert_currency",
+    "tcmb_get_rate_history",
+    "tcmb_compare_currencies"
+  ]
+}

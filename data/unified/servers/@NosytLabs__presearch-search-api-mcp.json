@@ -1,0 +1,424 @@
+{
+  "id": "@NosytLabs/presearch-search-api-mcp",
+  "name": "@NosytLabs/presearch-search-api-mcp",
+  "display_name": "Presearch MCP",
+  "version": null,
+  "description": "Search the web with Presearch API using country, freshness, and safety filters. Export results to JSON, CSV, or Markdown for easy reuse. Scrape content from result links and speed up workflows with caching.\n\nGet Presearch API key here - https://presearch.io/searchapi",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/dcb7f920-888f-4677-8184-dec9e6f7c86c.webp",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "presearch_ai_search",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "The maximum number of search results to return. Defaults to 10, max 100."
+          },
+          "query": {
+            "type": "string",
+            "description": "The search query to execute. Supports advanced operators like 'site:', 'quotes', and minus sign exclusion."
+          },
+          "language": {
+            "type": "string",
+            "description": "The language code for the search results (e.g., 'en-US', 'es'). Defaults to 'en-US'."
+          },
+          "safe_search": {
+            "type": "boolean",
+            "description": "Enable or disable safe search filtering. Defaults to true."
+          },
+          "include_analysis": {
+            "type": "boolean",
+            "description": "Include AI analysis of the results."
+          }
+        }
+      },
+      "description": "Privacy-focused search engine returning ranked results with relevance scores. Supports quotes, minus sign exclusion, and site: operators.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "analyze_content",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The text content or JSON string to analyze."
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code for the analysis (e.g., 'en')."
+          },
+          "analysis_type": {
+            "enum": [
+              "summary",
+              "keywords",
+              "sentiment",
+              "topics"
+            ],
+            "type": "string",
+            "description": "Type of analysis to perform: summary, keywords, sentiment, or topics."
+          },
+          "max_summary_length": {
+            "type": "number",
+            "description": "Maximum character length for the generated summary."
+          }
+        }
+      },
+      "description": "NLP-based content analysis supporting summary, keywords, sentiment, and topics extraction.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "export_search_results",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "format": {
+            "enum": [
+              "json",
+              "csv",
+              "markdown",
+              "html"
+            ],
+            "type": "string",
+            "description": "Target format for the export: json, csv, markdown, or html. Defaults to json."
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Array of search result objects to export. Each object should contain title, url, description, etc."
+          },
+          "filename": {
+            "type": "string",
+            "description": "Optional filename for the exported file. If provided, suggests saving to disk."
+          },
+          "include_metadata": {
+            "type": "boolean",
+            "description": "Whether to include additional metadata (timestamps, query info) in the export. Defaults to false."
+          }
+        }
+      },
+      "description": "Export search results to JSON, CSV, Markdown, or HTML format with optional metadata.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "scrape_url",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The URL of the web page to scrape."
+          },
+          "format": {
+            "enum": [
+              "text",
+              "markdown",
+              "html"
+            ],
+            "type": "string",
+            "description": "Preferred output format: text, markdown, or html. Defaults to markdown."
+          },
+          "onlyMainContent": {
+            "type": "boolean",
+            "description": "If true, attempts to extract only the main content (article body), excluding navigation/ads. Defaults to true."
+          }
+        }
+      },
+      "description": "Scrape content from a specific URL with options for format (text, markdown, html) and main content extraction.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "presearch_search_and_scrape",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 5,
+            "maximum": 10,
+            "minimum": 1,
+            "description": "Maximum number of results to search and scrape (1-10). Defaults to 5."
+          },
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The search query to execute. Supports standard operators."
+          },
+          "exclude_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of domain names to exclude from the search results."
+          }
+        }
+      },
+      "description": "Combined search and scraping (50-70% faster than sequential). Searches then extracts from top results.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "site_export",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The starting URL to export content from."
+          },
+          "depth": {
+            "type": "number",
+            "maximum": 5,
+            "minimum": 1,
+            "description": "Maximum crawl depth (1-5) when recursive is enabled."
+          },
+          "format": {
+            "enum": [
+              "markdown",
+              "json",
+              "html",
+              "pdf"
+            ],
+            "type": "string",
+            "default": "json",
+            "description": "Target export format: markdown, json, html, or pdf. Defaults to json."
+          },
+          "recursive": {
+            "type": "boolean",
+            "description": "Enable recursive crawling to follow links within the same domain. Defaults to false."
+          },
+          "include_assets": {
+            "type": "boolean",
+            "description": "Whether to include static assets (images, styles) in the export. Defaults to false."
+          }
+        }
+      },
+      "description": "Deep crawl and export site content to JSON, Markdown, HTML, or PDF. Supports recursive crawling and asset inclusion.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "cache_stats",
+      "annotations": {
+        "type": "object",
+        "properties": {},
+        "description": "No parameters required"
+      },
+      "description": "Retrieve cache performance metrics: hits, misses, size, and entry count.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "cache_clear",
+      "annotations": {
+        "type": "object",
+        "properties": {},
+        "description": "No parameters required"
+      },
+      "description": "Clear all cached data and reset statistics for fresh data collection.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "presearch_health_check",
+      "annotations": {
+        "type": "object",
+        "properties": {},
+        "description": "No parameters required"
+      },
+      "description": "Verify API connectivity, authentication, and rate limit status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "presearch_node_status",
+      "annotations": {
+        "type": "object",
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "description": "Specific Node ID or public key to query. Optional."
+          }
+        }
+      },
+      "description": "Monitor Presearch network node health and performance metrics.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "presearch_deep_research",
+      "annotations": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "ip": {
+            "type": "string",
+            "description": "User IP for localization. Example: '1.2.3.4'."
+          },
+          "depth": {
+            "type": "number",
+            "default": 3,
+            "maximum": 10,
+            "minimum": 1,
+            "description": "Number of source pages to scrape and analyze (1-10)."
+          },
+          "query": {
+            "type": "string",
+            "description": "The research topic or question. Example: 'impact of ai on healthcare'."
+          },
+          "breadth": {
+            "type": "number",
+            "default": 10,
+            "maximum": 20,
+            "minimum": 5,
+            "description": "Number of search results to consider for selection (5-20)."
+          },
+          "country": {
+            "type": "string",
+            "description": "Country filtering using ISO 3166-1 alpha-2 codes (e.g., US, CA)."
+          },
+          "language": {
+            "type": "string",
+            "description": "Language filtering using BCP 47 codes (e.g., en-US)."
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "lat": {
+                "type": "number"
+              },
+              "long": {
+                "type": "number"
+              }
+            },
+            "description": "Geolocation override. {lat, long}"
+          },
+          "freshness": {
+            "enum": [
+              "hour",
+              "day",
+              "week",
+              "month",
+              "year",
+              "all"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Temporal filtering for recency."
+          },
+          "safesearch": {
+            "enum": [
+              "off",
+              "moderate",
+              "strict"
+            ],
+            "type": "string",
+            "default": "moderate",
+            "description": "Content safety filtering level."
+          },
+          "timeout_ms": {
+            "type": "number",
+            "default": 60000,
+            "description": "Timeout in milliseconds for the research session."
+          },
+          "research_focus": {
+            "enum": [
+              "general",
+              "academic",
+              "market",
+              "technical",
+              "news"
+            ],
+            "type": "string",
+            "default": "general",
+            "description": "The context of the research to guide relevance scoring."
+          }
+        }
+      },
+      "description": "Performs a deep research session: searches multiple queries (if needed), scrapes authoritative sources, analyzes content quality/relevance, and synthesizes a comprehensive report with citations. Ideal for complex topics requiring fact-checking or broad overview.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ],
+  "tool_count": 11,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@NosytLabs/presearch-search-api-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "presearch_ai_search",
+    "analyze_content",
+    "export_search_results",
+    "scrape_url",
+    "presearch_search_and_scrape",
+    "site_export",
+    "cache_stats",
+    "cache_clear",
+    "presearch_health_check",
+    "presearch_node_status",
+    "presearch_deep_research"
+  ]
+}

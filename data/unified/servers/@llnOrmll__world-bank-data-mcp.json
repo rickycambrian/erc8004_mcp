@@ -1,0 +1,227 @@
+{
+  "id": "@llnOrmll/world-bank-data-mcp",
+  "name": "@llnOrmll/world-bank-data-mcp",
+  "display_name": "world-bank-data-mcp",
+  "version": null,
+  "description": "Search 1,000+ World Bank economic and social indicators for 200+ countries. Filter by year, country, and demographics to access 60+ years of historical data. Compare results to surface the latest figures and trends.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/e758bad2-09f9-4c04-8e22-2c6772cd3287.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "search_datasets_tool",
+      "description": "[STEP 1/3] Search World Bank Data360 for datasets.\n        \n        <purpose>\n            Search World Bank Data360 for datasets. This is STEP 1 of 3 in the data retrieval workflow.\n            Find indicator IDs and database IDs needed for subsequent data operations.\n        </purpose>\n\n        <workflow>\n            <step number=\"1\">search_datasets (this tool) - Find indicator ID and database ID</step>\n            <step number=\"2\">get_temporal_coverage - Check available years BEFORE retrieving data</step>\n            <step number=\"3\">retrieve_data - Fetch actual data with proper year and limit parameters</step>\n        </workflow>\n\n        <optimization_tips>\n            <tip>Remove punctuation: \"GDP, total\" becomes \"GDP total\"</tip>\n            <tip>Expand abbreviations: \"GDP\" becomes \"Gross Domestic Product\"</tip>\n            <tip>Add \"total\" for aggregates: \"population\" becomes \"population total\"</tip>\n            <tip>Use lowercase for consistency</tip>\n            <tip>Remove filler words: \"data\", \"statistics\"</tip>\n        </optimization_tips>\n\n        <common_databases>\n            <database id=\"WB_WDI\">World Development Indicators (most comprehensive)</database>\n            <database id=\"WB_HNP\">Health, Nutrition and Population</database>\n            <database id=\"WB_GDF\">Global Development Finance</database>\n        </common_databases>\n\n        <examples>\n            <example original=\"GDP\">gross domestic product total</example>\n            <example original=\"population data\">population total</example>\n            <example original=\"\">poverty headcount ratio</example>\n        </examples>\n\n        <returns>\n            List of datasets with indicator IDs, names, database IDs, and search scores.\n        </returns>\n\n        <next_step>\n            Call get_temporal_coverage with the indicator and database from results.\n        </next_step>",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_datasets_toolArguments",
+        "required": [
+          "search_query"
+        ],
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 20
+          },
+          "search_query": {
+            "type": "string",
+            "title": "Search Query"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "search_datasets_toolDictOutput",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_temporal_coverage_tool",
+      "description": "[STEP 2/3] Get available years for a specific dataset.\n        \n        CRITICAL: Always call this BEFORE retrieve_data to avoid errors.\n        \n        Workflow:\n        1. search_datasets - Done \u2713\n        2. get_temporal_coverage (this tool) - Check what years are available\n        3. retrieve_data - Use latest_year from this response\n        \n        Returns: start_year, end_year, latest_year, and full list of available years.\n        Next step: Call retrieve_data with year=latest_year.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_temporal_coverage_toolArguments",
+        "required": [
+          "indicator",
+          "database"
+        ],
+        "properties": {
+          "database": {
+            "type": "string",
+            "title": "Database"
+          },
+          "indicator": {
+            "type": "string",
+            "title": "Indicator"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_temporal_coverage_toolDictOutput",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "retrieve_data_tool",
+      "description": "[STEP 3/3] Retrieve actual data from World Bank Data360.\n\n\u26a0\ufe0f PREREQUISITE: Call get_temporal_coverage first to get latest_year.\n\n\ud83d\udea8 CRITICAL TYPE REQUIREMENTS \ud83d\udea8\n\nWhen calling this tool, you MUST pass parameters with the EXACT types shown below.\nCommon mistakes that cause validation errors:\n\n\u274c INCORRECT: {\"limit\": \"10\"}      \u2190 limit as STRING (causes error!)\n\u2705 CORRECT:   {\"limit\": 10}        \u2190 limit as INTEGER\n\n\u274c INCORRECT: {\"exclude_aggregates\": \"true\"}    \u2190 boolean as STRING\n\u2705 CORRECT:   {\"exclude_aggregates\": true}      \u2190 boolean as BOOLEAN\n\n\u274c INCORRECT: {\"year\": 2023}       \u2190 year as NUMBER\n\u2705 CORRECT:   {\"year\": \"2023\"}     \u2190 year as STRING\n\n\ud83d\udccb PARAMETER TYPES - MUST MATCH EXACTLY:\n\nSTRING parameters (use quotes in JSON):\n  indicator: \"WB_WDI_SP_POP_TOTL\"\n  database: \"WB_WDI\"\n  year: \"2023\"\n  countries: \"USA,CHN,JPN\"\n  sex: \"M\" or \"F\" or \"_T\"\n  age: \"0-14\"\n  sort_order: \"desc\" or \"asc\"\n\nINTEGER parameters (no quotes in JSON):\n  limit: 10 (default: 20)\n\nBOOLEAN parameters (no quotes in JSON):\n  exclude_aggregates: true or false (default: true)\n  compact_response: true or false (default: true)\n\n\ud83c\udfaf CORRECT JSON EXAMPLES:\n\nExample 1 - Top 10 countries by population:\n{\n  \"indicator\": \"WB_WDI_SP_POP_TOTL\",\n  \"database\": \"WB_WDI\",\n  \"year\": \"2023\",\n  \"limit\": 10,\n  \"sort_order\": \"desc\",\n  \"exclude_aggregates\": true\n}\n\nExample 2 - Specific countries GDP:\n{\n  \"indicator\": \"WB_WDI_NY_GDP_MKTP_CD\",\n  \"database\": \"WB_WDI\",\n  \"year\": \"2023\",\n  \"countries\": \"USA,CHN,JPN\"\n}\n\nExample 3 - All data with aggregates:\n{\n  \"indicator\": \"WB_WDI_SP_POP_TOTL\",\n  \"database\": \"WB_WDI\",\n  \"year\": \"2022\",\n  \"exclude_aggregates\": false\n}\n\n\u26a1 HOW IT WORKS:\n- countries parameter: API fetches ONLY those countries (efficient)\n- exclude_aggregates: Filters out 47 regional/income codes (ARB, AFE, WLD, HIC, etc.)\n  \u26a0\ufe0f DEFAULT is TRUE - only individual countries returned\n  Set to false to include aggregates like \"World\", \"High income\", \"Arab World\"\n- sort_order: Sorts by OBS_VALUE before limiting\n- limit parameter: Returns top N records to minimize tokens\n  \u26a0\ufe0f DEFAULT is 20 - provides reasonable default, override if you need more\n- compact_response: Returns only essential fields (country, country_name, year, value)\n  \u26a0\ufe0f DEFAULT is TRUE - minimizes token usage by ~75%\n  Set to false if you need all fields (REF_AREA, TIME_PERIOD, OBS_VALUE, UNIT_MEASURE, etc.)\n\n\ud83d\udcca AFTER RECEIVING DATA:\nFormat results as markdown table:\n- Sort by value (highest to lowest)\n- Add rank numbers\n- Format with thousand separators\n- Include country names (not just codes)\n\nReturns: Data records with summary statistics.",
+      "inputSchema": {
+        "type": "object",
+        "title": "retrieve_data_toolArguments",
+        "required": [
+          "indicator",
+          "database"
+        ],
+        "properties": {
+          "age": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age",
+            "default": null
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex",
+            "default": null
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 20
+          },
+          "database": {
+            "type": "string",
+            "title": "Database"
+          },
+          "countries": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Countries",
+            "default": null
+          },
+          "indicator": {
+            "type": "string",
+            "title": "Indicator"
+          },
+          "sort_order": {
+            "type": "string",
+            "title": "Sort Order",
+            "default": "desc"
+          },
+          "compact_response": {
+            "type": "boolean",
+            "title": "Compact Response",
+            "default": true
+          },
+          "exclude_aggregates": {
+            "type": "boolean",
+            "title": "Exclude Aggregates",
+            "default": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "retrieve_data_toolDictOutput",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "list_popular_indicators",
+      "description": "Get a curated list of popular World Bank indicators.\n\n        This tool helps users discover commonly requested indicators without searching.\n        Perfect for getting started or exploring what data is available.\n\n        Categories included:\n        - Demographics: Population, growth rate, density, fertility\n        - Economy: GDP, GDP per capita, growth, inflation, trade\n        - Health: Life expectancy, mortality rates (infant, under-5, maternal)\n        - Education: Literacy rates, school enrollment\n        - Labor: Unemployment, labor force participation, employment ratios\n        - Poverty & Inequality: Poverty rates, Gini index, income distribution\n        - Environment: Greenhouse gas emissions, forest area, renewable energy\n        - Infrastructure: Electricity access, water, sanitation\n        - Technology: Internet usage, mobile subscriptions, broadband\n\n        Returns: List of 38 curated indicators with codes, names, descriptions, and categories.\n\n        Usage: Browse the list, pick an indicator code, then use search_datasets\n        to find the exact database ID before retrieving data.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_popular_indicatorsArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "list_popular_indicatorsDictOutput",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "search_local_indicators",
+      "description": "Search through local metadata for World Bank indicators (instant, offline).\n\n        This is a FAST alternative to search_datasets that searches through locally cached\n        metadata. Use this to discover what types of data are available before using the\n        API search.\n\n        How it works:\n        - Searches indicator names, codes, and descriptions\n        - Instant results (no API call)\n        - Returns relevance-ranked matches\n\n        Search tips:\n        - Use simple keywords: \"unemployment\", \"poverty\", \"co2\", \"water\"\n        - Search works on indicator names AND descriptions\n        - Case-insensitive\n        - More specific queries = better results\n\n        Example queries:\n        - \"unemployment\" \u2192 finds all unemployment-related indicators\n        - \"mortality infant\" \u2192 finds infant mortality indicators\n        - \"internet\" \u2192 finds internet usage indicators\n        - \"renewable energy\" \u2192 finds renewable energy indicators\n\n        Parameters:\n        - query: Search term (e.g., \"unemployment\", \"gdp growth\", \"water access\")\n        - limit: Maximum number of results to return (default: 20)\n\n        Returns: List of matching indicators with codes, names, descriptions, and relevance scores.\n\n        Note: This returns indicator codes but NOT database IDs. After finding an indicator,\n        use search_datasets with the indicator name to get the database ID needed for data retrieval.\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_local_indicatorsArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 20
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "search_local_indicatorsDictOutput",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "tool_count": 5,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@llnOrmll/world-bank-data-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "search_datasets_tool",
+    "get_temporal_coverage_tool",
+    "retrieve_data_tool",
+    "list_popular_indicators",
+    "search_local_indicators"
+  ]
+}

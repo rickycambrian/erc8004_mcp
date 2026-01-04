@@ -1,0 +1,577 @@
+{
+  "id": "dropbox",
+  "name": "dropbox",
+  "display_name": "Dropbox",
+  "version": null,
+  "description": "Dropbox is a cloud storage service offering file syncing, sharing, and collaboration across devices with version control and robust integrations",
+  "icon_url": "https://logos.composio.dev/api/dropbox",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "DROPBOX_CREATE_FILE_REQUEST",
+      "description": "Tool to create a new file request in Dropbox. Use when you need to request files from others by generating a unique link for uploads to a specified Dropbox folder, optionally with a deadline.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateFileRequestRequest",
+        "required": [
+          "title",
+          "destination"
+        ],
+        "properties": {
+          "open": {
+            "type": "boolean",
+            "title": "Open",
+            "default": true,
+            "nullable": true,
+            "description": "Whether the file request should be open by default. If true, the file request will start accepting files immediately."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "minLength": 1,
+            "description": "The title of the new file request. Must be 1 character or more."
+          },
+          "deadline": {
+            "type": "object",
+            "title": "FileRequestDeadlineRequest",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "due_date": {
+                "type": "string",
+                "title": "Due Date",
+                "format": "date-time",
+                "default": null,
+                "nullable": true,
+                "description": "The deadline for the file request. Timestamps should be in UTC. Example: '2024-08-15T17:00:00Z'"
+              },
+              "allow_late_uploads": {
+                "enum": [
+                  "seven_days",
+                  "thirty_days",
+                  "always",
+                  "false",
+                  null
+                ],
+                "title": "Allow Late Uploads",
+                "default": null,
+                "nullable": true,
+                "description": "Specifies the policy for uploads after the deadline. 'seven_days' or 'thirty_days' allows uploads for that period. 'always' allows indefinite late uploads. 'false' (or not set) means no late uploads."
+              }
+            },
+            "description": "Represents the deadline parameters for a file request.",
+            "additionalProperties": false
+          },
+          "destination": {
+            "type": "string",
+            "title": "Destination",
+            "pattern": "^/.*",
+            "description": "The path in the user's Dropbox where uploaded files will be saved. Must be a path starting with '/'. Example: '/Homework/math'"
+          }
+        },
+        "description": "Defines the parameters for creating a new file request in Dropbox."
+      }
+    },
+    {
+      "name": "DROPBOX_CREATE_FOLDER",
+      "description": "Tool to create a new folder at a specified path in Dropbox. Use when you need to organize files by creating a new directory. Requires the 'files.content.write' scope.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateFolderRequest",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Path in the user's Dropbox to create the new folder."
+          },
+          "autorename": {
+            "type": "boolean",
+            "title": "Autorename",
+            "default": false,
+            "description": "If there's a conflict, have Dropbox automatically rename the folder. The default for this field is False."
+          }
+        }
+      }
+    },
+    {
+      "name": "DROPBOX_CREATE_PAPER",
+      "description": "Creates a new Dropbox Paper document at the specified path using HTML or Markdown content.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreatePaperRequest",
+        "required": [
+          "path",
+          "content"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "examples": [
+              "/Paper Docs/New Doc",
+              "/Meeting Notes"
+            ],
+            "description": "Path in Dropbox where the Paper document will be created. Do NOT include any file extension - Paper docs don't use extensions."
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "<h1>My Document</h1><p>Content here</p>"
+            ],
+            "description": "Content of the paper document"
+          },
+          "import_format": {
+            "type": "string",
+            "title": "Import Format",
+            "default": "html",
+            "examples": [
+              "html",
+              "markdown"
+            ],
+            "description": "Format of the provided content"
+          }
+        }
+      }
+    },
+    {
+      "name": "DROPBOX_DELETE_FILE_OR_FOLDER",
+      "description": "Permanently deletes the file or folder at the specified path in Dropbox. Use when you need to remove a specific file or folder. Requires the `files.content.write` scope.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteFileOrFolderRequest",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "The path to the file or folder to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "DROPBOX_GET_ABOUT_ME",
+      "description": "Tool to get information about the current user's Dropbox account. Use when you need to retrieve account details like email, name, or account type.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetAboutMeRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "DROPBOX_GET_TEMPORARY_LINK",
+      "description": "Tool to get a one-click temporary (expiring) download link. Use when you need to share a Dropbox file directly without proxying content through this service. Requires `files.content.read` scope.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetTemporaryLinkRequest",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "examples": [
+              "/Homework/math/Prime_Numbers.txt",
+              "id:4g0reWVRsAAAAAAAAAAAQ",
+              "rev:5f0e4d3b2a1c0000",
+              "ns:12345/Photos/Vacation.jpg"
+            ],
+            "description": "The path or identifier of the file to get a temporary link for. Supports Dropbox path (e.g., '/folder/file.txt'), id:..., rev:..., or ns:... notation."
+          }
+        },
+        "description": "Request model for the /2/files/get_temporary_link endpoint."
+      }
+    },
+    {
+      "name": "DROPBOX_LIST_FILES_IN_FOLDER",
+      "description": "Tool to list files and folders in a specified Dropbox directory. Use when you need to see the contents of a folder, including subfolders if recursive is true.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFilesInFolderRequest",
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": "",
+            "description": "The folder path (e.g., \"/europe/invoices\", \"\" for root) or folder ID (e.g., \"id:aBcDeFgH123\") to list contents from."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 2000,
+            "maximum": 2000,
+            "minimum": 1,
+            "description": "The maximum number of results to return per request. Default is 2000. Max is 2000."
+          },
+          "recursive": {
+            "type": "boolean",
+            "title": "Recursive",
+            "default": false,
+            "description": "If true, recursively lists contents of nested subfolders; otherwise, lists only immediate contents."
+          },
+          "include_deleted": {
+            "type": "boolean",
+            "title": "Include Deleted",
+            "default": false,
+            "description": "If true, includes deleted (but potentially recoverable) files and folders in the listing."
+          },
+          "include_media_info": {
+            "type": "boolean",
+            "title": "Include Media Info",
+            "default": false,
+            "description": "If true, includes media metadata (e.g., dimensions, location) for photo and video files."
+          },
+          "include_non_downloadable_files": {
+            "type": "boolean",
+            "title": "Include Non Downloadable Files",
+            "default": true,
+            "description": "If true, includes non-downloadable files (e.g., Google Docs, Dropbox Paper) in the listing."
+          }
+        }
+      }
+    },
+    {
+      "name": "DROPBOX_LIST_FOLDERS",
+      "description": "Retrieves a list of folders, files, and deleted entries from a specified Dropbox path.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListFoldersRequest",
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": "",
+            "description": "Path to the folder (e.g., \"\" for root, \"/folder/subfolder\", or \"id:abc123xyz\"). If a path string, it must start with / and not end with / or whitespace."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 2000,
+            "maximum": 2000,
+            "minimum": 1,
+            "description": "Maximum number of folder entries to return per request; an approximate upper bound."
+          },
+          "recursive": {
+            "type": "boolean",
+            "title": "Recursive",
+            "default": false,
+            "description": "Whether to include folders in nested subfolders (True) or only immediate subfolders (False)"
+          },
+          "include_deleted": {
+            "type": "boolean",
+            "title": "Include Deleted",
+            "default": false,
+            "description": "Whether to include folders that have been deleted but may be recoverable"
+          }
+        }
+      }
+    },
+    {
+      "name": "DROPBOX_MOVE_FILE_OR_FOLDER",
+      "description": "Move file or folder",
+      "inputSchema": {
+        "type": "object",
+        "title": "DropboxMoveFileOrFolderRequest",
+        "required": [
+          "from_path",
+          "to_path"
+        ],
+        "properties": {
+          "to_path": {
+            "type": "string",
+            "title": "To Path",
+            "examples": [
+              "/Homework/archive/math_prime_numbers.txt",
+              "/Photos/2024/Vacation_renamed"
+            ],
+            "description": "Path in the user's Dropbox that is the destination. This path is case-sensitive."
+          },
+          "from_path": {
+            "type": "string",
+            "title": "From Path",
+            "examples": [
+              "/Homework/math/prime_numbers.txt",
+              "/Photos/Vacation"
+            ],
+            "description": "Path in the user's Dropbox to be moved. This path is case-sensitive."
+          },
+          "autorename": {
+            "type": "boolean",
+            "title": "Autorename",
+            "default": false,
+            "nullable": true,
+            "description": "If there's a conflict (e.g., a file with the same name already exists at the destination), have the Dropbox server try to auto-rename the file to avoid the conflict. The default is false."
+          },
+          "allow_shared_folder": {
+            "type": "boolean",
+            "title": "Allow Shared Folder",
+            "default": false,
+            "nullable": true,
+            "description": "If true, allows moving shared folders. The default is false."
+          },
+          "allow_ownership_transfer": {
+            "type": "boolean",
+            "title": "Allow Ownership Transfer",
+            "default": false,
+            "nullable": true,
+            "description": "Allow moves by owner even if it would result in an ownership transfer for the content being moved. This does not apply to copies. The default is false."
+          }
+        },
+        "description": "Request model for moving a file or folder in Dropbox."
+      }
+    },
+    {
+      "name": "DROPBOX_READ_FILE",
+      "description": "Downloads a file from the specified Dropbox path, requiring `files.content.read` scope.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReadFileOrFolderRequest",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "examples": [
+              "/photo.jpg",
+              "/Documents/file.pdf",
+              "/Homework/math/Matrices.txt"
+            ],
+            "description": "The path to search in"
+          }
+        }
+      }
+    },
+    {
+      "name": "DROPBOX_SEARCH_FILE_OR_FOLDER",
+      "description": "Tool to search for files and folders in Dropbox. Use when you need to find an item by name or content, optionally within a specific path or with other filters, and paginate through results. Example: Search for 'report.docx' in the '/finance' folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SearchFileOrFolderRequest",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "The search string. Must be 1 or more characters. Queries are case-insensitive."
+          },
+          "options": {
+            "type": "object",
+            "title": "SearchOptions",
+            "nullable": true,
+            "properties": {
+              "path": {
+                "type": "string",
+                "title": "Path",
+                "default": null,
+                "nullable": true,
+                "description": "Scopes the search to the given path and its subfolders. Provide an empty string to search the root. If None, searches the entire Dropbox."
+              },
+              "order_by": {
+                "type": "object",
+                "title": "Order By",
+                "default": null,
+                "examples": [
+                  {
+                    ".tag": "relevance"
+                  },
+                  {
+                    ".tag": "last_modified_time"
+                  }
+                ],
+                "nullable": true,
+                "description": "Specifies the field and direction to order search results by. Example: {\".tag\": \"relevance\"} or {\".tag\": \"last_modified_time\"}. Default is relevance.",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "account_id": {
+                "type": "string",
+                "title": "Account Id",
+                "default": null,
+                "nullable": true,
+                "description": "The account ID to search on. If not specified, searches the current user's Dropbox. Must be 40 characters or less."
+              },
+              "file_status": {
+                "enum": [
+                  "active",
+                  "deleted"
+                ],
+                "type": "string",
+                "title": "File Status",
+                "default": "active",
+                "nullable": true,
+                "description": "Restricts search to files with the given status. Can be 'active' (default) or 'deleted'. To search both, omit this parameter or make separate requests."
+              },
+              "max_results": {
+                "type": "integer",
+                "title": "Max Results",
+                "default": 100,
+                "maximum": 1000,
+                "minimum": 1,
+                "nullable": true,
+                "description": "The maximum number of search results to return per request. Default is 100, min 1, max 1000."
+              },
+              "filename_only": {
+                "type": "boolean",
+                "title": "Filename Only",
+                "default": false,
+                "nullable": true,
+                "description": "Restricts search to only match on filenames."
+              },
+              "file_categories": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "image",
+                    "document",
+                    "pdf",
+                    "spreadsheet",
+                    "presentation",
+                    "audio",
+                    "video",
+                    "folder",
+                    "paper",
+                    "others"
+                  ],
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "File Categories",
+                "default": null,
+                "nullable": true,
+                "description": "Restricts search to only match files in the given categories."
+              },
+              "file_extensions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "File Extensions",
+                "default": null,
+                "nullable": true,
+                "description": "Restricts search to only match files with the given extensions (e.g., ['jpg', 'png']). This is case-insensitive."
+              },
+              "include_highlights": {
+                "type": "boolean",
+                "title": "Include Highlights",
+                "default": false,
+                "nullable": true,
+                "description": "If true, highlight information for the matches will be returned."
+              },
+              "image_content_search": {
+                "type": "boolean",
+                "title": "Image Content Search",
+                "default": false,
+                "nullable": true,
+                "description": "If true, performs content search within images for Business accounts."
+              }
+            },
+            "description": "Additional options for the search. If not provided, default search options will be used.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "DROPBOX_UPLOAD_FILE",
+      "description": "Uploads a file to a specified path in the user's Dropbox, with options for handling existing files.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UploadFileRequest",
+        "required": [
+          "path",
+          "content"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "add",
+            "examples": [
+              "add",
+              "overwrite"
+            ],
+            "description": "Specifies how to handle the upload if a file already exists at the specified path."
+          },
+          "mute": {
+            "type": "boolean",
+            "title": "Mute",
+            "default": false,
+            "description": "If true, the user will not be notified of the new file via desktop or mobile notifications."
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "examples": [
+              "/Images/photo.jpg",
+              "/Documents/file.pdf",
+              "/Homework/math/Matrices.txt"
+            ],
+            "description": "Path in the user's Dropbox to save the file."
+          },
+          "content": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "File to be uploaded; supports various formats including images, PDFs, and text files.",
+            "file_uploadable": true
+          },
+          "autorename": {
+            "type": "boolean",
+            "title": "Autorename",
+            "default": false,
+            "description": "If true and a file already exists at the path, the new file will be renamed to avoid conflict."
+          },
+          "strict_conflict": {
+            "type": "boolean",
+            "title": "Strict Conflict",
+            "default": false,
+            "description": "If true, the upload will be rejected if the file already exists, regardless of the autorename setting."
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 12,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/dropbox/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "DROPBOX_CREATE_FILE_REQUEST",
+    "DROPBOX_CREATE_FOLDER",
+    "DROPBOX_CREATE_PAPER",
+    "DROPBOX_DELETE_FILE_OR_FOLDER",
+    "DROPBOX_GET_ABOUT_ME",
+    "DROPBOX_GET_TEMPORARY_LINK",
+    "DROPBOX_LIST_FILES_IN_FOLDER",
+    "DROPBOX_LIST_FOLDERS",
+    "DROPBOX_MOVE_FILE_OR_FOLDER",
+    "DROPBOX_READ_FILE",
+    "DROPBOX_SEARCH_FILE_OR_FOLDER",
+    "DROPBOX_UPLOAD_FILE"
+  ]
+}

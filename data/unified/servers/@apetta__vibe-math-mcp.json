@@ -1,0 +1,2119 @@
+{
+  "id": "@apetta/vibe-math-mcp",
+  "name": "@apetta/vibe-math-mcp",
+  "display_name": "Vibe Math",
+  "version": null,
+  "description": "A local/remote high-performance Model Context Protocol (MCP) server for math-ing whilst vibing with LLMs. Built with Polars, Pandas, NumPy, SciPy, and SymPy for optimal calculation speed and comprehensive mathematical capabilities from basic arithmetic to advanced calculus and linear algebra\n\n## Local Installation\n\n### IDEs\n\n[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_Math-0098FF?style=flat-square&logo=visualstudiocode&logoColor=ffffff)](vscode:mcp/install?%7B%22name%22%3A%22Math%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22vibe-math-mcp%22%5D%7D)\n\n[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en-US/install-mcp?name=Math&config=eyJjb21tYW5kIjoidXZ4IHZpYmUtbWF0aC1tY3AifQ%3D%3D)\n\n### Claude Desktop\n\nOpen **Settings > Developer > Edit Config** and add:\n\n**For published package:**\n\n```json\n{\n  \"mcpServers\": {\n    \"Math\": {\n      \"command\": \"uvx\",\n      \"args\": [\"vibe-math-mcp\"]\n    }\n  }\n}\n```\n### Claude Code\n\n**Quick setup (CLI):**\n\nPublished package:\n\n```bash\nclaude mcp add --transport stdio math -- uvx vibe-math-mcp\n```\n\n**Team setup** (create `mcp.json` in project root for shared use with Claude Code and/or IDEs)\n\n```json\n{\n  \"mcpServers\": {\n    \"math\": {\n      \"command\": \"uvx\",\n      \"args\": [\"vibe-math-mcp\"]\n    }\n  }\n}\n```\n\n**Verify:** Run `claude mcp list` or use `/mcp` or view available servers in IDEs.\n\n\n### Try it\n\n- \"Calculate 15% of 250\" \u2192 uses `percentage`\n- \"Find determinant of [[1,2],[3,4]]\" \u2192 uses `matrix_operations`\n- \"Integrate x^2 from 0 to 1\" \u2192 uses `integral`\n- \"If I invest $1000 at 5% annual interest compounded monthly for 10 years, what will be the future value?\" \u2192 uses `compound_interest`\n- If I was paid the square root of $69m in 10 years, what's the present value at 7% discount rate? \u2192 uses `batch_execute (calculate -> financial_calcs)`\n\n## Output Control\n\nAll tools automatically support output control for maximum flexibility and token efficiency. The LLM can specify the desired verbosity.\n\nControl response verbosity using the `output_mode` parameter (available on **every tool**):\n\n| Mode      | Description                                        | Token Savings | Use Case                                    |\n| --------- | -------------------------------------------------- | ------------- | ------------------------------------------- |\n| `full`    | Complete response with all metadata (default)      | 0% (baseline) | Debugging, full context needed              |\n| `compact` | Remove null fields, minimize whitespace            | ~20-30%       | Moderate reduction, preserve structure      |\n| `minimal` | Primary value(s) only, strip metadata              | ~60-70%       | Fast extraction, minimal context            |\n| `value`   | Normalized `{value: X}` structure                  | ~70-80%       | Consistent chaining, maximum simplicity     |\n| `final`   | For sequential chains, return only terminal result | ~95%          | Simple calculations, predictable extraction |\n\n## Batch Execution\n\nFor multi-step workflows, `batch_execute` chains multiple calculations in a single request\u2014**achieving 90-95% token reduction**. Reference prior outputs using `$operation_id.result` syntax, and the engine automatically handles dependency resolution and parallel execution for speed.\n\n**Perfect for:** Bond pricing, financial models, statistical pipelines, complex transformations\n\n## Complete Tool Reference\n\n**Note:** All tool parameters include detailed descriptions with concrete examples directly in the MCP interface. Each parameter shows expected format, use cases, and sample values to make usage obvious without referring to external documentation.\n\n### Basic Calculations\n\n| Tool            | Description                                                  |\n| --------------- | ------------------------------------------------------------ |\n| `calculate`     | Evaluate mathematical expressions with variable substitution |\n| `percentage`    | Percentage calculations (of, increase, decrease, change)     |\n| `round`         | Advanced rounding (round, floor, ceil, trunc)                |\n| `convert_units` | Unit conversions (degrees \ufffd radians)                         |\n\n### Array Operations\n\n| Tool               | Description                                                      |\n| ------------------ | ---------------------------------------------------------------- |\n| `array_operations` | Element-wise operations (add, subtract, multiply, divide, power) |\n| `array_statistics` | Statistical measures (mean, median, std, min, max, sum)          |\n| `array_aggregate`  | Aggregations (sumproduct, weighted average, dot product)         |\n| `array_transform`  | Transformations (normalise, standardise, scale, log)             |\n\n### Statistics\n\n| Tool          | Description                                            |\n| ------------- | ------------------------------------------------------ |\n| `statistics`  | Comprehensive analysis (describe, quartiles, outliers) |\n| `pivot_table` | Create pivot tables with aggregation                   |\n| `correlation` | Correlation matrices (Pearson, Spearman)               |\n\n### Financial Mathematics\n\n| Tool                | Description                                 |\n| ------------------- | ------------------------------------------- |\n| `financial_calcs`   | Time value of money (PV, FV, PMT, IRR, NPV) |\n| `compound_interest` | Compound interest with various frequencies  |\n\n### Linear Algebra\n\n| Tool                   | Description                                                          |\n| ---------------------- | -------------------------------------------------------------------- |\n| `matrix_operations`    | Matrix operations (multiply, inverse, transpose, determinant, trace) |\n| `solve_linear_system`  | Solve Ax = b systems                                                 |\n| `matrix_decomposition` | Decompositions (eigen, SVD, QR, Cholesky, LU)                        |\n\n### Calculus\n\n| Tool            | Description                            |\n| --------------- | -------------------------------------- |\n| `derivative`    | Symbolic and numerical differentiation |\n| `integral`      | Symbolic and numerical integration     |\n| `limits_series` | Limits and series expansions           |\n",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/40b7374a-7ed7-4f95-ab2d-65f2a1618616.svg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "calculate",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Expression Calculator",
+      "annotations": {
+        "title": "Expression Calculator",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Evaluate mathematical expressions using SymPy.\n\nSupports:\n    - Arithmetic: +, -, *, /, ^\n    - Trigonometry: sin, cos, tan, asin, acos, atan\n    - Logarithms: log, ln, exp\n    - Constants: pi, e\n    - Functions: sqrt, abs\n\nExamples:\n\nSIMPLE ARITHMETIC:\n    expression=\"2 + 2\"\n    Result: 4\n\nTRIGONOMETRY:\n    expression=\"sin(pi/2)\"\n    Result: 1.0\n\nWITH VARIABLES:\n    expression=\"x^2 + 2*x + 1\", variables={\"x\": 3}\n    Result: 16\n\nMULTIPLE VARIABLES:\n    expression=\"x^2 + y^2\", variables={\"x\": 3, \"y\": 4}\n    Result: 25",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "expression"
+        ],
+        "properties": {
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "variables": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Variable substitutions (e.g., {'x': 5, 'y': 10})"
+          },
+          "expression": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Mathematical expression (e.g., '2+2', 'sin(pi/2)', 'x^2+1')"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "percentage",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Percentage Calculator",
+      "annotations": {
+        "title": "Percentage Calculator",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Perform percentage calculations: of, increase, decrease, or change.\n\nExamples:\n\nPERCENTAGE OF: 15% of 200\n    operation=\"of\", value=200, percentage=15\n    Result: 30\n\nINCREASE: 100 increased by 20%\n    operation=\"increase\", value=100, percentage=20\n    Result: 120\n\nDECREASE: 100 decreased by 20%\n    operation=\"decrease\", value=100, percentage=20\n    Result: 80\n\nPERCENTAGE CHANGE: from 80 to 100\n    operation=\"change\", value=80, percentage=100\n    Result: 25 (25% increase)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "value",
+          "percentage",
+          "operation"
+        ],
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Base value"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "operation": {
+            "enum": [
+              "of",
+              "increase",
+              "decrease",
+              "change"
+            ],
+            "type": "string",
+            "description": "Type of calculation"
+          },
+          "percentage": {
+            "type": "number",
+            "description": "Percentage amount (or new value for 'change')"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "round",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Advanced Rounding",
+      "annotations": {
+        "title": "Advanced Rounding",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Advanced rounding operations with multiple methods.\n\nMethods:\n    - round: Round to nearest (3.145 \u2192 3.15 at 2dp)\n    - floor: Always round down (3.149 \u2192 3.14)\n    - ceil: Always round up (3.141 \u2192 3.15)\n    - trunc: Truncate towards zero (-3.7 \u2192 -3, 3.7 \u2192 3)\n\nExamples:\n\nROUND TO NEAREST:\n    values=3.14159, method=\"round\", decimals=2\n    Result: 3.14\n\nFLOOR (DOWN):\n    values=3.14159, method=\"floor\", decimals=2\n    Result: 3.14\n\nCEIL (UP):\n    values=3.14159, method=\"ceil\", decimals=2\n    Result: 3.15\n\nMULTIPLE VALUES:\n    values=[3.14159, 2.71828], method=\"round\", decimals=2\n    Result: [3.14, 2.72]",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "values"
+        ],
+        "properties": {
+          "method": {
+            "enum": [
+              "round",
+              "floor",
+              "ceil",
+              "trunc"
+            ],
+            "type": "string",
+            "default": "round",
+            "description": "Rounding method"
+          },
+          "values": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            ],
+            "description": "Single value or list (e.g., 3.14159 or [3.14, 2.71])"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "decimals": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "Number of decimal places"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "convert_units",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Unit Converter",
+      "annotations": {
+        "title": "Unit Converter",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Convert between angle units: degrees \u2194 radians.\n\nExamples:\n\nDEGREES TO RADIANS:\n    value=180, from_unit=\"degrees\", to_unit=\"radians\"\n    Result: 3.14159... (\u03c0)\n\nRADIANS TO DEGREES:\n    value=3.14159, from_unit=\"radians\", to_unit=\"degrees\"\n    Result: 180\n\nRIGHT ANGLE:\n    value=90, from_unit=\"degrees\", to_unit=\"radians\"\n    Result: 1.5708... (\u03c0/2)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "value",
+          "from_unit",
+          "to_unit"
+        ],
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Value to convert (e.g., 180, 3.14159)"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "to_unit": {
+            "enum": [
+              "degrees",
+              "radians"
+            ],
+            "type": "string",
+            "description": "Target unit"
+          },
+          "from_unit": {
+            "enum": [
+              "degrees",
+              "radians"
+            ],
+            "type": "string",
+            "description": "Source unit"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "array_operations",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Array Operations",
+      "annotations": {
+        "title": "Array Operations",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Perform element-wise operations on arrays using Polars.\n\nSupports array-array and array-scalar operations.\n\nExamples:\n\nSCALAR MULTIPLICATION:\n    operation=\"multiply\", array1=[[1,2],[3,4]], array2=2\n    Result: [[2,4],[6,8]]\n\nARRAY ADDITION:\n    operation=\"add\", array1=[[1,2]], array2=[[3,4]]\n    Result: [[4,6]]\n\nPOWER OPERATION:\n    operation=\"power\", array1=[[2,3]], array2=2\n    Result: [[4,9]]\n\nARRAY DIVISION:\n    operation=\"divide\", array1=[[10,20],[30,40]], array2=[[2,4],[5,8]]\n    Result: [[5,5],[6,5]]",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "operation",
+          "array1",
+          "array2"
+        ],
+        "properties": {
+          "array1": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "First 2D array (e.g., [[1,2],[3,4]])"
+          },
+          "array2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "Second array, scalar, or JSON string"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "operation": {
+            "enum": [
+              "add",
+              "subtract",
+              "multiply",
+              "divide",
+              "power"
+            ],
+            "type": "string",
+            "description": "Element-wise operation to perform"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "array_statistics",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Array Statistics",
+      "annotations": {
+        "title": "Array Statistics",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Calculate statistical measures on arrays using Polars.\n\nSupports computation across entire array, rows, or columns.\n\nExamples:\n\nCOLUMN-WISE MEANS:\n    data=[[1,2,3],[4,5,6]], operations=[\"mean\"], axis=0\n    Result: [2.5, 3.5, 4.5] (average of each column)\n\nROW-WISE MEANS:\n    data=[[1,2,3],[4,5,6]], operations=[\"mean\"], axis=1\n    Result: [2.0, 5.0] (average of each row)\n\nOVERALL STATISTICS:\n    data=[[1,2,3],[4,5,6]], operations=[\"mean\",\"std\"], axis=None\n    Result: {mean: 3.5, std: 1.71}\n\nMULTIPLE STATISTICS:\n    data=[[1,2,3],[4,5,6]], operations=[\"min\",\"max\",\"mean\"], axis=0\n    Result: {min: [1,2,3], max: [4,5,6], mean: [2.5,3.5,4.5]}",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "operations",
+          "data"
+        ],
+        "properties": {
+          "axis": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Axis: 0=column-wise, 1=row-wise, None=overall"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "2D array (e.g., [[1,2,3],[4,5,6]])"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "mean",
+                "median",
+                "std",
+                "min",
+                "max",
+                "sum"
+              ],
+              "type": "string"
+            },
+            "description": "Statistics to compute (e.g., ['mean','std'])"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "array_aggregate",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Array Aggregation",
+      "annotations": {
+        "title": "Array Aggregation",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Perform aggregation operations on 1D arrays.\n\nExamples:\n\nSUMPRODUCT:\n    operation=\"sumproduct\", array1=[1,2,3], array2=[4,5,6]\n    Result: 32 (1\u00d74 + 2\u00d75 + 3\u00d76)\n\nWEIGHTED AVERAGE:\n    operation=\"weighted_average\", array1=[10,20,30], weights=[1,2,3]\n    Result: 23.33... ((10\u00d71 + 20\u00d72 + 30\u00d73) / (1+2+3))\n\nDOT PRODUCT:\n    operation=\"dot_product\", array1=[1,2], array2=[3,4]\n    Result: 11 (1\u00d73 + 2\u00d74)\n\nGRADE CALCULATION:\n    operation=\"weighted_average\", array1=[85,92,78], weights=[0.3,0.5,0.2]\n    Result: 86.5",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "array1",
+          "operation"
+        ],
+        "properties": {
+          "array1": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "First 1D array (e.g., [1,2,3])"
+          },
+          "array2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Second 1D array for sumproduct/dot_product"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "weights": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Weights for weighted_average (e.g., [1,2,3])"
+          },
+          "operation": {
+            "enum": [
+              "sumproduct",
+              "weighted_average",
+              "dot_product"
+            ],
+            "type": "string",
+            "description": "Aggregation operation"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "array_transform",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Array Transformation",
+      "annotations": {
+        "title": "Array Transformation",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Transform arrays for ML preprocessing and data normalization.\n\nTransformations:\n    - normalize: L2 normalization (unit vector)\n    - standardize: Z-score (mean=0, std=1)\n    - minmax_scale: Scale to [0,1] range\n    - log_transform: Natural log transform\n\nExamples:\n\nL2 NORMALIZATION:\n    data=[[3,4]], transform=\"normalize\"\n    Result: [[0.6,0.8]] (3\u00b2+4\u00b2=25, \u221a25=5, 3/5=0.6, 4/5=0.8)\n\nSTANDARDIZATION (Z-SCORE):\n    data=[[1,2],[3,4]], transform=\"standardize\"\n    Result: Values with mean=0, std=1\n\nMIN-MAX SCALING:\n    data=[[1,2],[3,4]], transform=\"minmax_scale\"\n    Result: [[0,0.33],[0.67,1]] (scaled to [0,1])\n\nLOG TRANSFORM:\n    data=[[1,10,100]], transform=\"log_transform\"\n    Result: [[0,2.3,4.6]] (natural log)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "transform",
+          "data"
+        ],
+        "properties": {
+          "axis": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Axis: 0=column-wise, 1=row-wise, None=overall"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "2D array to transform (e.g., [[1,2],[3,4]])"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "transform": {
+            "enum": [
+              "normalize",
+              "standardize",
+              "minmax_scale",
+              "log_transform"
+            ],
+            "type": "string",
+            "description": "Transformation type"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "statistics",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Statistical Analysis",
+      "annotations": {
+        "title": "Statistical Analysis",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Comprehensive statistical analysis using Polars.\n\nAnalysis types:\n    - describe: Count, mean, std, min, max, median\n    - quartiles: Q1, Q2, Q3, IQR\n    - outliers: IQR-based detection (values beyond Q1-1.5\u00d7IQR or Q3+1.5\u00d7IQR)\n\nExamples:\n\nDESCRIPTIVE STATISTICS:\n    data=[1,2,3,4,5,100], analyses=[\"describe\"]\n    Result: {count:6, mean:19.17, std:39.25, min:1, max:100, median:3.5}\n\nQUARTILES:\n    data=[1,2,3,4,5], analyses=[\"quartiles\"]\n    Result: {Q1:2, Q2:3, Q3:4, IQR:2}\n\nOUTLIER DETECTION:\n    data=[1,2,3,4,5,100], analyses=[\"outliers\"]\n    Result: {outlier_values:[100], outlier_count:1, lower_bound:-1, upper_bound:8.5}\n\nFULL ANALYSIS:\n    data=[1,2,3,4,5,100], analyses=[\"describe\",\"quartiles\",\"outliers\"]\n    Result: All three analyses combined",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "data",
+          "analyses"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "List of numerical values (e.g., [1,2,3,4,5,100])"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "analyses": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "describe",
+                "quartiles",
+                "outliers"
+              ],
+              "type": "string"
+            },
+            "description": "Types of analysis to perform"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "pivot_table",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Pivot Table",
+      "annotations": {
+        "title": "Pivot Table",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Create pivot tables from tabular data using Polars.\n\nLike Excel pivot tables: reshape data with row/column dimensions and aggregated values.\n\nExample:\n\nSALES BY REGION AND PRODUCT:\n    data=[\n        {\"region\":\"North\",\"product\":\"A\",\"sales\":100},\n        {\"region\":\"North\",\"product\":\"B\",\"sales\":150},\n        {\"region\":\"South\",\"product\":\"A\",\"sales\":80},\n        {\"region\":\"South\",\"product\":\"B\",\"sales\":120}\n    ],\n    index=\"region\", columns=\"product\", values=\"sales\", aggfunc=\"sum\"\n    Result:\n        product |  A   |  B\n        --------|------|------\n        North   | 100  | 150\n        South   |  80  | 120\n\nCOUNT AGGREGATION:\n    Same data with aggfunc=\"count\"\n    Result: Count of entries per region-product combination\n\nAVERAGE SCORES:\n    data=[{\"dept\":\"Sales\",\"role\":\"Manager\",\"score\":85}, ...]\n    index=\"dept\", columns=\"role\", values=\"score\", aggfunc=\"mean\"\n    Result: Average scores by department and role",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "index",
+          "columns",
+          "values",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              }
+            },
+            "description": "List of row dictionaries"
+          },
+          "index": {
+            "type": "string",
+            "description": "Column name for row index"
+          },
+          "values": {
+            "type": "string",
+            "description": "Column name to aggregate"
+          },
+          "aggfunc": {
+            "enum": [
+              "sum",
+              "mean",
+              "count",
+              "min",
+              "max"
+            ],
+            "type": "string",
+            "default": "sum",
+            "description": "Aggregation function"
+          },
+          "columns": {
+            "type": "string",
+            "description": "Column name for pivot columns"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "correlation",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Correlation Analysis",
+      "annotations": {
+        "title": "Correlation Analysis",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Calculate correlation matrices between multiple variables using Polars.\n\nMethods:\n    - pearson: Linear correlation (-1 to +1, 0 = no linear relationship)\n    - spearman: Rank-based correlation (monotonic, robust to outliers)\n\nExamples:\n\nPEARSON CORRELATION:\n    data={\"x\":[1,2,3], \"y\":[2,4,6], \"z\":[1,1,1]},\n    method=\"pearson\", output_format=\"matrix\"\n    Result: {\n        \"x\": {\"x\":1.0, \"y\":1.0, \"z\":NaN},\n        \"y\": {\"x\":1.0, \"y\":1.0, \"z\":NaN},\n        \"z\": {\"x\":NaN, \"y\":NaN, \"z\":NaN}\n    }\n\nPAIRWISE FORMAT:\n    data={\"height\":[170,175,168], \"weight\":[65,78,62]},\n    method=\"pearson\", output_format=\"pairs\"\n    Result: [{\"var1\":\"height\", \"var2\":\"weight\", \"correlation\":0.89}]\n\nSPEARMAN (RANK):\n    data={\"x\":[1,2,100], \"y\":[2,4,200]},\n    method=\"spearman\"\n    Result: Perfect correlation (1.0) despite non-linear relationship",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "Dict of variable names to values (e.g., {'x':[1,2,3],'y':[2,4,6]})",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "method": {
+            "enum": [
+              "pearson",
+              "spearman"
+            ],
+            "type": "string",
+            "default": "pearson",
+            "description": "Correlation method"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          },
+          "output_format": {
+            "enum": [
+              "matrix",
+              "pairs"
+            ],
+            "type": "string",
+            "default": "matrix",
+            "description": "Output format: 'matrix' or 'pairs'"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "financial_calcs",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Financial Calculations",
+      "annotations": {
+        "title": "Financial Calculations",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Time Value of Money (TVM) calculations: solve for PV, FV, PMT, rate, IRR, or NPV.\n\nThe TVM equation has 5 variables - know 4, solve for the 5th:\n    PV  = Present Value (lump sum now)\n    FV  = Future Value (lump sum at maturity)\n    PMT = Payment (regular periodic cash flow)\n    N   = Number of periods\n    I/Y = Interest rate per period\n\nSign convention: negative = cash out (you pay), positive = cash in (you receive)\n\nExamples:\n\nZERO-COUPON BOND: PV of \u00a31000 in 10 years at 5%\n    calculation=\"pv\", rate=0.05, periods=10, future_value=1000\n    Result: \u00a3613.91\n\nCOUPON BOND: PV of \u00a330 annual coupons + \u00a31000 face value at 5% yield\n    calculation=\"pv\", rate=0.05, periods=10, payment=30, future_value=1000\n    Result: \u00a3845.57\n\nRETIREMENT SAVINGS: FV with \u00a3500/month for 30 years at 7%\n    calculation=\"fv\", rate=0.07/12, periods=360, payment=-500, present_value=0\n    Result: \u00a3566,764\n\nMORTGAGE PAYMENT: Monthly payment on \u00a3200k loan, 30 years, 4% APR\n    calculation=\"pmt\", rate=0.04/12, periods=360, present_value=-200000, future_value=0\n    Result: \u00a3954.83\n\nINTEREST RATE: What rate grows \u00a3613.81 to \u00a31000 in 10 years?\n    calculation=\"rate\", periods=10, present_value=-613.81, future_value=1000\n    Result: 0.05 (5%)\n\nGROWING ANNUITY: Salary stream with 3.5% raises, discounted at 12%\n    calculation=\"pv\", rate=0.12, periods=25, payment=-45000, growth_rate=0.035\n    Result: \u00a3402,586",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "calculation"
+        ],
+        "properties": {
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Interest/discount rate per period (e.g., 0.05 for 5% annual)"
+          },
+          "when": {
+            "enum": [
+              "end",
+              "begin"
+            ],
+            "type": "string",
+            "default": "end",
+            "description": "Payment timing: 'end' (ordinary) or 'begin' (annuity due)"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "payment": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Regular periodic payment (negative=pay out, positive=receive)"
+          },
+          "periods": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Number of compounding periods"
+          },
+          "cash_flows": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Series of cash flows for IRR/NPV (e.g., [-100, 30, 30, 130])"
+          },
+          "calculation": {
+            "enum": [
+              "pv",
+              "fv",
+              "pmt",
+              "rate",
+              "irr",
+              "npv"
+            ],
+            "type": "string",
+            "description": "What to solve for: pv, fv, pmt, rate, irr, or npv"
+          },
+          "growth_rate": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0,
+            "description": "Payment growth rate per period (0.0 for level annuity)"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          },
+          "future_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Single lump sum at maturity (negative=owe, positive=receive)"
+          },
+          "present_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Single lump sum at time 0 (negative=pay, positive=receive)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "compound_interest",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Compound Interest",
+      "annotations": {
+        "title": "Compound Interest",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Calculate compound interest with various compounding frequencies.\n\nFormulas:\n    Discrete: A = P(1 + r/n)^(nt)\n    Continuous: A = Pe^(rt)\n\nExamples:\n\nANNUAL COMPOUNDING: \u00a31000 at 5% for 10 years\n    principal=1000, rate=0.05, time=10, frequency=\"annual\"\n    Result: \u00a31628.89\n\nMONTHLY COMPOUNDING: \u00a31000 at 5% for 10 years\n    principal=1000, rate=0.05, time=10, frequency=\"monthly\"\n    Result: \u00a31647.01\n\nCONTINUOUS COMPOUNDING: \u00a31000 at 5% for 10 years\n    principal=1000, rate=0.05, time=10, frequency=\"continuous\"\n    Result: \u00a31648.72",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "rate",
+          "time",
+          "principal"
+        ],
+        "properties": {
+          "rate": {
+            "type": "number",
+            "description": "Annual interest rate (e.g., 0.05 for 5%)"
+          },
+          "time": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Time period in years (e.g., 10)"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "frequency": {
+            "enum": [
+              "annual",
+              "semi-annual",
+              "quarterly",
+              "monthly",
+              "daily",
+              "continuous"
+            ],
+            "type": "string",
+            "default": "annual",
+            "description": "Compounding frequency"
+          },
+          "principal": {
+            "type": "number",
+            "description": "Initial principal amount (e.g., 1000)"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "perpetuity",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Perpetuity Calculations",
+      "annotations": {
+        "title": "Perpetuity Calculations",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Calculate present value of a perpetuity (infinite series of payments).\n\nA perpetuity is an annuity that continues forever. Common in:\n    - Preferred stock dividends\n    - Endowment funds\n    - Real estate with infinite rental income\n    - UK Consol bonds (historically)\n\nFormulas:\n    Level Ordinary: PV = C / r\n    Level Due: PV = C / r \u00d7 (1 + r)\n    Growing: PV = C / (r - g), where r > g\n\nExamples:\n\nLEVEL PERPETUITY: \u00a31000 annual payment at 5%\n    payment=1000, rate=0.05\n    Result: PV = \u00a320,000\n\nGROWING PERPETUITY: \u00a31000 payment growing 3% annually at 8% discount\n    payment=1000, rate=0.08, growth_rate=0.03\n    Result: PV = \u00a320,000\n\nPERPETUITY DUE: \u00a31000 at period start at 5%\n    payment=1000, rate=0.05, when='begin'\n    Result: PV = \u00a321,000",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "payment",
+          "rate"
+        ],
+        "properties": {
+          "rate": {
+            "type": "number",
+            "description": "Discount rate per period (e.g., 0.05)",
+            "exclusiveMinimum": 0
+          },
+          "when": {
+            "enum": [
+              "end",
+              "begin"
+            ],
+            "type": "string",
+            "default": "end",
+            "description": "Payment timing: 'end' or 'begin'"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "payment": {
+            "type": "number",
+            "description": "Periodic payment amount (e.g., 1000)"
+          },
+          "growth_rate": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Payment growth rate (None or 0 for level, e.g., 0.03 for growing)"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "matrix_operations",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Matrix Operations",
+      "annotations": {
+        "title": "Matrix Operations",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Core matrix operations using NumPy BLAS.\n\nExamples:\n\nMATRIX MULTIPLICATION:\n    operation=\"multiply\", matrix1=[[1,2],[3,4]], matrix2=[[5,6],[7,8]]\n    Result: [[19,22],[43,50]]\n\nMATRIX INVERSE:\n    operation=\"inverse\", matrix1=[[1,2],[3,4]]\n    Result: [[-2,1],[1.5,-0.5]]\n\nTRANSPOSE:\n    operation=\"transpose\", matrix1=[[1,2],[3,4]]\n    Result: [[1,3],[2,4]]\n\nDETERMINANT:\n    operation=\"determinant\", matrix1=[[1,2],[3,4]]\n    Result: -2.0\n\nTRACE:\n    operation=\"trace\", matrix1=[[1,2],[3,4]]\n    Result: 5.0 (1+4)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "matrix1",
+          "operation"
+        ],
+        "properties": {
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "matrix1": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "First matrix (e.g., [[1,2],[3,4]])"
+          },
+          "matrix2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Second matrix for multiplication"
+          },
+          "operation": {
+            "enum": [
+              "multiply",
+              "inverse",
+              "transpose",
+              "determinant",
+              "trace"
+            ],
+            "type": "string",
+            "description": "Matrix operation"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "solve_linear_system",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Linear System Solver",
+      "annotations": {
+        "title": "Linear System Solver",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Solve systems of linear equations (Ax = b) using SciPy's optimised solver.\n\nExamples:\n\nSQUARE SYSTEM (2 equations, 2 unknowns):\n    coefficients=[[2,3],[1,1]], constants=[8,3], method=\"direct\"\n    Solves: 2x+3y=8, x+y=3\n    Result: [x=1, y=2]\n\nOVERDETERMINED SYSTEM (3 equations, 2 unknowns):\n    coefficients=[[1,2],[3,4],[5,6]], constants=[5,6,7], method=\"least_squares\"\n    Finds best-fit x minimizing ||Ax-b||\n    Result: [x\u2248-6, y\u22485.5]\n\n3x3 SYSTEM:\n    coefficients=[[2,1,-1],[1,3,2],[-1,2,1]], constants=[8,13,5], method=\"direct\"\n    Result: [x=3, y=2, z=1]",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "coefficients",
+          "constants"
+        ],
+        "properties": {
+          "method": {
+            "enum": [
+              "direct",
+              "least_squares"
+            ],
+            "type": "string",
+            "default": "direct",
+            "description": "Solution method: direct=exact (square systems), least_squares=overdetermined systems"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "constants": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Constants vector b in Ax=b system (1D list, e.g., [8,3])"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          },
+          "coefficients": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "Coefficient matrix A in Ax=b system (2D list, e.g., [[2,3],[1,1]])"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "matrix_decomposition",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Matrix Decomposition",
+      "annotations": {
+        "title": "Matrix Decomposition",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Matrix decompositions: eigenvalues/vectors, SVD, QR, Cholesky, LU.\n\nExamples:\n\nEIGENVALUE DECOMPOSITION:\n    matrix=[[4,2],[1,3]], decomposition=\"eigen\"\n    Result: {eigenvalues: [5, 2], eigenvectors: [[0.89,0.45],[0.71,-0.71]]}\n\nSINGULAR VALUE DECOMPOSITION (SVD):\n    matrix=[[1,2],[3,4],[5,6]], decomposition=\"svd\"\n    Result: {U: 3\u00d73, singular_values: [9.5, 0.77], Vt: 2\u00d72}\n\nQR FACTORISATION:\n    matrix=[[1,2],[3,4]], decomposition=\"qr\"\n    Result: {Q: orthogonal, R: upper triangular}\n\nCHOLESKY (symmetric positive definite):\n    matrix=[[4,2],[2,3]], decomposition=\"cholesky\"\n    Result: {L: [[2,0],[1,1.41]]} where A=LL^T\n\nLU DECOMPOSITION:\n    matrix=[[2,1],[4,3]], decomposition=\"lu\"\n    Result: {P: permutation, L: lower, U: upper} where A=PLU",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "matrix",
+          "decomposition"
+        ],
+        "properties": {
+          "matrix": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "Matrix to decompose as 2D nested list (e.g., [[4,2],[1,3]])"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          },
+          "decomposition": {
+            "enum": [
+              "eigen",
+              "svd",
+              "qr",
+              "cholesky",
+              "lu"
+            ],
+            "type": "string",
+            "description": "Decomposition type: eigen=eigenvalues/vectors, svd=singular value, qr=QR, cholesky=symmetric positive definite, lu=LU factorisation"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "derivative",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Derivative Calculator",
+      "annotations": {
+        "title": "Derivative Calculator",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Compute symbolic and numerical derivatives with support for higher orders and partial derivatives.\n\nExamples:\n\nFIRST DERIVATIVE:\n    expression=\"x^3 + 2*x^2\", variable=\"x\", order=1\n    Result: derivative=\"3*x^2 + 4*x\"\n\nSECOND DERIVATIVE (acceleration/concavity):\n    expression=\"x^3\", variable=\"x\", order=2\n    Result: derivative=\"6*x\"\n\nEVALUATE AT POINT:\n    expression=\"sin(x)\", variable=\"x\", order=1, point=0\n    Result: derivative=\"cos(x)\", value_at_point=1.0\n\nPRODUCT RULE:\n    expression=\"sin(x)*cos(x)\", variable=\"x\", order=1\n    Result: derivative=\"cos(x)^2 - sin(x)^2\"\n\nPARTIAL DERIVATIVE:\n    expression=\"x^2*y\", variable=\"y\", order=1\n    Result: derivative=\"x^2\" (treating x as constant)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "expression",
+          "variable"
+        ],
+        "properties": {
+          "order": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1,
+            "description": "Derivative order (1=first derivative, 2=second, etc.)"
+          },
+          "point": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional point for numerical evaluation of the derivative"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "variable": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Variable to differentiate with respect to (e.g., 'x', 't')"
+          },
+          "expression": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Mathematical expression to differentiate (e.g., 'x^3 + 2*x^2', 'sin(x)')"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "integral",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Integral Calculator",
+      "annotations": {
+        "title": "Integral Calculator",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Compute symbolic and numerical integrals (definite and indefinite).\n\nExamples:\n\nINDEFINITE INTEGRAL (antiderivative):\n    expression=\"x^2\", variable=\"x\"\n    Result: \"x^3/3\"\n\nDEFINITE INTEGRAL (area):\n    expression=\"x^2\", variable=\"x\", lower_bound=0, upper_bound=1\n    Result: 0.333\n\nTRIGONOMETRIC:\n    expression=\"sin(x)\", variable=\"x\", lower_bound=0, upper_bound=3.14159\n    Result: 2.0 (area under one period)\n\nNUMERICAL METHOD (non-elementary):\n    expression=\"exp(-x^2)\", variable=\"x\", lower_bound=0, upper_bound=1, method=\"numerical\"\n    Result: 0.746824 (Gaussian integral approximation)\n\nSYMBOLIC ANTIDERIVATIVE:\n    expression=\"1/x\", variable=\"x\"\n    Result: \"log(x)\" ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "expression",
+          "variable"
+        ],
+        "properties": {
+          "method": {
+            "enum": [
+              "symbolic",
+              "numerical"
+            ],
+            "type": "string",
+            "default": "symbolic",
+            "description": "Integration method: symbolic=exact/analytical, numerical=approximate (requires bounds)"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "variable": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Integration variable (e.g., 'x', 't')"
+          },
+          "expression": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Mathematical expression to integrate (e.g., 'x^2', 'sin(x)')"
+          },
+          "lower_bound": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Lower bound for definite integral (omit for indefinite)"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          },
+          "upper_bound": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Upper bound for definite integral (omit for indefinite)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "limits_series",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Limits and Series",
+      "annotations": {
+        "title": "Limits and Series",
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "description": "Compute limits and series expansions using SymPy.\n\nExamples:\n\nCLASSIC LIMIT:\n    expression=\"sin(x)/x\", variable=\"x\", point=0, operation=\"limit\"\n    Result: limit=1\n\nLIMIT AT INFINITY:\n    expression=\"1/x\", variable=\"x\", point=\"oo\", operation=\"limit\"\n    Result: limit=0\n\nONE-SIDED LIMIT:\n    expression=\"1/x\", variable=\"x\", point=0, operation=\"limit\", direction=\"+\"\n    Result: limit=+\u221e (approaching from right)\n\nREMOVABLE DISCONTINUITY:\n    expression=\"(x^2-1)/(x-1)\", variable=\"x\", point=1, operation=\"limit\"\n    Result: limit=2\n\nMACLAURIN SERIES (at 0):\n    expression=\"exp(x)\", variable=\"x\", point=0, operation=\"series\", order=4\n    Result: \"1 + x + x^2/2 + x^3/6 + O(x^4)\"\n\nTAYLOR SERIES (at point):\n    expression=\"sin(x)\", variable=\"x\", point=3.14159, operation=\"series\", order=4\n    Result: expansion around \u03c0",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "point",
+          "expression",
+          "variable"
+        ],
+        "properties": {
+          "order": {
+            "type": "integer",
+            "default": 6,
+            "minimum": 1,
+            "description": "Series expansion order (number of terms)"
+          },
+          "point": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Point for limit/expansion (number, 'oo' for infinity, '-oo' for -infinity)"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "variable": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Variable for limit/expansion (e.g., 'x', 't')"
+          },
+          "direction": {
+            "enum": [
+              "+",
+              "-",
+              "+-"
+            ],
+            "type": "string",
+            "default": "+-",
+            "description": "Limit direction: +=from right, -=from left, +-=both sides"
+          },
+          "operation": {
+            "enum": [
+              "limit",
+              "series"
+            ],
+            "type": "string",
+            "default": "limit",
+            "description": "Operation: limit=compute limit, series=Taylor/Maclaurin expansion"
+          },
+          "expression": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Mathematical expression to analyse (e.g., 'sin(x)/x', 'exp(x)')"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "batch_execute",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Batch Execute",
+      "annotations": {
+        "title": "Batch Execute",
+        "readOnlyHint": true
+      },
+      "description": "Execute multiple math operations in a single request with automatic dependency chaining.\n\n**USE THIS TOOL when you need 2+ calculations where outputs feed into inputs** (bond pricing, statistical workflows, multi-step formulas). Don't make sequential individual tool calls.\n\nBenefits: 90-95% token reduction, single API call, highly flexible workflows\n\n## Quick Start\n\nAvailable tools (20):\n\u2022 Basic: calculate, percentage, round, convert_units\n\u2022 Arrays: array_operations, array_statistics, array_aggregate, array_transform\n\u2022 Statistics: statistics, pivot_table, correlation\n\u2022 Financial: financial_calcs, compound_interest, perpetuity\n\u2022 Linear Algebra: matrix_operations, solve_linear_system, matrix_decomposition\n\u2022 Calculus: derivative, integral, limits_series\n\n**Result referencing:**\n\nPass `$op_id.result` directly in any parameter:\n- `$op_id.result` - Use output from prior operation\n- `$op_id.result[0]` - Array indexing\n- `$op_id.metadata.field` - Nested fields\n\nExample: `\"payment\": \"$coupon.result\"` or `\"variables\": {\"x\": \"$op1.result\"}`\n\n**Example - Bond valuation:**\n```json\n{\n  \"operations\": [\n    {\"id\": \"coupon\", \"tool\": \"calculate\",\n     \"context\": \"Calculate annual coupon payment\",\n     \"arguments\": {\"expression\": \"principal * 0.04\", \"variables\": {\"principal\": 8306623.86}}},\n    {\"id\": \"fv\", \"tool\": \"financial_calcs\",\n     \"context\": \"Future value of coupon payments\",\n     \"arguments\": {\"calculation\": \"fv\", \"rate\": 0.04, \"periods\": 10,\n                   \"payment\": \"$coupon.result\", \"present_value\": 0}},\n    {\"id\": \"total\", \"tool\": \"calculate\",\n     \"context\": \"Total bond maturity value\",\n     \"arguments\": {\"expression\": \"fv + principal\",\n                   \"variables\": {\"fv\": \"$fv.result\", \"principal\": 8306623.86}}}\n  ],\n  \"execution_mode\": \"auto\",\n  \"output_mode\": \"minimal\",\n  \"context\": \"Bond A 10-year valuation\"\n}\n```\n\n## When to Use\n\u2705 Multi-step calculations (financial models, statistics, transformations)\n\u2705 Data pipelines where step N needs output from step N-1\n\u2705 Any workflow requiring 2+ operations from the tools above\n\n\u274c Single standalone calculation\n\u274c Need to inspect/validate intermediate results before proceeding\n\n## Execution Modes\n- `auto` (recommended): DAG-based optimization, parallel where possible\n- `sequential`: Strict order\n- `parallel`: All concurrent (only if truly independent)\n\n## Output Modes\n- `full`: Complete metadata (default)\n- `compact`: Remove nulls/whitespace\n- `minimal`: Basic operation objects with values\n- `value`: Flat {id: value} map (~90% smaller) - **use this for most cases**\n- `final`: Sequential chains only, returns terminal result (~95% smaller)\n\n## Structure\nEach operation:\n- `tool`: Tool name (required)\n- `arguments`: Tool parameters (required)\n- `id`: Unique identifier (auto-generated if omitted)\n- `context`: Optional label for this operation\n\nBatch-level `context` parameter labels entire workflow across all output modes.\n\nResponse includes: per-operation status, result/error, execution_time_ms, dependency wave, summary stats.\n",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "BatchOperation": {
+            "type": "object",
+            "required": [
+              "tool",
+              "arguments"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1,
+                "description": "Unique operation identifier (auto-generated UUID if not provided)"
+              },
+              "tool": {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1,
+                "description": "Tool name (must match one of the 19 available mathematical tools)"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Human-readable label for this operation (displayed in results)"
+              },
+              "context": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Operation-specific context annotation (e.g., 'Bond A valuation')"
+              },
+              "arguments": {
+                "type": "object",
+                "description": "Tool arguments as key-value pairs matching the tool's parameter signature",
+                "additionalProperties": true
+              },
+              "timeout_ms": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "maximum": 300000,
+                    "minimum": 100
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Operation-specific timeout in milliseconds (100ms - 300s)"
+              }
+            },
+            "description": "Single operation within a batch request.\n\nRepresents one tool call with its arguments, dependencies, and metadata.\nOperations are executed according to their dependencies and the selected execution mode."
+          }
+        },
+        "required": [
+          "operations"
+        ],
+        "properties": {
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional annotation to label this calculation (e.g., 'Bond A PV', 'Q2 revenue'). Appears in results for easy identification."
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/BatchOperation"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "description": "List of operations to execute. Each operation MUST include: tool (name), arguments (dict). Optional: id (UUID/string), context, label, timeout_ms (int)"
+          },
+          "output_mode": {
+            "enum": [
+              "full",
+              "compact",
+              "minimal",
+              "value",
+              "final"
+            ],
+            "type": "string",
+            "default": "full",
+            "description": "Output format: full (default), compact, minimal, value, or final. See batch_execute tool for details."
+          },
+          "stop_on_error": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to stop execution on first error. If False, independent operations continue even if others fail."
+          },
+          "execution_mode": {
+            "enum": [
+              "sequential",
+              "parallel",
+              "auto"
+            ],
+            "type": "string",
+            "default": "auto",
+            "description": "Execution strategy: sequential (order), parallel (concurrent), auto (DAG-based)"
+          },
+          "max_concurrent": {
+            "type": "integer",
+            "default": 5,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Maximum concurrent operations (applies to parallel/auto modes)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    }
+  ],
+  "tool_count": 21,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@apetta/vibe-math-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "calculate",
+    "percentage",
+    "round",
+    "convert_units",
+    "array_operations",
+    "array_statistics",
+    "array_aggregate",
+    "array_transform",
+    "statistics",
+    "pivot_table",
+    "correlation",
+    "financial_calcs",
+    "compound_interest",
+    "perpetuity",
+    "matrix_operations",
+    "solve_linear_system",
+    "matrix_decomposition",
+    "derivative",
+    "integral",
+    "limits_series",
+    "batch_execute"
+  ]
+}

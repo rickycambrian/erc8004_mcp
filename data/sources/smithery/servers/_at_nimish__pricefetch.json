@@ -1,0 +1,51 @@
+{
+  "qualifiedName": "@nimish/pricefetch",
+  "displayName": "Crypto Price Quotes | By Onramp.Money",
+  "description": "Get live crypto prices from Onramp.money and instantly see how much you can buy with your local currency. Select your country or currency to receive accurate buy quotes across supported networks. Compare options to plan purchases in 60+ countries and more.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/c20e5228-3308-4638-a29d-87aa7381c7ba.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@nimish/pricefetch",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@nimish/pricefetch/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "cryptoPriceINR",
+      "description": "Get live price of a cryptocurrency on onramp.money for ANY supported fiat and calculate how much crypto you can buy. IMPORTANT: Before calling this tool, determine fiatType from the user's country/fiat using Onramp's `fetchAllCountryConfig` API (`/onramp/api/v2/common/public/fetchAllCountryConfig`). Ask the user for their country or local currency, then select the appropriate active entry from `data.buy` and use its key as fiatType (e.g., '1' for INR/India, '21' for USD/US). PARAMETER PRIORITY: coinCode > fiatType > network > fiatAmount. Resolve missing parameters in this order, then call this tool so it can query Onramp's `coinDetails` API.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "coinCode",
+          "fiatType"
+        ],
+        "properties": {
+          "network": {
+            "type": "string",
+            "description": "OPTIONAL: The blockchain network/chain ID (e.g., '1' for Ethereum, '137' for Polygon, '56' for BSC). PRIORITY ORDER: coinCode > fiatType > network > fiatAmount. If the user has not given a network but has given coinCode and fiatType, first call the Onramp `coinNetworks` API (`/onramp/api/v3/buy/public/coinNetworks`) with coinCode and fiatType, show the available networks (chain name + chainId), and ask the user to choose one. Only after the user chooses a network should you ask for the fiatAmount if it is still missing."
+          },
+          "coinCode": {
+            "type": "string",
+            "description": "REQUIRED: The cryptocurrency symbol/code in lowercase (e.g., 'usdt' for USDT, 'btc' for Bitcoin, 'eth' for Ethereum). Extract this from the user's message. If not provided, ask the user for the coin code."
+          },
+          "fiatType": {
+            "type": "string",
+            "description": "REQUIRED: The fiat currency type code. This is the numeric key from Onramp's country config API `/onramp/api/v2/common/public/fetchAllCountryConfig` (see `data.buy`). FLOW: First ask the user for their country (or preferred local fiat). Then call `fetchAllCountryConfig`, look under `data.buy` for an entry where `country` or `currency` matches the user\u2019s choice and `isActive` is 1, and use that OBJECT KEY as fiatType. For example, if the user chooses India/INR, use the key '1'; if they choose United States/USD, use the key '21'. Do NOT invent fiatType values; always derive them from this API."
+          },
+          "fiatAmount": {
+            "type": "number",
+            "description": "OPTIONAL: The amount in fiat currency that the user wants to spend (e.g., 200 for 200 USD, 2000 for 2000 INR). PRIORITY ORDER: coinCode > fiatType > network > fiatAmount. Extract this number from the user's message, but only AFTER coinCode, fiatType, and network are known. IMPORTANT: Use the amount in the SAME currency the user specified - if they say '200 USD', use 200, NOT a converted INR amount. If not provided after network is chosen, ask the user for the fiat amount."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:20:19.767243+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,468 @@
+{
+  "qualifiedName": "@ai/blinkxmcp",
+  "displayName": "blinkxmcp",
+  "description": "Connect your BlinkX account to view holdings, margins, and profile. Monitor markets with quotes, instrument search, and historical candles. Place and track orders, or backtest strategies and even run strategies real time.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/273c67ed-04c5-4f42-86dc-471800c52444.svg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@ai/blinkxmcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@ai/blinkxmcp/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "login",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Open the BlinkX device login flow (clickable link).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_holdings",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Fetch user holdings after successful login.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "default": ""
+          },
+          "api_url": {
+            "type": "string",
+            "default": "https://developeruat.blinkx.in/SmartApi/portfolio/holdings"
+          },
+          "session_id": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_user_profile",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Fetch the BlinkX user profile using the stored session token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "default": ""
+          },
+          "api_url": {
+            "type": "string",
+            "default": "https://developeruat.blinkx.in/SmartApi/user/profile"
+          },
+          "session_id": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_user_margins",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Fetch the BlinkX user margin details using the stored session token.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "default": ""
+          },
+          "api_url": {
+            "type": "string",
+            "default": "https://developeruat.blinkx.in/SmartApi/user/margins"
+          },
+          "session_id": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_ltp",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Retrieve BlinkX quotes for one or more instruments.\n\nSupported quote types:\n- \"\" (or None): full market quote (`/quote`)\n- \"full\": alias for full market quote (`/quote`)\n- \"ohlc\": OHLC quote (`/quote/ohlc`)\n- \"ltp\": last traded price quote (`/quote/ltp`)\n\nInstruments format: NSE:NIFTY,BSE:BANKNIFTY no suffix like -EQ or  prefix like a number\nExample:\n  get_ltp(instruments=[\"NSE:NIFTY\", \"BSE:BANKNIFTY\"], quote_type=\"ltp\") ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "default": ""
+          },
+          "quote_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "instruments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_instruments",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Fetch and parse the BlinkX instruments list (CSV format).\n\nExample:\n  get_instruments(search=\"RELIANCE\")",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "default": ""
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "api_url": {
+            "type": "string",
+            "default": "https://developeruat.blinkx.in/SmartApi/instruments"
+          },
+          "session_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_historical_candles",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Fetch historical candle data for a specific instrument from BlinkX SmartAPI.\nuse get_instruments to get the instrument_token\nExample:\n  get_historical_candles(\n      instrument_token=\"1594_NSE\",\n      from_time=\"2025-10-29+10:02:03\",\n      to_time=\"2025-10-29+15:00:00\",\n      interval=\"minute\"\n  )",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "instrument_token",
+          "from_time",
+          "to_time",
+          "session_id"
+        ],
+        "properties": {
+          "oi": {
+            "type": "integer",
+            "default": 0
+          },
+          "token": {
+            "type": "string",
+            "default": ""
+          },
+          "to_time": {
+            "type": "string"
+          },
+          "interval": {
+            "type": "string",
+            "default": "minute"
+          },
+          "from_time": {
+            "type": "string"
+          },
+          "continuous": {
+            "type": "integer",
+            "default": 0
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "instrument_token": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "place_order",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Place an order using BlinkX SmartAPI (regular order).\nAlways Confirm from user before placing order\n\nExample:\n  place_order(tradingsymbol=\"RELIANCE-EQ\", quantity=5, price=2800)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "price": {
+            "type": "number",
+            "default": 0
+          },
+          "token": {
+            "type": "string",
+            "default": ""
+          },
+          "api_url": {
+            "type": "string",
+            "default": "https://developeruat.blinkx.in/SmartApi/orders/regular"
+          },
+          "product": {
+            "type": "string",
+            "default": "NRML"
+          },
+          "exchange": {
+            "type": "string",
+            "default": "NSE"
+          },
+          "quantity": {
+            "type": "integer",
+            "default": 1
+          },
+          "validity": {
+            "type": "string",
+            "default": "DAY"
+          },
+          "order_type": {
+            "type": "string",
+            "default": "LIMIT"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "tradingsymbol": {
+            "type": "string",
+            "default": ""
+          },
+          "transaction_type": {
+            "type": "string",
+            "default": "BUY"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_orders",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Fetch all orders or a specific order by ID from BlinkX SmartAPI.\n\nExample:\n  get_orders()                    \u2192 Fetch all orders\n  get_orders(order_id=\"251107000000021\") \u2192 Fetch specific order",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "default": ""
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "api_url_base": {
+            "type": "string",
+            "default": "https://developeruat.blinkx.in/SmartApi/orders"
+          }
+        }
+      }
+    },
+    {
+      "name": "listen",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "scrip_code",
+          "exchange"
+        ],
+        "properties": {
+          "exchange": {
+            "type": "string"
+          },
+          "scrip_code": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "run_strategy",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Execute a Python strategy code asynchronously. The code can:\n- Read live prices from LTP_STORE using:\n      key = f\"{scrip_code}_{exchange}\"\n- Place orders using the async function func_place_order:\n- subscribe(scrip_code, exchange) \u2192 async function to subscribe to a symbol\n- unsubscribe(scrip_code, exchange) \u2192 async function to unsubscribe from a symbol\n- get_token(session_id: str) -> to get token for order placement, session id always to be sent by ai agent, possible output  {\"status\": \"ok\", \"access_token\": access_token} or return {\"status\": \"error\", \"access_token\": None, \"message\": \"Session ID not found in tokens file\"}\n\nArguments for func_place_order:\n  - api_url: string, API endpoint (default: BlinkX regular order URL)\n  - token: string, authentication token\n  - tradingsymbol: string, symbol of the instrument (required)\n  - exchange: string, exchange (e.g., NSE, BSE)\n  - transaction_type: BUY or SELL\n  - order_type: LIMIT or MARKET\n  - quantity: int, number of shares/contracts\n  - product: string, product type\n  - validity: string, DAY or IOC\n  - price: float, price for LIMIT orders\n\nExample strategy code:\n\nkey = f'-1_NSE'\nltp = LTP_STORE.get(key, 0)\nif ltp > 26100:\n    await func_place_order(tradingsymbol='-1', exchange='NSE', transaction_type='BUY', price=ltp, quantity=1)\n\nalways unsubscribe to symbol after placing order and always ensure proper logging for every iteration to get status of execution in format session ID: \"Required logs\" and use default logging ie already existing 'logger'",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "strategy_code"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "default": ""
+          },
+          "strategy_code": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "run_backtest",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Run a custom BACKTEST strategy provided by the AI agent using historical data fetched from BlinkX SmartAPI.\nhistorical data will be available in variable historical_data in format historical_data.append({\n        \"timestamp\": candle[0],  # The timestamp is the first element\n        \"open\": candle[1],       # Open is the second element\n        \"high\": candle[2],       # High is the third element\n        \"low\": candle[3],        # Low is the fourth element\n        \"close\": candle[4],      # Close is the fifth element\n        \"volume\": candle[5]      # Volume is the sixth element\n    })\nand for recording trades call record_trade(side: str, price: float, qty: int) that stores trades  in variable RESULTS = {\"trades\": [], \"metrics\": {}} this variable will already be defined and can be read as it is\nInputs:\n---------\nbacktest_code : str\n    The Python code written by the AI agent.\n    The code will be wrapped inside an async function and executed.\n\ninstrument_token : str\n    The instrument token to fetch historical candle data.\n\nfrom_time : str\n    The starting timestamp for fetching historical candles (e.g., \"2025-10-29+10:02:03\").\n\nto_time : str\n    The ending timestamp for fetching historical candles (e.g., \"2025-10-29+15:00:00\").\n\nsession_id : str\n    The session ID for fetching the token needed to call the API.\n\nReturns:\n--------\ndict :\n    The result of the backtest, including trade records and metrics.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "backtest_code",
+          "instrument_token",
+          "from_time",
+          "to_time",
+          "session_id"
+        ],
+        "properties": {
+          "to_time": {
+            "type": "string"
+          },
+          "from_time": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "backtest_code": {
+            "type": "string"
+          },
+          "instrument_token": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:22:14.624291+00:00",
+    "source": "smithery"
+  }
+}

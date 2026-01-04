@@ -1,0 +1,606 @@
+{
+  "id": "@ThrownLemon/medical-mcp",
+  "name": "@ThrownLemon/medical-mcp",
+  "display_name": "Medical Information Server",
+  "version": null,
+  "description": "Provide comprehensive and authoritative medical information by querying multiple trusted sources including FDA, WHO, PubMed, RxNorm, and Google Scholar. Enable detailed drug data retrieval, health statistics access, and medical literature search to support healthcare and research needs. Facilitate seamless integration with MCP-compatible clients for reliable medical data and research insights.",
+  "icon_url": null,
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "search-drugs",
+      "title": "Search Drugs",
+      "description": "Search for drug information using FDA database",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Number of results to return (max 50)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Drug name to search for (brand name or generic name)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-latest-schedule",
+      "title": "Get Latest PBS Schedule",
+      "description": "Resolve the current latest PBS schedule_code for reuse by other calls.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-list-schedules",
+      "title": "List PBS Schedules",
+      "description": "List PBS schedules (optionally only the latest schedule)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 5
+          },
+          "latest_only": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true, only returns the latest schedule_code"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-list-dispensing-rules",
+      "title": "List PBS Dispensing Rules",
+      "description": "List PBS dispensing rules optionally filtered by mnemonic/title/reference.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "description": "Max rules to return."
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Filter by schedule_code (numeric)."
+          },
+          "dispensing_rule_mnem": {
+            "type": "string",
+            "description": "Filter by dispensing rule mnemonic, e.g. 's90-cp'."
+          },
+          "dispensing_rule_title": {
+            "type": "string",
+            "description": "Filter by human-readable dispensing rule title."
+          },
+          "dispensing_rule_reference": {
+            "type": "string",
+            "description": "Filter by dispensing rule reference id."
+          },
+          "community_pharmacy_indicator": {
+            "type": "string",
+            "description": "Filter by community pharmacy applicability (TRUE for community pharmacy)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-restrictions-for-item",
+      "title": "Get PBS Item Restrictions",
+      "description": "Fetch restriction text (legal instrument + notes/cautions) for a PBS item code; auto-uses the item's schedule if not provided.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pbs_item_code"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 1,
+            "description": "How many restriction groups to show."
+          },
+          "pbs_item_code": {
+            "type": "string",
+            "description": "PBS item code, e.g. '12210P'."
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Optional schedule code; if omitted, uses the item's schedule."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-prescribers-for-item",
+      "title": "Get PBS Item Prescribers",
+      "description": "List prescriber types allowed for a PBS item across schedules (e.g., Medical Practitioners).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pbs_item_code"
+        ],
+        "properties": {
+          "pbs_item_code": {
+            "type": "string",
+            "description": "PBS item code, e.g. '12210P'."
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Optional schedule code filter."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-atc-for-item",
+      "title": "Get PBS Item ATC Classification",
+      "description": "Return ATC classification(s) for a PBS item, enriched with ATC descriptions (de-duplicated).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pbs_item_code"
+        ],
+        "properties": {
+          "pbs_item_code": {
+            "type": "string",
+            "description": "PBS item code, e.g. '12210P'."
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Optional schedule code filter."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-amt-mapping",
+      "title": "Get PBS Item AMT Mapping",
+      "description": "Return AMT concept mapping (MP/MPUU/MPP/TPP) for a PBS item (de-duplicated).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pbs_item_code"
+        ],
+        "properties": {
+          "pbs_item_code": {
+            "type": "string",
+            "description": "PBS item code, e.g. '12210P'."
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Optional schedule code filter."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-organisation-for-item",
+      "title": "Get PBS Item Organisation",
+      "description": "Return manufacturer/responsible person info for a PBS item (from /organisations).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pbs_item_code"
+        ],
+        "properties": {
+          "pbs_item_code": {
+            "type": "string",
+            "description": "PBS item code, e.g. '12210P'."
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Optional schedule code filter."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-copayments",
+      "title": "Get PBS Copayments",
+      "description": "Return PBS copayment amounts and Safety Net thresholds (latest by default).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "schedule_code": {
+            "type": "string",
+            "description": "Optional schedule code; if omitted, resolves latest."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-price-events-for-item",
+      "title": "Get PBS Item Price Events",
+      "description": "Return statutory price reduction events for a PBS item (de-duplicated).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pbs_item_code"
+        ],
+        "properties": {
+          "pbs_item_code": {
+            "type": "string",
+            "description": "PBS item code, e.g. '12210P'."
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Optional schedule code filter."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-program-details",
+      "title": "Get PBS Item Program Details",
+      "description": "Return program info and dispensing rules for a PBS item (de-duplicated rules).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pbs_item_code"
+        ],
+        "properties": {
+          "pbs_item_code": {
+            "type": "string",
+            "description": "PBS item code, e.g. '12210P'."
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Optional schedule code filter."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-item",
+      "title": "Get PBS Item",
+      "description": "Fetch PBS item(s) by pbs_item_code and optional schedule_code; returns compact summary lines.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pbs_item_code"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 5,
+            "description": "Max items to summarize."
+          },
+          "pbs_item_code": {
+            "type": "string",
+            "description": "PBS item code, e.g. '1234K'."
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Optional schedule code filter."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-search-item-overview",
+      "title": "Search PBS Item Overview",
+      "description": "Search PBS item-overview using simple ODATA-like filters (brand_name/li_drug_name/pbs_code, etc.).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "filter"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 5,
+            "description": "Max results to show."
+          },
+          "filter": {
+            "type": "string",
+            "description": "Equality filters only (e.g., brand_name eq 'PANADOL', li_drug_name eq 'PARACETAMOL', or raw brand_name)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-search",
+      "title": "Search PBS API",
+      "description": "Query Australia's PBS public API (rate-limited; ~20s between calls).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "endpoint"
+        ],
+        "properties": {
+          "params": {
+            "type": "object",
+            "description": "Query parameters passed through (validated per endpoint).",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "endpoint": {
+            "anyOf": [
+              {
+                "enum": [
+                  "schedules",
+                  "items",
+                  "item-overview",
+                  "organisations",
+                  "fees",
+                  "dispensing-rules"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "PBS endpoint under base, e.g. 'schedules', 'items', 'item-overview'"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-summary-of-changes",
+      "title": "PBS Summary of Changes",
+      "description": "Summarize changes between schedules for a given endpoint/table (INSERT/UPDATE/DELETE).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "description": "Max change rows to include."
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Target schedule code; if omitted uses latest."
+          },
+          "changed_endpoint": {
+            "type": "string",
+            "description": "Endpoint/table to filter by, e.g. 'items'."
+          },
+          "source_schedule_code": {
+            "type": "string",
+            "description": "Source schedule (previous); inferred if omitted."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list-who-indicators",
+      "title": "List WHO Indicators",
+      "description": "List WHO indicators by searching for a keyword (useful to find exact indicator names/codes)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Keyword to search in WHO Indicator names"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "pbs-get-fees-for-item",
+      "title": "Get PBS Item Fees",
+      "description": "Fetch PBS fees by resolving an item's program_code, optionally for a specific schedule",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "pbs_item_code"
+        ],
+        "properties": {
+          "pbs_item_code": {
+            "type": "string",
+            "description": "PBS item code, e.g. '12210P'"
+          },
+          "schedule_code": {
+            "type": "string",
+            "description": "Optional schedule code, e.g. '3773'"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-drug-details",
+      "title": "Get Drug Details",
+      "description": "Get detailed information about a specific drug by NDC (National Drug Code)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "ndc"
+        ],
+        "properties": {
+          "ndc": {
+            "type": "string",
+            "description": "National Drug Code (NDC) of the drug"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-health-statistics",
+      "title": "Get Health Statistics",
+      "description": "Get health statistics and indicators from WHO Global Health Observatory",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "indicator"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Number of results to return (max 20)"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country code (e.g., 'USA', 'GBR') - optional"
+          },
+          "indicator": {
+            "type": "string",
+            "description": "Health indicator to search for (e.g., 'Life expectancy', 'Mortality rate')"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search-medical-literature",
+      "title": "Search Medical Literature",
+      "description": "Search for medical research articles in PubMed",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Medical topic or condition to search for"
+          },
+          "max_results": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Maximum number of articles to return (max 20)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search-drug-nomenclature",
+      "title": "Search Drug Nomenclature",
+      "description": "Search for drug information using RxNorm (standardized drug nomenclature)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Drug name to search for in RxNorm database"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search-google-scholar",
+      "title": "Search Google Scholar",
+      "description": "Search for academic research articles using Google Scholar",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Academic topic or research query to search for"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 23,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@ThrownLemon/medical-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "search-drugs",
+    "pbs-get-latest-schedule",
+    "pbs-list-schedules",
+    "pbs-list-dispensing-rules",
+    "pbs-get-restrictions-for-item",
+    "pbs-get-prescribers-for-item",
+    "pbs-get-atc-for-item",
+    "pbs-get-amt-mapping",
+    "pbs-get-organisation-for-item",
+    "pbs-get-copayments",
+    "pbs-get-price-events-for-item",
+    "pbs-get-program-details",
+    "pbs-get-item",
+    "pbs-search-item-overview",
+    "pbs-search",
+    "pbs-summary-of-changes",
+    "list-who-indicators",
+    "pbs-get-fees-for-item",
+    "get-drug-details",
+    "get-health-statistics",
+    "search-medical-literature",
+    "search-drug-nomenclature",
+    "search-google-scholar"
+  ]
+}

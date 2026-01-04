@@ -1,0 +1,179 @@
+{
+  "qualifiedName": "@falcosan/mcp-siex",
+  "displayName": "SIEX",
+  "description": "Connect to Spain\u2019s SIEX platform to retrieve farm data, register phytosanitary treatments, and export the CUE digital farm record book. Automate regulatory compliance and keep farm records accurate and up to date. Start by configuring your API and SID keys for secure access.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@falcosan/mcp-siex",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@falcosan/mcp-siex/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "apiKey",
+          "sidKey"
+        ],
+        "properties": {
+          "host": {
+            "type": "string",
+            "default": "https://api.plataformatierra.es",
+            "description": "SIEX API host URL"
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "SIEX API Subscription Key (Ocp-Apim-Subscription-Key) - Required for authentication"
+          },
+          "sidKey": {
+            "type": "string",
+            "description": "SIEX SID Key (Ocp-Apim-Sid-Key) - Required for authentication"
+          },
+          "environment": {
+            "enum": [
+              "dev",
+              "pro"
+            ],
+            "type": "string",
+            "default": "pro",
+            "description": "Environment mode: dev or pro"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket",
+        "additionalProperties": false
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "siex_export_cue",
+      "description": "Export CUE (Cuaderno de Explotaci\u00f3n - Digital Farm Record Book) for specific phytosanitary applications. Submits treatments to the Spanish Agriculture Administration (SIEX) for official registration. An email confirmation will be sent upon successful completion.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "agrifarmId",
+          "applicationIds"
+        ],
+        "properties": {
+          "agrifarmId": {
+            "type": "string",
+            "description": "Farm ID in format urn:ngsi-ld:AgriFarm:xxx-xxx"
+          },
+          "applicationIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Array of AgriPhytosanitary application IDs to export. Format: urn:ngsi-ld:AgriPhytosanitary:xxxx (e.g., urn:ngsi-ld:AgriPhytosanitary:2941). Must have at least one ID."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "siex_get_farm_data",
+      "description": "Retrieve farm exploitation data from SIEX for a specific REA (Registro de Explotaciones Agrarias) and year. This provides complete farm information including parcels, crops, and regional attributes.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "rea",
+          "year"
+        ],
+        "properties": {
+          "rea": {
+            "type": "string",
+            "description": "REA code (Registro de Explotaciones Agrarias) - Farm registry identification number"
+          },
+          "year": {
+            "type": "string",
+            "description": "Campaign year for the data (e.g., \"2025\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "siex_register_phytosanitary",
+      "description": "Register a phytosanitary (pesticide/herbicide/fungicide) application for a farm. Records treatments applied to specific crop-location parcels.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "agrifarmId",
+          "dateApplication",
+          "productName",
+          "productCode",
+          "dose",
+          "measureName",
+          "measureSymbol",
+          "measureCode",
+          "idcpList",
+          "applicatorNif",
+          "applicatorRopo"
+        ],
+        "properties": {
+          "dose": {
+            "type": "number",
+            "description": "Application dose amount (must be positive number)",
+            "exclusiveMinimum": 0
+          },
+          "idcpList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Array of crop-location IDs (IDCP) where the product was applied. Must have at least one ID."
+          },
+          "agrifarmId": {
+            "type": "string",
+            "description": "Farm ID in format urn:ngsi-ld:AgriFarm:xxx-xxx"
+          },
+          "measureCode": {
+            "type": "number",
+            "description": "Measure unit code from official catalog (e.g., 17)"
+          },
+          "measureName": {
+            "type": "string",
+            "description": "Measure unit full name (e.g., \"Kilogramo por hect\u00e1rea\", \"Litro por hect\u00e1rea\")"
+          },
+          "productCode": {
+            "type": "string",
+            "description": "Official product registration code (e.g., \"ES-00261\" - Spanish registry number)"
+          },
+          "productName": {
+            "type": "string",
+            "description": "Phytosanitary product commercial name (e.g., \"Spotter Wg\", \"Roundup\")"
+          },
+          "applicatorNif": {
+            "type": "string",
+            "description": "NIF/DNI of the person who applied the treatment (Spanish tax ID)"
+          },
+          "measureSymbol": {
+            "type": "string",
+            "description": "Measure unit symbol (e.g., \"kg/ha\", \"l/ha\")"
+          },
+          "applicatorRopo": {
+            "type": "string",
+            "description": "ROPO registration number of the applicator (official registry for phytosanitary product users)"
+          },
+          "dateApplication": {
+            "type": "string",
+            "description": "Application date and time in format DD-MM-YYYY HH:mm:ss (e.g., \"01-01-2025 10:06:16\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:23:25.161049+00:00",
+    "source": "smithery"
+  }
+}

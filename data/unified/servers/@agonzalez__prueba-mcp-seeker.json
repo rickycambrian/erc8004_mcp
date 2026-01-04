@@ -1,0 +1,2671 @@
+{
+  "id": "@agonzalez/prueba-mcp-seeker",
+  "name": "@agonzalez/prueba-mcp-seeker",
+  "display_name": "MCP Seeker",
+  "version": null,
+  "description": "Search hotels by city, state, country, or geolocation and explore detailed property info. Check live availability, compare rates and room types, and review boards and promotions. Create ready-to-book links with preselected rooms, rates, supplements, and optional guest details.",
+  "icon_url": null,
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "get_availability",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Check Hotel Availability and Pricing",
+      "annotations": {
+        "title": "Check Hotel Availability and Pricing",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Search hotel room availability and pricing for specific dates and occupancy.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "Occupancy": {
+            "type": "object",
+            "properties": {
+              "adults": {
+                "type": "integer",
+                "default": 2,
+                "maximum": 10,
+                "minimum": 1
+              },
+              "babies": {
+                "type": "integer",
+                "default": 0
+              },
+              "children": {
+                "type": "integer",
+                "default": 0
+              }
+            }
+          }
+        },
+        "required": [
+          "hotel_code",
+          "start_date",
+          "end_date",
+          "occupancy"
+        ],
+        "properties": {
+          "currency": {
+            "type": "string",
+            "default": "EUR",
+            "description": "ISO 4217 currency code for prices"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Check-out date"
+          },
+          "language": {
+            "type": "string",
+            "default": "ES",
+            "description": "ISO 639-1 language code"
+          },
+          "occupancy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Occupancy"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "description": "Occupancy per room"
+          },
+          "hotel_code": {
+            "type": "string",
+            "examples": [
+              "tarik",
+              "landmar-arena"
+            ],
+            "description": "Hotel identifier"
+          },
+          "promo_code": {
+            "type": "string",
+            "default": null,
+            "description": "Promotional code"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Check-in date"
+          },
+          "country_code": {
+            "type": "string",
+            "default": "ES",
+            "description": "ISO 3166-1 alpha-2 country code"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "BookingOption": {
+            "type": "object",
+            "required": [
+              "room_name",
+              "rate_name",
+              "board_name",
+              "total_price",
+              "price_per_night",
+              "price_breakdown",
+              "room_key",
+              "rate_key",
+              "board_key",
+              "rooms_available"
+            ],
+            "properties": {
+              "rate_key": {
+                "type": "string"
+              },
+              "room_key": {
+                "type": "string"
+              },
+              "board_key": {
+                "type": "string"
+              },
+              "rate_name": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "board_name": {
+                "type": "string"
+              },
+              "total_price": {
+                "type": "number"
+              },
+              "promotion_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "price_breakdown": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "price_per_night": {
+                "type": "number"
+              },
+              "rooms_available": {
+                "type": "integer"
+              }
+            }
+          },
+          "PictureWithProperties": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "altText": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Alternative text"
+              },
+              "servingUrl": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              }
+            },
+            "description": "Picture with additional properties"
+          },
+          "AvailabilityRoomImages": {
+            "type": "object",
+            "properties": {
+              "images": {
+                "type": "object",
+                "description": "Dictionary mapping room_key to list of room pictures with properties for displaying in booking cards",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/PictureWithProperties"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "options"
+        ],
+        "properties": {
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/BookingOption"
+            },
+            "description": "Available booking options with all keys needed for booking tools"
+          },
+          "room_images": {
+            "$ref": "#/$defs/AvailabilityRoomImages",
+            "description": "Room images information"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_calendar",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Check Hotel Availability and Pricing Calendar",
+      "annotations": {
+        "title": "Check Hotel Availability and Pricing Calendar",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Search hotel calendar availability and pricing.\n\n    **When to use**: When specific dates are not available, use this to suggest closest available dates or alternatives",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "Occupancy": {
+            "type": "object",
+            "properties": {
+              "adults": {
+                "type": "integer",
+                "default": 2,
+                "maximum": 10,
+                "minimum": 1
+              },
+              "babies": {
+                "type": "integer",
+                "default": 0
+              },
+              "children": {
+                "type": "integer",
+                "default": 0
+              }
+            }
+          }
+        },
+        "required": [
+          "hotel_code",
+          "month",
+          "occupancy"
+        ],
+        "properties": {
+          "year": {
+            "type": "integer",
+            "minimum": 2025
+          },
+          "month": {
+            "type": "integer",
+            "maximum": 12,
+            "minimum": 12
+          },
+          "currency": {
+            "type": "string",
+            "default": null,
+            "description": "ISO 4217 currency code for prices"
+          },
+          "language": {
+            "type": "string",
+            "default": "ES",
+            "description": "ISO 639-1 language code"
+          },
+          "occupancy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Occupancy"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "description": "Occupancy per room"
+          },
+          "hotel_code": {
+            "type": "string",
+            "examples": [
+              "tarik",
+              "landmar-arena"
+            ],
+            "description": "Hotel identifier"
+          },
+          "country_code": {
+            "type": "string",
+            "default": "ES",
+            "description": "ISO 3166-1 alpha-2 country code"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "CalendarDay": {
+            "type": "object",
+            "required": [
+              "day",
+              "price",
+              "price_without_discount",
+              "available"
+            ],
+            "properties": {
+              "day": {
+                "type": "integer"
+              },
+              "price": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "release": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "max_stay": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "min_stay": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "available": {
+                "type": "boolean"
+              },
+              "close_to_arrival": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "price_without_discount": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "year",
+          "month",
+          "hotel_code",
+          "days"
+        ],
+        "properties": {
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/CalendarDay"
+            },
+            "description": "List of days info"
+          },
+          "year": {
+            "type": "integer"
+          },
+          "month": {
+            "type": "integer"
+          },
+          "hotel_code": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_booking_additional_services",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Get Additional Services for Booking Option",
+      "annotations": {
+        "title": "Get Additional Services for Booking Option",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Get additional services available for a booking selection.\n\n    **When to use**: After user selects a booking option from availability search, to get additional services available for that option.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "Occupancy": {
+            "type": "object",
+            "properties": {
+              "adults": {
+                "type": "integer",
+                "default": 2,
+                "maximum": 10,
+                "minimum": 1
+              },
+              "babies": {
+                "type": "integer",
+                "default": 0
+              },
+              "children": {
+                "type": "integer",
+                "default": 0
+              }
+            }
+          },
+          "BookingOption": {
+            "type": "object",
+            "required": [
+              "room_name",
+              "rate_name",
+              "board_name",
+              "total_price",
+              "price_per_night",
+              "price_breakdown",
+              "room_key",
+              "rate_key",
+              "board_key",
+              "rooms_available"
+            ],
+            "properties": {
+              "rate_key": {
+                "type": "string"
+              },
+              "room_key": {
+                "type": "string"
+              },
+              "board_key": {
+                "type": "string"
+              },
+              "rate_name": {
+                "type": "string"
+              },
+              "room_name": {
+                "type": "string"
+              },
+              "board_name": {
+                "type": "string"
+              },
+              "total_price": {
+                "type": "number"
+              },
+              "promotion_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "price_breakdown": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "price_per_night": {
+                "type": "number"
+              },
+              "rooms_available": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "required": [
+          "hotel_code",
+          "start_date",
+          "end_date",
+          "occupancy",
+          "selected_booking_options"
+        ],
+        "properties": {
+          "currency": {
+            "type": "string",
+            "default": "EUR",
+            "description": "ISO 4217 currency code for prices"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Check-out date"
+          },
+          "language": {
+            "type": "string"
+          },
+          "occupancy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Occupancy"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "description": "Occupancy per room"
+          },
+          "hotel_code": {
+            "type": "string",
+            "examples": [
+              "tarik",
+              "landmar-arena"
+            ],
+            "description": "Hotel identifier"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Check-in date"
+          },
+          "country_code": {
+            "type": "string",
+            "default": "ES",
+            "description": "ISO 3166-1 alpha-2 country code"
+          },
+          "selected_booking_options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/BookingOption"
+            },
+            "description": "Selected Booking options from availability search"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "PriceInfo": {
+            "type": "object",
+            "required": [
+              "adult",
+              "child",
+              "baby"
+            ],
+            "properties": {
+              "baby": {
+                "type": "number",
+                "description": "Price per baby (0-2 years)"
+              },
+              "adult": {
+                "type": "number",
+                "description": "Price per adult"
+              },
+              "child": {
+                "type": "number",
+                "description": "Price per child (2-12 years)"
+              },
+              "senior": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Price per senior (optional, for special services)"
+              }
+            },
+            "description": "Price information for different age groups"
+          },
+          "ServiceFilters": {
+            "type": "object",
+            "properties": {
+              "end_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "End date filter (YYYY-MM-DD)"
+              },
+              "start_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Start date filter (YYYY-MM-DD)"
+              },
+              "valid_periods": {
+                "type": "array",
+                "items": {},
+                "description": "Valid booking periods"
+              },
+              "valid_capacities": {
+                "type": "array",
+                "items": {},
+                "description": "Valid capacity configurations"
+              }
+            },
+            "description": "Filters that apply to the service"
+          },
+          "ServicePicture": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "fields": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Additional fields (e.g., 'round_trip')"
+              },
+              "source": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Source information"
+              },
+              "altText": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Alternative text"
+              },
+              "destiny": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Destination information"
+              },
+              "enabled": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Whether picture is enabled"
+              },
+              "filters": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Applied filters"
+              },
+              "category": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Picture category"
+              },
+              "priority": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Display priority"
+              },
+              "free_until": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Free until this quantity"
+              },
+              "servingUrl": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Picture description"
+              },
+              "max_big_bag": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Maximum number of large bags"
+              },
+              "source_type": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Type of source (hotel, airport, station_train)"
+              },
+              "destiny_type": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Type of destination (hotel, airport, station_train)"
+              },
+              "max_little_bag": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Maximum number of small bags"
+              },
+              "product_transfer": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Transfer product identifier"
+              }
+            },
+            "description": "Extended picture information for additional services"
+          },
+          "AdditionalService": {
+            "type": "object",
+            "required": [
+              "key",
+              "name",
+              "type",
+              "base_price",
+              "base_price_kids",
+              "base_price_babies",
+              "min_price",
+              "amount",
+              "release",
+              "description",
+              "duration",
+              "associated_room",
+              "filters"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "Service datastore key for booking"
+              },
+              "name": {
+                "type": "string",
+                "description": "Service name displayed to customers"
+              },
+              "type": {
+                "type": "string",
+                "description": "Service type: 'Por Habitacion' (per room) or 'Por Persona' (per person)"
+              },
+              "amount": {
+                "type": "integer",
+                "description": "Available quantity (-1 for unlimited)"
+              },
+              "extras": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Additional configurations. For PortAventura, contains 'port_aventura' with detailed daily ticket options"
+              },
+              "prices": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/DailyAvailability"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Simple price list for services without daily variation (e.g., cuna)"
+              },
+              "filters": {
+                "$ref": "#/$defs/ServiceFilters",
+                "description": "Filters (rates, rooms, dates)"
+              },
+              "release": {
+                "type": "integer",
+                "description": "Days before arrival for booking (-1 for no restriction)"
+              },
+              "discount": {
+                "type": "number",
+                "default": 0,
+                "description": "Discount percentage applied"
+              },
+              "duration": {
+                "type": "string",
+                "description": "Duration: 'Uno' (one-time) or 'Toda la estancia' (entire stay)"
+              },
+              "pictures": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ServicePicture"
+                },
+                "description": "Service images for cards"
+              },
+              "min_price": {
+                "type": "number",
+                "description": "Minimum price across all dates"
+              },
+              "base_price": {
+                "type": "number",
+                "description": "Base price for adults"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description with terms and conditions"
+              },
+              "price_per_room": {
+                "type": "boolean",
+                "default": false,
+                "description": "Price applies per room"
+              },
+              "prices_per_day": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/DailyAvailability"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Standard pricing by date (YYYY-MM-DD -> 'all' -> availability list)"
+              },
+              "associated_room": {
+                "type": "boolean",
+                "description": "Service tied to specific rooms"
+              },
+              "base_price_kids": {
+                "type": "number",
+                "description": "Base price for children"
+              },
+              "base_price_babies": {
+                "type": "number",
+                "description": "Base price for babies"
+              },
+              "price_per_booking": {
+                "type": "boolean",
+                "default": false,
+                "description": "Single price for entire booking"
+              }
+            },
+            "description": "Additional service for upselling (transfers, activities, extras, etc.)."
+          },
+          "DailyAvailability": {
+            "type": "object",
+            "required": [
+              "availability",
+              "currency",
+              "prices"
+            ],
+            "properties": {
+              "prices": {
+                "$ref": "#/$defs/PriceInfo",
+                "description": "Prices by age group"
+              },
+              "currency": {
+                "type": "string",
+                "description": "ISO currency code"
+              },
+              "availability": {
+                "type": "integer",
+                "description": "Number available (-1 for unlimited)"
+              }
+            },
+            "description": "Availability and pricing for a specific day"
+          }
+        },
+        "required": [
+          "services"
+        ],
+        "properties": {
+          "services": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/AdditionalService"
+            },
+            "description": "Available additional services (transfers, activities, extras) for the booking"
+          }
+        },
+        "description": "MCP Response containing only the list of additional services"
+      }
+    },
+    {
+      "name": "get_booking_url",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Generate Booking Link",
+      "annotations": {
+        "title": "Generate Booking Link",
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n    Generate booking url with preselected room, rate, meal plan, supplements. If no room_preselection is provided, it will generate a booking url showing available options.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "RoomPreselection": {
+            "type": "object",
+            "required": [
+              "room_key",
+              "rate_key",
+              "board_key"
+            ],
+            "properties": {
+              "adults": {
+                "type": "integer",
+                "default": 2,
+                "maximum": 10,
+                "minimum": 1
+              },
+              "babies": {
+                "type": "integer",
+                "default": 0
+              },
+              "children": {
+                "type": "integer",
+                "default": 0
+              },
+              "rate_key": {
+                "type": "string",
+                "description": "Rate identifier from get_availability"
+              },
+              "room_key": {
+                "type": "string",
+                "description": "Room identifier from get_availability"
+              },
+              "board_key": {
+                "type": "string",
+                "description": "Meal identifier from get_availability"
+              },
+              "supplement_key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Supplement identifier from get_booking_additional_services"
+              },
+              "supplement_days": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Number of days for the supplement if it is a daily supplement"
+              },
+              "supplement_amount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Quantity of supplements"
+              }
+            }
+          }
+        },
+        "required": [
+          "hotel_code"
+        ],
+        "properties": {
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "default": null,
+            "description": "Check-out date"
+          },
+          "language": {
+            "type": "string",
+            "default": "ES",
+            "description": "ISO 639-1 language code"
+          },
+          "hotel_code": {
+            "type": "string",
+            "examples": [
+              "tarik",
+              "landmar-arena"
+            ],
+            "description": "Hotel identifier"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "default": null,
+            "description": "Check-in date"
+          },
+          "room_preselection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/RoomPreselection"
+            },
+            "default": [],
+            "examples": [
+              [
+                {
+                  "adults": 2,
+                  "babies": 0,
+                  "children": 0,
+                  "rate_key": "ag5zfmFtYXJlLWhvdGVsc3IRCxIEUmF0ZRiAgIDAqPzKCwyiAQ5hbWFyZS1tYXJiZWxsYQ",
+                  "room_key": "ag5zfmFtYXJlLWhvdGVsc3IVCxIIUm9vbVR5cGUYgICAgLqbmAkMogEOYW1hcmUtbWFyYmVsbGE",
+                  "board_key": "ag5zfmFtYXJlLWhvdGVsc3IUCxIHUmVnaW1lbhiAgICA3s_NCAyiAQ5hbWFyZS1tYXJiZWxsYQ",
+                  "supplement_key": "ahJzfmhvdGVsLXB1ZW50ZXJlYWxyFgsSCVByb21vdGlvbhiAgNCIvfm6CQw",
+                  "supplement_days": 1,
+                  "supplement_amount": 1
+                }
+              ]
+            ],
+            "description": "Needed if you want a prebuilt booking with preselected room, rate, meal plan, supplements, and prefilled guest details"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "search_hotels_by_area",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Search Hotels by Area",
+      "annotations": {
+        "title": "Search Hotels by Area",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search for hotels in a specific area",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "area"
+        ],
+        "properties": {
+          "area": {
+            "type": "string",
+            "examples": [
+              "Malaga",
+              "Torremolinos",
+              "Spain",
+              "Madrid"
+            ],
+            "description": "Area name, can be a city, state or province"
+          },
+          "page": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1,
+            "description": "Page number"
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 25,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Items per page"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "HotelInfo": {
+            "type": "object",
+            "required": [
+              "hotel_code"
+            ],
+            "properties": {
+              "city": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "logo": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PictureWithProperties"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "URL_en": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "English URL"
+              },
+              "URL_es": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Spanish URL"
+              },
+              "address": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "country": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "latitude": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "maximum": 90,
+                    "minimum": -90
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Geographic latitude"
+              },
+              "amenities": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "longitude": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "maximum": 180,
+                    "minimum": -180
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Geographic longitude"
+              },
+              "hotel_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "examples": [
+                  "tarik",
+                  "landmar-arena"
+                ],
+                "description": "Hotel identifier"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "postal_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "previewPicture": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PictureWithProperties"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              }
+            },
+            "description": "Hotel information model"
+          },
+          "Pagination": {
+            "type": "object",
+            "required": [
+              "page",
+              "page_size",
+              "total_items",
+              "total_pages",
+              "has_next",
+              "has_previous"
+            ],
+            "properties": {
+              "page": {
+                "type": "integer",
+                "description": "Current page number"
+              },
+              "has_next": {
+                "type": "boolean"
+              },
+              "page_size": {
+                "type": "integer",
+                "description": "Number of items per page"
+              },
+              "total_items": {
+                "type": "integer"
+              },
+              "total_pages": {
+                "type": "integer",
+                "description": "Total number of available pages"
+              },
+              "has_previous": {
+                "type": "boolean"
+              }
+            }
+          },
+          "PictureWithProperties": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "altText": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Alternative text"
+              },
+              "servingUrl": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              }
+            },
+            "description": "Picture with additional properties"
+          }
+        },
+        "required": [
+          "hotels",
+          "pagination"
+        ],
+        "properties": {
+          "hotels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/HotelInfo"
+            }
+          },
+          "pagination": {
+            "$ref": "#/$defs/Pagination"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_hotels_by_geo_location",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Search Hotels by GPS Location",
+      "annotations": {
+        "title": "Search Hotels by GPS Location",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search for hotels near GPS coordinates within a specified radius, sorted by distance.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude",
+          "radius_km"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1,
+            "description": "Page number"
+          },
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 25,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Items per page"
+          },
+          "radius_km": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 0.1
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "NearHotel": {
+            "type": "object",
+            "required": [
+              "hotel_code"
+            ],
+            "properties": {
+              "city": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "logo": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PictureWithProperties"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "URL_en": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "English URL"
+              },
+              "URL_es": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Spanish URL"
+              },
+              "address": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "country": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "distance": {
+                "type": "number",
+                "default": null,
+                "maximum": 90,
+                "minimum": -90,
+                "description": "Geographic latitude"
+              },
+              "latitude": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "maximum": 90,
+                    "minimum": -90
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Geographic latitude"
+              },
+              "amenities": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "longitude": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "maximum": 180,
+                    "minimum": -180
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Geographic longitude"
+              },
+              "hotel_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "examples": [
+                  "tarik",
+                  "landmar-arena"
+                ],
+                "description": "Hotel identifier"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "postal_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "previewPicture": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PictureWithProperties"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              }
+            }
+          },
+          "Pagination": {
+            "type": "object",
+            "required": [
+              "page",
+              "page_size",
+              "total_items",
+              "total_pages",
+              "has_next",
+              "has_previous"
+            ],
+            "properties": {
+              "page": {
+                "type": "integer",
+                "description": "Current page number"
+              },
+              "has_next": {
+                "type": "boolean"
+              },
+              "page_size": {
+                "type": "integer",
+                "description": "Number of items per page"
+              },
+              "total_items": {
+                "type": "integer"
+              },
+              "total_pages": {
+                "type": "integer",
+                "description": "Total number of available pages"
+              },
+              "has_previous": {
+                "type": "boolean"
+              }
+            }
+          },
+          "PictureWithProperties": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "altText": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Alternative text"
+              },
+              "servingUrl": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              }
+            },
+            "description": "Picture with additional properties"
+          }
+        },
+        "required": [
+          "hotels",
+          "pagination"
+        ],
+        "properties": {
+          "hotels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/NearHotel"
+            },
+            "description": "List of paginated hotels"
+          },
+          "pagination": {
+            "$ref": "#/$defs/Pagination",
+            "description": "Pagination details of the response"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_all_hotels",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Get All Hotels",
+      "annotations": {
+        "title": "Get All Hotels",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get paginated list of all hotels by the System",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1,
+            "description": "Page number"
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Items per page"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "HotelInfo": {
+            "type": "object",
+            "required": [
+              "hotel_code"
+            ],
+            "properties": {
+              "city": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "logo": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PictureWithProperties"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "URL_en": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "English URL"
+              },
+              "URL_es": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Spanish URL"
+              },
+              "address": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "country": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "latitude": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "maximum": 90,
+                    "minimum": -90
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Geographic latitude"
+              },
+              "amenities": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "longitude": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "maximum": 180,
+                    "minimum": -180
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Geographic longitude"
+              },
+              "hotel_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "examples": [
+                  "tarik",
+                  "landmar-arena"
+                ],
+                "description": "Hotel identifier"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "postal_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "previewPicture": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PictureWithProperties"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              }
+            },
+            "description": "Hotel information model"
+          },
+          "Pagination": {
+            "type": "object",
+            "required": [
+              "page",
+              "page_size",
+              "total_items",
+              "total_pages",
+              "has_next",
+              "has_previous"
+            ],
+            "properties": {
+              "page": {
+                "type": "integer",
+                "description": "Current page number"
+              },
+              "has_next": {
+                "type": "boolean"
+              },
+              "page_size": {
+                "type": "integer",
+                "description": "Number of items per page"
+              },
+              "total_items": {
+                "type": "integer"
+              },
+              "total_pages": {
+                "type": "integer",
+                "description": "Total number of available pages"
+              },
+              "has_previous": {
+                "type": "boolean"
+              }
+            }
+          },
+          "PictureWithProperties": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "altText": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Alternative text"
+              },
+              "servingUrl": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              }
+            },
+            "description": "Picture with additional properties"
+          }
+        },
+        "required": [
+          "hotels",
+          "pagination"
+        ],
+        "properties": {
+          "hotels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/HotelInfo"
+            }
+          },
+          "pagination": {
+            "$ref": "#/$defs/Pagination"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_hotel_by_name",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Get Hotel by Name",
+      "annotations": {
+        "title": "Get Hotel by Name",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve hotels based on distance-search algorithms",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "hotel_name"
+        ],
+        "properties": {
+          "hotel_name": {
+            "type": "string",
+            "examples": [
+              "Puente Real",
+              "Estivalll",
+              "Oasis",
+              "Parque royal"
+            ],
+            "description": "Hotel name hint"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "HotelInfo": {
+            "type": "object",
+            "required": [
+              "hotel_code"
+            ],
+            "properties": {
+              "city": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "logo": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PictureWithProperties"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "URL_en": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "English URL"
+              },
+              "URL_es": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Spanish URL"
+              },
+              "address": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "country": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "latitude": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "maximum": 90,
+                    "minimum": -90
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Geographic latitude"
+              },
+              "amenities": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "longitude": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "maximum": 180,
+                    "minimum": -180
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Geographic longitude"
+              },
+              "hotel_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "examples": [
+                  "tarik",
+                  "landmar-arena"
+                ],
+                "description": "Hotel identifier"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "postal_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "previewPicture": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PictureWithProperties"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              }
+            },
+            "description": "Hotel information model"
+          },
+          "PictureWithProperties": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "altText": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Alternative text"
+              },
+              "servingUrl": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2083,
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              }
+            },
+            "description": "Picture with additional properties"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "$ref": "#/$defs/HotelInfo"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "get_datetime",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Get Date and Time",
+      "annotations": {
+        "title": "Get Date and Time",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Get current date and time",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "timezone"
+        ],
+        "properties": {
+          "timezone": {
+            "type": "string",
+            "examples": [
+              "Europe/Madrid",
+              "America/New_York"
+            ],
+            "description": "IANA timezone name"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "timezone_name",
+          "datetime_iso"
+        ],
+        "properties": {
+          "datetime_iso": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timezone_name": {
+            "type": "string",
+            "examples": [
+              "Europe/Madrid",
+              "America/New_York"
+            ],
+            "description": "IANA timezone name"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 9,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@agonzalez/prueba-mcp-seeker/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "get_availability",
+    "get_calendar",
+    "get_booking_additional_services",
+    "get_booking_url",
+    "search_hotels_by_area",
+    "search_hotels_by_geo_location",
+    "get_all_hotels",
+    "get_hotel_by_name",
+    "get_datetime"
+  ]
+}

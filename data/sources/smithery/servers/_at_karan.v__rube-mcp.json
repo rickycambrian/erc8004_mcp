@@ -1,0 +1,463 @@
+{
+  "qualifiedName": "@karan.v/rube-mcp",
+  "displayName": "rube-mcp",
+  "description": "",
+  "iconUrl": null,
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@karan.v/rube-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@karan.v/rube-mcp/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "RUBE_CREATE_PLAN",
+      "annotations": {
+        "title": "RUBE_CREATE_PLAN",
+        "scopes": [],
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\nThis is a workflow builder that ensures the LLM produces a complete, step-by-step plan for any use case.\nYou MUST always call this tool after RUBE_SEARCH_TOOLS or RUBE_MANAGE_CONNECTIONS to get a proper execution plan for the user's use case.\nIf the user pivots to a different use case in same chat, you MUST call this tool again with the new use case.\n\nMemory Integration:\n- You can choose to add the memory received from the search tool into the known_fields parameter of the plan function to enhance planning with discovered relationships and information.\n\nOutputs a complete plan with sections such as \"workflow_steps\", \"complexity_assessment\", \"decision_matrix\", \"failure_handlig\" \"output_format\", and more as needed. \n\nIf you skip this step, workflows will likely be incomplete, or fail during execution for complex tasks.\nCalling it guarantees reliable, accurate, and end-to-end workflows aligned with the available tools and connections.\n",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "use_case",
+          "known_fields",
+          "primary_tool_slugs",
+          "reasoning",
+          "difficulty"
+        ],
+        "properties": {
+          "use_case": {
+            "type": "string",
+            "description": "Detailed explanation of the use case the user is trying to accomplish. Include as many details as possible for a better plan"
+          },
+          "reasoning": {
+            "type": "string",
+            "description": "Reasoning from the search about the use case and how the selected tools can accomplish it"
+          },
+          "difficulty": {
+            "enum": [
+              "easy",
+              "medium",
+              "hard"
+            ],
+            "type": "string",
+            "description": "Difficulty level for the plan. Choose \"easy\" for straightforward tasks with minimal tool use (e.g., send an email to a known ID), \"medium\" for moderately complex tasks with several tool calls (e.g., summarize Slack messages from the last day), and \"hard\" for tasks that involve many tool calls, multiple tools, or advanced logic (e.g., create personalized drafts for 100 emails)."
+          },
+          "known_fields": {
+            "type": "string",
+            "description": "Provide any workflow inputs you already know as a comma-separated string of key:value pairs. This helps the tool infer or look up missing details (for example, finding channel_id from a given channel_name). Keep values short and structured\u2014do not include long texts like full messages. Use the format \"key1:value1, key2:value2, key3:value3\". Example: \"channel_name:pod-sdk, channel_id:123, user_name:John, timezone:Asia/Kolkata, recipient_email:dhawal@example.com, email_count:100\""
+          },
+          "primary_tool_slugs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of primary tool slugs that can accomplish the main task. For example: ['GITHUB_LIST_PULL_REQUESTS', 'SLACK_SEND_MESSAGE']"
+          },
+          "related_tool_slugs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "List of related/supporting tool slugs that might be useful. These are optional tools that could help with the task."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "RUBE_MULTI_EXECUTE_TOOL",
+      "annotations": {
+        "title": "RUBE_MULTI_EXECUTE_TOOL",
+        "scopes": [],
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n  Fast and parallel tool executor for tools discovered through RUBE_SEARCH_TOOLS. Use this tool to execute upto 20 tools in parallel across apps. Response contains structured outputs ready for immediate analysis - avoid reprocessing via remote bash/code execute tools.\n  \n  Prerequisites:\n- Alwyas use valid tool slugs and their parameters discovered through RUBE_SEARCH_TOOLS. NEVER invent tool slugs. ALWAYS pass arguments with the tool_slug in each tool.\n- Active connection statuses for the tools that are going to be executed through RUBE_MANAGE_CONNECTIONS.\n- Ensure proper plan creation using RUBE_CREATE_PLAN has been done.\n- Cannot have any dependency of the response among the tools.\n\nUsage guidelines:\n- To be used whenever a tool is discovered and has to be called, either as part of a multi-step workflow or as a standalone tool.\n- If RUBE_SEARCH_TOOLS returns a tool that can perform the task, prefer calling it via this executor AFTER consulting RUBE_CREATE_PLAN. Do not write custom API calls or ad\u2011hoc scripts for tasks that can be completed by available Composio tools.\n- Tools should be used highly parallelly.\n- Predictively set sync_response_to_workbench=true if the response may be large or needed for later scripting. It still shows inline. However, if the actual response data turns out small and manageable without scripting, SKIP the workbench and use inline response directly.\n- Responses contain structured outputs for each tool. RULE: Small data - process yourself inline; large data - process in the workbench.\n- ALWAYS include inline references/links to sources in MARKDOWN format directly next to the relevant text. Eg provide slack thread links along with summary. \n- CRITICAL: You MUST always include the 'memory' parameter - never omit it. Even if you think there's nothing to remember, include an empty object {} for memory.\n\nMemory Storage:\n- CRITICAL FORMAT: Memory must be a dictionary where keys are app names (strings) and values are arrays of strings. NEVER pass nested objects or dictionaries as values.\n- CORRECT format: {\"slack\": [\"Channel general has ID C1234567\"], \"gmail\": [\"John's email is john@example.com\"]}\n- INCORRECT format: {\"slack\": {\"channel_id\": \"C1234567\"}, \"gmail\": {\"user\": \"john\"}}\n- Write memory entries in natural, descriptive language - NOT as key-value pairs. Use full sentences that clearly describe the relationship or information.\n- ONLY store information that will be valuable for future tool executions - focus on persistent data that saves API calls.\n- STORE: ID mappings, entity relationships, configuration details, user/resource identifiers that don't change frequently.\n- DO NOT STORE: Action descriptions, temporary status updates, activity logs, \"sent message\" confirmations, \"fetched data\" descriptions.\n- Examples of GOOD memory (store these):\n  * \"The important channel in Slack has ID C1234567 and is called #general\"\n  * \"Venky's GitHub project 'MyProject' maps to project ID proj_abc123\" \n  * \"The team's main repository is owned by user 'teamlead' with ID 98765\"\n  * \"The user prefers markdown docs with professional writing, no emojis\" (user_preference)\n- Examples of BAD memory (DON'T store these):\n  * \"Successfully sent email to john@example.com with message hi\"\n  * \"Fetching emails from last day (Sep 6, 2025) for analysis\"\n  * \"Found 5 unread messages in inbox\"\n- Do not repeat the memories stored or found previously.\n",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "tools",
+          "sync_response_to_workbench"
+        ],
+        "properties": {
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "arguments",
+                "tool_slug"
+              ],
+              "properties": {
+                "arguments": {
+                  "type": "object",
+                  "properties": {},
+                  "description": "The arguments to be passed to the tool. The schema of the arguments is present in the retrieve_actions response\nExamples:\n  {\"body\":\"This is a test\",\"subject\":\"Hello\",\"to\":\"test@gmail.com\"}\n  {\"channel\":\"#general\",\"text\":\"Hello from Composio!\"}\n  {\"body\":\"Description of the issue\",\"labels\":[\"bug\"],\"title\":\"Bug Report\"}",
+                  "additionalProperties": true
+                },
+                "tool_slug": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The slug of the tool to execute\nExamples:\n  \"GMAIL_SEND_EMAIL\"\n  \"SLACK_SEND_MESSAGE\"\n  \"GITHUB_CREATE_ISSUE\""
+                }
+              },
+              "description": "MultiExecuteToolItem",
+              "additionalProperties": true
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "description": "List of tools to execute in parallel"
+          },
+          "memory": {
+            "type": "object",
+            "description": "CRITICAL: Memory must be a dictionary where keys are app names (strings) and values are arrays of strings. NEVER pass nested objects or dictionaries as values. Format: {\"app_name\": [\"string1\", \"string2\"]}. Use this to store durable, action-enabling facts - stable IDs, mappings, roles, stable preferences. Do not pass ephemeral data like message IDs, tokens, temp links, or execution details. Write in full sentences describing relationships, NOT as key-value pairs. Always include this parameter.",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "Natural language memory string - e.g., \"John's user ID in Slack is 12345\", \"Venky's project MyProject has ID proj_abc123\""
+              }
+            }
+          },
+          "thought": {
+            "type": "string",
+            "description": "One-sentence high-level rationale (no step-by-step)."
+          },
+          "next_step": {
+            "type": "string",
+            "description": "Enum for the next planned workflow step (may be the same as current_step). Eg \"GENERATING_SUMMARY\", \"FETCHING_EMAILS\"."
+          },
+          "current_step": {
+            "type": "string",
+            "description": "Short enum for current step of the workflow execution. Eg FETCHING_EMAILS, GENERATING_REPLIES. Always include to keep execution aligned with the workflow."
+          },
+          "current_step_metric": {
+            "type": "object",
+            "required": [
+              "completed",
+              "total"
+            ],
+            "properties": {
+              "unit": {
+                "type": "string",
+                "maxLength": 30,
+                "description": "Measurement unit for progress E.g., items, pages, emails"
+              },
+              "total": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "description": "Total units expected for this step. Use \"n\" if unknown."
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^(\\d+|n)$",
+                    "description": "Total units expected for this step. Use \"n\" if unknown."
+                  }
+                ],
+                "description": "Total units expected for this step. Use \"n\" if unknown."
+              },
+              "completed": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Units already processed so far in this step"
+              }
+            },
+            "description": "Progress metrics for the current step - use to track how far execution has advanced.",
+            "additionalProperties": true
+          },
+          "sync_response_to_workbench": {
+            "type": "boolean",
+            "description": "Syncs the response to the remote workbench (for later scripting/processing) while still viewable inline. Predictively set true if the output may be large or need scripting; if it turns out small/manageable, skip workbench and use inline only. Default: false"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "RUBE_REMOTE_BASH_TOOL",
+      "annotations": {
+        "title": "RUBE_REMOTE_BASH_TOOL",
+        "scopes": [],
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n  Execute bash commands in a REMOTE sandbox for file operations, data processing, and system tasks. Essential for handling large tool responses saved to remote files.\n  PRIMARY USE CASES:\n- Process large tool responses saved to remote sandbox\n- File system operations, data processing with shell tools like jq, awk, sed, grep, etc.\n\nWORKFLOW INTEGRATION:\n1. IF RUBE_MULTI_EXECUTE_TOOL saves large responses to remote sandbox\n3. Extract specific information from JSON files using jq\n\nIMPORTANT NOTES:\n- Commands run from /home/user directory by default\n",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "command"
+        ],
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The bash command to execute"
+          },
+          "timeout": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 3000,
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 300,
+            "description": "Optional timeout in seconds (default: 300)\nExamples:\n  300\n  600\n  1200"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "RUBE_REMOTE_WORKBENCH",
+      "annotations": {
+        "title": "RUBE_REMOTE_WORKBENCH",
+        "scopes": [],
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n  Process REMOTE FILES or script BULK TOOL EXECUTIONS using Python code IN A REMOTE SANDBOX. If you can see the data in chat, DON'T USE THIS TOOL.   \n**ONLY** use this when processing **data stored in a remote file** or when scripting bulk Composio tool executions or proxy_execute calls (when no direct Composio tool exists for the task).  \n\nDO NOT USE\n- When the complete response is already inline/in-memory, or you only need quick parsing, summarization, or basic math.\n\nUSE IF\n- To parse/analyze tool outputs saved to a remote file in the sandbox or to script multi-tool chains there.\n- For bulk or repeated executions of known Composio tools (e.g., add a label to 100 emails).\n- To call APIs via proxy_execute when no Composio tool exists for that API.\n\nOUTPUTS\n- Returns a compact result and, if too long, path(s) to artifacts under `/home/user/.code_out`.\n\nIMPORTANT CODING RULES: \n  1. Stepwise Execution: Prefer splitting work into small steps. Save intermediate outputs in variables or temporary file in `/tmp/`. Call RUBE_REMOTE_WORKBENCH again for the next step. This improves composabilit and avoid timeouts.\n  1. Notebook Persistence: This is a persistent Jupyter notebook cell: variables, functions, imports, and in-memory state from previous and future code executions are preserved in the notebook\u2019s history and available for ruse. You also have a few helper functions available.\n  3. Parallelism & Timeout (CRITICAL): There is a hard timeout of 4 minutes so complete the code within that. Prioritize PARALLEL execution using ThreadPoolExecutor with suitable concurrency for bulk operations - e.g., call run_composio_tool or invoke_llm parallelly across rows to maximize efficiency. \n    3.1 If the data is large, split into smaller batches and call the workbench multiple times.\n  4. Checkpoints: Implement checkpoints (in memory or files) so that long runs can be resumed from the last completed step.\n  5. Schema Safety: Never assume the response schema for run_composio_tool if not known already from previous tools. To inspect schema, either run a simple request **outside** the workbench via RUBE_MULTI_EXECUTE_TOOL or use invoke_llm helper.\n  6. LLM Helpers: You should always use invoke_llm helper for summary, analysis, or field extraction on results. This is a smart LLM that will give much better results than any adhoc filtering.\n  7. Avoid Meta Loops: Do not use run_composio_tool to call RUBE_MULTI_EXECUTE_TOOL or other RUBE_* meta tools to avoid cycles. Only use it for app tools. \n  8. Pagination: Use when data spans multiple pages. Continue fetching pages with the returned next_page_token or cursor until none remains. Parallelize fetching pages if tool supports page_number.\n  9. No Hardcoding: Never hardcode data in code. Always load it from files or tool responses, iterating to construct intermediate or final inputs/outputs.\n  10. Code Correctness (CRITICAL): Code must be syntactically and semantically correct and executable.\n  11. If the final output is in a workbench file, use upload_local_file to download it - never expose the raw workbench file path to the user.\n\nENV & HELPERS:\n1. Home directory: `/home/user`.\n4. Helper functions initialized in the workbench:\n    1) `run_composio_tool(tool_slug: str, arguments: dict)`: Execute a known Composio **app** tool (from RUBE_SEARCH_TOOLS). Do not invent names; match the tool\u2019s input schema. Suited for loops/parallel/bulk over datasets. \n      1.1 run_composio_tools returns JSON with top-level \"data\". Parse carefully\u2014structure may be nested.\n    2) `invoke_llm(query: str)`: Invoke an LLM for semantic tasks. Pass MAX 400000 characters in input.\n    3) `proxy_execute(method, endpoint, toolkit, params=None, body=None)`: Call a toolkit API directly when no Composio tool exists.\n    4) `web_search(query: str)`: Search the web for information.\n    5) `upload_local_file(*file_paths)`: Upload files to Composio S3/R2 storage. Use this to download any generated files/artifacts from the sandbox.\n    6) `smart_file_extract(file_path: str)`: Extract text from any file format (pdf, image, doc, etc). Use this to extract content from workbench files in any format for summary/analysis. Use invoke_llm on response if it's large. Returns Tuple[str, str] (response, error)\n    7) Workbench comes with comprehensive Image Processing (PIL/Pillow, OpenCV, scikit-image) and Machine Learning (TensorFlow, PyTorch) libraries, plus standard data analysis tools (pandas, numpy, matplotlib) for advanced visual and AI tasks.\"\n\n\n## Python Helper Functions for LLM Scripting\n\n### 1) run_composio_tool(tool_slug, arguments)\nExecutes a known Composio tool via backend API. Do NOT call RUBE_* meta tools to avoid cyclic calls.\n\n    def run_composio_tool(tool_slug: str, arguments: Dict[str, Any]) -> tuple[Dict[str, Any], str]\n    # Returns: (tool_response_dict, error_message)\n    #   Success: ({\"data\": {actual_data}}, \"\") - Note the top-level data\n    #   Error:   ({}, \"error_message\") or (response_data, \"error_message\")\n\n    result, error = run_composio_tool(\"GMAIL_FETCH_EMAILS\", {\"max_results\": 1, \"user_id\": \"me\"})\n    if error:\n        print(\"GMAIL_FETCH_EMAILS error:\", error); return\n    email_data = result.get(\"data\", {})\n    print(\"Fetched:\", email_data)\n\n### 2) invoke_llm(query)\nCalls Groq LLM for reasoning, analysis, and semantic tasks. Pass MAX 400000 characters input.\n\n    def invoke_llm(query: str) -> tuple[str, str]\n    # Returns: (llm_response, error_message)\n\n    resp, error = invoke_llm(\"Summarize the key points from this data\")\n    if error:\n        print(\"invoke_llm error:\", error); return\n    print(\"LLM:\", resp)\n\n    # Example: analyze tool response with LLM\n    tool_resp, err = run_composio_tool(\"GMAIL_FETCH_EMAILS\", {\"max_results\": 5, \"user_id\": \"me\"})\n    if err:\n        print(\"GMAIL_FETCH_EMAILS error:\", err); return\n    parsed = tool_resp.get(\"data\", {})\n    resp, err = invoke_llm(f\"Analyze these emails and summarize: {parsed}\")\n    if err:\n        print(\"invoke_llm error:\", err); return\n    print(\"LLM Gmail Summary:\", resp)\n\n    # TIP: batch prompts to reduce LLM calls.\n\n### 4) proxy_execute(method, endpoint, toolkit, params=None, body=None)\nDirect API call to a connected toolkit service.\n\n    from typing import Literal, Optional\n\n    def proxy_execute(\n        method: Literal[\"GET\",\"POST\",\"PUT\",\"DELETE\",\"PATCH\"],\n        endpoint: str,\n        toolkit: str,\n        params: Optional[list[Parameter]] = None,\n        body: Optional[object] = None,\n    ) -> tuple[ToolProxyResponse | None, str]\n    # Returns: (response_object, error_message)\n\n    response, error = proxy_execute(\"GET\", \"https://api.github.com/repos/owner/repo\", \"github\")\n    if error:\n        print(\"proxy_execute error:\", error); return\n    print(\"Success:\", response.data)\n\n### 5) web_search(query)\nSearches the web via Exa AI.\n\n    def web_search(query: str) -> tuple[str, str]\n    # Returns: (search_results_text, error_message)\n\n    results, error = web_search(\"latest developments in AI\")\n    if error:\n        print(\"web_search error:\", error)\n    else:\n        print(\"Results:\", results)\n\n## Best Practices\n\n### Error-first pattern\n    data, error = some_helper(...)\n    if error:\n        print(\"some_helper error:\", error); return\n    # safe to use `data`\n\n### Defensive parsing (print keys while narrowing)\n    res, err = run_composio_tool(\"GMAIL_FETCH_EMAILS\", {\"max_results\": 5})\n    if not err and isinstance(res, dict):\n        print(\"res keys:\", list(res.keys()))\n        data = res.get(\"data\") or {}\n        print(\"data keys:\", list(data.keys()))\n        msgs = data.get(\"messages\") or []\n        print(\"messages count:\", len(msgs))\n        for m in msgs:\n            print(\"subject:\", m.get(\"subject\", \"<missing>\"))\n\n### Parallelize (4-min sandbox timeout)\nAdjust concurrency so all tasks finish within 4 minutes.\n\n    import concurrent.futures\n\n    MAX_CONCURRENCY = 10 # Adjust as needed\n\n    def send_bulk_emails(email_list):\n        def send_single(email):\n            result, error = run_composio_tool(\"GMAIL_SEND_EMAIL\", {\n                \"to\": email[\"recipient\"], \"subject\": email[\"subject\"], \"body\": email[\"body\"]\n            })\n            if error:\n                print(f\"Failed {email['recipient']}: {error}\")\n                return {\"status\": \"failed\", \"error\": error}\n            return {\"status\": \"sent\", \"data\": result}\n\n        results = []\n        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_CONCURRENCY) as ex:\n            futures = [ex.submit(send_single, e) for e in email_list]\n            for f in concurrent.futures.as_completed(futures):\n                results.append(f.result())\n        return results\n\n    # Example usage\n    email_list = [{\"recipient\": f\"user{i}@example.com\", \"subject\": \"Test\", \"body\": \"Hello\"} for i in range(1000)]\n    results = send_bulk_emails(email_list)\n\n### upload_local_file(*file_paths)\nUploads files to Composio S3/R2 storage. Single files upload directly, multiple files are auto-zipped.\nUse this when you need to upload/download any generated artifacts from the sandbox.\n\n    def upload_local_file(*file_paths) -> tuple[Dict[str, Any], str]\n    # Returns: (result_dict, error_string)\n    # Success: ({\"s3_url\": str, \"uploaded_file\": str, \"type\": str, \"id\": str, \"key\": str, \"message\": str}, \"\")\n    # Error: ({}, \"error_message\")\n\n    # Single file\n    result, error = upload_local_file(\"/path/to/report.pdf\")\n    \n    # Multiple files (auto-zipped)\n    result, error = upload_local_file(\"/home/user/doc1.txt\", \"/home/user/doc2.txt\")\n    \n    # Always check for errors\n    if error:\n        print(\"Upload failed:\", error)\n        return\n    print(\"Uploaded:\", result[\"s3_url\"])\n\n\nGuidance: Ensure to peform the task with High Accuracy and Completeness. For large data, use parallel processing (ThreadPoolExecutor) and fewer batches in each call to maximise efficiency. Leverage invoke_llm for smart analysis whenever needed. NEVER hardcode data in code and NEVER run RUBE_MULTI_EXECUTE_TOOL in the workbench.\n\nMemory Storage:\n- CRITICAL: You MUST always include the 'memory' parameter - never omit it. Even if you think there's nothing to remember, include an empty object {} for memory.\n- CRITICAL FORMAT: Memory must be a dictionary where keys are app names (strings) and values are arrays of strings. NEVER pass nested objects or dictionaries as values.\n- CORRECT format: {\"slack\": [\"Channel general has ID C1234567\"], \"gmail\": [\"John's email is john@example.com\"]}\n- INCORRECT format: {\"slack\": {\"channel_id\": \"C1234567\"}, \"gmail\": {\"user\": \"john\"}}\n- Write memory entries in natural, descriptive language - NOT as key-value pairs. Use full sentences that clearly describe the relationship or information.\n- ONLY store information that will be valuable for future tool executions - focus on persistent data that saves API calls.\n- STORE: ID mappings, entity relationships, configuration details, user/resource identifiers that don't change frequently.\n- DO NOT STORE: Action descriptions, temporary status updates, activity logs, \"sent message\" confirmations, \"fetched data\" descriptions.\n- Examples of GOOD memory (store these):\n  * \"The important channel in Slack has ID C1234567 and is called #general\"\n  * \"Venky's GitHub project 'MyProject' maps to project ID proj_abc123\"\n  * \"The team's main repository is owned by user 'teamlead' with ID 98765\"\n- Examples of BAD memory (DON'T store these):\n  * \"Successfully sent email to john@example.com with message hi\"\n  * \"Fetching emails from last day (Sep 6, 2025) for analysis\"\n  * \"Found 5 unread messages in inbox\"\n\n",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "code_to_execute",
+          "thought_process"
+        ],
+        "properties": {
+          "memory": {
+            "type": "object",
+            "description": "CRITICAL: Memory must be a dictionary where keys are app names (strings) and values are arrays of strings. NEVER pass nested objects or dictionaries as values. Format: {\"app_name\": [\"string1\", \"string2\"]}. Write in full sentences describing relationships, NOT as key-value pairs. Always include this parameter.",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "Natural language memory string (e.g., \"John's user ID in Gmail is 12345\", \"Venky's project MyProject has ID proj_abc123\")"
+              }
+            }
+          },
+          "file_path": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "Remote path/glob inside the sandbox to analyze. **Required for file analysis**; optional when only orchestrating tools."
+          },
+          "next_step": {
+            "type": "string",
+            "description": "Enum for the next planned workflow step (may be the same as current_step). Eg \"GENERATING_SUMMARY\", \"FETCHING_EMAILS\"."
+          },
+          "current_step": {
+            "type": "string",
+            "description": "Short enum for current step of the workflow execution. Eg FETCHING_EMAILS, GENERATING_REPLIES. Always include to keep execution aligned with the workflow."
+          },
+          "code_to_execute": {
+            "type": "string",
+            "description": "Python to run inside the persistent **remote Jupyter sandbox**. State (imports, variables, files) is preserved across executions. Use this to (a) parse/aggregate **remote** artifacts referenced in `file_path`, or (b) orchestrate **Composio** tools via `run_composio_tool` for bulk/repeat/conditional/polling flows. Do **not** use if the required data is already available inline.Keep code concise to minimize tool call latency. Avoid unnecessary comments.\nExamples:\n  \"import json, glob\\npaths = glob.glob(file_path)\\n...\"\n  \"result = run_composio_tool(tool_slug='SLACK_SEARCH_MESSAGES', arguments={'query': 'Rube'})\\n...\""
+          },
+          "thought_process": {
+            "type": "string",
+            "description": "Brief objective and high-level plan (no private chain-of-thought). 1\u20132 sentences describing what the cell should achieve and why the sandbox is needed.\nExamples:\n  \"Summarize errors from ~/.composio/output/** in the last 24h and write a CSV with counts by severity.\"\n  \"Bulk-apply a Gmail label via Composio for thread IDs listed in the remote JSON.\""
+          },
+          "current_step_metric": {
+            "type": "object",
+            "required": [
+              "completed",
+              "total"
+            ],
+            "properties": {
+              "unit": {
+                "type": "string",
+                "maxLength": 30,
+                "description": "Measurement unit for progress E.g., items, pages, emails"
+              },
+              "total": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "description": "Total units expected for this step. Use \"n\" if unknown."
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^(\\d+|n)$",
+                    "description": "Total units expected for this step. Use \"n\" if unknown."
+                  }
+                ],
+                "description": "Total units expected for this step. Use \"n\" if unknown."
+              },
+              "completed": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Units already processed so far in this step"
+              }
+            },
+            "description": "Progress metrics for the current step - use to track how far execution has advanced.",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "RUBE_SEARCH_TOOLS",
+      "annotations": {
+        "title": "RUBE_SEARCH_TOOLS",
+        "scopes": [],
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n  MCP Server Info: Rube MCP by Composio connects 500+ apps\u2014Slack, GitHub, Notion, Google Workspace (Gmail, Sheets, Drive, Calendar), Microsoft (Outlook, Teams), X, Figma, Meta apps (WhatsApp, Instagram), TikTok, AI tools like Veo3 & V0, and more\u2014for seamless cross-app automation. \n  Use this MCP server to discover new tools and connect to apps. \n  ALWAYS call this tool first whenever a user mentions or implies an external app, service, or workflow\u2014never say \"I don\u2019t have access to X/Y app\" before calling it.\n\n<br>\n  Tool Info: Extremely fast search tool to discover available MCP callable tools that can be used to solve a particular problem, user query or complete a task.\nUsage guidelines:\n  <recommended>\n  - Use this tool whenever kicking off a task. Post this, keep coming back to this tool to discover new tools.\n  - If the user pivots to a different use case in same chat, you MUST call this tool again with the new use case.\n  </recommended>\n  - Specify the use_case with a detailed description of the problem, query, or task. Be clear and precise so the system can find the most relevant tools. Queries can involve one or multiple apps, and be simple or complex\u2014from a quick action to a multi-step, cross-app workflow.\n  - Pass known_fields as a list of key-value pairs to help the search provide tools to look up missing details (for example, finding channel_id from a given channel_name). \n  - To understand the abilities and skills at hand, set exploratory_query to true. Otherwise, keep it as false for task specific searches.\n  - After this tool, call RUBE_CREATE_PLAN to ensure proper plan creation.\nResponse: \n  - The response is a list of toolkits (apps) and tools suitable for the task, along with their tool_slug, description, input schema, and related tools that may serve as prerequisites, fallbacks, or next steps. It also includes a recommended order of execution and a brief reasoning for why each result was returned.\n  - If a toolkit has an active connection, the response includes it along with any available current user information. If no active connection exists, the response lists any required parameters for establishing a new one.\n  - The response includes the current UTC time for reference. You can reference UTC time from the response if needed.\n  - The response includes a memory parameter containing relevant information about the use case and the known fields that can be used to determine the flow of execution going forward.\n  - The tools returned to you through this are to be called via RUBE_MULTI_EXECUTE_TOOL. Make sure to specify the tool_slug and arguments for each tool execution properly.\n",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "use_case",
+          "known_fields"
+        ],
+        "properties": {
+          "toolkits": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "List of specific toolkits to search within\nExamples:\n  [\"jira\"]\n  [\"gmail\"]\n  [\"slack\",\"github\"]"
+          },
+          "use_case": {
+            "type": "string",
+            "description": "Use case for searching tools. Always pass the complete detailed use case to get the right set of tools.\nExamples:\n  \"create an issue on linear\"\n  \"send an email\"\n  \"search jira issues with label and put them in a google sheet\"\n  \"post a message to slack\""
+          },
+          "known_fields": {
+            "type": "string",
+            "description": "Provide any workflow inputs you already know comma-separated key:value pairs (not an array). E.g. channel name, user email, timezone, etc. This helps the tool infer or look up relevant memories (like resoliving channel_id from a given channel_name). Keep values short and structured\u2014 focus on stable identifiers, names, emails, or settings only. Do not include free-form or long text (like messages, notes, or descriptions). Example: \"channel_name:pod-sdk, channel_id:123, user_names:John,Maria, timezone:Asia/Kolkata\""
+          },
+          "exploratory_query": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set to true for EXPLORATORY questions like \"What can I do with Gmail?\", \"How to automate workflows?\", \"What are my capabilities?\".\n        Set to false (default) for TASK-SPECIFIC requests like \"Find my 5 latest emails\", \"Send email to John\", \"Create a document\".\n\n        When true: Returns capability overviews, tool showcases, and use case suggestions for guidance and discovery.\n        When false: Returns specific tools to accomplish the requested task.\n\n        Examples of exploratory (true):\n        - \"What can I do with Gmail?\"\n        - \"How can I automate my email workflow?\"\n        - \"What integrations are available?\"\n        - \"Show me what's possible\"\n\n        Examples of task-specific (false):\n        - \"Find my latest emails\"\n        - \"Send an email to John\"\n        - \"Create a Google Doc\"\n        - \"Get all unread messages\"\n        "
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "RUBE_MANAGE_CONNECTIONS",
+      "annotations": {
+        "title": "RUBE_MANAGE_CONNECTIONS",
+        "scopes": [],
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n  MCP Server Info: Rube MCP by Composio connects 500+ apps\u2014Slack, GitHub, Notion, Google Workspace (Gmail, Sheets, Drive, Calendar), Microsoft (Outlook, Teams), X, Figma, Meta apps (WhatsApp, Instagram), TikTok, AI tools like Veo3 & V0, and more\u2014for seamless cross-app automation. Use this MCP server to discover new tools and connect to apps.\n<br>\nTool Info: Create/manage connections to user's apps. If RUBE_SEARCH_TOOLS finds no active connection for an app, call this with the toolkit name and required auth params to create one. When the needed params are unclear, the tool returns a list\u2014ask the user for each (e.g. API_KEY). ALWAYS show the list along with their descriptions(if possible) to the user.\nIf the response includes an OAuth redirect_url, ALWAYS show a FORMATTED MARKDOWN LINK to the user.\nSupports OAuth (default/custom), API Key, Bearer Token, Basic Auth, hybrid, and no-auth. Batch-safe, isolates errors, allows selective re-init, returns per-app results and summary.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "toolkits"
+        ],
+        "properties": {
+          "toolkits": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "List of toolkit slugs to manage (e.g. 'gmail', 'slack')"
+          },
+          "reinitiate_all": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, force re-initiate connections for all toolkits in 'toolkits'"
+          },
+          "reinitiate_specific": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Subset of toolkits from 'toolkits' to re-initiate; ignored if reinitiate_all is true"
+          },
+          "specify_custom_auth": {
+            "type": "object",
+            "default": {},
+            "properties": {},
+            "description": "Per-toolkit custom auth values to use instead of defaults (toolkit -> key/value map)",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "RUBE_WAIT_FOR_CONNECTION",
+      "annotations": {
+        "title": "RUBE_WAIT_FOR_CONNECTION",
+        "scopes": [],
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n   Wait for the user to complete authentication AFTER you have given them an auth URL from RUBE_MANAGE_CONNECTIONS. Use this **immediately after** sharing the auth URL so you can automatically continue once the connection is established \u2014 without waiting for the user to manually come back and say they\u2019re done. Make sure you have printed the auth URL, DO NOT call this tool without printing auth URL first. \n    This ensures a smooth, uninterrupted flow and a better user experience.\n  You NEED NOT wait if there is no auth URL in the response of RUBE_MANAGE_CONNECTIONS like in cases you ask user for  api_key, client_id or client_secret.\n    Input params <toolkits: list of toolkit names>, <mode (any / all) : wait for ANY or ALL connections to reach success/failed state (default: any) >\n    Output params <connection statuses>\n    Example:\n    input:\n    toolkits: [gmail, outlook]\n    mode: [any]\n    output: {\n      gmail: {\n        status: [connected]\n      },\n      outlook: {\n        status: [initiated]\n      }\n    }\n  ",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "toolkits"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "any",
+              "all"
+            ],
+            "type": "string",
+            "default": "any",
+            "description": "Wait for ANY connection or ALL connections to reach success/failed state (default: any)"
+          },
+          "toolkits": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "List of toolkit slugs to wait for"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:21:26.713748+00:00",
+    "source": "smithery"
+  }
+}

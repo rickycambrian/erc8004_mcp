@@ -1,0 +1,2503 @@
+{
+  "id": "@PaulGG-Code/kali_mcp-mcp-server",
+  "name": "@PaulGG-Code/kali_mcp-mcp-server",
+  "display_name": "kali_mcp-mcp-server",
+  "version": null,
+  "description": "Streamline ethical security testing with a curated set of Kali-based reconnaissance, web, crypto, reversing, and forensics workflows. Run reproducible assessments with managed workspaces and shareable results. Use only on systems you own or have explicit permission to test..",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/2630a9e4-0c74-4795-bcd1-c91a335f1df6.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "nmap_scan",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Execute an Nmap network scan to discover hosts, open ports, services, and versions.\n\n        Args:\n            target: Target IP address or hostname to scan (e.g., '192.168.1.1' or 'example.com')\n            scan_type: Nmap scan type - use '-sV' for version detection, '-sS' for SYN scan, '-sT' for TCP connect, '-sU' for UDP scan, or '-A' for aggressive scan (default: '-sV')\n            ports: Ports to scan - can be single port '80', range '1-1000', comma-separated list '22,80,443', or empty for default ports (default: '')\n            additional_args: Additional Nmap arguments like '-O' for OS detection or '--script vuln' for vulnerability scripts (default: '')\n\n        Returns:\n            Scan results including discovered ports, services, and version information\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "properties": {
+          "ports": {
+            "type": "string",
+            "title": "Ports",
+            "default": ""
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "scan_type": {
+            "type": "string",
+            "title": "Scan Type",
+            "default": "-sV"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "gobuster_scan",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Execute Gobuster directory/DNS/vhost enumeration to discover hidden paths, subdomains, or virtual hosts.\n\n        Args:\n            url: Target URL (http://example.com) or domain for DNS mode\n            mode: Scan mode - 'dir' for directory bruteforce, 'dns' for subdomain enumeration, 'vhost' for virtual host discovery, or 'fuzz' for fuzzing (default: 'dir')\n            wordlist: Path to wordlist file on Kali server (default: '/usr/share/wordlists/dirb/common.txt')\n            additional_args: Additional Gobuster arguments like '-x php,html' for file extensions or '-t 50' for thread count (default: '')\n\n        Returns:\n            Discovered directories, subdomains, or virtual hosts with response codes\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "dir"
+          },
+          "wordlist": {
+            "type": "string",
+            "title": "Wordlist",
+            "default": "/usr/share/wordlists/dirb/common.txt"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "dirb_scan",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Execute Dirb web content scanner to discover hidden directories and files through dictionary-based attacks.\n\n        Args:\n            url: Target URL to scan (e.g., http://example.com)\n            wordlist: Path to wordlist file on Kali server (default: '/usr/share/wordlists/dirb/common.txt')\n            additional_args: Additional Dirb arguments like '-r' for non-recursive or '-z 10' for millisecond delay (default: '')\n\n        Returns:\n            Discovered directories and files with HTTP response codes\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "wordlist": {
+            "type": "string",
+            "title": "Wordlist",
+            "default": "/usr/share/wordlists/dirb/common.txt"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "nikto_scan",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Execute Nikto web server vulnerability scanner to identify server misconfigurations, outdated software, and security issues.\n\n        Args:\n            target: Target URL or IP address to scan (e.g., 'http://example.com' or '192.168.1.1')\n            additional_args: Additional Nikto arguments like '-Tuning x' for specific test types or '-port 8080' for custom port (default: '')\n\n        Returns:\n            Vulnerability findings, server information, and security recommendations\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "properties": {
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "sqlmap_scan",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "\n        Execute SQLmap automated SQL injection detection and exploitation tool. WARNING: Can modify database contents.\n\n        Args:\n            url: Target URL to test for SQL injection vulnerabilities (e.g., 'http://example.com/page.php?id=1')\n            data: POST data string for testing POST parameters (e.g., 'username=admin&password=test') (default: '')\n            additional_args: Additional SQLmap arguments like '--batch' for non-interactive mode, '--dbs' to enumerate databases, or '--risk 3' for aggressive testing (default: '')\n\n        Returns:\n            SQL injection vulnerabilities found, database information, and exploitation results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "data": {
+            "type": "string",
+            "title": "Data",
+            "default": ""
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "metasploit_run",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "\n        Execute a Metasploit Framework module for exploitation, scanning, or auxiliary functions. WARNING: Can compromise systems.\n\n        Args:\n            module: Metasploit module path (e.g., 'exploit/windows/smb/ms17_010_eternalblue' or 'auxiliary/scanner/portscan/tcp')\n            options: Module options as key-value pairs (e.g., {'RHOSTS': '192.168.1.1', 'RPORT': 445}) (default: {})\n\n        Returns:\n            Module execution results, including any exploited sessions or scan findings\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "module"
+        ],
+        "properties": {
+          "module": {
+            "type": "string",
+            "title": "Module"
+          },
+          "options": {
+            "type": "object",
+            "title": "Options",
+            "default": {},
+            "additionalProperties": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "hydra_attack",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "\n        Execute Hydra online password cracking tool for authentication brute-forcing. WARNING: May lock accounts or trigger security alerts.\n\n        Args:\n            target: Target IP address or hostname to attack (e.g., '192.168.1.1' or 'example.com')\n            service: Service to attack - supports 'ssh', 'ftp', 'http-post-form', 'rdp', 'smb', 'telnet', etc.\n            username: Single username to test (leave empty if using username_file) (default: '')\n            username_file: Path to username wordlist file on Kali server (e.g., '/usr/share/wordlists/usernames.txt') (default: '')\n            password: Single password to test (leave empty if using password_file) (default: '')\n            password_file: Path to password wordlist file on Kali server (e.g., '/usr/share/wordlists/rockyou.txt') (default: '')\n            additional_args: Additional Hydra arguments like '-t 4' for thread count or '-V' for verbose output (default: '')\n\n        Returns:\n            Successfully cracked credentials and attack statistics\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "target",
+          "service"
+        ],
+        "properties": {
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "service": {
+            "type": "string",
+            "title": "Service"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "default": ""
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "default": ""
+          },
+          "password_file": {
+            "type": "string",
+            "title": "Password File",
+            "default": ""
+          },
+          "username_file": {
+            "type": "string",
+            "title": "Username File",
+            "default": ""
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "john_crack",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Execute John the Ripper offline password hash cracker using wordlist and rules-based attacks.\n\n        Args:\n            hash_file: Path to file containing password hashes on Kali server (e.g., '/tmp/hashes.txt')\n            wordlist: Path to wordlist file on Kali server (default: '/usr/share/wordlists/rockyou.txt')\n            format_type: Hash format type like 'md5', 'sha256', 'NT', 'des', 'raw-md5' - leave empty for auto-detection (default: '')\n            additional_args: Additional John arguments like '--rules' for mangling rules or '--show' to display previously cracked passwords (default: '')\n\n        Returns:\n            Cracked passwords, hash format information, and cracking statistics\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "hash_file"
+        ],
+        "properties": {
+          "wordlist": {
+            "type": "string",
+            "title": "Wordlist",
+            "default": "/usr/share/wordlists/rockyou.txt"
+          },
+          "hash_file": {
+            "type": "string",
+            "title": "Hash File"
+          },
+          "format_type": {
+            "type": "string",
+            "title": "Format Type",
+            "default": ""
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "wpscan_analyze",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Execute WPScan WordPress security scanner to identify vulnerabilities, plugins, themes, and users.\n\n        Args:\n            url: Target WordPress site URL (e.g., 'http://example.com')\n            additional_args: Additional WPScan arguments like '--enumerate u,p,t' for enumerating users/plugins/themes or '--api-token TOKEN' for vulnerability data (default: '')\n\n        Returns:\n            WordPress version, installed plugins/themes, known vulnerabilities, and enumerated users\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "enum4linux_scan",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Execute Enum4linux tool to enumerate Windows/Samba systems for users, shares, groups, and OS information.\n\n        Args:\n            target: Target Windows/Samba host IP address or hostname (e.g., '192.168.1.10')\n            additional_args: Additional enum4linux arguments - use '-a' for all enumeration, '-U' for users only, or '-S' for shares only (default: '-a')\n\n        Returns:\n            Enumerated users, shares, groups, password policies, and system information\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "properties": {
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": "-a"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "masscan_scan",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Execute Masscan ultra-fast port scanner to quickly scan large IP ranges and port ranges. Much faster than nmap for large-scale scans.\n\n        Args:\n            target: Target IP address, IP range, or CIDR notation (e.g., '192.168.1.1', '192.168.1.0/24', '10.0.0.1-10.0.0.255')\n            ports: Ports to scan - can be single port '80', range '1-1000', comma-separated list '22,80,443', or '--top-ports 100' (default: '1-1000')\n            rate: Scan rate in packets per second - higher values are faster but may be detected (default: '1000')\n            additional_args: Additional Masscan arguments like '--banners' for banner grabbing or '--exclude' to exclude IPs (default: '')\n\n        Returns:\n            Scan results including discovered open ports and services\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "properties": {
+          "rate": {
+            "type": "string",
+            "title": "Rate",
+            "default": "1000"
+          },
+          "ports": {
+            "type": "string",
+            "title": "Ports",
+            "default": "1-1000"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "ffuf_scan",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Execute Ffuf fast web fuzzer to discover directories, files, virtual hosts, or fuzz parameters. Faster alternative to gobuster/dirb.\n\n        Args:\n            url: Target URL with FUZZ placeholder (e.g., 'http://example.com/FUZZ' for dir mode, 'http://example.com' for vhost mode)\n            wordlist: Path to wordlist file on Kali server (default: '/usr/share/wordlists/dirb/common.txt')\n            mode: Fuzzing mode - 'dir' for directory/file discovery, 'vhost' for virtual host discovery, 'param' for parameter fuzzing, or 'fuzz' for custom fuzzing (default: 'dir')\n            param_name: Parameter name for param mode (default: 'FUZZ')\n            additional_args: Additional Ffuf arguments like '-mc 200,204' for match codes, '-t 50' for threads, or '-H' for headers (default: '')\n\n        Returns:\n            Discovered paths, virtual hosts, or parameters with response codes and sizes\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "dir"
+          },
+          "wordlist": {
+            "type": "string",
+            "title": "Wordlist",
+            "default": "/usr/share/wordlists/dirb/common.txt"
+          },
+          "param_name": {
+            "type": "string",
+            "title": "Param Name",
+            "default": "FUZZ"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "searchsploit_find",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Search Exploit-DB database for exploits, shellcodes, and papers matching the query. Useful for finding exploits after vulnerability discovery.\n\n        Args:\n            query: Search query - can be software name, CVE number, platform, or keyword (e.g., 'apache 2.4', 'CVE-2021-44228', 'windows smb')\n            search_type: Search scope - 'all' searches all fields, 'title' searches titles only, 'description' searches descriptions, 'author' searches authors, 'platform' searches platforms, 'type' searches exploit types (default: 'all')\n            exact: If True, perform exact match search (default: False)\n            additional_args: Additional searchsploit arguments like '--json' for JSON output or '--id' to show exploit IDs (default: '')\n\n        Returns:\n            Matching exploits with descriptions, platforms, and file paths\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "exact": {
+            "type": "boolean",
+            "title": "Exact",
+            "default": false
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "search_type": {
+            "type": "string",
+            "title": "Search Type",
+            "default": "all"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "apktool_decompile",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Decompile or build Android APK files using Apktool. Decompiles APK to Smali code and resources for analysis.\n\n        Args:\n            apk_file: Path to APK file to decompile or directory to build (e.g., '/path/to/app.apk' or '/path/to/decompiled')\n            action: Action to perform - 'd' or 'decode' to decompile APK, 'b' or 'build' to rebuild APK from decompiled directory (default: 'd')\n            output_dir: Output directory for decompiled files or output APK path (default: auto-generated based on APK name)\n            additional_args: Additional Apktool arguments like '-f' to force overwrite, '-r' to skip resources, or '-s' to skip sources (default: '')\n\n        Returns:\n            Decompilation/build results with output directory path\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "apk_file"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "title": "Action",
+            "default": "d"
+          },
+          "apk_file": {
+            "type": "string",
+            "title": "Apk File"
+          },
+          "output_dir": {
+            "type": "string",
+            "title": "Output Dir",
+            "default": ""
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "jadx_decompile",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Decompile Android APK or DEX files to Java source code using JADX. Produces readable Java code (better than Apktool for source code analysis).\n\n        Args:\n            apk_file: Path to APK or DEX file to decompile (e.g., '/path/to/app.apk' or '/path/to/classes.dex')\n            output_dir: Output directory for decompiled Java source code (default: auto-generated based on APK name)\n            additional_args: Additional JADX arguments like '--deobf' for deobfuscation, '--no-imports' to skip imports, or '--show-bad-code' to show problematic code (default: '')\n\n        Returns:\n            Decompilation results with output directory path containing Java source files\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "apk_file"
+        ],
+        "properties": {
+          "apk_file": {
+            "type": "string",
+            "title": "Apk File"
+          },
+          "output_dir": {
+            "type": "string",
+            "title": "Output Dir",
+            "default": ""
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "server_health",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Check the health status and tool availability of the Kali API server.\n\n        Returns:\n            Server status, available security tools, and system health information\n        ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "execute_command",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "\n        Execute an arbitrary shell command on the Kali Linux server. WARNING: Unrestricted command execution - use with extreme caution.\n\n        Args:\n            command: Shell command to execute on Kali server (e.g., 'whoami' or 'ls -la /tmp'). WARNING: Can execute any command with server permissions.\n\n        Returns:\n            Command output (stdout/stderr), exit code, and execution status\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "command"
+        ],
+        "properties": {
+          "command": {
+            "type": "string",
+            "title": "Command"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "create_analysis_session",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Create a new analysis session for multi-step binary analysis or exploitation. Sessions maintain workspace, context, and history.\n\n        Args:\n            user_id: Identifier for the session owner (default: 'mcp_client')\n\n        Returns:\n            Session ID and workspace path for file operations\n        ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "mcp_client"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "save_analysis_result",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Save analysis results to session context for later retrieval. Use this to persist findings across multiple analysis steps.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            key: Context key (e.g., 'protections', 'gadgets', 'exploit_script')\n            value: Value to store (can be string, JSON, or any serializable data)\n\n        Returns:\n            Success status\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "load_analysis_results",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Load all analysis results saved in the session context.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n\n        Returns:\n            All saved context data including workspace path and creation time\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "upload_binary",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Upload a binary file to the session workspace for analysis. File content must be base64 encoded.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            filename: Name of the file to create (e.g., 'challenge.bin')\n            content_base64: Base64 encoded file content\n            executable: Set executable permission on the file (default: True)\n\n        Returns:\n            File path, size, and upload status\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "filename",
+          "content_base64"
+        ],
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "executable": {
+            "type": "boolean",
+            "title": "Executable",
+            "default": true
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "content_base64": {
+            "type": "string",
+            "title": "Content Base64"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "list_session_files",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        List all files in the session workspace.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n\n        Returns:\n            List of files with name, size, permissions, and modification time\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "start_interactive_shell",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "\n        Start an interactive shell session for bidirectional communication (e.g., nc, ssh, or running exploits). WARNING: Creates persistent connection.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            command: Command to execute interactively (e.g., 'nc 127.0.0.1 9000' or 'python3 exploit.py')\n\n        Returns:\n            Interactive session ID for sending input and reading output\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "command"
+        ],
+        "properties": {
+          "command": {
+            "type": "string",
+            "title": "Command"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "send_to_shell",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "\n        Send input to an interactive shell session. Use this to interact with running programs.\n\n        Args:\n            interactive_id: Interactive session ID from start_interactive_shell()\n            text: Text to send (include '\n' for newline if needed)\n\n        Returns:\n            Success status\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "interactive_id",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "interactive_id": {
+            "type": "string",
+            "title": "Interactive Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "read_shell_output",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Read accumulated output from an interactive shell session. Output buffer is cleared after reading.\n\n        Args:\n            interactive_id: Interactive session ID from start_interactive_shell()\n\n        Returns:\n            Shell output and process alive status\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "interactive_id"
+        ],
+        "properties": {
+          "interactive_id": {
+            "type": "string",
+            "title": "Interactive Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "close_shell",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Close an interactive shell session and free resources.\n\n        Args:\n            interactive_id: Interactive session ID from start_interactive_shell()\n\n        Returns:\n            Success status\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "interactive_id"
+        ],
+        "properties": {
+          "interactive_id": {
+            "type": "string",
+            "title": "Interactive Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "checksec_binary",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Analyze binary security protections (RELRO, Stack Canary, NX, PIE, Symbols). Essential first step for pwnable challenges.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            binary_filename: Filename of binary in session workspace\n\n        Returns:\n            Protection mechanisms enabled/disabled with parsed boolean values\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "binary_filename"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "binary_filename": {
+            "type": "string",
+            "title": "Binary Filename"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "find_rop_gadgets",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Search for ROP gadgets in binary using ROPgadget. Use this to build ROP chains for NX bypass.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            binary_filename: Filename of binary in session workspace\n            search_string: Optional search filter (e.g., 'pop rdi' or 'syscall')\n\n        Returns:\n            List of gadget addresses and instructions\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "binary_filename"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "search_string": {
+            "type": "string",
+            "title": "Search String",
+            "default": ""
+          },
+          "binary_filename": {
+            "type": "string",
+            "title": "Binary Filename"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_with_radare2",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Analyze binary with radare2. Default commands: analyze all, disassemble main.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            binary_filename: Filename of binary in session workspace\n            commands: List of r2 commands (default: ['aaa', 'pdf @ main']). Common commands: 'afl' (list functions), 'iz' (strings), 'pdf @ func' (disassemble)\n\n        Returns:\n            Radare2 analysis output\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "binary_filename"
+        ],
+        "properties": {
+          "commands": {
+            "type": "array",
+            "items": {},
+            "title": "Commands",
+            "default": null
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "binary_filename": {
+            "type": "string",
+            "title": "Binary Filename"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "disassemble_binary",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Disassemble binary with objdump. Modes: disassemble (code), headers (sections), symbols (functions/variables), all (everything).\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            binary_filename: Filename of binary in session workspace\n            mode: Analysis mode - 'disassemble', 'headers', 'symbols', or 'all'\n\n        Returns:\n            Objdump output in Intel syntax\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "binary_filename"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "disassemble"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "binary_filename": {
+            "type": "string",
+            "title": "Binary Filename"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "trace_syscalls",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Trace system calls with strace. Useful for understanding binary behavior and finding vulnerabilities.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            binary_filename: Filename of binary in session workspace\n            arguments: Command line arguments to pass to binary\n\n        Returns:\n            System call trace output\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "binary_filename"
+        ],
+        "properties": {
+          "arguments": {
+            "type": "string",
+            "title": "Arguments",
+            "default": ""
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "binary_filename": {
+            "type": "string",
+            "title": "Binary Filename"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "trace_library_calls",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Trace library calls with ltrace. Reveals functions like strcpy, malloc, printf being called.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            binary_filename: Filename of binary in session workspace\n            arguments: Command line arguments to pass to binary\n\n        Returns:\n            Library call trace output\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "binary_filename"
+        ],
+        "properties": {
+          "arguments": {
+            "type": "string",
+            "title": "Arguments",
+            "default": ""
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "binary_filename": {
+            "type": "string",
+            "title": "Binary Filename"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "extract_strings",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Extract printable strings from binary. Look for flags, passwords, or interesting data.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            binary_filename: Filename of binary in session workspace\n            min_length: Minimum string length to extract (default: 4)\n\n        Returns:\n            Extracted strings\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "binary_filename"
+        ],
+        "properties": {
+          "min_length": {
+            "type": "integer",
+            "title": "Min Length",
+            "default": 4
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "binary_filename": {
+            "type": "string",
+            "title": "Binary Filename"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "run_pwntools_exploit",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "\n        Execute a pwntools exploit script. Script should use 'from pwn import *' and can use process() or remote().\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            exploit_script: Complete Python exploit code using pwntools\n            script_name: Filename to save script as (default: 'exploit.py')\n\n        Returns:\n            Exploit execution output including any captured flags\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "exploit_script"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "script_name": {
+            "type": "string",
+            "title": "Script Name",
+            "default": "exploit.py"
+          },
+          "exploit_script": {
+            "type": "string",
+            "title": "Exploit Script"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "auto_detect_vulnerabilities",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        AI-powered automatic vulnerability detection. Analyzes protections, dangerous functions, and infers potential exploits.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            binary_filename: Filename of binary in session workspace\n\n        Returns:\n            Comprehensive findings including protections, dangerous functions, interesting strings, and potential vulnerabilities with severity\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "binary_filename"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "binary_filename": {
+            "type": "string",
+            "title": "Binary Filename"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "hashcat_crack",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Crack password hashes using hashcat GPU-accelerated cracking. Supports 300+ hash types.\n\n        Args:\n            hash_value: Single hash to crack (alternative to hash_file)\n            hash_file: Path to file containing hashes on Kali server\n            hash_type: Hash type mode - '0' for MD5, '100' for SHA1, '1000' for NTLM, '1400' for SHA256, '3200' for bcrypt (default: '0')\n            wordlist: Path to wordlist file (default: '/usr/share/wordlists/rockyou.txt')\n            attack_mode: Attack mode - '0' for straight, '1' for combination, '3' for brute-force (default: '0')\n            additional_args: Additional hashcat args like '--rules-file' or '--increment'\n\n        Returns:\n            Cracked passwords and cracking statistics\n        ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "wordlist": {
+            "type": "string",
+            "title": "Wordlist",
+            "default": "/usr/share/wordlists/rockyou.txt"
+          },
+          "hash_file": {
+            "type": "string",
+            "title": "Hash File",
+            "default": ""
+          },
+          "hash_type": {
+            "type": "string",
+            "title": "Hash Type",
+            "default": "0"
+          },
+          "hash_value": {
+            "type": "string",
+            "title": "Hash Value",
+            "default": ""
+          },
+          "attack_mode": {
+            "type": "string",
+            "title": "Attack Mode",
+            "default": "0"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "factordb_query",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Query FactorDB for integer factorization. Essential for RSA attacks with weak primes.\n\n        Args:\n            number: Large integer to factor (RSA modulus N)\n\n        Returns:\n            Factorization results from FactorDB\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "number"
+        ],
+        "properties": {
+          "number": {
+            "type": "string",
+            "title": "Number"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "rsa_attack",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Perform RSA attacks using RsaCtfTool. Includes factorization, Wiener's attack, Hastad's attack, and more.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            n: RSA modulus (N)\n            e: Public exponent (e)\n            c: Ciphertext to decrypt\n            attack: Attack type - 'all', 'wiener', 'fermat', 'factordb', 'noveltyprimes' (default: 'all')\n\n        Returns:\n            Attack results including private key or plaintext if successful\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "c": {
+            "type": "string",
+            "title": "C",
+            "default": ""
+          },
+          "e": {
+            "type": "string",
+            "title": "E",
+            "default": ""
+          },
+          "n": {
+            "type": "string",
+            "title": "N",
+            "default": ""
+          },
+          "attack": {
+            "type": "string",
+            "title": "Attack",
+            "default": "all"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "sage_execute",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Execute SageMath script for advanced cryptographic attacks (elliptic curves, lattices, number theory).\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            script: Complete SageMath script code\n            script_name: Filename to save script as (default: 'crypto_solve.sage')\n\n        Returns:\n            SageMath execution output including mathematical results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "script"
+        ],
+        "properties": {
+          "script": {
+            "type": "string",
+            "title": "Script"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "script_name": {
+            "type": "string",
+            "title": "Script Name",
+            "default": "crypto_solve.sage"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "openssl_operation",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Perform OpenSSL cryptographic operations (encryption, decryption, key generation, certificate parsing).\n\n        Args:\n            operation: OpenSSL operation - 'enc', 'dec', 'rsa', 'genrsa', 'x509', 'dgst', etc.\n            args: Operation arguments (e.g., '-aes-256-cbc -d -in cipher.txt -out plain.txt -k password')\n\n        Returns:\n            OpenSSL command output\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "operation"
+        ],
+        "properties": {
+          "args": {
+            "type": "string",
+            "title": "Args",
+            "default": ""
+          },
+          "operation": {
+            "type": "string",
+            "title": "Operation"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "volatility_analyze",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Analyze memory dumps with Volatility 3 for malware analysis, incident response, and forensics.\n\n        Args:\n            dump_file: Path to memory dump file on Kali server\n            plugin: Volatility plugin - 'windows.info', 'windows.pslist', 'windows.netscan', 'windows.malfind', 'linux.bash', etc.\n            additional_args: Additional volatility args like '--pid 1234'\n\n        Returns:\n            Memory analysis results including processes, network connections, or malware artifacts\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "dump_file"
+        ],
+        "properties": {
+          "plugin": {
+            "type": "string",
+            "title": "Plugin",
+            "default": "windows.info"
+          },
+          "dump_file": {
+            "type": "string",
+            "title": "Dump File"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "binwalk_analyze",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Analyze firmware and binaries with binwalk to identify embedded files and filesystems.\n\n        Args:\n            file_path: Path to file on Kali server\n            extract: Extract found files (default: False)\n            session_id: Session ID for organizing extracted files (required if extract=True)\n\n        Returns:\n            Identified file signatures, offsets, and extracted file locations\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "file_path"
+        ],
+        "properties": {
+          "extract": {
+            "type": "boolean",
+            "title": "Extract",
+            "default": false
+          },
+          "file_path": {
+            "type": "string",
+            "title": "File Path"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "steghide_extract",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Extract hidden data from images/audio using steghide steganography tool.\n\n        Args:\n            cover_file: Path to cover file (JPG, BMP, WAV, AU) on Kali server\n            passphrase: Steganography passphrase (leave empty to try without passphrase)\n            output_file: Output filename for extracted data\n\n        Returns:\n            Extraction results and hidden file contents\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "cover_file"
+        ],
+        "properties": {
+          "cover_file": {
+            "type": "string",
+            "title": "Cover File"
+          },
+          "passphrase": {
+            "type": "string",
+            "title": "Passphrase",
+            "default": ""
+          },
+          "output_file": {
+            "type": "string",
+            "title": "Output File",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "foremost_carve",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Carve files from disk images or corrupted data using foremost.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            file_path: Path to disk image or file on Kali server\n            types: File types to carve - 'jpg,png,pdf,doc,zip' or empty for all types\n\n        Returns:\n            Carved files location and recovery statistics\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "file_path"
+        ],
+        "properties": {
+          "types": {
+            "type": "string",
+            "title": "Types",
+            "default": ""
+          },
+          "file_path": {
+            "type": "string",
+            "title": "File Path"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "exiftool_analyze",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Extract metadata from images, documents, and media files using exiftool.\n\n        Args:\n            file_path: Path to file on Kali server\n\n        Returns:\n            Complete metadata including GPS coordinates, camera info, creation dates, author info\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "file_path"
+        ],
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "title": "File Path"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "tesseract_ocr",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Perform OCR (Optical Character Recognition) on images using tesseract.\n\n        Args:\n            image_path: Path to image file on Kali server\n            lang: Language code - 'eng', 'fra', 'deu', 'jpn', 'kor', etc. (default: 'eng')\n\n        Returns:\n            Extracted text from image\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "image_path"
+        ],
+        "properties": {
+          "lang": {
+            "type": "string",
+            "title": "Lang",
+            "default": "eng"
+          },
+          "image_path": {
+            "type": "string",
+            "title": "Image Path"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "auto_memory_analysis",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Automated multi-stage memory forensics analysis using Volatility.\n\n        Performs comprehensive analysis automatically:\n        - Phase 1: OS identification (Windows/Linux)\n        - Phase 2: Process listing and analysis\n        - Phase 3: Network connections enumeration\n        - Phase 4: Malware detection (malfind)\n        - Phase 5: Registry analysis (Windows only)\n        - Phase 6: DLL analysis (Windows only)\n\n        This tool runs 3-6 Volatility plugins automatically based on OS type,\n        providing a complete memory forensics report without manual intervention.\n\n        Args:\n            dump_file: Path to memory dump file (e.g., '/path/to/memory.dmp')\n            session_id: Session ID for workspace management\n\n        Returns:\n            Comprehensive analysis results with:\n            - os_info: Operating system information\n            - processes: Running processes at time of capture\n            - network: Network connections\n            - malfind: Malware detection results\n            - registry: Registry hives (Windows)\n            - dlls: Loaded DLLs (Windows)\n            - summary: Analysis summary with threat indicators\n\n        Example:\n            auto_memory_analysis(\n                dump_file=\"/evidence/suspect.dmp\",\n                session_id=\"forensics_001\"\n            )\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "dump_file",
+          "session_id"
+        ],
+        "properties": {
+          "dump_file": {
+            "type": "string",
+            "title": "Dump File"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "auto_disk_analysis",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Automated disk forensics analysis using SleuthKit (TSK).\n\n        Performs comprehensive filesystem analysis automatically:\n        - Phase 1: Partition layout analysis (mmls)\n        - Phase 2: Filesystem type detection (fsstat)\n        - Phase 3: Complete file listing (fls)\n        - Phase 4: Timeline generation (mactime)\n        - Phase 5: Deleted file detection\n        - Phase 6: Hash verification (md5deep)\n\n        This tool automates the entire disk forensics workflow, generating\n        timelines and identifying deleted files without manual commands.\n\n        Args:\n            disk_image: Path to disk image file (e.g., '/path/to/disk.dd', '/dev/sda')\n            session_id: Session ID for workspace management\n\n        Returns:\n            Comprehensive disk analysis results with:\n            - partitions: Partition table layout\n            - filesystem: Filesystem metadata\n            - files: Complete file listing\n            - timeline_generated: Timeline creation status\n            - timeline_path: Path to generated timeline CSV\n            - deleted_files: List of deleted files\n            - hashes: File hash database\n            - summary: Analysis summary\n\n        Example:\n            auto_disk_analysis(\n                disk_image=\"/evidence/disk.dd\",\n                session_id=\"forensics_002\"\n            )\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "disk_image",
+          "session_id"
+        ],
+        "properties": {
+          "disk_image": {
+            "type": "string",
+            "title": "Disk Image"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "auto_malware_hunt",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Automated malware hunting and analysis workflow.\n\n        Combines multiple tools for comprehensive malware analysis:\n        - Phase 1: YARA rule scanning (signature detection)\n        - Phase 2: String extraction and IOC identification\n        - Phase 3: File type identification\n        - Phase 4: Entropy analysis (packer detection)\n        - Phase 5: Hash generation (MD5, SHA256)\n        - Phase 6: Metadata extraction (EXIF)\n        - Phase 7: Binary structure analysis (binwalk)\n\n        Automatically detects:\n        - Known malware signatures (YARA)\n        - Suspicious strings (IPs, domains, registry keys)\n        - Packed/encrypted executables (high entropy)\n        - File anomalies and embedded files\n\n        Args:\n            target: Path to file, directory, or memory dump to analyze\n            session_id: Session ID for workspace management\n            scan_type: Type of scan - 'file', 'directory', or 'memory' (default: 'file')\n\n        Returns:\n            Comprehensive malware analysis results with:\n            - yara_matches: YARA rule hits\n            - extracted_iocs: Indicators of Compromise (IPs, domains)\n            - file_type: File identification\n            - entropy: Entropy score (packer detection)\n            - hashes: MD5 and SHA256 hashes\n            - metadata: EXIF metadata\n            - binwalk: Embedded file analysis\n            - summary: Threat assessment with indicators\n\n        Example:\n            auto_malware_hunt(\n                target=\"/samples/suspicious.exe\",\n                session_id=\"malware_001\",\n                scan_type=\"file\"\n            )\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "target",
+          "session_id"
+        ],
+        "properties": {
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "scan_type": {
+            "type": "string",
+            "title": "Scan Type",
+            "default": "file"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "aws_enumerate",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Enumerate AWS resources using AWS CLI. Requires configured AWS credentials.\n\n        Args:\n            profile: AWS CLI profile name (default: 'default')\n            service: AWS service - 's3', 'ec2', 'iam', 'lambda', etc.\n            command: Command type - 'list' for listing resources\n\n        Returns:\n            Enumerated AWS resources (buckets, instances, users, etc.)\n        ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "title": "Command",
+            "default": "list"
+          },
+          "profile": {
+            "type": "string",
+            "title": "Profile",
+            "default": "default"
+          },
+          "service": {
+            "type": "string",
+            "title": "Service",
+            "default": "s3"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "s3_bucket_scan",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Scan S3 buckets for misconfigurations and public access.\n\n        Args:\n            bucket_name: Specific S3 bucket name to test\n            wordlist: Path to wordlist file for bucket name enumeration (alternative to bucket_name)\n\n        Returns:\n            S3 bucket accessibility and contents\n        ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "wordlist": {
+            "type": "string",
+            "title": "Wordlist",
+            "default": ""
+          },
+          "bucket_name": {
+            "type": "string",
+            "title": "Bucket Name",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "cloud_metadata_query",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Query cloud metadata service for credentials and instance information.\n\n        Args:\n            provider: Cloud provider - 'aws', 'gcp', or 'azure'\n            endpoint: Metadata endpoint path (e.g., 'iam/security-credentials/' for AWS)\n\n        Returns:\n            Cloud metadata including potential credentials and instance info\n        ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "title": "Endpoint",
+            "default": ""
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider",
+            "default": "aws"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "pacu_aws_exploit",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "\n        Execute Pacu AWS exploitation framework modules. WARNING: Can modify AWS resources.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            module: Pacu module name (e.g., 'iam__enum_permissions', 's3__download_bucket')\n            pacu_session: Pacu session name (default: 'default')\n\n        Returns:\n            Pacu module execution results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "module"
+        ],
+        "properties": {
+          "module": {
+            "type": "string",
+            "title": "Module"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "pacu_session": {
+            "type": "string",
+            "title": "Pacu Session",
+            "default": "default"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "slither_analyze",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Analyze Solidity smart contracts with Slither static analysis tool. Detects vulnerabilities and code issues.\n\n        Args:\n            contract_path: Path to .sol contract file on Kali server\n            additional_args: Additional slither args like '--detect reentrancy' or '--exclude-informational'\n\n        Returns:\n            Smart contract vulnerabilities, detectors results, and security findings\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "contract_path"
+        ],
+        "properties": {
+          "contract_path": {
+            "type": "string",
+            "title": "Contract Path"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "mythril_analyze",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Analyze smart contracts with Mythril symbolic execution engine. Finds complex vulnerabilities through symbolic analysis.\n\n        Args:\n            contract_path: Path to .sol contract file on Kali server\n            timeout: Analysis timeout in seconds (default: 300)\n            additional_args: Additional mythril args like '--max-depth 10'\n\n        Returns:\n            Detected vulnerabilities with severity levels and exploit scenarios\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "contract_path"
+        ],
+        "properties": {
+          "timeout": {
+            "type": "integer",
+            "title": "Timeout",
+            "default": 300
+          },
+          "contract_path": {
+            "type": "string",
+            "title": "Contract Path"
+          },
+          "additional_args": {
+            "type": "string",
+            "title": "Additional Args",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "web3_interact",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": true
+      },
+      "description": "\n        Interact with blockchain networks using web3.py. WARNING: Can execute transactions and spend gas.\n\n        Args:\n            session_id: Session ID from create_analysis_session()\n            script: Complete Python script using web3.py\n            script_name: Filename to save script as (default: 'web3_interact.py')\n\n        Returns:\n            Blockchain interaction results including transaction hashes and contract responses\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "script"
+        ],
+        "properties": {
+          "script": {
+            "type": "string",
+            "title": "Script"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "script_name": {
+            "type": "string",
+            "title": "Script Name",
+            "default": "web3_interact.py"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "solidity_compile",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Compile Solidity smart contracts using solc compiler.\n\n        Args:\n            contract_path: Path to .sol contract file on Kali server\n            optimize: Enable optimizer for gas efficiency (default: False)\n            output_dir: Output directory for compiled artifacts (default: '/tmp/solc_output')\n\n        Returns:\n            Compiled contract bytecode and ABI\n        ",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "contract_path"
+        ],
+        "properties": {
+          "optimize": {
+            "type": "boolean",
+            "title": "Optimize",
+            "default": false
+          },
+          "output_dir": {
+            "type": "string",
+            "title": "Output Dir",
+            "default": "/tmp/solc_output"
+          },
+          "contract_path": {
+            "type": "string",
+            "title": "Contract Path"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "object",
+            "title": "Result",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 57,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@PaulGG-Code/kali_mcp-mcp-server/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "nmap_scan",
+    "gobuster_scan",
+    "dirb_scan",
+    "nikto_scan",
+    "sqlmap_scan",
+    "metasploit_run",
+    "hydra_attack",
+    "john_crack",
+    "wpscan_analyze",
+    "enum4linux_scan",
+    "masscan_scan",
+    "ffuf_scan",
+    "searchsploit_find",
+    "apktool_decompile",
+    "jadx_decompile",
+    "server_health",
+    "execute_command",
+    "create_analysis_session",
+    "save_analysis_result",
+    "load_analysis_results",
+    "upload_binary",
+    "list_session_files",
+    "start_interactive_shell",
+    "send_to_shell",
+    "read_shell_output",
+    "close_shell",
+    "checksec_binary",
+    "find_rop_gadgets",
+    "analyze_with_radare2",
+    "disassemble_binary",
+    "trace_syscalls",
+    "trace_library_calls",
+    "extract_strings",
+    "run_pwntools_exploit",
+    "auto_detect_vulnerabilities",
+    "hashcat_crack",
+    "factordb_query",
+    "rsa_attack",
+    "sage_execute",
+    "openssl_operation",
+    "volatility_analyze",
+    "binwalk_analyze",
+    "steghide_extract",
+    "foremost_carve",
+    "exiftool_analyze",
+    "tesseract_ocr",
+    "auto_memory_analysis",
+    "auto_disk_analysis",
+    "auto_malware_hunt",
+    "aws_enumerate",
+    "s3_bucket_scan",
+    "cloud_metadata_query",
+    "pacu_aws_exploit",
+    "slither_analyze",
+    "mythril_analyze",
+    "web3_interact",
+    "solidity_compile"
+  ]
+}

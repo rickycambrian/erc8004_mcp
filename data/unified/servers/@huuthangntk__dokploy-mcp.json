@@ -1,0 +1,775 @@
+{
+  "id": "@huuthangntk/dokploy-mcp",
+  "name": "@huuthangntk/dokploy-mcp",
+  "display_name": "Dokploy Deployments",
+  "version": null,
+  "description": "Manage Dokploy projects, applications, databases, domains, and backups from one place. Deploy from Git repositories, monitor status and logs, and control start/stop/restart actions effortlessly. Streamline workflows with guided prompts for app deployment, database setup, and troubleshooting.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all projects in your Dokploy instance",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create a new project in Dokploy",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Project name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Project description"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete-project",
+      "title": "Delete Project",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Delete a project from Dokploy",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "The ID of the project to delete"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list-applications",
+      "title": "List Applications",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all applications in a project",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "The project ID to list applications from"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create-application",
+      "title": "Create Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create a new application in Dokploy",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectId",
+          "name"
+        ],
+        "properties": {
+          "env": {
+            "type": "object",
+            "description": "Environment variables as key-value pairs",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string",
+            "description": "Application name"
+          },
+          "branch": {
+            "type": "string",
+            "default": "main",
+            "description": "Git branch to deploy"
+          },
+          "appType": {
+            "enum": [
+              "docker",
+              "git",
+              "github"
+            ],
+            "type": "string",
+            "default": "github",
+            "description": "Application type"
+          },
+          "buildPath": {
+            "type": "string",
+            "default": "/",
+            "description": "Build path in repository"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "The project ID to create the application in"
+          },
+          "dockerfile": {
+            "type": "string",
+            "description": "Path to Dockerfile (for docker type)"
+          },
+          "repository": {
+            "type": "string",
+            "description": "Git repository URL (for git/github types)"
+          },
+          "environmentId": {
+            "type": "string",
+            "description": "The environment ID (if not provided, uses the default environment)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "deploy-application",
+      "title": "Deploy Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Deploy an application in Dokploy",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "applicationId"
+        ],
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "description": "The ID of the application to deploy"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "stop-application",
+      "title": "Stop Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Stop a running application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "applicationId"
+        ],
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "description": "The ID of the application to stop"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "start-application",
+      "title": "Start Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Start a stopped application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "applicationId"
+        ],
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "description": "The ID of the application to start"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "restart-application",
+      "title": "Restart Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Restart an application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "applicationId"
+        ],
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "description": "The ID of the application to restart"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete-application",
+      "title": "Delete Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Delete an application from Dokploy",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "applicationId"
+        ],
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "description": "The ID of the application to delete"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create-database",
+      "title": "Create Database",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create a new database (PostgreSQL, MySQL, MongoDB, Redis, or MariaDB)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectId",
+          "name",
+          "type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Database name"
+          },
+          "type": {
+            "enum": [
+              "postgres",
+              "mysql",
+              "mongodb",
+              "redis",
+              "mariadb"
+            ],
+            "type": "string",
+            "description": "Database type"
+          },
+          "appName": {
+            "type": "string",
+            "description": "Application name (auto-generated if not provided)"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "The project ID to create the database in"
+          },
+          "databaseName": {
+            "type": "string",
+            "description": "Database name (auto-generated if not provided)"
+          },
+          "databaseUser": {
+            "type": "string",
+            "description": "Database username (auto-generated if not provided)"
+          },
+          "environmentId": {
+            "type": "string",
+            "description": "The environment ID (if not provided, uses the default environment)"
+          },
+          "databasePassword": {
+            "type": "string",
+            "description": "Database password (auto-generated if not provided)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list-databases",
+      "title": "List Databases",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all databases in a project",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "The project ID to list databases from"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list-composes",
+      "title": "List Docker Compose Applications",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all Docker Compose applications in a project",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "The project ID to list compose applications from"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create-compose",
+      "title": "Create Docker Compose Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create a new Docker Compose application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectId",
+          "name"
+        ],
+        "properties": {
+          "env": {
+            "type": "object",
+            "description": "Environment variables as key-value pairs",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string",
+            "description": "Compose application name"
+          },
+          "branch": {
+            "type": "string",
+            "default": "main",
+            "description": "Git branch to deploy"
+          },
+          "appName": {
+            "type": "string",
+            "description": "Application name override"
+          },
+          "buildPath": {
+            "type": "string",
+            "default": "/",
+            "description": "Build path in repository"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "The project ID to create the compose application in"
+          },
+          "repository": {
+            "type": "string",
+            "description": "Git repository URL"
+          },
+          "description": {
+            "type": "string",
+            "description": "Compose application description"
+          },
+          "environmentId": {
+            "type": "string",
+            "description": "The environment ID (if not provided, uses the default environment)"
+          },
+          "dockerComposeFile": {
+            "type": "string",
+            "description": "Docker Compose file content"
+          },
+          "dockerComposeFilePath": {
+            "type": "string",
+            "description": "Path to Docker Compose file in repository"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "deploy-compose",
+      "title": "Deploy Docker Compose Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Deploy a Docker Compose application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "composeId"
+        ],
+        "properties": {
+          "composeId": {
+            "type": "string",
+            "description": "The ID of the compose application to deploy"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "stop-compose",
+      "title": "Stop Docker Compose Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Stop a running Docker Compose application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "composeId"
+        ],
+        "properties": {
+          "composeId": {
+            "type": "string",
+            "description": "The ID of the compose application to stop"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "start-compose",
+      "title": "Start Docker Compose Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Start a stopped Docker Compose application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "composeId"
+        ],
+        "properties": {
+          "composeId": {
+            "type": "string",
+            "description": "The ID of the compose application to start"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "restart-compose",
+      "title": "Restart Docker Compose Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Restart a Docker Compose application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "composeId"
+        ],
+        "properties": {
+          "composeId": {
+            "type": "string",
+            "description": "The ID of the compose application to restart"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete-compose",
+      "title": "Delete Docker Compose Application",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Delete a Docker Compose application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "composeId"
+        ],
+        "properties": {
+          "composeId": {
+            "type": "string",
+            "description": "The ID of the compose application to delete"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list-servers",
+      "title": "List Servers",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all configured servers",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "create-server",
+      "title": "Create Server",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create a new server configuration",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name",
+          "ipAddress"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Server name"
+          },
+          "port": {
+            "type": "number",
+            "default": 22,
+            "description": "SSH port"
+          },
+          "username": {
+            "type": "string",
+            "default": "root",
+            "description": "SSH username"
+          },
+          "ipAddress": {
+            "type": "string",
+            "description": "Server IP address"
+          },
+          "description": {
+            "type": "string",
+            "description": "Server description"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list-users",
+      "title": "List Users",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all users in the Dokploy instance",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {}
+      }
+    },
+    {
+      "name": "create-user",
+      "title": "Create User",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Create a new user account",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email address"
+          },
+          "isAdmin": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the user should have admin privileges"
+          },
+          "password": {
+            "type": "string",
+            "description": "User password"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update-env-vars",
+      "title": "Update Environment Variables",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Update environment variables for an application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "applicationId",
+          "env"
+        ],
+        "properties": {
+          "env": {
+            "type": "object",
+            "description": "Environment variables as key-value pairs",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "applicationId": {
+            "type": "string",
+            "description": "The application ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list-deployments",
+      "title": "List Deployments",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "List all deployments for an application",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "composeId": {
+            "type": "string",
+            "description": "Compose ID to filter deployments"
+          },
+          "applicationId": {
+            "type": "string",
+            "description": "Application ID to filter deployments"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "cancel-deployment",
+      "title": "Cancel Deployment",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Cancel a running deployment",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "composeId": {
+            "type": "string",
+            "description": "Compose ID"
+          },
+          "applicationId": {
+            "type": "string",
+            "description": "Application ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 26,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@huuthangntk/dokploy-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "list-projects",
+    "create-project",
+    "delete-project",
+    "list-applications",
+    "create-application",
+    "deploy-application",
+    "stop-application",
+    "start-application",
+    "restart-application",
+    "delete-application",
+    "create-database",
+    "list-databases",
+    "list-composes",
+    "create-compose",
+    "deploy-compose",
+    "stop-compose",
+    "start-compose",
+    "restart-compose",
+    "delete-compose",
+    "list-servers",
+    "create-server",
+    "list-users",
+    "create-user",
+    "update-env-vars",
+    "list-deployments",
+    "cancel-deployment"
+  ]
+}

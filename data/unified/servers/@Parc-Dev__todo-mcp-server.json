@@ -1,0 +1,646 @@
+{
+  "id": "@Parc-Dev/todo-mcp-server",
+  "name": "@Parc-Dev/todo-mcp-server",
+  "display_name": "todo-mcp",
+  "version": null,
+  "description": "Organize tasks and subtasks with fast create, update, complete, and reopen actions. Filter views by today, upcoming, overdue, or all to stay focused. Recover mistakes with soft delete and restore.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/b5c01260-90f2-41d2-a675-f750a0eecc43.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "list_tasks",
+      "title": "List Tasks",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List tasks with optional filters (today, upcoming, overdue, all)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "filter": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "enum": [
+                      "today",
+                      "upcoming",
+                      "overdue",
+                      "all"
+                    ],
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter tasks by due date"
+          },
+          "isDeleted": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Include deleted tasks"
+          },
+          "isCompleted": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by completion status"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_task",
+      "title": "Create Task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a new task, generating subtasks created by AI",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "place": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Location where the task should be done (optional)"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "description": "Task title (max 100 chars)"
+          },
+          "dueDate": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Due date in YYYY-MM-DD format (e.g., 2025-08-02). Defaults to today if not provided."
+          },
+          "dueTime": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Due time in ISO 8601 timestamp format in UTC timezone (e.g., 2025-10-01T16:05:28.535Z or 2025-10-01T16:05:28Z). For KST times, convert to UTC (e.g., KST 13:00 \u2192 UTC 04:00). Optional."
+          },
+          "breakdown": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to break down the task into subtasks using AI. Defaults to true. Always use true for new tasks to let AI generate subtasks automatically."
+          },
+          "description": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "You must write Brief summary only (max 150 chars). Detailed steps will go in subtasks."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_task",
+      "title": "Update Task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update an existing task. All fields except taskId are optional.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId"
+        ],
+        "properties": {
+          "place": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Location where the task should be done (optional)"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New task title (max 100 chars, optional)"
+          },
+          "taskId": {
+            "type": "integer",
+            "description": "Task ID (required)",
+            "exclusiveMinimum": 0
+          },
+          "dueDate": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New due date in YYYY-MM-DD format (e.g., 2025-10-01). Optional."
+          },
+          "dueTime": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Due time in ISO 8601 timestamp format in UTC timezone (e.g., 2025-10-01T16:05:28.535Z or 2025-10-01T16:05:28Z). For KST times, convert to UTC (e.g., KST 13:00 \u2192 UTC 04:00). Optional."
+          },
+          "description": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "You must write Brief summary only (max 150 chars). Detailed steps will go in subtasks."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "complete_task",
+      "title": "Complete Task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Mark a task as completed (automatically completes all subtasks)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "integer",
+            "description": "Task ID (required)",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reopen_task",
+      "title": "Reopen Task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Reopen a completed task",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "integer",
+            "description": "Task ID (required)",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_task",
+      "title": "Delete Task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Soft delete a task (recoverable)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "integer",
+            "description": "Task ID (required)",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "undelete_task",
+      "title": "Restore Task",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Restore a deleted task",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "integer",
+            "description": "Task ID (required)",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_subtask",
+      "title": "Create SubTask",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a new subtask under a specified task",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId",
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Subtask title (required)"
+          },
+          "taskId": {
+            "type": "integer",
+            "description": "Parent task ID (required)",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_subtask",
+      "title": "Update SubTask",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Update a subtask's title",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId",
+          "subTaskId"
+        ],
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New subtask title (optional)"
+          },
+          "taskId": {
+            "type": "integer",
+            "description": "Parent task ID (required)",
+            "exclusiveMinimum": 0
+          },
+          "subTaskId": {
+            "type": "integer",
+            "description": "Subtask ID (required)",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "complete_subtask",
+      "title": "Complete SubTask",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Mark a subtask as completed",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId",
+          "subTaskId"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "integer",
+            "description": "Parent task ID (required)",
+            "exclusiveMinimum": 0
+          },
+          "subTaskId": {
+            "type": "integer",
+            "description": "Subtask ID (required)",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reopen_subtask",
+      "title": "Reopen SubTask",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Reopen a completed subtask",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId",
+          "subTaskId"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "integer",
+            "description": "Parent task ID (required)",
+            "exclusiveMinimum": 0
+          },
+          "subTaskId": {
+            "type": "integer",
+            "description": "Subtask ID (required)",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_subtask",
+      "title": "Delete SubTask",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Soft delete a subtask (recoverable)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId",
+          "subTaskId"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "integer",
+            "description": "Parent task ID (required)",
+            "exclusiveMinimum": 0
+          },
+          "subTaskId": {
+            "type": "integer",
+            "description": "Subtask ID (required)",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "undelete_subtask",
+      "title": "Restore SubTask",
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Restore a deleted subtask",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId",
+          "subTaskId"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "integer",
+            "description": "Parent task ID (required)",
+            "exclusiveMinimum": 0
+          },
+          "subTaskId": {
+            "type": "integer",
+            "description": "Subtask ID (required)",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 13,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@Parc-Dev/todo-mcp-server/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "list_tasks",
+    "create_task",
+    "update_task",
+    "complete_task",
+    "reopen_task",
+    "delete_task",
+    "undelete_task",
+    "create_subtask",
+    "update_subtask",
+    "complete_subtask",
+    "reopen_subtask",
+    "delete_subtask",
+    "undelete_subtask"
+  ]
+}

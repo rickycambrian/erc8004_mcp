@@ -1,0 +1,163 @@
+{
+  "qualifiedName": "hex",
+  "displayName": "Hex",
+  "description": "Search your Hex projects and ask questions about your data with threaded analyses. Start a new thread, then monitor progress and retrieve results as they\u2019re ready. Continue the conversation to refine answers and dive deeper into insights.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/36cf40a1-0019-4ff6-b3dd-b0253dcda5ac.jpg",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/hex",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/hex/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "search_projects",
+      "title": "Search Projects",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "description": "Search for projects",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projects"
+        ],
+        "properties": {
+          "projects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "projectId",
+                "title",
+                "description",
+                "generated_summary",
+                "url",
+                "type"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "project",
+                    "app"
+                  ],
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "projectId": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "generated_summary": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_thread",
+      "title": "Create a thread",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a new Hex Thread to ask a question about your data. Hex will use its Threads Agent to analyze your data and then provide a response. The thread will take a few minutes to complete - you should warn the user about this. While the thread is running, you can use the `get_thread` tool to check on its status. You should check at least 10 times, or until the response has the information the user asked for. Once the thread is complete (status is IDLE), you can use the `continue_thread` tool to add follow-up questions or continue the conversation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_thread",
+      "title": "Get a thread by ID",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true
+      },
+      "description": "Fetch a Hex Thread using its ID. You can get an ID when you call the `create_thread` tool. If the thread is not finished yet, it will sleep for a number of seconds before returning the messages. You should warn the user about this. Once the thread is complete (status is IDLE), you can use the `continue_thread` tool to add follow-up questions or continue the conversation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "continue_thread",
+      "title": "Continue thread",
+      "description": "Continue a Hex Thread by adding a new message and triggering the agent to process it. The thread must be in IDLE status to be continued. If the thread is currently running, this will return an error. The thread will take a few minutes to complete - you should warn the user about this. While the thread is running, you can use the `get_thread` tool to check on its status.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id",
+          "prompt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the thread to continue"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The message to add to continue the thread"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:24:59.022917+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,2391 @@
+{
+  "id": "com.getclockwise/clockwise-mcp",
+  "name": "com.getclockwise/clockwise-mcp",
+  "display_name": "com.getclockwise/clockwise-mcp",
+  "version": "1.0.0",
+  "description": "An MCP server for managing your calendar, via Clockwise",
+  "icon_url": null,
+  "repository_url": null,
+  "status": "active",
+  "published_at": "2025-09-15T23:12:29.670365Z",
+  "tools": [
+    {
+      "name": "search_events",
+      "title": "Search Calendar Events",
+      "description": "IMPORTANT: Time ranges must be less than 27 weeks. Split longer periods into multiple calls.\n\n    Find events based on the given query, especially useful for searching by category tags such as 1:1, External, etc.\nUse this to find specific events on the current user's calendar. Broader queries are more likely to find events.\n\nIt allows searching by attendees, title, time ranges, RSVP status, and tags.\n\nPrefer to use category tags to find events by type, such as 1:1, External, etc instead of searching by title.\nAttendee search should be done by calendarId. CalendarId can be found by searching for the person by name using the search_people tool.\n\nIf unsure what properties to search for, fallback to searching by title.\n\n\nExamples:\n- INVALID: more than 27 weeks\n{\n  \"timeRangeSearch\": {\n    \"includeRanges\": [\n      {\n        \"startTime\": \"2025-01-01T00:00:00Z\",\n        \"endTime\": \"2025-08-01T00:00:00Z\"\n      }\n    ]\n  }\n}\n- VALID: less than 27 weeks\n{\n  \"timeRangeSearch\": {\n    \"includeRanges\": [\n      {\n        \"startTime\": \"2025-01-01T00:00:00Z\",\n        \"endTime\": \"2025-06-30T00:00:00Z\"\n      }\n    ]\n  }\n}\n\nReturns:\n  FindEventsResponse containing basic info on the matching events",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "calendarIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional list of calendar IDs to search for events in (if not provided, Clockwise will only search for events in the current user's primary calendar)"
+          },
+          "query": {
+            "type": "object",
+            "properties": {
+              "eventIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "PREFERRED: List of event IDs (externalEventId) to target specific events. Use this when you have event IDs from previous search_events calls - it's more reliable than searching by title or other criteria. If provided, other query parameters are ignored."
+              },
+              "attendeeSearch": {
+                "type": "object",
+                "properties": {
+                  "calendarIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "modifier": {
+                    "type": "string",
+                    "enum": [
+                      "All",
+                      "Any",
+                      "Exact"
+                    ],
+                    "description": "Modifier for attendee search"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "titleSearch": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "modifier": {
+                    "type": "string",
+                    "enum": [
+                      "Contains",
+                      "Like",
+                      "Exact"
+                    ],
+                    "description": "Modifier for title search"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "validRsvps": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "Accepted",
+                    "Declined",
+                    "Tentative",
+                    "NeedsAction"
+                  ]
+                }
+              },
+              "timeRangeSearch": {
+                "type": "object",
+                "properties": {
+                  "includeRanges": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "startTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO datetime string in LOCAL time (WITHOUT timezone offset), e.g. \"2025-08-15T09:00:00\". DO NOT include the timezone offset."
+                        },
+                        "endTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO datetime string in LOCAL time (WITHOUT timezone offset), e.g. \"2025-08-15T10:00:00\". DO NOT include the timezone offset."
+                        }
+                      },
+                      "required": [
+                        "startTime",
+                        "endTime"
+                      ],
+                      "additionalProperties": false,
+                      "description": "IMPORTANT: Must be less than 27 weeks in duration; split any longer time range up into multiple, smaller chunks. Any ranges larger than 27 weeks in duration will cause an error"
+                    }
+                  },
+                  "excludeRanges": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/properties/query/properties/timeRangeSearch/properties/includeRanges/items"
+                    }
+                  },
+                  "includeStart": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/properties/query/properties/timeRangeSearch/properties/includeRanges/items"
+                    }
+                  },
+                  "includeEnd": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/properties/query/properties/timeRangeSearch/properties/includeRanges/items"
+                    }
+                  }
+                },
+                "additionalProperties": false,
+                "description": "\ud83d\udea8 MAX 27 WEEKS DURATION \ud83d\udea8 - Time range search parameters. Any range exceeding 27 weeks will cause an error. Split longer periods into multiple calls"
+              },
+              "validTags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "Conflict",
+                    "External",
+                    "Flexible",
+                    "Hold",
+                    "Internal",
+                    "OneOnOne",
+                    "OOO",
+                    "Recurring"
+                  ]
+                },
+                "description": "Event tags to filter by"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/events.html",
+        "openai/toolInvocation/invoking": "Searching for events",
+        "openai/toolInvocation/invoked": "Found events",
+        "openai/widgetAccessible": true,
+        "openai/resultCanProduceWidget": true,
+        "openai/widgetPrefersBorder": true
+      }
+    },
+    {
+      "name": "fetch_events",
+      "title": "Fetch Event Details",
+      "description": "Fetch events by their IDs from specific calendars. This tool takes a map of calendar IDs to lists of event IDs and fetches the full event details for each event.\n\n    This is useful when you have event IDs from previous search_events calls and want to get the complete event information including all details, such as description, location, attendees, and metadata.\n\n    Input: A map where keys are calendar IDs (email addresses) and values are arrays of event IDs (externalEventId)\n    Output: A map where keys are calendar IDs and values are arrays of simplified event objects",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "eventsByCalendar": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from calendar ID (email) to array of event IDs to fetch from that calendar"
+          }
+        },
+        "required": [
+          "eventsByCalendar"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "search_people",
+      "title": "Search People and Teams",
+      "description": "Search for persons, teams, and groups in the organization using fuzzy string matching.\n\n    IMPORTANT NOTES:\n    - Returns multiple potential matches for each search term using fuzzy string matching\n    - Automatically select the most appropriate match when there's a clear match, and ask for disambiguation when it is not clear. \n    - The tool provides team information as a fallback to help identify users\n    - Returns both direct matches and team-based suggestions\n\n    Input Parameters:\n    - names: List of individual person names to search for (e.g., \"John Smith\", \"Sarah\", \"Mike\") - use fuzzy search on actual people's first/last names, not job titles or team names\n    - teams_groups: List of team or group names to search\n    - include_my_teams: Boolean to include all teams the current user belongs to (useful for discovering available teams without knowing their names).\n\n    Response Structure:\n    - Direct results for each search term (may include fuzzy matches with varying quality)\n    - Suggestions if no direct matches found\n    - For each person: userId, calendarId, full name, profile info\n    - For teams: team_id, team_name, members list\n    - my_info: Always includes current user's information (userId, calendarId)\n\n    Returns essential IDs:\n    - userId: Internal ID for use with fetch_people_by_id\n    - primaryCalendarId: Email/calendar ID for scheduling\n\n    Usage Tips:\n    - Automatically select obvious correct matches (exact name matches or clearly intended person) without asking for disambiguation\n    - Only ask for disambiguation when multiple results are genuinely ambiguous with similar match quality (e.g., \"John Smith\" and \"John Davis\" both match equally well for \"John\")\n    - Use match quality assessment: exact matches > partial matches > fuzzy similarity matches\n    - When fuzzy matching returns unrelated results, ignore the poor matches and proceed with obvious correct matches\n    - For initials or short names, check the team member list in the response\n    - Consider both the name match quality and context clues like teams and roles when determining the best match automatically\n    - Use returned userId with fetch_people_by_id for detailed information\n    - Use calendarId/email for scheduling with create_proposal\n    - Use include_my_teams=true to discover all teams you belong to\n    - For team searches, use keywords rather than full names: \"marketing\" finds teams better than \"marketing team\"",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of individual person names to search for"
+          },
+          "teams_groups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of team or group names to search for"
+          },
+          "include_my_teams": {
+            "type": "boolean",
+            "description": "Whether to include all teams the current user belongs to. Useful for discovering available teams without knowing their names."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/people.html",
+        "openai/toolInvocation/invoking": "Searching for people",
+        "openai/toolInvocation/invoked": "Found people",
+        "openai/widgetAccessible": true,
+        "openai/resultCanProduceWidget": true,
+        "openai/widgetPrefersBorder": true
+      }
+    },
+    {
+      "name": "fetch_people_by_id",
+      "title": "Fetch User Details",
+      "description": "Fetches detailed context for users given their internal user IDs (obtained from search_people results). If no user IDs are provided, it fetches information for the current user.\n      Returns comprehensive information including:\n      - Working hours (timezone, daily schedules, overrides)\n      - Calendar preferences and goals (focus time targets, lunch preferences, meeting style)\n      - Team membership and colleagues\n      - Job function and role (when available)\n      - Scheduling preferences (preferred work times, end-of-day preferences)\n\n      If fetching for the current user, also includes:\n      - Descriptions of calendars relevant to the user\n\n      Input: List of internal user IDs (e.g., [\"e7e0f7dad0914f43ae1f4409f34e4c08\"])\n      Output: Dictionary keyed by user ID with detailed user context\n\n      Use this after search_people to get in-depth information about attendees before scheduling meetings or to understand their work patterns.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "An optional list of user IDs to fetch information for. If not provided, fetches information for the current user."
+          },
+          "includeCurrentUser": {
+            "type": "boolean",
+            "description": "Whether to include the current user in the results."
+          },
+          "showWorkingHoursOverlap": {
+            "type": "boolean",
+            "description": "Whether to include working hours overlap analysis."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "update_preferences",
+      "title": "Update User Preferences",
+      "description": "Update the user's preferences for focus time, lunch, meeting relief, preferred work time, working hours, meeting hours, timezone, and additional scheduling preferences.\n\nThis tool allows you to modify:\n- Focus time preferences (ideal minutes per week/day, minimum minutes per week, auto-decline settings)\n- Lunch preferences (time slot range, duration)\n- Meeting relief settings (fatigue threshold, break duration)\n- Preferred work time (morning/afternoon preference, work days, keep start/end open)\n- Working hours (timezone, daily schedules for base work hours)\n- Meeting hours (timezone, daily schedules for meeting availability)\n- User timezone (e.g., 'America/New_York', 'Europe/London', 'Asia/Tokyo')\n- Additional preferences (map of preference tags to values, e.g., { 'my_team': 'alice, bob, chris', 'preferred_hours': '9-5' })\n\nIMPORTANT:\n- additionalPreferences performs an UPSERT operation that will OVERWRITE all existing additional preferences.\nTo update additional preferences safely:\n1. **ALWAYS use fetch_people_by_id first** to retrieve the user's current additional preferences\n2. Merge your new preferences with the existing ones\n3. Use \"Replace\" action with the complete merged set of preferences\n\nAll parameters are optional - only the ones you specify will be updated.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "focusTime": {
+            "type": "object",
+            "properties": {
+              "idealMinutesPerWeek": {
+                "type": "number",
+                "description": "Ideal focus time minutes per week"
+              },
+              "idealMinutesPerDay": {
+                "type": "number",
+                "description": "Ideal focus time minutes per day"
+              },
+              "minMinutesPerWeek": {
+                "type": "number",
+                "description": "If autodeclineIfMinimumNotMet is true, the minimum focus time minutes per week before auto-declining is enabled"
+              },
+              "autodeclineIfMinimumNotMet": {
+                "type": "boolean",
+                "description": "Whether to auto-decline if minimum focus time isn't met"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Focus time preferences to update"
+          },
+          "lunch": {
+            "type": "object",
+            "properties": {
+              "timeSlotRange": {
+                "type": "object",
+                "properties": {
+                  "min": {
+                    "type": "string",
+                    "enum": [
+                      "T_00_00",
+                      "T_00_30",
+                      "T_01_00",
+                      "T_01_30",
+                      "T_02_00",
+                      "T_02_30",
+                      "T_03_00",
+                      "T_03_30",
+                      "T_04_00",
+                      "T_04_30",
+                      "T_05_00",
+                      "T_05_30",
+                      "T_06_00",
+                      "T_06_30",
+                      "T_07_00",
+                      "T_07_30",
+                      "T_08_00",
+                      "T_08_30",
+                      "T_09_00",
+                      "T_09_30",
+                      "T_10_00",
+                      "T_10_30",
+                      "T_11_00",
+                      "T_11_30",
+                      "T_12_00",
+                      "T_12_30",
+                      "T_13_00",
+                      "T_13_30",
+                      "T_14_00",
+                      "T_14_30",
+                      "T_15_00",
+                      "T_15_30",
+                      "T_16_00",
+                      "T_16_30",
+                      "T_17_00",
+                      "T_17_30",
+                      "T_18_00",
+                      "T_18_30",
+                      "T_19_00",
+                      "T_19_30",
+                      "T_20_00",
+                      "T_20_30",
+                      "T_21_00",
+                      "T_21_30",
+                      "T_22_00",
+                      "T_22_30",
+                      "T_23_00",
+                      "T_23_30"
+                    ],
+                    "description": "Start time for lunch slot (24-hour format)"
+                  },
+                  "max": {
+                    "type": "string",
+                    "enum": [
+                      "T_00_00",
+                      "T_00_30",
+                      "T_01_00",
+                      "T_01_30",
+                      "T_02_00",
+                      "T_02_30",
+                      "T_03_00",
+                      "T_03_30",
+                      "T_04_00",
+                      "T_04_30",
+                      "T_05_00",
+                      "T_05_30",
+                      "T_06_00",
+                      "T_06_30",
+                      "T_07_00",
+                      "T_07_30",
+                      "T_08_00",
+                      "T_08_30",
+                      "T_09_00",
+                      "T_09_30",
+                      "T_10_00",
+                      "T_10_30",
+                      "T_11_00",
+                      "T_11_30",
+                      "T_12_00",
+                      "T_12_30",
+                      "T_13_00",
+                      "T_13_30",
+                      "T_14_00",
+                      "T_14_30",
+                      "T_15_00",
+                      "T_15_30",
+                      "T_16_00",
+                      "T_16_30",
+                      "T_17_00",
+                      "T_17_30",
+                      "T_18_00",
+                      "T_18_30",
+                      "T_19_00",
+                      "T_19_30",
+                      "T_20_00",
+                      "T_20_30",
+                      "T_21_00",
+                      "T_21_30",
+                      "T_22_00",
+                      "T_22_30",
+                      "T_23_00",
+                      "T_23_30"
+                    ],
+                    "description": "End time for lunch slot (24-hour format)"
+                  }
+                },
+                "required": [
+                  "min",
+                  "max"
+                ],
+                "additionalProperties": false,
+                "description": "Time range for lunch slot"
+              },
+              "idealMinutesDuration": {
+                "type": "number",
+                "description": "Ideal lunch duration in minutes"
+              },
+              "minimumMinutesDuration": {
+                "type": "number",
+                "description": "Minimum lunch duration in minutes"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Lunch preferences to update"
+          },
+          "meetingRelief": {
+            "type": "object",
+            "properties": {
+              "meetingFatigueThresholdMinutes": {
+                "type": "number",
+                "description": "Minutes of meetings before relief break is needed"
+              },
+              "meetingReliefBreakMinutes": {
+                "type": "number",
+                "description": "Duration of relief break in minutes"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Meeting relief preferences to update"
+          },
+          "preferredWork": {
+            "type": "object",
+            "properties": {
+              "preferredWorkType": {
+                "type": "string",
+                "enum": [
+                  "Morning",
+                  "Afternoon",
+                  "Any"
+                ],
+                "description": "Preferred work time of day"
+              },
+              "preferredWorkDays": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "Sunday",
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday"
+                  ]
+                },
+                "description": "Preferred work days of the week. Workdays are generally Monday through Friday, don't include Saturdays or Sundays unless they are explicitly mentioned."
+              },
+              "keepStartOfDayOpen": {
+                "type": "boolean",
+                "description": "Whether to keep the start of the day open"
+              },
+              "keepEndOfDayOpen": {
+                "type": "boolean",
+                "description": "Whether to keep the end of the day open"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Preferred work time preferences to update"
+          },
+          "workingHours": {
+            "type": "object",
+            "properties": {
+              "timeZone": {
+                "type": "string",
+                "description": "Timezone for working hours (e.g., 'America/New_York')"
+              },
+              "daySettings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "day": {
+                      "type": "string",
+                      "enum": [
+                        "Sunday",
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday"
+                      ],
+                      "description": "Days of the week the user is working. Workdays are generally Monday through Friday, don't include Saturdays or Sundays unless they are explicitly mentioned."
+                    },
+                    "setting": {
+                      "type": "object",
+                      "properties": {
+                        "minSlot": {
+                          "type": "string",
+                          "enum": [
+                            "T_00_00",
+                            "T_00_30",
+                            "T_01_00",
+                            "T_01_30",
+                            "T_02_00",
+                            "T_02_30",
+                            "T_03_00",
+                            "T_03_30",
+                            "T_04_00",
+                            "T_04_30",
+                            "T_05_00",
+                            "T_05_30",
+                            "T_06_00",
+                            "T_06_30",
+                            "T_07_00",
+                            "T_07_30",
+                            "T_08_00",
+                            "T_08_30",
+                            "T_09_00",
+                            "T_09_30",
+                            "T_10_00",
+                            "T_10_30",
+                            "T_11_00",
+                            "T_11_30",
+                            "T_12_00",
+                            "T_12_30",
+                            "T_13_00",
+                            "T_13_30",
+                            "T_14_00",
+                            "T_14_30",
+                            "T_15_00",
+                            "T_15_30",
+                            "T_16_00",
+                            "T_16_30",
+                            "T_17_00",
+                            "T_17_30",
+                            "T_18_00",
+                            "T_18_30",
+                            "T_19_00",
+                            "T_19_30",
+                            "T_20_00",
+                            "T_20_30",
+                            "T_21_00",
+                            "T_21_30",
+                            "T_22_00",
+                            "T_22_30",
+                            "T_23_00",
+                            "T_23_30"
+                          ]
+                        },
+                        "maxSlot": {
+                          "$ref": "#/properties/workingHours/properties/daySettings/items/properties/setting/properties/minSlot"
+                        },
+                        "excludedSlots": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/properties/workingHours/properties/daySettings/items/properties/setting/properties/minSlot"
+                          },
+                          "description": "Slots that are excluded from the working hours. Only include slots that are explicitly excluded within the min and max slot."
+                        }
+                      },
+                      "required": [
+                        "minSlot",
+                        "maxSlot"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "day",
+                    "setting"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "timeZone",
+              "daySettings"
+            ],
+            "additionalProperties": false,
+            "description": "Working hours preferences to update (Base type)"
+          },
+          "meetingHours": {
+            "type": "object",
+            "properties": {
+              "timeZone": {
+                "type": "string",
+                "description": "Timezone for meeting hours (e.g., 'America/New_York')"
+              },
+              "daySettings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "day": {
+                      "type": "string",
+                      "enum": [
+                        "Sunday",
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday"
+                      ],
+                      "description": "Days of the week the user is working. Workdays are generally Monday through Friday, don't include Saturdays or Sundays unless they are explicitly mentioned."
+                    },
+                    "setting": {
+                      "type": "object",
+                      "properties": {
+                        "minSlot": {
+                          "$ref": "#/properties/workingHours/properties/daySettings/items/properties/setting/properties/minSlot"
+                        },
+                        "maxSlot": {
+                          "$ref": "#/properties/workingHours/properties/daySettings/items/properties/setting/properties/minSlot"
+                        },
+                        "excludedSlots": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/properties/workingHours/properties/daySettings/items/properties/setting/properties/minSlot"
+                          },
+                          "description": "Slots that are excluded from the working hours. Only include slots that are explicitly excluded within the min and max slot."
+                        }
+                      },
+                      "required": [
+                        "minSlot",
+                        "maxSlot"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "day",
+                    "setting"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "timeZone",
+              "daySettings"
+            ],
+            "additionalProperties": false,
+            "description": "Meeting hours preferences to update (Meeting type)"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "User's timezone (e.g., 'America/New_York', 'Europe/London', 'Asia/Tokyo')"
+          },
+          "additionalPreferences": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "UPSERT OPERATION: This will overwrite ALL existing additional preferences. Use fetch_people_by_id first to get current preferences, then merge with new ones before calling this tool. Map of preference tags to preference values (e.g., { 'my_team': 'alice, bob, chris', 'preferred_schedule': '9-5', 'other': 'any other preferences' }). Preferences are sent to the backend as 'tag: value' strings."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "destructiveHint": true
+      }
+    },
+    {
+      "name": "set_calendar_description",
+      "title": "Set Calendar Description",
+      "description": "\n  Set or update the description for a specific calendar identified by its email/calendar ID.\n  Use this description to keep track of anything you learn about the calendar, or anything the user wants to remember about it.\n  ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "calendarId": {
+            "type": "string",
+            "description": "The email/calendar ID of the calendar to update"
+          },
+          "description": {
+            "type": "string",
+            "description": "The new description for the calendar"
+          }
+        },
+        "required": [
+          "calendarId",
+          "description"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "destructiveHint": true
+      }
+    },
+    {
+      "name": "create_proposal",
+      "title": "Create Meeting Proposal",
+      "description": "Manage multiple meetings with different operations in a single request. This can include scheduling new events, updating or rescheduling existing events, or cancelling existing events. Returns a proposal for the given changes, including a link to view in the Clockwise app.\n\n    IMPORTANT: ALL parameters are optional unless explicitly required. When parameters are omitted, Clockwise automatically chooses intelligent defaults based on the user's preferences, calendar settings, and availability patterns. Do NOT ask users for meeting details - instead, provide broad timeranges and let Clockwise optimize.\n\n    When scheduling meetings:\n    - Give Clockwise the widest possible timeranges (multiple days/weeks) so Clockwise can find optimal times\n    - Clockwise sees everyone's calendars and will automatically choose the best time for all attendees\n    - Only specify explicit start and end times when the user explicitly requests them, for example when the user wants to schedule a meeting at an exact time or they want to block off a specific time range, such as a full morning or afternoon.\n    - Omit titles, durations, descriptions, and other details unless explicitly requested - Clockwise will choose appropriate defaults\n\n    When updating or cancelling existing events, use eventIds (e.g., from a previous search_events call).\n\n    IMPORTANT: When scheduling meetings with teams, you must first use search_people to identify individual team members before creating the proposal. The create_proposal tool cannot resolve team names directly - it only accepts individual person names or calendar IDs.\n\n    When scheduling meetings with people or teams, use the search_people tool first to identify attendees and get their calendar IDs.\n    ",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "newEvents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "createOutOfOffice": {
+                  "type": "boolean",
+                  "description": "Whether the event is an out of office event."
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Optional event title. If empty, Clockwise will chose a default title based on attendees and event type."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Optional event description, only include if explicitly requested."
+                },
+                "rsvpStatus": {
+                  "type": "string",
+                  "enum": [
+                    "Accepted",
+                    "Declined",
+                    "Tentative",
+                    "NeedsAction"
+                  ],
+                  "description": "RSVP status for the user. Only set if explicitly requested, otherwise, will use calendar default"
+                },
+                "attendees": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of individual person names (e.g., \"adam\", \"john smith\") or calendar IDs (e.g., \"user@example.com\"). IMPORTANT: This parameter only accepts individual people, NOT team names. If you need to invite a team (e.g., \"engineering team\", \"QA team\"), you must first use the search_people tool to find the individual team members, then include their names or calendar IDs here. For Google Groups, use the \"groupAliases\" parameter instead. If not provided, Clockwise will schedule a single hold with no additional attendees."
+                },
+                "optionalAttendees": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Names or calendar IDs of optional attendees."
+                },
+                "groupAliases": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Calendar IDs of any google groups to include"
+                },
+                "timeRanges": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "startTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "ISO datetime string in LOCAL time (WITHOUT timezone offset), e.g. \"2025-08-15T09:00:00\". DO NOT include the timezone offset."
+                      },
+                      "endTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "ISO datetime string in LOCAL time (WITHOUT timezone offset), e.g. \"2025-08-15T10:00:00\". DO NOT include the timezone offset."
+                      }
+                    },
+                    "required": [
+                      "startTime",
+                      "endTime"
+                    ],
+                    "additionalProperties": false,
+                    "description": "IMPORTANT: Must be less than 27 weeks in duration; split any longer time range up into multiple, smaller chunks. Any ranges larger than 27 weeks in duration will cause an error"
+                  },
+                  "description": "Optional - do not include if not specified by the user. If not set, Clockwise will use a default time range. If set, Clockwise will find the best time for the event within these timeranges. This should be as broad as possible to allow Clockwise the most flexibility in finding the best times."
+                },
+                "excludeTimeRanges": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/properties/newEvents/items/properties/timeRanges/items"
+                  },
+                  "description": "Any timeranges the event should not be in"
+                },
+                "duration": {
+                  "type": "string",
+                  "description": "ISO 8601 duration, e.g. PT30M. Optional, if not included, Clockwise will chose a default duration."
+                },
+                "explicitStartTime": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A set start time for the event as local ISO datetime string (without time zone offset, e.g., \"2025-08-15T09:00:00\"). If not specified by the user, prefer to use the \"timeRanges\" parameter so Clockwise can find the best times.\n      If this date time should be in a time zone other than the user's default time zone, please also set the \"timezone\" parameter."
+                },
+                "explicitEndTime": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "A set end time for the event as local ISO datetime string (without time zone offset, e.g., \"2025-08-15T10:00:00\"). If this date time should be in a time zone other than the user's default time zone, please also set the \"timezone\" parameter."
+                },
+                "recurrenceRule": {
+                  "$ref": "#/properties/newEvents/items/properties/description",
+                  "description": "Recurrence rule string in RRule format, such as RRULE:FREQ=WEEKLY;BYDAY=MO,WE"
+                },
+                "conferenceType": {
+                  "type": "string",
+                  "enum": [
+                    "MEET",
+                    "ZOOM",
+                    "TEAMS_FOR_BUSINESS"
+                  ],
+                  "description": "What type of video conferencing to use. Only set if explicitly requested, otherwise Clockwise will choose a default based on user settings."
+                },
+                "location": {
+                  "$ref": "#/properties/newEvents/items/properties/description",
+                  "description": "Meeting location, optional."
+                },
+                "enableEventFlexibility": {
+                  "type": "boolean",
+                  "description": "Whether to enable Clockwise event flexibility. Optional."
+                },
+                "numOptions": {
+                  "type": "number",
+                  "description": "Number of time options to return. Optional."
+                },
+                "timezone": {
+                  "$ref": "#/properties/newEvents/items/properties/description",
+                  "description": "Timezone for the event (e.g., \"America/New_York\", \"Europe/London\"). Only set if explicitly scheduling in a different timezone than the user's default."
+                },
+                "taskProperties": {
+                  "type": "object",
+                  "properties": {
+                    "deadline": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Date/time (with a time zone offset) that the task must be scheduled by. This will usually match the due date of the underlying task, but can also match a specific time if the user specifies it."
+                    },
+                    "softDeadline": {
+                      "type": "boolean",
+                      "description": "True if the task can be scheduled after its deadline; False if the task _must_ be scheduled before its deadline. Default is false"
+                    },
+                    "completed": {
+                      "type": "boolean",
+                      "description": "Whether the task has been completed, so any events representing it no longer need to hold time on the calendar. Default is false"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "description": "Properties if the event we should create is a task; don't set this field if the event is not a task"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Optional list of new events to create."
+          },
+          "updateRequests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "eventIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of event IDs (externalEventId) to target specific events for updates."
+                },
+                "updateMutation": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "$ref": "#/properties/newEvents/items/properties/description"
+                    },
+                    "description": {
+                      "$ref": "#/properties/updateRequests/items/properties/updateMutation/properties/title"
+                    },
+                    "rsvpStatus": {
+                      "$ref": "#/properties/newEvents/items/properties/rsvpStatus",
+                      "description": "RSVP status for the user. Only set if explicitly requested, otherwise, will use calendar default"
+                    },
+                    "attendees": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "optionalAttendees": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "groupAliases": {
+                      "$ref": "#/properties/newEvents/items/properties/groupAliases"
+                    },
+                    "timeRanges": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/properties/newEvents/items/properties/timeRanges/items"
+                      },
+                      "description": "Optional - do not include if not specified by the user. If not set, Clockwise will use a default time range. If set, Clockwise will find the best time for the event within these timeranges. This should be as broad as possible to allow Clockwise the most flexibility in finding the best times."
+                    },
+                    "excludeTimeRanges": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/properties/newEvents/items/properties/timeRanges/items"
+                      },
+                      "description": "Any timeranges the event should not be in"
+                    },
+                    "duration": {
+                      "$ref": "#/properties/newEvents/items/properties/duration",
+                      "description": "ISO 8601 duration, e.g. PT30M. Optional, if not included, Clockwise will chose a default duration."
+                    },
+                    "explicitStartTime": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "A set start time for the event as local ISO datetime string (without time zone offset, e.g., \"2025-08-15T09:00:00\"). If not specified, prefer to use the \"timeRanges\" parameter so Clockwise can find the best times.\n      If this date time should be in a time zone other than the user's default time zone, please also set the \"timezone\" parameter."
+                    },
+                    "explicitEndTime": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "A set end time for the event as local ISO datetime string (without time zone offset, e.g., \"2025-08-15T10:00:00\"). If this date time should be in a time zone other than the user's default time zone, please also set the \"timezone\" parameter."
+                    },
+                    "recurrenceRule": {
+                      "$ref": "#/properties/newEvents/items/properties/description",
+                      "description": "Recurrence rule string in RRule format, such as RRULE:FREQ=WEEKLY;BYDAY=MO,WE"
+                    },
+                    "conferenceType": {
+                      "$ref": "#/properties/newEvents/items/properties/conferenceType"
+                    },
+                    "location": {
+                      "$ref": "#/properties/updateRequests/items/properties/updateMutation/properties/title"
+                    },
+                    "enableEventFlexibility": {
+                      "type": "boolean",
+                      "description": "Whether to enable Clockwise event flexibility. Optional."
+                    },
+                    "durationDelta": {
+                      "$ref": "#/properties/newEvents/items/properties/duration",
+                      "description": "Duration delta relative to current event duration as ISO 8601 duration, e.g. PT30M to make an event 30 mins longer"
+                    },
+                    "attendeesToRemove": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "startTimeDelta": {
+                      "$ref": "#/properties/newEvents/items/properties/duration",
+                      "description": "Start time delta relative to current event start, as ISO 8601 duration, e.g. PT30M to move an event 30 mins later"
+                    },
+                    "numOptions": {
+                      "type": "number",
+                      "description": "Number of time options to return. Optional."
+                    },
+                    "timezone": {
+                      "$ref": "#/properties/newEvents/items/properties/description",
+                      "description": "Timezone for the event (e.g., \"America/New_York\", \"Europe/London\"). Only set if explicitly scheduling in a different timezone than the user's default."
+                    },
+                    "ignoredEvents": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "findEventsQuery": {
+                            "type": "object",
+                            "properties": {
+                              "eventIds": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "description": "PREFERRED: List of event IDs (externalEventId) to target specific events. Use this when you have event IDs from previous search_events calls - it's more reliable than searching by title or other criteria. If provided, other query parameters are ignored."
+                              },
+                              "attendeeSearch": {
+                                "type": "object",
+                                "properties": {
+                                  "calendarIds": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "modifier": {
+                                    "type": "string",
+                                    "enum": [
+                                      "All",
+                                      "Any",
+                                      "Exact"
+                                    ],
+                                    "description": "Modifier for attendee search"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              "titleSearch": {
+                                "type": "object",
+                                "properties": {
+                                  "title": {
+                                    "type": "string"
+                                  },
+                                  "modifier": {
+                                    "type": "string",
+                                    "enum": [
+                                      "Contains",
+                                      "Like",
+                                      "Exact"
+                                    ],
+                                    "description": "Modifier for title search"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              "validRsvps": {
+                                "type": "array",
+                                "items": {
+                                  "$ref": "#/properties/newEvents/items/properties/rsvpStatus"
+                                }
+                              },
+                              "timeRangeSearch": {
+                                "type": "object",
+                                "properties": {
+                                  "includeRanges": {
+                                    "type": "array",
+                                    "items": {
+                                      "$ref": "#/properties/newEvents/items/properties/timeRanges/items"
+                                    }
+                                  },
+                                  "excludeRanges": {
+                                    "type": "array",
+                                    "items": {
+                                      "$ref": "#/properties/newEvents/items/properties/timeRanges/items"
+                                    }
+                                  },
+                                  "includeStart": {
+                                    "type": "array",
+                                    "items": {
+                                      "$ref": "#/properties/newEvents/items/properties/timeRanges/items"
+                                    }
+                                  },
+                                  "includeEnd": {
+                                    "type": "array",
+                                    "items": {
+                                      "$ref": "#/properties/newEvents/items/properties/timeRanges/items"
+                                    }
+                                  }
+                                },
+                                "additionalProperties": false,
+                                "description": "\ud83d\udea8 MAX 27 WEEKS DURATION \ud83d\udea8 - Time range search parameters. Any range exceeding 27 weeks will cause an error. Split longer periods into multiple calls"
+                              },
+                              "validTags": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "Conflict",
+                                    "External",
+                                    "Flexible",
+                                    "Hold",
+                                    "Internal",
+                                    "OneOnOne",
+                                    "OOO",
+                                    "Recurring"
+                                  ]
+                                },
+                                "description": "Event tags to filter by"
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "calendarId": {
+                            "$ref": "#/properties/newEvents/items/properties/description",
+                            "description": "The calendar that we should look on for events. If we want to look on the calling user's primary calendar, leave this empty"
+                          }
+                        },
+                        "required": [
+                          "findEventsQuery"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "Events to ignore when scheduling; these events will not cause conflicts or impact availability when scheduling"
+                    },
+                    "meetingHoursOverrides": {
+                      "type": "object",
+                      "properties": {
+                        "timeZone": {
+                          "type": "string",
+                          "description": "The time zone for the new meeting hours"
+                        },
+                        "meetingHours": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "start": {
+                                "type": "string",
+                                "format": "date-time",
+                                "description": "ISO datetime string (without time zone offset): Start time of this specific meeting hour range"
+                              },
+                              "end": {
+                                "type": "string",
+                                "format": "date-time",
+                                "description": "ISO datetime string (without time zone offset): End time of this specific meeting hour range"
+                              }
+                            },
+                            "required": [
+                              "start",
+                              "end"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "timeZone",
+                        "meetingHours"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Override the meeting hours for all people involved; This can be used if we know that the stored meeting hours are incorrect or if we just don't want to use them."
+                    },
+                    "taskProperties": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "softDeadline": {
+                              "$ref": "#/properties/newEvents/items/properties/taskProperties/properties/softDeadline"
+                            },
+                            "completed": {
+                              "$ref": "#/properties/newEvents/items/properties/taskProperties/properties/completed"
+                            },
+                            "deadline": {
+                              "anyOf": [
+                                {
+                                  "$ref": "#/properties/newEvents/items/properties/taskProperties/properties/deadline"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "description": "Date/time (with a time zone offset) that the task must be scheduled by. This will usually match the due date of the underlying task, but can also match a specific time if the user specifies it.\nSet this to null if we want to remove the deadline associated with a task"
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Properties if the event is a task; don't set this field if the event is not a task. Set this to null if an event is currently representing a task, and we want to remove the task representation."
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "List of update event requests, each of which should have eventIds to target specific events for updates, and a updateMutation describing the changes to make to those events."
+          },
+          "cancelRequests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of event IDs (externalEventId) to cancel. Use eventIds from previous searches for precise event targeting."
+          },
+          "ignoredEvents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "findEventsQuery": {
+                  "$ref": "#/properties/updateRequests/items/properties/updateMutation/properties/ignoredEvents/items/properties/findEventsQuery"
+                },
+                "calendarId": {
+                  "$ref": "#/properties/newEvents/items/properties/description",
+                  "description": "The calendar that we should look on for events. If we want to look on the calling user's primary calendar, leave this empty"
+                }
+              },
+              "required": [
+                "findEventsQuery"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Events to ignore when scheduling; these events will not cause conflicts or impact availability when scheduling"
+          },
+          "meetingHoursOverrides": {
+            "$ref": "#/properties/updateRequests/items/properties/updateMutation/properties/meetingHoursOverrides",
+            "description": "Optional! IMPORTANT: Do NOT set this unless EXPLICITLY requested. Overrides the meeting hours for all people involved; This can be used if we know that the stored meeting hours are incorrect or if we just don't want to use them."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/create-proposal.html",
+        "openai/toolInvocation/invoking": "Creating meeting proposal",
+        "openai/toolInvocation/invoked": "Created meeting proposal",
+        "openai/widgetAccessible": true,
+        "openai/resultCanProduceWidget": true,
+        "openai/widgetPrefersBorder": true
+      }
+    },
+    {
+      "name": "update_proposal",
+      "title": "Update Meeting Proposal",
+      "description": "\n    Update an existing proposal; can remove current diffs, or add request to create, update, or cancel events.\n\n    In order to update a proposed change from the previous proposal, remove the diff corresponding to that change (by including it in the \"removedDiffs\" field), and then add a new diff with the desired properties into \"addedDiffs\"\n    Example: Changing the title of a previously proposed new event, with diff ID \"diff-12345\":\n    {\n      \"removedDiffs\": [\"diff-12345\"],\n      \"addedDiffs\": [{\n        \"newEvents\": [{ \"title\": \"new title\" }]\n      }]\n    }\n\n    In order to add an update modification (i.e. an action that modifies events that currently exist on the calendar), add it to \"addedDiffs\".\n    Example: Changing the title of an existing event:\n    {\n      \"addedDiffs\": [{\n        \"updateRequests\": [{\n          \"eventIds\": [\"existing-event-id\"],\n          \"updateMutation\": { \"title\": \"new title\" }\n        }]\n      }]\n    }\n\n    Adding diffs takes the same input as create_proposal.\n\n    Returns a new proposal, based off the existing one.\n\n    If there's a previous proposal that has not been confirmed, always try to update that proposal with the new information.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "proposalId": {
+            "type": "string",
+            "description": "The ID of the proposal to update"
+          },
+          "removedDiffs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional list of event IDs to remove from the proposal."
+          },
+          "addedDiffs": {
+            "type": "object",
+            "properties": {
+              "newEvents": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "createOutOfOffice": {
+                      "type": "boolean",
+                      "description": "Whether the event is an out of office event."
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Optional event title. If empty, Clockwise will chose a default title based on attendees and event type."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional event description, only include if explicitly requested."
+                    },
+                    "rsvpStatus": {
+                      "type": "string",
+                      "enum": [
+                        "Accepted",
+                        "Declined",
+                        "Tentative",
+                        "NeedsAction"
+                      ],
+                      "description": "RSVP status for the user. Only set if explicitly requested, otherwise, will use calendar default"
+                    },
+                    "attendees": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of individual person names (e.g., \"adam\", \"john smith\") or calendar IDs (e.g., \"user@example.com\"). IMPORTANT: This parameter only accepts individual people, NOT team names. If you need to invite a team (e.g., \"engineering team\", \"QA team\"), you must first use the search_people tool to find the individual team members, then include their names or calendar IDs here. For Google Groups, use the \"groupAliases\" parameter instead. If not provided, Clockwise will schedule a single hold with no additional attendees."
+                    },
+                    "optionalAttendees": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Names or calendar IDs of optional attendees."
+                    },
+                    "groupAliases": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Calendar IDs of any google groups to include"
+                    },
+                    "timeRanges": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "startTime": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO datetime string in LOCAL time (WITHOUT timezone offset), e.g. \"2025-08-15T09:00:00\". DO NOT include the timezone offset."
+                          },
+                          "endTime": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO datetime string in LOCAL time (WITHOUT timezone offset), e.g. \"2025-08-15T10:00:00\". DO NOT include the timezone offset."
+                          }
+                        },
+                        "required": [
+                          "startTime",
+                          "endTime"
+                        ],
+                        "additionalProperties": false,
+                        "description": "IMPORTANT: Must be less than 27 weeks in duration; split any longer time range up into multiple, smaller chunks. Any ranges larger than 27 weeks in duration will cause an error"
+                      },
+                      "description": "Optional - do not include if not specified by the user. If not set, Clockwise will use a default time range. If set, Clockwise will find the best time for the event within these timeranges. This should be as broad as possible to allow Clockwise the most flexibility in finding the best times."
+                    },
+                    "excludeTimeRanges": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/timeRanges/items"
+                      },
+                      "description": "Any timeranges the event should not be in"
+                    },
+                    "duration": {
+                      "type": "string",
+                      "description": "ISO 8601 duration, e.g. PT30M. Optional, if not included, Clockwise will chose a default duration."
+                    },
+                    "explicitStartTime": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "A set start time for the event as local ISO datetime string (without time zone offset, e.g., \"2025-08-15T09:00:00\"). If not specified by the user, prefer to use the \"timeRanges\" parameter so Clockwise can find the best times.\n      If this date time should be in a time zone other than the user's default time zone, please also set the \"timezone\" parameter."
+                    },
+                    "explicitEndTime": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "A set end time for the event as local ISO datetime string (without time zone offset, e.g., \"2025-08-15T10:00:00\"). If this date time should be in a time zone other than the user's default time zone, please also set the \"timezone\" parameter."
+                    },
+                    "recurrenceRule": {
+                      "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/description",
+                      "description": "Recurrence rule string in RRule format, such as RRULE:FREQ=WEEKLY;BYDAY=MO,WE"
+                    },
+                    "conferenceType": {
+                      "type": "string",
+                      "enum": [
+                        "MEET",
+                        "ZOOM",
+                        "TEAMS_FOR_BUSINESS"
+                      ],
+                      "description": "What type of video conferencing to use. Only set if explicitly requested, otherwise Clockwise will choose a default based on user settings."
+                    },
+                    "location": {
+                      "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/description",
+                      "description": "Meeting location, optional."
+                    },
+                    "enableEventFlexibility": {
+                      "type": "boolean",
+                      "description": "Whether to enable Clockwise event flexibility. Optional."
+                    },
+                    "numOptions": {
+                      "type": "number",
+                      "description": "Number of time options to return. Optional."
+                    },
+                    "timezone": {
+                      "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/description",
+                      "description": "Timezone for the event (e.g., \"America/New_York\", \"Europe/London\"). Only set if explicitly scheduling in a different timezone than the user's default."
+                    },
+                    "taskProperties": {
+                      "type": "object",
+                      "properties": {
+                        "deadline": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Date/time (with a time zone offset) that the task must be scheduled by. This will usually match the due date of the underlying task, but can also match a specific time if the user specifies it."
+                        },
+                        "softDeadline": {
+                          "type": "boolean",
+                          "description": "True if the task can be scheduled after its deadline; False if the task _must_ be scheduled before its deadline. Default is false"
+                        },
+                        "completed": {
+                          "type": "boolean",
+                          "description": "Whether the task has been completed, so any events representing it no longer need to hold time on the calendar. Default is false"
+                        }
+                      },
+                      "additionalProperties": false,
+                      "description": "Properties if the event we should create is a task; don't set this field if the event is not a task"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "description": "Optional list of new events to create."
+              },
+              "updateRequests": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "eventIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of event IDs (externalEventId) to target specific events for updates."
+                    },
+                    "updateMutation": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/description"
+                        },
+                        "description": {
+                          "$ref": "#/properties/addedDiffs/properties/updateRequests/items/properties/updateMutation/properties/title"
+                        },
+                        "rsvpStatus": {
+                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/rsvpStatus",
+                          "description": "RSVP status for the user. Only set if explicitly requested, otherwise, will use calendar default"
+                        },
+                        "attendees": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "optionalAttendees": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "groupAliases": {
+                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/groupAliases"
+                        },
+                        "timeRanges": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/timeRanges/items"
+                          },
+                          "description": "Optional - do not include if not specified by the user. If not set, Clockwise will use a default time range. If set, Clockwise will find the best time for the event within these timeranges. This should be as broad as possible to allow Clockwise the most flexibility in finding the best times."
+                        },
+                        "excludeTimeRanges": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/timeRanges/items"
+                          },
+                          "description": "Any timeranges the event should not be in"
+                        },
+                        "duration": {
+                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/duration",
+                          "description": "ISO 8601 duration, e.g. PT30M. Optional, if not included, Clockwise will chose a default duration."
+                        },
+                        "explicitStartTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "A set start time for the event as local ISO datetime string (without time zone offset, e.g., \"2025-08-15T09:00:00\"). If not specified, prefer to use the \"timeRanges\" parameter so Clockwise can find the best times.\n      If this date time should be in a time zone other than the user's default time zone, please also set the \"timezone\" parameter."
+                        },
+                        "explicitEndTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "A set end time for the event as local ISO datetime string (without time zone offset, e.g., \"2025-08-15T10:00:00\"). If this date time should be in a time zone other than the user's default time zone, please also set the \"timezone\" parameter."
+                        },
+                        "recurrenceRule": {
+                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/description",
+                          "description": "Recurrence rule string in RRule format, such as RRULE:FREQ=WEEKLY;BYDAY=MO,WE"
+                        },
+                        "conferenceType": {
+                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/conferenceType"
+                        },
+                        "location": {
+                          "$ref": "#/properties/addedDiffs/properties/updateRequests/items/properties/updateMutation/properties/title"
+                        },
+                        "enableEventFlexibility": {
+                          "type": "boolean",
+                          "description": "Whether to enable Clockwise event flexibility. Optional."
+                        },
+                        "durationDelta": {
+                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/duration",
+                          "description": "Duration delta relative to current event duration as ISO 8601 duration, e.g. PT30M to make an event 30 mins longer"
+                        },
+                        "attendeesToRemove": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "startTimeDelta": {
+                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/duration",
+                          "description": "Start time delta relative to current event start, as ISO 8601 duration, e.g. PT30M to move an event 30 mins later"
+                        },
+                        "numOptions": {
+                          "type": "number",
+                          "description": "Number of time options to return. Optional."
+                        },
+                        "timezone": {
+                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/description",
+                          "description": "Timezone for the event (e.g., \"America/New_York\", \"Europe/London\"). Only set if explicitly scheduling in a different timezone than the user's default."
+                        },
+                        "ignoredEvents": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "findEventsQuery": {
+                                "type": "object",
+                                "properties": {
+                                  "eventIds": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "description": "PREFERRED: List of event IDs (externalEventId) to target specific events. Use this when you have event IDs from previous search_events calls - it's more reliable than searching by title or other criteria. If provided, other query parameters are ignored."
+                                  },
+                                  "attendeeSearch": {
+                                    "type": "object",
+                                    "properties": {
+                                      "calendarIds": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "modifier": {
+                                        "type": "string",
+                                        "enum": [
+                                          "All",
+                                          "Any",
+                                          "Exact"
+                                        ],
+                                        "description": "Modifier for attendee search"
+                                      }
+                                    },
+                                    "additionalProperties": false
+                                  },
+                                  "titleSearch": {
+                                    "type": "object",
+                                    "properties": {
+                                      "title": {
+                                        "type": "string"
+                                      },
+                                      "modifier": {
+                                        "type": "string",
+                                        "enum": [
+                                          "Contains",
+                                          "Like",
+                                          "Exact"
+                                        ],
+                                        "description": "Modifier for title search"
+                                      }
+                                    },
+                                    "additionalProperties": false
+                                  },
+                                  "validRsvps": {
+                                    "type": "array",
+                                    "items": {
+                                      "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/rsvpStatus"
+                                    }
+                                  },
+                                  "timeRangeSearch": {
+                                    "type": "object",
+                                    "properties": {
+                                      "includeRanges": {
+                                        "type": "array",
+                                        "items": {
+                                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/timeRanges/items"
+                                        }
+                                      },
+                                      "excludeRanges": {
+                                        "type": "array",
+                                        "items": {
+                                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/timeRanges/items"
+                                        }
+                                      },
+                                      "includeStart": {
+                                        "type": "array",
+                                        "items": {
+                                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/timeRanges/items"
+                                        }
+                                      },
+                                      "includeEnd": {
+                                        "type": "array",
+                                        "items": {
+                                          "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/timeRanges/items"
+                                        }
+                                      }
+                                    },
+                                    "additionalProperties": false,
+                                    "description": "\ud83d\udea8 MAX 27 WEEKS DURATION \ud83d\udea8 - Time range search parameters. Any range exceeding 27 weeks will cause an error. Split longer periods into multiple calls"
+                                  },
+                                  "validTags": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "enum": [
+                                        "Conflict",
+                                        "External",
+                                        "Flexible",
+                                        "Hold",
+                                        "Internal",
+                                        "OneOnOne",
+                                        "OOO",
+                                        "Recurring"
+                                      ]
+                                    },
+                                    "description": "Event tags to filter by"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              "calendarId": {
+                                "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/description",
+                                "description": "The calendar that we should look on for events. If we want to look on the calling user's primary calendar, leave this empty"
+                              }
+                            },
+                            "required": [
+                              "findEventsQuery"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "Events to ignore when scheduling; these events will not cause conflicts or impact availability when scheduling"
+                        },
+                        "meetingHoursOverrides": {
+                          "type": "object",
+                          "properties": {
+                            "timeZone": {
+                              "type": "string",
+                              "description": "The time zone for the new meeting hours"
+                            },
+                            "meetingHours": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "start": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "description": "ISO datetime string (without time zone offset): Start time of this specific meeting hour range"
+                                  },
+                                  "end": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "description": "ISO datetime string (without time zone offset): End time of this specific meeting hour range"
+                                  }
+                                },
+                                "required": [
+                                  "start",
+                                  "end"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "timeZone",
+                            "meetingHours"
+                          ],
+                          "additionalProperties": false,
+                          "description": "Override the meeting hours for all people involved; This can be used if we know that the stored meeting hours are incorrect or if we just don't want to use them."
+                        },
+                        "taskProperties": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "softDeadline": {
+                                  "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/taskProperties/properties/softDeadline"
+                                },
+                                "completed": {
+                                  "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/taskProperties/properties/completed"
+                                },
+                                "deadline": {
+                                  "anyOf": [
+                                    {
+                                      "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/taskProperties/properties/deadline"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Date/time (with a time zone offset) that the task must be scheduled by. This will usually match the due date of the underlying task, but can also match a specific time if the user specifies it.\nSet this to null if we want to remove the deadline associated with a task"
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Properties if the event is a task; don't set this field if the event is not a task. Set this to null if an event is currently representing a task, and we want to remove the task representation."
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "description": "List of update event requests, each of which should have eventIds to target specific events for updates, and a updateMutation describing the changes to make to those events."
+              },
+              "cancelRequests": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of event IDs (externalEventId) to cancel"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Optional JSON Object of new actions to add to the proposal"
+          },
+          "ignoredEvents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "findEventsQuery": {
+                  "$ref": "#/properties/addedDiffs/properties/updateRequests/items/properties/updateMutation/properties/ignoredEvents/items/properties/findEventsQuery"
+                },
+                "calendarId": {
+                  "$ref": "#/properties/addedDiffs/properties/newEvents/items/properties/description",
+                  "description": "The calendar that we should look on for events. If we want to look on the calling user's primary calendar, leave this empty"
+                }
+              },
+              "required": [
+                "findEventsQuery"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Events to ignore when scheduling; these events will not cause conflicts or impact availability when scheduling. \n          Any events provided here will replace the set of ignored events provided with the original proposal\n          Pass in null if we want to remove an existing set of ignored events"
+          },
+          "meetingHoursOverrides": {
+            "anyOf": [
+              {
+                "$ref": "#/properties/addedDiffs/properties/updateRequests/items/properties/updateMutation/properties/meetingHoursOverrides"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Override the meeting hours for all people involved; This can be used if we know that the stored meeting hours are incorrect or if we just don't want to use them.\n        Any meeting hours provided here will replace the existing meeting hour overrides provided with the original proposal.\n        Pass in null if we want to remove the existing meeting hour overrides"
+          }
+        },
+        "required": [
+          "proposalId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/create-proposal.html",
+        "openai/toolInvocation/invoking": "Creating meeting proposal",
+        "openai/toolInvocation/invoked": "Created meeting proposal",
+        "openai/widgetAccessible": true,
+        "openai/resultCanProduceWidget": true,
+        "openai/widgetPrefersBorder": true
+      }
+    },
+    {
+      "name": "confirm_proposal",
+      "title": "Confirm Meeting Proposal",
+      "description": "Confirm the given proposal after the user has reviewed and approved it. This is the final step in the scheduling process and should be called only after explicit user confirmation.\n    ALWAYS prompt the user with the specific event details and get a clear confirmation from the user\u2014such as \"Yes, that looks good\"\u2014before calling this tool. DO NOT INFER CONFIRMATION. NEVER CALL THIS WITHOUT EXPLICIT USER CONFIRMATION.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "description": "ID of the proposal to confirm"
+          },
+          "has_user_viewed_proposal": {
+            "type": "boolean",
+            "description": "Boolean that must be True to proceed with confirmation. This is a safety measure to ensure the user explicitly wants to confirm the proposal."
+          }
+        },
+        "required": [
+          "proposal_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "destructiveHint": true
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/confirm-proposal.html",
+        "openai/toolInvocation/invoking": "Confirming meeting proposal",
+        "openai/toolInvocation/invoked": "Confirmed meeting proposal",
+        "openai/widgetAccessible": true,
+        "openai/resultCanProduceWidget": true,
+        "openai/widgetPrefersBorder": true
+      }
+    },
+    {
+      "name": "cancel_proposal",
+      "title": "Cancel Meeting Proposal",
+      "description": "Cancel the given proposal. This will remove the proposal and any associated scheduling changes.\n    Always prompt the user with the specific event details and get a clear confirmation\u2014such as \"Yes, that looks good\"\u2014before calling this tool. DO NOT INFER CONFIRMATION.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "description": "ID of the proposal to cancel"
+          }
+        },
+        "required": [
+          "proposal_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "destructiveHint": false
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/cancel-proposal.html",
+        "openai/toolInvocation/invoking": "Canceling meeting proposal",
+        "openai/toolInvocation/invoked": "Canceled meeting proposal",
+        "openai/widgetAccessible": true,
+        "openai/resultCanProduceWidget": true,
+        "openai/widgetPrefersBorder": true
+      }
+    },
+    {
+      "name": "get_current_time",
+      "title": "Get Current Time",
+      "description": "Get the current time in a specific timezone.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "timezone": {
+            "type": "string",
+            "description": "The timezone to get the current time in. Leave empty to use the user's timezone, or specify a timezone like \"UTC\", \"America/New_York\", \"Europe/London\", \"Asia/Tokyo\""
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "optimize_schedule",
+      "title": "Optimize Calendar Schedule",
+      "description": "Automatically reorganize your entire calendar by moving existing meetings to create a better overall schedule within your current working hours and preferences.\n\n    Use this when you want to:\n    - Fix a chaotic week by reorganizing existing meetings\n    - Create more focus time by consolidating meeting times  \n    - Resolve conflicts across your entire calendar\n    - Optimize an overloaded schedule without canceling meetings\n\n    DO NOT USE for:\n    - Moving just 1-2 specific meetings\n    - Moving specific meetings to different times\n    - Accommodating timezone changes\n    - Rescheduling around specific constraints or conflicts\n    - Making targeted adjustments to individual meetings\n    For these cases, use search_events + create_proposal instead\n    Note: This tool only suggests moving existing meetings. To schedule new meetings, update specific meetings, or cancel meetings, use create_proposal instead.\n\n    This tool analyzes ALL meetings in the date range and suggests moving them to better times based on your existing timezone, working hours, and calendar preferences. It returns a comprehensive reorganization proposal.\n    \n    The tool returns:\n    - A detailed proposal showing which meetings to move and why\n    - A summary of improvements (focus time gained, conflicts resolved, etc.)\n    - A link to review the full proposal in Clockwise before applying changes\n\n    You can customize the optimization based on the following goals:\n    - meeting_movement: Controls how much we should move existing meetings to optimize the schedule\n      - 1: Minimal - minimize meeting movement (events are only moved for high priority reasons such as to resolve conflicts)\n      - 2: Balanced approach\n      - 3: Maximum - allow maximum movement of events to optimize the schedule\n    \n    - meeting_density: Adjusts how Clockwise spaces or clusters your meetings throughout the day.\n      - 1: Spread out meetings throughout the week, breaking up back to back meetings to allow more breaks and meeting relief\n      - 2: Balanced approach (medium weights)\n      - 3: Cluster meetings together to optimize for Focus Time and No Meeting Days\n\n    - consideration_level: Adjusts how much we consider your team's needs versus your own when optimizing your schedule\n      - 1: Prioritize my time\n      - 2: Balanced\n      - 3: Adapt for the team\n\n    Returns a proposal containing suggested meeting moves, including a link to view the proposal in the Clockwise app. This link should be displayed to the user so they can review the proposal online.\n    The returned proposal ID can be passed to other tools in this MCP server.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date in YYYY-MM-DD format (e.g., \"2025-08-15\")"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "End date in YYYY-MM-DD format (e.g., \"2025-08-19\")"
+          },
+          "meeting_movement": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "description": "Controls how much to move existing meetings (1, 2, or 3, default: 2). 1=Minimal, 2=Balanced, 3=aggressive optimization"
+          },
+          "meeting_density": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "description": "Controls meeting density preferences (1, 2, or 3, default: 2). 1=Spread out, 2=Balanced, 3=Clustered"
+          },
+          "consideration_level": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "description": "Consideration level (1, 2, or 3, default: 2). 1=Prioritize my time, 2=balanced, 3=Adapt for the team"
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "_meta": {
+        "openai/outputTemplate": "ui://widget/create-proposal.html",
+        "openai/toolInvocation/invoking": "Creating meeting proposal",
+        "openai/toolInvocation/invoked": "Created meeting proposal",
+        "openai/widgetAccessible": true,
+        "openai/resultCanProduceWidget": true,
+        "openai/widgetPrefersBorder": true
+      }
+    },
+    {
+      "name": "fetch_calendar_stats",
+      "title": "Fetch Calendar Analytics",
+      "description": "Fetch calendar analytics data for specified calendar IDs by week. Analyzes calendar patterns and time allocation.\n\n    This tool provides insights into time distribution, including:\n    - Meeting vs focus time breakdown\n    - Calendar density and fragmentation analysis  \n    - Time allocation patterns by day of week\n\n    Returns aggregated statistics for the requested historical period:\n    - Overall metrics: focusMinutes, busyMinutes, fragmentedMinutes, totalMinutes\n    - scoresByDay: Aggregated totals by day of week (e.g., total focus minutes across all Mondays)\n    - scoresByDate: Daily breakdown for each date in the range\n\n    \n    IMPORTANT: Time range must be less than 27 weeks in duration. If you need to fetch data over a longer period of time, split into multiple call of this tool with different time ranges.\n\n    Uses the user's timezone for all calculations. If no calendar IDs provided, defaults to the current user's calendar. If no date range provided, defaults to the current week (Monday to Sunday).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "calendarIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of calendar IDs to fetch statistics for. Each calendar ID should be a valid email address or calendar identifier. If not provided, fetches stats for the current user's calendar."
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date for the statistics period (YYYY-MM-DD format)"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "End date for the statistics period (YYYY-MM-DD format)"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "get_scheduling_links",
+      "title": "Get Scheduling Links",
+      "description": "Get all scheduling links for the current user.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "create_scheduling_link",
+      "title": "Create Scheduling Link",
+      "description": "Create a scheduling link with the provided meeting settings. Returns the link and a summary\n    availability text with suggested times to be shown to the user to share their availability.\n    Start with the defaults for all settings that have defaults.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "meetingSettings": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Display name for the scheduling link. This will be used in the title of the scheduling link\n      and the created event, so make it short but descriptive. If no other details are provided, use a default name such as \"Meeting with <Name>\"."
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional description for the scheduling link."
+              },
+              "timingSettings": {
+                "type": "object",
+                "properties": {
+                  "durations": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "default": [
+                      30,
+                      60
+                    ],
+                    "description": "The option for meeting duration that will be presented by the scheduling link. The selected\n      option determines the length of the meeting that will be created. This field is an array of\n      available meeting durations in minutes, e.g. [30, 60]. Default is [30, 60]."
+                  },
+                  "defaultDuration": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "Default duration in minutes, e.g. 30. Default is 30."
+                  },
+                  "timeRange": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "RollingWindow",
+                            "description": "RollingWindow"
+                          },
+                          "windowSizeDays": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "windowSizeDays"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The time range is a rolling window, which means the link can create meetings from now until a\n      fixed number of days in the future."
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "Range",
+                            "description": "Range"
+                          },
+                          "startDate": {
+                            "type": "string",
+                            "format": "date",
+                            "description": "The start date of the time range."
+                          },
+                          "endDate": {
+                            "type": "string",
+                            "format": "date",
+                            "description": "The end date (inclusive) of the time range."
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "startDate",
+                          "endDate"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The time range is a fixed range of dates, which means the link can create meetings over a\n      fixed range of dates."
+                      }
+                    ],
+                    "description": "The time range over which meetings can be created with the link."
+                  }
+                },
+                "required": [
+                  "timeRange"
+                ],
+                "additionalProperties": false,
+                "description": "\n      Timing settings for the scheduling link. durations and defaultDuration control the length of\n      the meeting that can be created by the link. periodType and timeRange determine the time range\n      over which the meetings can be created by the link."
+              },
+              "locationType": {
+                "type": "string",
+                "enum": [
+                  "Meet",
+                  "Zoom",
+                  "Teams",
+                  "InDescription"
+                ],
+                "default": "Zoom",
+                "description": "Type of meeting location: Meet for Google Meet, Zoom for Zoom. InDescription means the\n      location will be provided in the meeting settings description field."
+              },
+              "linkMembers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "calendarId": {
+                      "type": "string",
+                      "description": "Calendar ID of the link member."
+                    },
+                    "isRequired": {
+                      "type": "boolean",
+                      "default": true,
+                      "description": "\n            Whether this member is required for the meeting. The link will only present meeting\n            times when all required members are available. This is ignored for round robin links. By\n            default, use true."
+                    },
+                    "schedulingPriority": {
+                      "type": "string",
+                      "enum": [
+                        "DO_NOT_SCHEDULE",
+                        "LOW",
+                        "MEDIUM",
+                        "HIGH"
+                      ],
+                      "default": "HIGH",
+                      "description": "\n              Round robin scheduling priority for this member. This is only applicable to round\n              robin links and is required in that case.  HIGH is the highest priority, and LOW is\n              the lowest priority. If a meeting time is selected where multiple members are\n              available, a higher-priority member will be selected to attend before a lower-priority\n              member. DO_NOT_SCHEDULE means this member will never be selected to attend. By\n              default, set all members to priority HIGH."
+                    }
+                  },
+                  "required": [
+                    "calendarId"
+                  ],
+                  "additionalProperties": false
+                },
+                "description": "Attendees to include in this link. If the current user is not included, they will be\n      automatically added as required. If they are not required, make sure to include them as\n      optional."
+              },
+              "isActive": {
+                "type": "boolean",
+                "description": "Whether the link is active or inactive. This must not be set when the link is created, since\n      all newly-created links are active."
+              },
+              "bookableHours": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "WorkingHours"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Use the attendees' working hours as the bookable hours for the link."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "MeetingHours"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Use the attendees' meeting hours as the bookable hours for the link."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "CustomHours"
+                      },
+                      "respectNonOwnerConstraints": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "\n              Also respect the working and meeting hours of all required attendees when determining\n              available times. If true, the available hours will be the intersection of the custom\n              hours and the working and meeting hours of all required attendees. If false, only the\n              custom hours will be considered when determining available times."
+                      },
+                      "schedule": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "day": {
+                              "type": "string",
+                              "enum": [
+                                "Sunday",
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday"
+                              ]
+                            },
+                            "timeRanges": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "startTime": {
+                                    "type": "string",
+                                    "format": "time"
+                                  },
+                                  "endTime": {
+                                    "type": "string",
+                                    "format": "time"
+                                  }
+                                },
+                                "required": [
+                                  "startTime",
+                                  "endTime"
+                                ],
+                                "additionalProperties": false,
+                                "description": "\n    A time range within the day during which a link may be scheduled. Times are interpreted in the\n    time zone of the user that owns the link."
+                              }
+                            }
+                          },
+                          "required": [
+                            "day",
+                            "timeRanges"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "description": "A weekly schedule for the bookable hours, specifying available time ranges for each day\n          of the week."
+                      },
+                      "dateOverrides": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "date": {
+                              "type": "string",
+                              "format": "date"
+                            },
+                            "timeRanges": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/properties/meetingSettings/properties/bookableHours/anyOf/2/properties/schedule/items/properties/timeRanges/items"
+                              }
+                            }
+                          },
+                          "required": [
+                            "date",
+                            "timeRanges"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "description": "Overrides for the weekly schedule, specifying available time ranges for specific dates."
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "schedule",
+                      "dateOverrides"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Use the provided custom time ranges as the bookable hours for the link."
+                  }
+                ],
+                "default": {
+                  "type": "MeetingHours"
+                },
+                "description": "Determines the time ranges that are available to be scheduled\n    with the given link. Working and meeting hours are evaluated for all required attendees on the\n    link. WorkingHours is not available for group links. By default, use MeetingHours."
+              },
+              "availabilityType": {
+                "type": "string",
+                "enum": [
+                  "MaximizeAvailability",
+                  "BalanceAvailabilityAndFocus",
+                  "MaximizeFocsTime"
+                ],
+                "default": "BalanceAvailabilityAndFocus",
+                "description": "\n      Use MaximizeFocusTime to only show meeting times that won't interfere with your focus time blocks. This protects your deep work but may limit scheduling options.\n      Use MaximizeAvailability to show all possible meeting times without considering focus time impact. This gives the most scheduling options.\n      BalanceAvailabilityAndFocus shows all available times but labels those that would conflict with focus time as \"inconvenient.\" This gives people options while highlighting which times are better for you.\n      By default, use BalanceAvailabilityAndFocus. Round robin links must use MaximizeAvailability."
+              },
+              "bookOnNoMeetingDay": {
+                "type": "boolean",
+                "default": true,
+                "description": "If true, allow scheduling meetings on the user's no-meeting days."
+              },
+              "highlightBestTimes": {
+                "type": "boolean",
+                "default": true,
+                "description": "If true, the scheduling link will highlight the best available times based on the user's\n      preferences and availability."
+              },
+              "allowFifteenMinuteMarkBooking": {
+                "type": "boolean",
+                "default": true,
+                "description": "If true, allow booking meetings that start at 15-minute marks (e.g., 9:15, 9:45). If false,\n      meetings may only start at 30-minute marks."
+              },
+              "bookingTimeBufferHours": {
+                "type": "number",
+                "default": 4,
+                "description": "The minimum number of hours between when a meeting is booked and when it can start."
+              },
+              "attendeeQuestions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "isRequired": {
+                      "type": "boolean",
+                      "default": true,
+                      "description": "This question must be answered for the meeting to be scheduled."
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "ShortText",
+                        "LongText",
+                        "PhoneNumber"
+                      ],
+                      "description": "\n      ShortText for a single-line text response, LongText for a multi-line text response,\n      PhoneNumber for a phone number response."
+                    },
+                    "question": {
+                      "type": "string",
+                      "description": "The text of the question to ask the attendee."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "question"
+                  ],
+                  "additionalProperties": false
+                },
+                "default": [],
+                "description": "List of questions to ask the attendee when they are booking the meeting. These questions will\n      be presented on the booking page and the responses will be included in the event\n      description."
+              },
+              "bookingLimit": {
+                "type": "number",
+                "description": "The maximum number of meetings that can be booked using this link. If not set, there is no\n      limit."
+              },
+              "allowAdditionalAttendees": {
+                "type": "boolean",
+                "default": false,
+                "description": "If true, the person booking the meeting can add additional attendees beyond those specified\n      in linkMembers."
+              },
+              "titleTemplate": {
+                "type": "string",
+                "default": "{{scheduler.display_name}} and {{organizer.display_name}}",
+                "description": "\n      An optional template for the event title. This can include variables enclosed in double curly\n      braces. The following variables are supported:\n      - link_name: The name of the link.\n      - organizer.display_name: The display name (full name) of the organizer (the user that owns the\n        link).\n      - organizer.email: The email address of the organizer.\n      - schedular.display_name: The display name (full name) of the person booking the meeting.\n      - scheduler.email: The email address of the person booking the meeting.\n      - attendees: A comma-separated list of the display names of all attendees, including the\n        organizer and the scheduler."
+              },
+              "textOnlyTitle": {
+                "type": "boolean",
+                "default": false,
+                "description": "If true, omit extra emojis or special characters from the event title."
+              },
+              "maxBookingsPerDay": {
+                "type": "number",
+                "description": "The maximum number of meetings that may be booked on a given day with this link. If\n    not specified, there is no daily limit. Both maxBookingsPerDay and maxBookingsPerWeek may be\n    specified."
+              },
+              "maxBookingsPerWeek": {
+                "type": "number",
+                "description": "The maximum number of meetings that may be booked on a given week with this link. If\n    not specified, there is no weekly limit. Both maxBookingsPerDay and maxBookingsPerWeek may be\n    specified."
+              },
+              "roundRobinScheduling": {
+                "type": "boolean",
+                "default": false,
+                "description": "For links with multiple members, whether to use round-robin scheduling to distribute\n    meetings evenly among the members. If false, the link will always schedule meetings with all\n    required members. If true, the link will only schedule meetings with one member at a time,\n    distributing meetings evenly among them based on their schedulingPriority.  This is only\n    applicable to links with multiple members. By default, use false."
+              }
+            },
+            "required": [
+              "name",
+              "timingSettings"
+            ],
+            "additionalProperties": false,
+            "description": "Meeting settings configuration for the scheduling link."
+          }
+        },
+        "required": [
+          "meetingSettings"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "select_scheduling_time",
+      "title": "Select Scheduling Time",
+      "description": "Select a specific time for a proposal by providing a start time. Returns a proposal for a meeting. The user must view the proposal and provide explicit approval before it can be confirmed.\n    IMPORTANT: CALLING THIS TOOL DOES NOT CONSTITUTE CONFIRMATION OF THE PROPOSAL. YOU MUST ASK AND WAIT FOR EXPLICIT CONFIRMATION BEFORE CALLING confirm_proposal.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "proposalId": {
+            "type": "string",
+            "description": "ID of the proposal to edit"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "local ISO string for the new start time of the event (without a time zone, e.g., '2025-08-27T14:30:00')"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Optional! local ISO string for the new end time of the event (without a time zone, e.g., '2025-08-27T15:30:00'). If not provided, will be calculated from event duration."
+          }
+        },
+        "required": [
+          "proposalId",
+          "startTime"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    }
+  ],
+  "tool_count": 16,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://mcp.getclockwise.com/mcp",
+  "packages": [],
+  "sources": [
+    "official"
+  ],
+  "primary_source": "official",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "search_events",
+    "fetch_events",
+    "search_people",
+    "fetch_people_by_id",
+    "update_preferences",
+    "set_calendar_description",
+    "create_proposal",
+    "update_proposal",
+    "confirm_proposal",
+    "cancel_proposal",
+    "get_current_time",
+    "optimize_schedule",
+    "fetch_calendar_stats",
+    "get_scheduling_links",
+    "create_scheduling_link",
+    "select_scheduling_time"
+  ]
+}

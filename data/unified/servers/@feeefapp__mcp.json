@@ -1,0 +1,2848 @@
+{
+  "id": "@feeefapp/mcp",
+  "name": "@feeefapp/mcp",
+  "display_name": "Feeef E-commerce API Server",
+  "version": null,
+  "description": "Enable AI assistants to interact seamlessly with Feeef e-commerce stores, products, and orders using powerful filtering and management tools. Authenticate securely to access user-specific data and perform advanced queries on stores, products, and orders. Simplify e-commerce operations by integrating comprehensive Feeef API capabilities into your AI workflows.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/580cc692-0e94-4281-9dbf-6981f79a27e9.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "users_auth_me",
+      "annotations": {
+        "schema_doc": {
+          "notes": "Primary tool for session validation and profile retrieval",
+          "output": "Complete User profile object with verification timestamps",
+          "permissions": "Self-access only; no additional permissions required",
+          "authentication": "Requires Authorization Bearer token",
+          "backendEndpoint": "GET /users/auth"
+        }
+      },
+      "description": "Retrieve complete profile information for the currently authenticated user. Returns user identity, contact details, verification status, and custom metadata. Essential for session validation and profile display.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "users_auth_update",
+      "annotations": {
+        "schema_doc": {
+          "notes": "Self-modification only; comprehensive field validation and business rules",
+          "schema": "UpdateUserSchema with photo_url->photoUrl mapping",
+          "behavior": "PATCH semantics; verification reset on email/phone changes",
+          "validation": "Phone regex, email uniqueness, name length, URL format",
+          "backendEndpoint": "PATCH /users/auth"
+        }
+      },
+      "description": "Update authenticated user profile with comprehensive validation. Supports name, email, phone, avatar, and custom metadata changes. Includes uniqueness checking and format validation for business compliance.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 2,
+            "description": "Display name (2-32 characters). Shown in UI components, order confirmations, and communications. Supports Unicode for international names."
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Contact email address (RFC-compliant format). Must be unique across all users. Used for notifications, password recovery, and account verification."
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "^0(5|6|7)\\d{8}$|^0(2)\\d{7}$",
+            "description": "Phone number in Palestinian/regional format. Mobile: 0591234567 (05/06/07 + 8 digits). Landline: 022345678 (02 + 7 digits). Used for SMS notifications and 2FA."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Custom JSON metadata for app-specific data. Store user preferences, integration tokens, custom fields. Limit: <10KB for performance. Avoid sensitive data.",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          },
+          "photoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Profile avatar image URL. Must be valid HTTP/HTTPS URL. HTTPS preferred for security. Empty value may display default avatar. Recommended size: 200x200px."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "stores_list",
+      "annotations": {
+        "schema_doc": {
+          "filters": [
+            "name",
+            "limit",
+            "page"
+          ],
+          "required": [
+            "user"
+          ],
+          "backendEndpoint": "GET /users/stores?user= or /stores"
+        }
+      },
+      "description": "List stores with comprehensive filtering options for merchant management. Requires user authentication. Mirrors backend store listing schema.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "user"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Exact store name match for filtering"
+          },
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination (1-based)"
+          },
+          "user": {
+            "type": "string",
+            "description": "User ID of the authenticated user (required - get from \"me\" tool first)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of stores to return (default: backend default, max: 50)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "stores_create",
+      "annotations": {
+        "schema_doc": {
+          "required": [
+            "name",
+            "slug",
+            "userId"
+          ],
+          "fieldMappings": {
+            "iconUrl": "iconUrl",
+            "logoUrl": "logoUrl",
+            "ondarkLogoUrl": "ondarkLogoUrl"
+          },
+          "backendValidator": "CreateStoreSchema"
+        }
+      },
+      "description": "Create a new store with comprehensive configuration options matching backend CreateStoreSchema. Requires name, slug, and userId.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name",
+          "slug",
+          "userId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 2,
+            "description": "Store display name (2-32 characters)"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "maxLength": 32,
+            "minLength": 2,
+            "description": "URL-safe store identifier (2-32 chars, lowercase, hyphens allowed, globally unique)"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 2,
+            "description": "SEO/page title"
+          },
+          "domain": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 32,
+                "minLength": 2
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "verifiedAt": {
+                "type": "string"
+              }
+            },
+            "description": "Custom domain configuration",
+            "additionalProperties": false
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID who will own this store (required)"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Primary store address"
+          },
+          "iconUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Small logo/favicon image URL"
+          },
+          "logoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Primary brand logo URL"
+          },
+          "contacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "value"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "maxLength": 32,
+                  "minLength": 2
+                },
+                "value": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "minLength": 2
+                },
+                "metadata": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Store contact information"
+          },
+          "iconFile": {
+            "type": "object",
+            "description": "Icon file upload data",
+            "additionalProperties": {}
+          },
+          "logoFile": {
+            "type": "object",
+            "description": "Logo file upload data",
+            "additionalProperties": {}
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {},
+            "description": "Custom metadata",
+            "additionalProperties": false
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "Multiple store addresses"
+          },
+          "blockedAt": {
+            "type": "string",
+            "description": "Store blocking timestamp"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "not": {}
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "slug": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "description": "Store category classifications"
+          },
+          "decoration": {
+            "type": "object",
+            "description": "Store visual decoration settings",
+            "additionalProperties": {}
+          },
+          "verifiedAt": {
+            "type": "string",
+            "description": "Store verification timestamp"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 2,
+            "description": "Store description for listings/SEO"
+          },
+          "integrations": {
+            "type": "object",
+            "properties": {
+              "metaPixel": {
+                "type": "object",
+                "properties": {
+                  "pixels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "objective": {
+                          "enum": [
+                            "purchase",
+                            "lead",
+                            "viewContent",
+                            "addToCart",
+                            "initiateCheckout"
+                          ],
+                          "type": "string"
+                        },
+                        "accessToken": {
+                          "type": "string"
+                        },
+                        "draftObjective": {
+                          "enum": [
+                            "purchase",
+                            "lead",
+                            "viewContent",
+                            "addToCart",
+                            "initiateCheckout"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "tiktokPixel": {
+                "type": "object",
+                "properties": {
+                  "pixels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "objective": {
+                          "enum": [
+                            "purchase",
+                            "placeAnOrder",
+                            "viewContent",
+                            "addToWishlist",
+                            "search",
+                            "addPaymentInfo",
+                            "addToCart",
+                            "initiateCheckout",
+                            "completeRegistration"
+                          ],
+                          "type": "string"
+                        },
+                        "accessToken": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "description": "Third-party integrations configuration",
+            "additionalProperties": false
+          },
+          "ondarkLogoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Logo variant for dark backgrounds URL"
+          },
+          "ondarkLogoFile": {
+            "type": "object",
+            "description": "Dark logo file upload data",
+            "additionalProperties": {}
+          },
+          "defaultShippingRates": {
+            "type": "object",
+            "description": "Default shipping rate configuration",
+            "additionalProperties": {}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "stores_update",
+      "annotations": {
+        "schema_doc": {
+          "optionalAll": true,
+          "fieldMappings": {
+            "iconUrl": "iconUrl",
+            "logoUrl": "logoUrl"
+          },
+          "backendValidator": "UpdateStoreSchema"
+        }
+      },
+      "description": "Update a store by ID. Supports core fields and the full 'integrations' object (UpdateStoreSchema subset).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Store ID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "configs": {
+            "type": "object",
+            "properties": {
+              "payment": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              },
+              "shipping": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              },
+              "currencies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "symbol",
+                    "rate",
+                    "precision"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "rate": {
+                      "type": "number"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "precision": {
+                      "type": "number"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "defaultCurrency": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "iconUrl": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "not": {}
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "slug": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "integrations": {
+            "type": "object",
+            "properties": {
+              "metaPixel": {
+                "type": "object",
+                "properties": {
+                  "pixels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "objective": {
+                          "enum": [
+                            "purchase",
+                            "lead",
+                            "viewContent",
+                            "addToCart",
+                            "initiateCheckout"
+                          ],
+                          "type": "string"
+                        },
+                        "accessToken": {
+                          "type": "string"
+                        },
+                        "draftObjective": {
+                          "enum": [
+                            "purchase",
+                            "lead",
+                            "viewContent",
+                            "addToCart",
+                            "initiateCheckout"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "tiktokPixel": {
+                "type": "object",
+                "properties": {
+                  "pixels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "objective": {
+                          "enum": [
+                            "purchase",
+                            "placeAnOrder",
+                            "viewContent",
+                            "addToWishlist",
+                            "search",
+                            "addPaymentInfo",
+                            "addToCart",
+                            "initiateCheckout",
+                            "completeRegistration"
+                          ],
+                          "type": "string"
+                        },
+                        "accessToken": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "ondarkLogoUrl": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "stores_i10s_meta_pixel_set",
+      "annotations": {
+        "schema_doc": {
+          "operations": [
+            "merge",
+            "replace",
+            "remove"
+          ],
+          "backendPath": "store.integrations.metaPixel",
+          "listMutation": {
+            "pixels": {
+              "additive": "add_pixels",
+              "fullReplace": "pixels",
+              "subtractive": "remove_pixel_ids"
+            }
+          }
+        }
+      },
+      "description": "Set or modify the Meta Pixel integration on a store. Replace / merge / remove metaPixel subtree (objective, draft_objective, active, pixels).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Store ID"
+          },
+          "mode": {
+            "enum": [
+              "merge",
+              "replace",
+              "remove"
+            ],
+            "type": "string",
+            "default": "merge",
+            "description": "Operation mode: merge (default), replace, or remove"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Set active flag (optional; merge/replace only)"
+          },
+          "pixels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Full list of pixels to set (use with mode=replace or merge to override list)"
+          },
+          "addPixels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Pixels to add (only used when pixels is not provided)"
+          },
+          "objective": {
+            "enum": [
+              "purchase",
+              "lead",
+              "viewContent",
+              "addToCart",
+              "initiateCheckout"
+            ],
+            "type": "string",
+            "description": "Primary objective event (optional)"
+          },
+          "draftObjective": {
+            "enum": [
+              "purchase",
+              "lead",
+              "viewContent",
+              "addToCart",
+              "initiateCheckout"
+            ],
+            "type": "string",
+            "description": "Draft objective event (optional)"
+          },
+          "removePixelIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Pixel IDs to remove (only used when pixels is not provided)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "stores_i10s_tiktok_pixel_set",
+      "annotations": {
+        "schema_doc": {
+          "operations": [
+            "merge",
+            "replace",
+            "remove"
+          ],
+          "backendPath": "store.integrations.tiktokPixel",
+          "listMutation": {
+            "pixels": {
+              "additive": "add_pixels",
+              "fullReplace": "pixels",
+              "subtractive": "remove_pixel_ids"
+            }
+          }
+        }
+      },
+      "description": "Set or modify the TikTok Pixel integration on a store. Replace / merge / remove tiktokPixel subtree (objective, draft_objective, active, pixels).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Store ID"
+          },
+          "mode": {
+            "enum": [
+              "merge",
+              "replace",
+              "remove"
+            ],
+            "type": "string",
+            "default": "merge",
+            "description": "Operation mode: merge (default), replace, or remove"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Set active flag (optional; merge/replace only)"
+          },
+          "pixels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "accessToken": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Full list of pixels to set (use with mode=replace or merge to override list)"
+          },
+          "addPixels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "accessToken": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Pixels to add (only used when pixels is not provided)"
+          },
+          "objective": {
+            "enum": [
+              "purchase",
+              "placeAnOrder",
+              "viewContent",
+              "addToWishlist",
+              "search",
+              "addPaymentInfo",
+              "addToCart",
+              "initiateCheckout",
+              "completeRegistration"
+            ],
+            "type": "string",
+            "description": "Primary objective event (optional)"
+          },
+          "draftObjective": {
+            "enum": [
+              "purchase",
+              "placeAnOrder",
+              "viewContent",
+              "addToWishlist",
+              "search",
+              "addPaymentInfo",
+              "addToCart",
+              "initiateCheckout",
+              "completeRegistration"
+            ],
+            "type": "string",
+            "description": "Draft objective event (optional)"
+          },
+          "removePixelIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Pixel IDs to remove (only used when pixels is not provided)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "products_list",
+      "annotations": {
+        "schema_doc": {
+          "notes": "Full-text search across multiple fields; supports published status filtering",
+          "output": "Product[] with pagination meta",
+          "filters": "q,store,published,page,limit",
+          "pricing": "Returns calculated final prices after discounts/variants",
+          "backendEndpoint": "GET /stores/{storeId}/products"
+        }
+      },
+      "description": "Retrieve products from a store with advanced filtering. Supports full-text search across names/descriptions/SKUs, exact field matching, price ranges, and pagination. Essential for inventory management and customer product discovery.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "store_id"
+        ],
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Full-text search across name, id, slug, description, and price fields. Matches partial strings with LIKE operator."
+          },
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination (1-based). Default: 1. Use with limit to control result sets for large inventories."
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum products per page. Default varies by backend configuration. Recommended: 10-50 for UI display, 100 for bulk operations."
+          },
+          "store_id": {
+            "type": "string",
+            "description": "REQUIRED: Store identifier (UUID format). User must have read access to this store. Use stores_list to discover available store IDs."
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Filter by published status. When true, excludes archived products. When false, shows all including archived."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "products_create",
+      "annotations": {
+        "schema_doc": {
+          "notes": "Full e-commerce product creation with advanced features",
+          "schema": "CreateProductSchema with snake_case->camelCase mapping",
+          "pricing": "Supports variants, offers, addons with complex calculation logic",
+          "validation": "Slug uniqueness, enum constraints, URL format validation",
+          "backendEndpoint": "POST /stores/{storeId}/products"
+        }
+      },
+      "description": "Create a new product with comprehensive e-commerce features. Supports variants, pricing tiers, rich content, inventory tracking, and advanced catalog management. Essential for building complete product listings.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "storeId",
+          "slug",
+          "name",
+          "price",
+          "status"
+        ],
+        "properties": {
+          "sku": {
+            "type": "string",
+            "description": "Stock Keeping Unit - internal identifier for inventory systems. Used for warehouse management, reporting, and integration with external systems."
+          },
+          "body": {
+            "type": "string",
+            "description": "Rich content description (max 10MB). Supports HTML/Markdown for detailed specifications, features, sizing guides, and marketing content."
+          },
+          "cost": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Internal acquisition/production cost (0-10M). Used for profit margin calculations (margin = final_price - cost). Never displayed to customers."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "REQUIRED: Product display name (max 255 chars). Shown in listings, cart, and order confirmations. Should be customer-facing and descriptive."
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 2,
+            "description": "REQUIRED: Unique URL identifier (2-255 chars). Must be globally unique across all products. Recommend lowercase with hyphens. Used in product URLs and SEO."
+          },
+          "type": {
+            "enum": [
+              "physical",
+              "digital",
+              "service"
+            ],
+            "type": "string",
+            "description": "Product type affecting fulfillment. Must be valid ProductType enum: 'physical' (requires shipping), 'digital' (download/email), 'service' (appointment/booking)."
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional gallery media URLs/IDs. Array of valid URLs for images/videos. Displayed in order shown. Supports various formats."
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0,
+            "description": "REQUIRED: Base unit price (0-10M). This is the primary selling price before discounts. Supports decimal values for precise pricing."
+          },
+          "stock": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Available inventory units (0-10M). Decremented on order confirmation. If omitted/null, treated as unlimited/untracked inventory."
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "SEO page title override (max 255 chars). If omitted, uses product name. Important for search engine optimization and browser tabs."
+          },
+          "addons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "title"
+              ],
+              "properties": {
+                "max": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "min": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "price": {
+                  "type": "number",
+                  "maximum": 10000000,
+                  "minimum": 0
+                },
+                "stock": {
+                  "type": "number",
+                  "maximum": 10000000,
+                  "minimum": 0
+                },
+                "title": {
+                  "type": "string"
+                },
+                "photoUrl": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "subtitle": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Optional purchasable extras (ProductAddonSchema[]). Additional items customers can add: [{photoUrl?, title, subtitle?, stock?, price?, min?, max?}]. Added to line item total."
+          },
+          "offers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "title"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number",
+                  "maximum": 10000000,
+                  "minimum": 0
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "maxQuantity": {
+                  "type": "number",
+                  "minimum": 1
+                },
+                "minQuantity": {
+                  "type": "number",
+                  "minimum": 1
+                },
+                "freeShipping": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Quantity-based pricing tiers (ProductOfferSchema[]). Bulk discount configuration: [{code, title, subtitle?, price?, minQuantity?, maxQuantity?, freeShipping?}]. First matching offer overrides unit price."
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "published",
+              "archived",
+              "deleted"
+            ],
+            "type": "string",
+            "description": "REQUIRED: Product lifecycle status. Must be valid ProductStatus enum value: 'draft' (hidden/editing), 'published' (visible/purchasable), 'archived' (hidden/discontinued), 'deleted' (removed)."
+          },
+          "barcode": {
+            "type": "string",
+            "description": "External barcode identifier (UPC/EAN/etc). Stored as string despite model showing number. Used for POS integration and inventory scanning."
+          },
+          "storeId": {
+            "type": "string",
+            "description": "REQUIRED: Store identifier (UUID). User must have product creation permissions for this store. Maps to backend storeId field."
+          },
+          "variant": {
+            "type": "object",
+            "required": [
+              "name",
+              "view",
+              "options"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 64,
+                "minLength": 1
+              },
+              "view": {
+                "enum": [
+                  "chips",
+                  "dropdown",
+                  "list",
+                  "grid"
+                ],
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "name",
+                    "view",
+                    "price",
+                    "type"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 255
+                    },
+                    "sold": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "type": "number",
+                              "maximum": 10000000,
+                              "minimum": 0
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "type": {
+                      "enum": [
+                        "text",
+                        "image",
+                        "color"
+                      ],
+                      "type": "string"
+                    },
+                    "view": {
+                      "type": "string",
+                      "maxLength": 255
+                    },
+                    "child": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "$ref": "#/properties/variant/properties/options/items"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "price": {
+                      "type": "number",
+                      "maximum": 10000000,
+                      "minimum": 0
+                    },
+                    "stock": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "type": "number",
+                              "maximum": 10000000
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "value": {
+                      "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                      ]
+                    },
+                    "hidden": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "mediaId": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "discount": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "type": "number",
+                              "maximum": 10000000,
+                              "minimum": 0
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "required": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "not": {}
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "description": "Product variant configuration (ProductVariantSchema). Defines size/color/style options with individual pricing: {name, view, options: [{name, sku?, barcode?, price?, discount?, stock?, type, value?, mediaId?, hidden?}]}",
+            "additionalProperties": false
+          },
+          "category": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "description": "Primary category assignment (EmbeddedCategorySchema). Defines main product classification for navigation and filtering.",
+            "additionalProperties": false
+          },
+          "discount": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Absolute monetary discount from base price (0-10M). Final unit price = max(0, price - discount). Can be overridden by variant options."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Custom JSON data for extensions/integrations. Arbitrary key-value pairs. Limit to <10KB for performance. Not displayed to customers.",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          },
+          "photoUrl": {
+            "type": "string",
+            "description": "Primary product image URL. Must be valid HTTP/HTTPS URL. Displayed in listings and product pages. Empty shows placeholder image."
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/properties/category"
+            },
+            "description": "Multiple category assignments (EmbeddedCategorySchema[]). Allows product to appear in multiple catalog sections."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Short marketing description (max 255 chars). Displayed in product listings and search results. Should highlight key features/benefits."
+          },
+          "shippingMethodId": {
+            "type": "string",
+            "description": "Restricts product to specific shipping method (UUID). Maps to shippingMethodId. If omitted, inherits store's default shipping options."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "products_update",
+      "annotations": {
+        "schema_doc": {
+          "types": {
+            "sku": "string?",
+            "body": "string?",
+            "cost": "number?",
+            "name": "string?",
+            "slug": "string?",
+            "type": "string?",
+            "media": "string[]?",
+            "price": "number?",
+            "stock": "number?",
+            "title": "string?",
+            "addons": "any[]?",
+            "offers": "any[]?",
+            "status": "string?",
+            "barcode": "string?",
+            "variant": "any?",
+            "category": "any?",
+            "discount": "number?",
+            "metadata": "object?",
+            "photoUrl": "string?",
+            "categories": "any[]?",
+            "description": "string?",
+            "shippingMethodId": "string?"
+          },
+          "optionalAll": true,
+          "fieldMappings": {
+            "photoUrl": "photoUrl",
+            "shippingMethodId": "shippingMethodId"
+          },
+          "backendValidator": "UpdateProductSchema"
+        }
+      },
+      "description": "Update an existing product by ID (UpdateProductSchema).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Product ID to update"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "cost": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "physical",
+              "digital",
+              "service"
+            ],
+            "type": "string"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "price": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "addons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "title"
+              ],
+              "properties": {
+                "max": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "min": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "price": {
+                  "type": "number",
+                  "maximum": 10000000,
+                  "minimum": 0
+                },
+                "stock": {
+                  "type": "number",
+                  "maximum": 10000000,
+                  "minimum": 0
+                },
+                "title": {
+                  "type": "string"
+                },
+                "photoUrl": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "subtitle": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "offers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "title"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number",
+                  "maximum": 10000000,
+                  "minimum": 0
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "maxQuantity": {
+                  "type": "number",
+                  "minimum": 1
+                },
+                "minQuantity": {
+                  "type": "number",
+                  "minimum": 1
+                },
+                "freeShipping": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "published",
+              "archived",
+              "deleted"
+            ],
+            "type": "string"
+          },
+          "barcode": {
+            "type": "string"
+          },
+          "storeId": {
+            "type": "string",
+            "description": "Store ID (recommended for authorization checks)"
+          },
+          "variant": {
+            "type": "object",
+            "required": [
+              "name",
+              "view",
+              "options"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 64,
+                "minLength": 1
+              },
+              "view": {
+                "enum": [
+                  "chips",
+                  "dropdown",
+                  "list",
+                  "grid"
+                ],
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "name",
+                    "view",
+                    "price",
+                    "type"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 255
+                    },
+                    "sold": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "type": "number",
+                              "maximum": 10000000,
+                              "minimum": 0
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "type": {
+                      "enum": [
+                        "text",
+                        "image",
+                        "color"
+                      ],
+                      "type": "string"
+                    },
+                    "view": {
+                      "type": "string",
+                      "maxLength": 255
+                    },
+                    "child": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "$ref": "#/properties/variant/properties/options/items"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "price": {
+                      "type": "number",
+                      "maximum": 10000000,
+                      "minimum": 0
+                    },
+                    "stock": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "type": "number",
+                              "maximum": 10000000
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "value": {
+                      "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                      ]
+                    },
+                    "hidden": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "mediaId": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "discount": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "not": {}
+                            },
+                            {
+                              "type": "number",
+                              "maximum": 10000000,
+                              "minimum": 0
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "required": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "not": {}
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "category": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "discount": {
+            "type": "number"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          },
+          "photoUrl": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/properties/category"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "shippingMethodId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "orders_list",
+      "annotations": {
+        "schema_doc": {
+          "filters": [
+            "status",
+            "paymentStatus",
+            "deliveryStatus",
+            "customStatus",
+            "q",
+            "tags",
+            "products",
+            "confirmer",
+            "createdAfter",
+            "createdBefore",
+            "updatedAfter",
+            "updatedBefore",
+            "orderBy",
+            "shippingState",
+            "shippingCity",
+            "deliveryService",
+            "items"
+          ],
+          "required": [
+            "store"
+          ],
+          "backendEndpoint": "GET /orders?store="
+        }
+      },
+      "description": "List orders with rich filters. Requires store_id. Supports status/payment_status/delivery_status/custom_status arrays, date ranges, tags, products, confirmer, sort.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "store"
+        ],
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Search across order fields"
+          },
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by tags (any match)"
+          },
+          "items": {
+            "type": "string",
+            "description": "Filter by product_id in items JSONB (legacy)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Results per page (default 40, max 50)"
+          },
+          "store": {
+            "type": "string",
+            "description": "Store ID (required)"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "Filter by order status or list of statuses"
+          },
+          "orderBy": {
+            "type": "object",
+            "required": [
+              "column"
+            ],
+            "properties": {
+              "column": {
+                "type": "string"
+              },
+              "direction": {
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
+                "type": "string"
+              }
+            },
+            "description": "Sort by column and direction",
+            "additionalProperties": false
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by product IDs (any match in items)"
+          },
+          "confirmer": {
+            "type": "string",
+            "description": "User ID of confirmer"
+          },
+          "createdAfter": {
+            "type": "string",
+            "description": "ISO date-time inclusive lower bound for created_at"
+          },
+          "customStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "Custom status code(s)"
+          },
+          "shippingCity": {
+            "type": "string"
+          },
+          "updatedAfter": {
+            "type": "string",
+            "description": "ISO date-time inclusive lower bound for updated_at"
+          },
+          "createdBefore": {
+            "type": "string",
+            "description": "ISO date-time inclusive upper bound for created_at"
+          },
+          "paymentStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "Payment status or list"
+          },
+          "shippingState": {
+            "type": "string"
+          },
+          "updatedBefore": {
+            "type": "string",
+            "description": "ISO date-time inclusive upper bound for updated_at"
+          },
+          "deliveryStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "Delivery status or list"
+          },
+          "deliveryService": {
+            "type": "string",
+            "description": "Delivery service code"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "orders_show",
+      "annotations": {
+        "schema_doc": {
+          "required": [
+            "id"
+          ],
+          "backendEndpoint": "GET /orders/:id"
+        }
+      },
+      "description": "Show a single order by ID.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Order ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "orders_create",
+      "annotations": {
+        "schema_doc": {
+          "array": {
+            "items": "OrderItemSchema[]"
+          },
+          "required": [
+            "store_id",
+            "status",
+            "shipping_type",
+            "items[].product_id",
+            "items[].quantity"
+          ],
+          "backendValidator": "CreateOrderSchema"
+        }
+      },
+      "description": "Create a new order as store owner (CreateOrderSchema). Provide items[]. All inputs snake_case; nested item keys mapped.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "storeId",
+          "status",
+          "shippingType",
+          "items"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "productId",
+                "quantity"
+              ],
+              "properties": {
+                "price": {
+                  "type": "number"
+                },
+                "addons": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "quantity": {
+                  "type": "number"
+                },
+                "offerCode": {
+                  "type": "string"
+                },
+                "productId": {
+                  "type": "string"
+                },
+                "productName": {
+                  "type": "string"
+                },
+                "variantPath": {
+                  "anyOf": [
+                    {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": [
+                              "string",
+                              "number"
+                            ]
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": [
+                              "string",
+                              "number",
+                              "boolean"
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "productPhotoUrl": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "coupon": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "Order status"
+          },
+          "storeId": {
+            "type": "string",
+            "description": "Store ID"
+          },
+          "discount": {
+            "type": "number"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "customerIp": {
+            "type": "string"
+          },
+          "manualTotal": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "customStatus": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerNote": {
+            "type": "string"
+          },
+          "internalNote": {
+            "type": "string"
+          },
+          "shippingCity": {
+            "type": "string"
+          },
+          "shippingNote": {
+            "type": "string"
+          },
+          "shippingType": {
+            "enum": [
+              "home",
+              "pickup",
+              "store"
+            ],
+            "type": "string",
+            "description": "Shipping type"
+          },
+          "customerEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "customerPhone": {
+            "type": "string"
+          },
+          "paymentStatus": {
+            "type": "string"
+          },
+          "shippingPrice": {
+            "type": "number"
+          },
+          "shippingState": {
+            "type": "string"
+          },
+          "deliveryStatus": {
+            "type": "string"
+          },
+          "calculatedTotal": {
+            "type": "number"
+          },
+          "deliveryService": {
+            "type": "string"
+          },
+          "paymentMethodId": {
+            "type": "string"
+          },
+          "shippingAddress": {
+            "type": "string"
+          },
+          "shippingMethodId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "orders_update",
+      "annotations": {
+        "schema_doc": {
+          "required": [
+            "id",
+            "store_id"
+          ],
+          "optionalAll": true,
+          "backendValidator": "UpdateOrderSchema"
+        }
+      },
+      "description": "Update an order by ID (UpdateOrderSchema). Provide only changed fields.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id",
+          "storeId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Order ID"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "productId",
+                "quantity"
+              ],
+              "properties": {
+                "price": {
+                  "type": "number"
+                },
+                "addons": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "quantity": {
+                  "type": "number"
+                },
+                "offerCode": {
+                  "type": "string"
+                },
+                "productId": {
+                  "type": "string"
+                },
+                "productName": {
+                  "type": "string"
+                },
+                "variantPath": {
+                  "anyOf": [
+                    {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": [
+                              "string",
+                              "number"
+                            ]
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": [
+                              "string",
+                              "number",
+                              "boolean"
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "productPhotoUrl": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "coupon": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "storeId": {
+            "type": "string",
+            "description": "Store ID (required by backend UpdateOrderSchema)"
+          },
+          "discount": {
+            "type": "number"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "customerIp": {
+            "type": "string"
+          },
+          "manualTotal": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "customStatus": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerNote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "internalNote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "shippingCity": {
+            "type": "string"
+          },
+          "shippingNote": {
+            "type": "string"
+          },
+          "shippingType": {
+            "enum": [
+              "home",
+              "pickup",
+              "store"
+            ],
+            "type": "string"
+          },
+          "customerEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "customerPhone": {
+            "type": "string"
+          },
+          "paymentStatus": {
+            "type": "string"
+          },
+          "shippingPrice": {
+            "type": "number"
+          },
+          "shippingState": {
+            "type": "string"
+          },
+          "deliveryStatus": {
+            "type": "string"
+          },
+          "deliveryService": {
+            "type": "string"
+          },
+          "paymentMethodId": {
+            "type": "string"
+          },
+          "shippingAddress": {
+            "type": "string"
+          },
+          "shippingMethodId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "orders_destroy",
+      "annotations": {
+        "schema_doc": {
+          "required": [
+            "id"
+          ],
+          "backendEndpoint": "DELETE /orders/:id"
+        }
+      },
+      "description": "Delete an order by ID.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Order ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "orders_assign",
+      "annotations": {
+        "schema_doc": {
+          "required": [
+            "order_id",
+            "member_id",
+            "store_id"
+          ],
+          "backendValidator": "AssignOrderToMemberSchema"
+        }
+      },
+      "description": "Assign a single order to a member (confirmer).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "orderId",
+          "memberId",
+          "storeId"
+        ],
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "Order ID"
+          },
+          "storeId": {
+            "type": "string",
+            "description": "Store ID"
+          },
+          "memberId": {
+            "type": "string",
+            "description": "Member (user) ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "orders_assign_many",
+      "annotations": {
+        "schema_doc": {
+          "required": [
+            "order_ids",
+            "member_id",
+            "store_id"
+          ],
+          "backendValidator": "AssignManyOrdersToMemberSchema"
+        }
+      },
+      "description": "Assign multiple orders to a member (confirmer).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "orderIds",
+          "memberId",
+          "storeId"
+        ],
+        "properties": {
+          "storeId": {
+            "type": "string",
+            "description": "Store ID"
+          },
+          "memberId": {
+            "type": "string",
+            "description": "Member (user) ID"
+          },
+          "orderIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Order IDs"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "orders_send",
+      "annotations": {
+        "schema_doc": {
+          "required": [
+            "store_id",
+            "status",
+            "shipping_type",
+            "items[].product_id",
+            "items[].quantity",
+            "customer_phone"
+          ],
+          "backendValidator": "SendOrderSchema"
+        }
+      },
+      "description": "Send a guest order (public). Follows SendOrderSchema subset.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "storeId",
+          "status",
+          "shippingType",
+          "items",
+          "customerPhone"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "productId",
+                "quantity"
+              ],
+              "properties": {
+                "addons": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "quantity": {
+                  "type": "number"
+                },
+                "offerCode": {
+                  "type": "string"
+                },
+                "productId": {
+                  "type": "string"
+                },
+                "variantPath": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "coupon": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "draft"
+            ],
+            "type": "string"
+          },
+          "storeId": {
+            "type": "string"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerNote": {
+            "type": "string"
+          },
+          "shippingCity": {
+            "type": "string"
+          },
+          "shippingNote": {
+            "type": "string"
+          },
+          "shippingType": {
+            "enum": [
+              "home",
+              "pickup",
+              "store"
+            ],
+            "type": "string"
+          },
+          "customerEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "customerPhone": {
+            "type": "string"
+          },
+          "shippingState": {
+            "type": "string"
+          },
+          "paymentMethodId": {
+            "type": "string"
+          },
+          "shippingAddress": {
+            "type": "string"
+          },
+          "shippingMethodId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "orders_track",
+      "annotations": {
+        "schema_doc": {
+          "required": [
+            "id"
+          ],
+          "backendValidator": "TrackOrderByGeustSchema"
+        }
+      },
+      "description": "Track an order by ID (public).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Order ID"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "orders_calculate",
+      "annotations": {
+        "schema_doc": {
+          "required": [
+            "store_id",
+            "items[].product_id",
+            "items[].quantity"
+          ],
+          "backendValidator": "CalculateOrderSchema"
+        }
+      },
+      "description": "Calculate order totals without creating an order (public).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "items",
+          "storeId"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "productId",
+                "quantity"
+              ],
+              "properties": {
+                "price": {
+                  "type": "number"
+                },
+                "addons": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "discount": {
+                  "type": "number"
+                },
+                "quantity": {
+                  "type": "number"
+                },
+                "productId": {
+                  "type": "string"
+                },
+                "variantPath": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "coupon": {
+            "type": "string"
+          },
+          "storeId": {
+            "type": "string"
+          },
+          "shippingType": {
+            "enum": [
+              "home",
+              "pickup",
+              "store"
+            ],
+            "type": "string"
+          },
+          "shippingState": {
+            "type": "string"
+          },
+          "deliveryService": {
+            "type": "string"
+          },
+          "shippingAddress": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 20,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@feeefapp/mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "users_auth_me",
+    "users_auth_update",
+    "stores_list",
+    "stores_create",
+    "stores_update",
+    "stores_i10s_meta_pixel_set",
+    "stores_i10s_tiktok_pixel_set",
+    "products_list",
+    "products_create",
+    "products_update",
+    "orders_list",
+    "orders_show",
+    "orders_create",
+    "orders_update",
+    "orders_destroy",
+    "orders_assign",
+    "orders_assign_many",
+    "orders_send",
+    "orders_track",
+    "orders_calculate"
+  ]
+}

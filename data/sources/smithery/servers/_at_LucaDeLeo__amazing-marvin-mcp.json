@@ -1,0 +1,666 @@
+{
+  "qualifiedName": "@LucaDeLeo/amazing-marvin-mcp",
+  "displayName": "amazing-marvin-mcp",
+  "description": "Plan your day by pulling today\u2019s and overdue tasks from Amazing Marvin. Create, organize, and complete tasks with projects, labels, due dates, priorities, and time tracking. Browse categories to find items and start or stop timers without leaving your workflow.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/43f39b90-c183-4195-8ec0-d5da59e495f7.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@LucaDeLeo/amazing-marvin-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@LucaDeLeo/amazing-marvin-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "api_token"
+        ],
+        "properties": {
+          "api_token": {
+            "type": "string",
+            "description": "Your Amazing Marvin API token. Get it from: https://app.amazingmarvin.com/pre?api="
+          }
+        },
+        "description": "Configuration schema for user-provided API token."
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "marvin_add_task",
+      "annotations": {
+        "title": "Add Task to Amazing Marvin",
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Create a new task in Amazing Marvin with full support for scheduling, labels, and organization.\n\n        This tool creates tasks with auto-completion support for shortcuts in the title.\n        Amazing Marvin shortcuts: #Project, @label, ~timeEstimate, +dueDate, ^priority.\n\n        Args:\n            params (AddTaskInput): Validated input parameters\n            ctx (Context): Smithery context with session configuration\n\n        Returns:\n            str: Success message with task ID and title, or error message\n        ",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "AddTaskInput": {
+            "type": "object",
+            "title": "AddTaskInput",
+            "required": [
+              "title"
+            ],
+            "properties": {
+              "day": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Day",
+                "default": null,
+                "description": "Schedule date in YYYY-MM-DD format to add task to daily schedule (e.g., '2024-03-15', '2024-12-25')"
+              },
+              "note": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 5000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Note",
+                "default": null,
+                "description": "Additional notes or description for the task"
+              },
+              "title": {
+                "type": "string",
+                "title": "Title",
+                "maxLength": 500,
+                "minLength": 1,
+                "description": "Task title. Supports Amazing Marvin shortcuts: #ProjectName (parent), @label (label), ~60 (time estimate in minutes), +YYYY-MM-DD (due date), ^1 (priority). Examples: 'Review budget #Work @urgent ~120 +2024-03-20', 'Call dentist ~15 +tomorrow'"
+              },
+              "due_date": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Due Date",
+                "default": null,
+                "description": "Due date in YYYY-MM-DD format for deadline tracking (e.g., '2024-03-20')"
+              },
+              "label_ids": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 20
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Label Ids",
+                "default": null,
+                "description": "List of label IDs to attach to task (get from marvin_get_labels). Example: ['label_1', 'label_2']"
+              },
+              "parent_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Parent Id",
+                "default": null,
+                "description": "ID of parent project or category (get from marvin_get_categories). Example: 'cat_abc123xyz'"
+              },
+              "is_starred": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Is Starred",
+                "default": null,
+                "description": "Whether to star/prioritize this task (true/false)"
+              },
+              "time_estimate": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "maximum": 86400000,
+                    "minimum": 60000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Time Estimate",
+                "default": null,
+                "description": "Estimated time in milliseconds. Common values: 900000 (15 min), 1800000 (30 min), 3600000 (1 hour), 7200000 (2 hours)"
+              }
+            },
+            "description": "Input model for creating a new task.",
+            "additionalProperties": false
+          }
+        },
+        "title": "marvin_add_taskArguments",
+        "required": [
+          "params"
+        ],
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/AddTaskInput"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "marvin_add_taskOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "marvin_get_todays_tasks",
+      "annotations": {
+        "title": "Get Today's Tasks",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Retrieve all tasks scheduled for today (or a specific date) in Amazing Marvin.\n\n        Args:\n            params (GetTasksInput): Validated input parameters\n            ctx (Context): Smithery context with session configuration\n\n        Returns:\n            str: List of tasks formatted as markdown or JSON\n        ",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "GetTasksInput": {
+            "type": "object",
+            "title": "GetTasksInput",
+            "properties": {
+              "date": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Date",
+                "default": null,
+                "description": "Date in YYYY-MM-DD format (defaults to today). Examples: '2024-03-15', '2024-12-25'"
+              },
+              "response_format": {
+                "$ref": "#/$defs/ResponseFormat",
+                "default": "markdown",
+                "description": "Output format: 'markdown' for human-readable (default) or 'json' for machine-readable structured data"
+              }
+            },
+            "description": "Input model for retrieving tasks with optional filters.",
+            "additionalProperties": false
+          },
+          "ResponseFormat": {
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "type": "string",
+            "title": "ResponseFormat",
+            "description": "Output format for tool responses."
+          }
+        },
+        "title": "marvin_get_todays_tasksArguments",
+        "required": [
+          "params"
+        ],
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/GetTasksInput"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "marvin_get_todays_tasksOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "marvin_mark_done",
+      "annotations": {
+        "title": "Mark Task as Done",
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Mark a specific task as complete in Amazing Marvin.\n\n        Args:\n            params (MarkDoneInput): Validated input parameters\n            ctx (Context): Smithery context with session configuration\n\n        Returns:\n            str: Success confirmation with task ID\n        ",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "MarkDoneInput": {
+            "type": "object",
+            "title": "MarkDoneInput",
+            "required": [
+              "item_id"
+            ],
+            "properties": {
+              "item_id": {
+                "type": "string",
+                "title": "Item Id",
+                "minLength": 1,
+                "description": "The ID of the task to mark as done (shown when viewing tasks). Example: 'task_abc123xyz'"
+              }
+            },
+            "description": "Input model for marking a task as complete.",
+            "additionalProperties": false
+          }
+        },
+        "title": "marvin_mark_doneArguments",
+        "required": [
+          "params"
+        ],
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/MarkDoneInput"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "marvin_mark_doneOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "marvin_get_due_tasks",
+      "annotations": {
+        "title": "Get Due and Overdue Tasks",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Get all tasks that are due today or overdue in Amazing Marvin.\n\n        Args:\n            params (GetTasksInput): Validated input parameters\n            ctx (Context): Smithery context with session configuration\n\n        Returns:\n            str: List of due/overdue tasks formatted as markdown or JSON\n        ",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "GetTasksInput": {
+            "type": "object",
+            "title": "GetTasksInput",
+            "properties": {
+              "date": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Date",
+                "default": null,
+                "description": "Date in YYYY-MM-DD format (defaults to today). Examples: '2024-03-15', '2024-12-25'"
+              },
+              "response_format": {
+                "$ref": "#/$defs/ResponseFormat",
+                "default": "markdown",
+                "description": "Output format: 'markdown' for human-readable (default) or 'json' for machine-readable structured data"
+              }
+            },
+            "description": "Input model for retrieving tasks with optional filters.",
+            "additionalProperties": false
+          },
+          "ResponseFormat": {
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "type": "string",
+            "title": "ResponseFormat",
+            "description": "Output format for tool responses."
+          }
+        },
+        "title": "marvin_get_due_tasksArguments",
+        "required": [
+          "params"
+        ],
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/GetTasksInput"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "marvin_get_due_tasksOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "marvin_get_categories",
+      "annotations": {
+        "title": "List All Categories and Projects",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        List all categories and projects in Amazing Marvin to help identify parent IDs.\n\n        Args:\n            params (SimpleFormatInput): Validated input parameters\n            ctx (Context): Smithery context with session configuration\n\n        Returns:\n            str: List of categories/projects formatted as markdown or JSON\n        ",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "ResponseFormat": {
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "type": "string",
+            "title": "ResponseFormat",
+            "description": "Output format for tool responses."
+          },
+          "SimpleFormatInput": {
+            "type": "object",
+            "title": "SimpleFormatInput",
+            "properties": {
+              "response_format": {
+                "$ref": "#/$defs/ResponseFormat",
+                "default": "markdown",
+                "description": "Output format: 'markdown' (default) or 'json'"
+              }
+            },
+            "description": "Input model for simple list operations with format option.",
+            "additionalProperties": false
+          }
+        },
+        "title": "marvin_get_categoriesArguments",
+        "required": [
+          "params"
+        ],
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/SimpleFormatInput"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "marvin_get_categoriesOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "marvin_get_labels",
+      "annotations": {
+        "title": "List All Labels",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        List all labels in Amazing Marvin to help identify label IDs for task creation.\n\n        Args:\n            params (SimpleFormatInput): Validated input parameters\n            ctx (Context): Smithery context with session configuration\n\n        Returns:\n            str: List of labels formatted as markdown or JSON\n        ",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "ResponseFormat": {
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "type": "string",
+            "title": "ResponseFormat",
+            "description": "Output format for tool responses."
+          },
+          "SimpleFormatInput": {
+            "type": "object",
+            "title": "SimpleFormatInput",
+            "properties": {
+              "response_format": {
+                "$ref": "#/$defs/ResponseFormat",
+                "default": "markdown",
+                "description": "Output format: 'markdown' (default) or 'json'"
+              }
+            },
+            "description": "Input model for simple list operations with format option.",
+            "additionalProperties": false
+          }
+        },
+        "title": "marvin_get_labelsArguments",
+        "required": [
+          "params"
+        ],
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/SimpleFormatInput"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "marvin_get_labelsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "marvin_get_children",
+      "annotations": {
+        "title": "Get Items in Category/Project",
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Get all tasks and projects within a specific category or project in Amazing Marvin.\n\n        Args:\n            params (GetChildrenInput): Validated input parameters\n            ctx (Context): Smithery context with session configuration\n\n        Returns:\n            str: List of child items formatted as markdown or JSON\n        ",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "ResponseFormat": {
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "type": "string",
+            "title": "ResponseFormat",
+            "description": "Output format for tool responses."
+          },
+          "GetChildrenInput": {
+            "type": "object",
+            "title": "GetChildrenInput",
+            "required": [
+              "parent_id"
+            ],
+            "properties": {
+              "parent_id": {
+                "type": "string",
+                "title": "Parent Id",
+                "minLength": 1,
+                "description": "ID of parent category/project (from marvin_get_categories) or 'unassigned' for tasks without a parent. Example: 'cat_abc123xyz'"
+              },
+              "response_format": {
+                "$ref": "#/$defs/ResponseFormat",
+                "default": "markdown",
+                "description": "Output format: 'markdown' (default) or 'json'"
+              }
+            },
+            "description": "Input model for getting items within a category/project.",
+            "additionalProperties": false
+          }
+        },
+        "title": "marvin_get_childrenArguments",
+        "required": [
+          "params"
+        ],
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/GetChildrenInput"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "marvin_get_childrenOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "marvin_start_tracking",
+      "annotations": {
+        "title": "Start Time Tracking",
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "\n        Start time tracking for a specific task in Amazing Marvin.\n\n        Args:\n            params (StartTrackingInput): Validated input parameters\n            ctx (Context): Smithery context with session configuration\n\n        Returns:\n            str: Success confirmation with task ID\n        ",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "StartTrackingInput": {
+            "type": "object",
+            "title": "StartTrackingInput",
+            "required": [
+              "item_id"
+            ],
+            "properties": {
+              "item_id": {
+                "type": "string",
+                "title": "Item Id",
+                "minLength": 1,
+                "description": "The ID of the task to start tracking (from task lists). Example: 'task_abc123xyz'"
+              }
+            },
+            "description": "Input model for starting time tracking.",
+            "additionalProperties": false
+          }
+        },
+        "title": "marvin_start_trackingArguments",
+        "required": [
+          "params"
+        ],
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/StartTrackingInput"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "marvin_start_trackingOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "marvin_stop_tracking",
+      "annotations": {
+        "title": "Stop Time Tracking",
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\n        Stop the currently running time tracker in Amazing Marvin.\n\n        Args:\n            ctx (Context): Smithery context with session configuration\n\n        Returns:\n            str: Success confirmation\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "marvin_stop_trackingArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "marvin_stop_trackingOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:19:01.724480+00:00",
+    "source": "smithery"
+  }
+}

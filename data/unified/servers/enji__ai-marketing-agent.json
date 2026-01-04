@@ -1,0 +1,295 @@
+{
+  "id": "enji/ai-marketing-agent",
+  "name": "enji/ai-marketing-agent",
+  "display_name": "ai-marketing-agent",
+  "version": null,
+  "description": "Search Enji\u2019s blog, Q&A, and help center to find grounded, source-backed answers to small-business marketing questions. Generate customer personas, brand voice summaries, and tailored social and blog ideas to plan content faster. Access free resources and tools to stay consistent and confident in your marketing.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/29a0b675-3a3a-40a9-9087-870a88fb8f8b.svg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "search",
+      "annotations": {
+        "title": "Search Enji Content",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search Enji\u2019s indexed documents (blog, Q&A, help center) and return a JSON array of results containing id, title, and url. Use fetch to retrieve full content for any id.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query text"
+          },
+          "top_k": {
+            "type": "integer",
+            "default": 6,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Maximum results to return"
+          }
+        }
+      }
+    },
+    {
+      "name": "fetch",
+      "annotations": {
+        "title": "Fetch Full Document",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Return the full document text for a search result id (from the search tool), including title, body text, and url metadata encoded as JSON.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Document id from the search tool"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_public",
+      "annotations": {
+        "title": "Search Enji Public Resources",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search Enji\u2019s blog, Q&A library, and marketing tools for factual, grounded answers to marketing-related questions. Responses include `confidence.aggregate` (0\u20131) and set `meta.is_low_confidence = true` when the service falls back to generic Enji links (typically <0.45).",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "User query"
+          },
+          "top_k": {
+            "type": "integer",
+            "default": 6,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Maximum results to consider"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_resources",
+      "annotations": {
+        "title": "List Available Resources",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Return a list of Enji\u2019s available resources and free marketing tools.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "answer_question",
+      "annotations": {
+        "title": "Get Expert Marketing Advice",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Answer small-business marketing questions using Enji\u2019s public resources; synthesizes a concise, grounded response with sources. If the underlying search result is weak (`meta.is_low_confidence = true` from search_public), the service returns a fallback pointing to Enji\u2019s blog/Q&A/help/tools rather than inventing an answer (often when confidence <0.45).",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "properties": {
+          "top_k": {
+            "type": "integer",
+            "default": 6,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Number of results to consider."
+          },
+          "question": {
+            "type": "string",
+            "description": "Marketing question from the user."
+          }
+        }
+      }
+    },
+    {
+      "name": "customer_persona",
+      "annotations": {
+        "title": "Generate your ideal Customer Persona",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Generate a structured customer persona (name, demographics, struggles, solutions) based on a business description. Ideal for quickly summarizing target audiences.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "business_name",
+          "product_description",
+          "customer_description"
+        ],
+        "properties": {
+          "gender": {
+            "enum": [
+              "male",
+              "female",
+              "both"
+            ],
+            "type": "string",
+            "description": "Optional gender focus"
+          },
+          "age_range": {
+            "type": "string",
+            "description": "Optional age range"
+          },
+          "business_name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "customer_review": {
+            "type": "string",
+            "maxLength": 5000,
+            "description": "Optional customer quote or insight"
+          },
+          "product_description": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 10,
+            "description": "Description of the product or service"
+          },
+          "customer_description": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 10,
+            "description": "Who you sell to"
+          }
+        }
+      }
+    },
+    {
+      "name": "brand_voice",
+      "annotations": {
+        "title": "Analyze and Generate your Brand Voice",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Analyze a copy sample to produce Enji\u2019s brand-voice summary (voice, tone, style) for consistent marketing.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "copy_sample"
+        ],
+        "properties": {
+          "copy_sample": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 50,
+            "description": "Sample copy (50-5000 chars)"
+          }
+        }
+      }
+    },
+    {
+      "name": "social_media_ideas",
+      "annotations": {
+        "title": "Generate Social Media Content Ideas",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Generate social media post ideas tailored to the business description (leverages Enji\u2019s Social Media Idea Generator).",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "business_name",
+          "business_description"
+        ],
+        "properties": {
+          "business_name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "target_customers": {
+            "type": "string",
+            "description": "Optional description of target audience"
+          },
+          "business_description": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 10
+          }
+        }
+      }
+    },
+    {
+      "name": "blog_ideas",
+      "annotations": {
+        "title": "Generate Blog Content Ideas",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "description": "Generate blog topic ideas based on the business description (Enji\u2019s Blog Idea Generator).",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "business_name",
+          "business_description"
+        ],
+        "properties": {
+          "business_name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "target_customers": {
+            "type": "string",
+            "description": "Optional description of target audience"
+          },
+          "business_description": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 10
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 9,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/enji/ai-marketing-agent/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "search",
+    "fetch",
+    "search_public",
+    "list_resources",
+    "answer_question",
+    "customer_persona",
+    "brand_voice",
+    "social_media_ideas",
+    "blog_ideas"
+  ]
+}

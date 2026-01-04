@@ -1,0 +1,858 @@
+{
+  "id": "ticktick",
+  "name": "ticktick",
+  "display_name": "Ticktick",
+  "version": null,
+  "description": "TickTick is a cross-platform task management and to-do list application designed to help users organize their tasks and schedules efficiently.",
+  "icon_url": "https://ticktick.com/favicon.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "TICKTICK_COMPLETE_TASK",
+      "description": "Tool to mark a task as complete. Use after confirming the task is done.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CompleteTaskRequest",
+        "required": [
+          "project_id",
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "63b7bebb91c0a5474805fcd4"
+            ],
+            "description": "Identifier of the task to mark as complete."
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "examples": [
+              "6226ff9877acee87727f6bca"
+            ],
+            "description": "Project identifier containing the task to complete."
+          }
+        }
+      }
+    },
+    {
+      "name": "TICKTICK_CREATE_PROJECT",
+      "description": "Tool to create a new project in TickTick. Use when you need to programmatically add a project after obtaining a valid access token.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateProjectRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "TASK",
+              "NOTE"
+            ],
+            "type": "string",
+            "title": "Kind",
+            "default": null,
+            "examples": [
+              "TASK"
+            ],
+            "nullable": true,
+            "description": "Optional project kind"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "My Project"
+            ],
+            "description": "Name of the new project"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color",
+            "default": null,
+            "examples": [
+              "#00C2FF"
+            ],
+            "nullable": true,
+            "description": "Hex color code for the project, e.g., '#F18181'"
+          },
+          "viewMode": {
+            "enum": [
+              "list",
+              "kanban",
+              "timeline"
+            ],
+            "type": "string",
+            "title": "View Mode",
+            "default": null,
+            "examples": [
+              "list"
+            ],
+            "nullable": true,
+            "description": "Optional view mode for the project"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Optional sort order value of the project"
+          }
+        },
+        "description": "Request schema for creating a new project in TickTick."
+      }
+    },
+    {
+      "name": "TICKTICK_CREATE_TASK",
+      "description": "Tool to create a new task in TickTick. Use after you have task details such as title, dates, and optional reminders or subtasks.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateTaskRequest",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "desc": {
+            "type": "string",
+            "title": "Desc",
+            "default": null,
+            "examples": [
+              "Grocery shopping for the weekend"
+            ],
+            "nullable": true,
+            "description": "Extended description of the task"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "ChecklistItem",
+              "required": [
+                "title"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "Id",
+                  "default": null,
+                  "nullable": true,
+                  "description": "ID of the checklist item (omit when creating new items)"
+                },
+                "title": {
+                  "type": "string",
+                  "title": "Title",
+                  "examples": [
+                    "Buy milk"
+                  ],
+                  "description": "Title of the checklist item"
+                },
+                "status": {
+                  "type": "integer",
+                  "title": "Status",
+                  "default": null,
+                  "examples": [
+                    0
+                  ],
+                  "nullable": true,
+                  "description": "Completion status: 0=Normal, 1=Completed"
+                },
+                "isAllDay": {
+                  "type": "boolean",
+                  "title": "Is All Day",
+                  "default": null,
+                  "examples": [
+                    false
+                  ],
+                  "nullable": true,
+                  "description": "If true, this item is an all-day event"
+                },
+                "timeZone": {
+                  "type": "string",
+                  "title": "Time Zone",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Time zone name, e.g., 'America/Los_Angeles'"
+                },
+                "sortOrder": {
+                  "type": "integer",
+                  "title": "Sort Order",
+                  "default": null,
+                  "examples": [
+                    1
+                  ],
+                  "nullable": true,
+                  "description": "Ordering index for the checklist item"
+                },
+                "startDate": {
+                  "type": "string",
+                  "title": "Start Date",
+                  "default": null,
+                  "examples": [
+                    "2023-04-23T12:00:00+0000"
+                  ],
+                  "nullable": true,
+                  "description": "Start date/time in ISO 8601 format"
+                },
+                "completedTime": {
+                  "type": "string",
+                  "title": "Completed Time",
+                  "default": null,
+                  "examples": [
+                    "2023-04-23T18:30:00+0000"
+                  ],
+                  "nullable": true,
+                  "description": "Completion timestamp in ISO 8601 format"
+                }
+              },
+              "description": "A single checklist (subtask) item within a task."
+            },
+            "title": "Items",
+            "default": null,
+            "nullable": true,
+            "description": "Checklist (subtask) items"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "Buy groceries"
+            ],
+            "description": "Title of the task"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "default": null,
+            "examples": [
+              "Remember to pick up eggs and bread"
+            ],
+            "nullable": true,
+            "description": "Main content or notes of the task"
+          },
+          "dueDate": {
+            "type": "string",
+            "title": "Due Date",
+            "default": null,
+            "examples": [
+              "2023-04-24T17:00:00+0000"
+            ],
+            "nullable": true,
+            "description": "ISO 8601 due date/time, e.g., '2023-04-24T17:00:00+0000'"
+          },
+          "isAllDay": {
+            "type": "boolean",
+            "title": "Is All Day",
+            "default": false,
+            "examples": [
+              false
+            ],
+            "nullable": true,
+            "description": "Set true for an all-day task"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority",
+            "default": null,
+            "examples": [
+              3
+            ],
+            "nullable": true,
+            "description": "Task priority (0=None, 1=Low, 3=Medium, 5=High)"
+          },
+          "timeZone": {
+            "type": "string",
+            "title": "Time Zone",
+            "default": null,
+            "nullable": true,
+            "description": "Time zone identifier, e.g., 'America/Los_Angeles'"
+          },
+          "projectId": {
+            "type": "string",
+            "title": "Project Id",
+            "default": null,
+            "examples": [
+              "5e8f7a2b3b2f4c1a2d3e4f5g"
+            ],
+            "nullable": true,
+            "description": "ID of the project (list) to add the task to"
+          },
+          "reminders": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Reminders",
+            "default": null,
+            "examples": [
+              [
+                "TRIGGER:PT10M"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of reminder triggers in RFC 5545 format, e.g., ['TRIGGER:PT10M', 'TRIGGER:PT0S']"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": null,
+            "examples": [
+              12345
+            ],
+            "nullable": true,
+            "description": "Internal sort index"
+          },
+          "startDate": {
+            "type": "string",
+            "title": "Start Date",
+            "default": null,
+            "nullable": true,
+            "description": "ISO 8601 start date/time, e.g., '2023-04-23T12:00:00+0000'"
+          },
+          "repeatFlag": {
+            "type": "string",
+            "title": "Repeat Flag",
+            "default": null,
+            "examples": [
+              "RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR"
+            ],
+            "nullable": true,
+            "description": "RRULE string for recurrence, e.g., 'RRULE:FREQ=DAILY;INTERVAL=1'"
+          }
+        },
+        "description": "Parameters for creating a new TickTick task."
+      }
+    },
+    {
+      "name": "TICKTICK_DELETE_PROJECT",
+      "description": "Tool to delete a specific project. Use when you have confirmed the project ID and intend to permanently remove it. Example: \"Delete the project with ID 6226ff9877acee87727f6bca\".",
+      "inputSchema": {
+        "type": "object",
+        "title": "TicktickDeleteProjectRequest",
+        "required": [
+          "project_id"
+        ],
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "examples": [
+              "6226ff9877acee87727f6bca"
+            ],
+            "description": "Project identifier to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "TICKTICK_DELETE_TASK",
+      "description": "Tool to delete a specific task. Use when you need to remove a task from a project after confirming both project and task IDs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTaskRequest",
+        "required": [
+          "project_id",
+          "task_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "63b7bebb91c0a5474805fcd4"
+            ],
+            "description": "Task identifier to delete."
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id",
+            "examples": [
+              "6226ff9877acee87727f6bca"
+            ],
+            "description": "Project identifier containing the task to delete."
+          }
+        },
+        "description": "Request schema for deleting a TickTick task."
+      }
+    },
+    {
+      "name": "TICKTICK_GET_PROJECT_WITH_DATA",
+      "description": "Tool to retrieve a project and its associated data (tasks, columns). Use when you need full project details including its tasks and columns after selecting a project ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetProjectWithDataRequest",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "title": "Project Id",
+            "examples": [
+              "6226ff9877acee87727f6bca"
+            ],
+            "description": "Project identifier to retrieve data for"
+          }
+        },
+        "description": "Request model for retrieving a project with its associated tasks and columns."
+      }
+    },
+    {
+      "name": "TICKTICK_GET_USER_PROJECT",
+      "description": "Tool to retrieve all projects for the user. Use when you need to list available projects for selection.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetUserProjectRequest",
+        "properties": {},
+        "description": "Empty request model for getting user projects. No parameters required."
+      }
+    },
+    {
+      "name": "TICKTICK_OAUTH2_AUTHORIZATION_STEP1",
+      "description": "Tool to generate the TickTick OAuth2 authorization URL. Use to redirect the user to obtain the authorization code (step 1).",
+      "inputSchema": {
+        "type": "object",
+        "title": "TicktickOauth2AuthorizationStep1Request",
+        "required": [
+          "client_id",
+          "scope",
+          "redirect_uri"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "examples": [
+              "tasks:read tasks:write"
+            ],
+            "description": "Space-separated permission scopes. Available scopes: 'tasks:read', 'tasks:write'."
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "default": null,
+            "examples": [
+              "secure_random_state_1234"
+            ],
+            "nullable": true,
+            "description": "An opaque value passed back to your redirect URI for CSRF protection and to maintain request state (optional)."
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "examples": [
+              "your_client_id_here"
+            ],
+            "description": "Your TickTick application's client ID obtained from the Developer Center."
+          },
+          "redirect_uri": {
+            "type": "string",
+            "title": "Redirect Uri",
+            "examples": [
+              "https://yourapp.com/oauth/callback"
+            ],
+            "description": "The exact redirect URI registered with your TickTick application; the authorization code will be sent here after user approval."
+          }
+        },
+        "description": "Request schema for constructing the TickTick OAuth2 authorization URL (first step of OAuth2 flow)."
+      }
+    },
+    {
+      "name": "TICKTICK_OAUTH2_AUTHORIZATION_STEP_1",
+      "description": "Tool to redirect user to TickTick authorization page to obtain authorization code. Use when initiating the OAuth2 flow before exchanging the code.",
+      "inputSchema": {
+        "type": "object",
+        "title": "TICKTICK_OAUTH2_AUTHORIZATION_STEP_1Request",
+        "required": [
+          "client_id",
+          "scope",
+          "redirect_uri"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "examples": [
+              "tasks:read tasks:write"
+            ],
+            "description": "Space-separated permission scopes. Available scopes: 'tasks:read', 'tasks:write'."
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "default": null,
+            "examples": [
+              "secure_random_state_1234"
+            ],
+            "nullable": true,
+            "description": "An opaque value passed back to your redirect URI for CSRF protection and to maintain request state."
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "examples": [
+              "your_client_id_here"
+            ],
+            "description": "Your TickTick application's client ID obtained from the Developer Center."
+          },
+          "redirect_uri": {
+            "type": "string",
+            "title": "Redirect Uri",
+            "examples": [
+              "https://yourapp.com/oauth/callback"
+            ],
+            "description": "The exact redirect URI registered with your TickTick application; the authorization code will be sent here."
+          }
+        },
+        "description": "Request parameters for constructing the TickTick OAuth2 authorization URL."
+      }
+    },
+    {
+      "name": "TICKTICK_UPDATE_PROJECT",
+      "description": "Tool to update an existing project. Use when you need to modify project details like name, color, sort order, view mode, or kind after selecting a project ID.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateProjectRequest",
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "TASK",
+              "NOTE"
+            ],
+            "type": "string",
+            "title": "Kind",
+            "default": null,
+            "examples": [
+              "TASK"
+            ],
+            "nullable": true,
+            "description": "Kind of the project, 'TASK' or 'NOTE'"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "New Project Name"
+            ],
+            "nullable": true,
+            "description": "New name of the project"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color",
+            "default": null,
+            "examples": [
+              "#F18181"
+            ],
+            "nullable": true,
+            "description": "Hex color code for the project, e.g. '#F18181'"
+          },
+          "viewMode": {
+            "enum": [
+              "list",
+              "kanban",
+              "timeline"
+            ],
+            "type": "string",
+            "title": "View Mode",
+            "default": null,
+            "examples": [
+              "list"
+            ],
+            "nullable": true,
+            "description": "View mode for the project"
+          },
+          "projectId": {
+            "type": "string",
+            "title": "Project Id",
+            "examples": [
+              "6226ff9877acee87727f6bca"
+            ],
+            "description": "Project identifier to update"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": null,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Sort order value of the project"
+          }
+        },
+        "description": "Request model for updating an existing project in TickTick."
+      }
+    },
+    {
+      "name": "TICKTICK_UPDATE_TASK",
+      "description": "Tool to update an existing task. Use after confirming the taskId and projectId.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateTaskRequest",
+        "required": [
+          "taskId",
+          "projectId"
+        ],
+        "properties": {
+          "desc": {
+            "type": "string",
+            "title": "Desc",
+            "default": null,
+            "examples": [
+              "Weekend shopping list"
+            ],
+            "nullable": true,
+            "description": "Extended description of the task"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "ChecklistItem",
+              "required": [
+                "title"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "Id",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Checklist item ID (omit for new items)"
+                },
+                "title": {
+                  "type": "string",
+                  "title": "Title",
+                  "examples": [
+                    "Buy milk"
+                  ],
+                  "description": "Title of the checklist item"
+                },
+                "status": {
+                  "type": "integer",
+                  "title": "Status",
+                  "default": null,
+                  "examples": [
+                    0
+                  ],
+                  "nullable": true,
+                  "description": "Completion status: 0=Normal, 1=Completed"
+                },
+                "isAllDay": {
+                  "type": "boolean",
+                  "title": "Is All Day",
+                  "default": null,
+                  "examples": [
+                    false
+                  ],
+                  "nullable": true,
+                  "description": "If true, this item is an all-day event"
+                },
+                "timeZone": {
+                  "type": "string",
+                  "title": "Time Zone",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Time zone name, e.g., 'America/Los_Angeles'"
+                },
+                "sortOrder": {
+                  "type": "integer",
+                  "title": "Sort Order",
+                  "default": null,
+                  "examples": [
+                    1
+                  ],
+                  "nullable": true,
+                  "description": "Ordering index for the checklist item"
+                },
+                "startDate": {
+                  "type": "string",
+                  "title": "Start Date",
+                  "default": null,
+                  "examples": [
+                    "2023-04-23T12:00:00+0000"
+                  ],
+                  "nullable": true,
+                  "description": "Start date/time in ISO 8601 format"
+                },
+                "completedTime": {
+                  "type": "string",
+                  "title": "Completed Time",
+                  "default": null,
+                  "examples": [
+                    "2023-04-23T18:30:00+0000"
+                  ],
+                  "nullable": true,
+                  "description": "Completion timestamp in ISO 8601 format"
+                }
+              },
+              "description": "A single checklist (subtask) item within a task."
+            },
+            "title": "Items",
+            "default": null,
+            "nullable": true,
+            "description": "Checklist (subtask) items"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "examples": [
+              "Buy groceries"
+            ],
+            "nullable": true,
+            "description": "New title of the task"
+          },
+          "taskId": {
+            "type": "string",
+            "title": "Task Id",
+            "examples": [
+              "5e8f7a2b3b2f4c1a2d3e4f5g"
+            ],
+            "description": "Task identifier to update"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "default": null,
+            "examples": [
+              "Remember to pick up eggs"
+            ],
+            "nullable": true,
+            "description": "Content or notes of the task"
+          },
+          "dueDate": {
+            "type": "string",
+            "title": "Due Date",
+            "default": null,
+            "examples": [
+              "2023-04-24T17:00:00+0000"
+            ],
+            "nullable": true,
+            "description": "ISO 8601 due date/time, e.g., '2023-04-24T17:00:00+0000'"
+          },
+          "isAllDay": {
+            "type": "boolean",
+            "title": "Is All Day",
+            "default": null,
+            "examples": [
+              false
+            ],
+            "nullable": true,
+            "description": "Set true for an all-day task"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority",
+            "default": null,
+            "examples": [
+              3
+            ],
+            "nullable": true,
+            "description": "Task priority (0=None, 1=Low, 3=Medium, 5=High)"
+          },
+          "timeZone": {
+            "type": "string",
+            "title": "Time Zone",
+            "default": null,
+            "nullable": true,
+            "description": "Time zone identifier, e.g., 'America/Los_Angeles'"
+          },
+          "projectId": {
+            "type": "string",
+            "title": "Project Id",
+            "examples": [
+              "6226ff9877acee87727f6bca"
+            ],
+            "description": "Project identifier containing the task"
+          },
+          "reminders": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Reminders",
+            "default": null,
+            "examples": [
+              [
+                "TRIGGER:PT10M"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of reminder triggers in RFC 5545 format, e.g., ['TRIGGER:PT10M']"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": null,
+            "examples": [
+              12345
+            ],
+            "nullable": true,
+            "description": "Internal sort index for ordering tasks"
+          },
+          "startDate": {
+            "type": "string",
+            "title": "Start Date",
+            "default": null,
+            "nullable": true,
+            "description": "ISO 8601 start date/time, e.g., '2023-04-23T12:00:00+0000'"
+          },
+          "repeatFlag": {
+            "type": "string",
+            "title": "Repeat Flag",
+            "default": null,
+            "examples": [
+              "RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR"
+            ],
+            "nullable": true,
+            "description": "RRULE string for recurrence, e.g., 'RRULE:FREQ=DAILY;INTERVAL=1'"
+          }
+        },
+        "description": "Request model for updating an existing task in TickTick."
+      }
+    }
+  ],
+  "tool_count": 11,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/ticktick/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "TICKTICK_COMPLETE_TASK",
+    "TICKTICK_CREATE_PROJECT",
+    "TICKTICK_CREATE_TASK",
+    "TICKTICK_DELETE_PROJECT",
+    "TICKTICK_DELETE_TASK",
+    "TICKTICK_GET_PROJECT_WITH_DATA",
+    "TICKTICK_GET_USER_PROJECT",
+    "TICKTICK_OAUTH2_AUTHORIZATION_STEP1",
+    "TICKTICK_OAUTH2_AUTHORIZATION_STEP_1",
+    "TICKTICK_UPDATE_PROJECT",
+    "TICKTICK_UPDATE_TASK"
+  ]
+}

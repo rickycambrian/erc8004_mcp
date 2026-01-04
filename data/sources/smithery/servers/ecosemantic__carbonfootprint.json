@@ -1,0 +1,212 @@
+{
+  "qualifiedName": "ecosemantic/carbonfootprint",
+  "displayName": "carbonfootprint",
+  "description": "Discover and run life cycle assessment analyses across searchable categories and datasets. Set session defaults to streamline repeated work and keep projects consistent. Monitor your capabilities and usage to plan analyses with confidence.",
+  "iconUrl": null,
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/ecosemantic/carbonfootprint",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/ecosemantic/carbonfootprint/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "get_account_and_capabilities",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "User Information & Capabilities",
+      "annotations": {
+        "title": "User Information & Capabilities",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get your account information, available capabilities, and usage statistics.\n\nReturns your tier, available tool categories (not individual tools),\ndatabases you can access, and current usage limits.\n\nUse discover_available_lca_tools() to explore tools within each category.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "discover_available_lca_tools",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Discover Available LCA Tools",
+      "annotations": {
+        "title": "Discover Available LCA Tools",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Discover available tool categories and get detailed tool schemas.\n\nThree usage modes:\n1. discover_available_lca_tools() - List all available categories\n2. discover_available_lca_tools(category=\"search\") - List tools in a category\n3. discover_available_lca_tools(tool_name=\"search_activities\") - Get full schema for a tool\n\nParameters:\n    category: Category name to explore (search, calculate, reference, power_search, custom_modeling)\n    tool_name: Specific tool name to get full schema\n\nReturns tool information needed to use execute_lca_tool().",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "tool_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "execute_lca_tool",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Execute LCA Tool",
+      "annotations": {
+        "title": "Execute LCA Tool",
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Execute any EcoSemantic LCA tool by name.\n\nUse discover_available_lca_tools() first to find available tools and their required parameters.\nSession defaults (set via set_lca_session_defaults) are applied automatically.\n\nParameters:\n    tool_name: Name of the tool to execute (e.g., 'search_activities')\n    params: Dictionary of parameters for the tool\n\nExample:\n    execute_lca_tool(tool_name=\"search_activities\", params={\"q\": \"electricity\", \"database\": \"ecoinvent-3.9.1-cutoff\"})",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tool_name"
+        ],
+        "properties": {
+          "params": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "tool_name": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "set_lca_session_defaults",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Set LCA Session Defaults",
+      "annotations": {
+        "title": "Set LCA Session Defaults",
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Set default values that apply to all subsequent LCA tool calls.\n\nReduces repetition - set database once, use everywhere.\nDefaults persist for 24 hours or until changed.\n\nParameters:\n    database: Default Ecoinvent database version (e.g., 'ecoinvent-3.9.1-cutoff')\n    project_id: Default project UUID for custom modeling tools\n\nExample:\n    set_lca_session_defaults(database=\"ecoinvent-3.9.1-cutoff\")\n    # Now all tools use this database by default",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "database": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "get_lca_session_defaults",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Get LCA Session Defaults",
+      "annotations": {
+        "title": "Get LCA Session Defaults",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "View your current LCA session defaults.\n\nShows what default values are currently set for database, project_id, etc.\nUse set_lca_session_defaults() to change these values.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:21:41.733003+00:00",
+    "source": "smithery"
+  }
+}

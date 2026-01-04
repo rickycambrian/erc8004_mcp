@@ -1,0 +1,1355 @@
+{
+  "id": "@flight505/mcp_dincoder",
+  "name": "@flight505/mcp_dincoder",
+  "display_name": "DinCoder",
+  "version": null,
+  "description": "Driven Intent Negotiation \u2014 Contract-Oriented Deterministic Executable Runtime\n\nIMPORTANT: \n> - **Using Claude Code?** \u2192 Install the [Plugin](#-claude-code-plugin-recommended-for-claude-code) (easier, includes slash commands & agents)\n> - **Using VS Code/Codex/Cursor?** \u2192 Install [MCP Server Only](#installing-via-smithery) (plugins not supported)\n>\n> \u26a0\ufe0f **Don't install both!** The plugin automatically installs the MCP server - installing both may cause conflicts.\n\nDinCoder brings the power of GitHub Spec Kit to any AI coding agent through the Model Context Protocol. It transforms the traditional \"prompt-then-code-dump\" workflow into a systematic, specification-driven process where specifications don't serve code\u2014code serves specifications.\n\n\ud83c\udf1f The Power Inversion: A New Development Paradigm\nFor decades, code has been king. Specifications were scaffolding\u2014built, used, then discarded once \"real work\" began. PRDs guided development, design docs informed implementation, but these were always subordinate to code. Code was truth. Everything else was, at best, good intentions.\n\nSpec-Driven Development inverts this power structure: \n\nSpecifications Generate Code: The PRD isn't a guide\u2014it's the source that produces implementation\nExecutable Specifications: Precise, complete specs that eliminate the gap between intent and implementation\nCode as Expression: Code becomes the specification's expression in a particular language/framework\nLiving Documentation: Maintain software by evolving specifications, not manually updating code\nThis transformation is possible because AI can understand complex specifications and implement them systematically. But raw AI generation without structure produces chaos. DinCoder provides that structure through GitHub's proven Spec Kit methodology. \n\nPlugin install :\n**Step 1: Add the DinCoder marketplace**\n```bash\n# In Claude Code\n/plugin marketplace add flight505/dincoder-plugin\n```\n\n**Step 2: Install the plugin**\n```bash\n/plugin install dincoder\n```",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/e3c7d336-d917-43e9-9b49-84df8af893f2.jpg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "constitution_create",
+      "description": "Define project principles, constraints, and preferences that guide all AI-generated artifacts. Use this before specify_start to establish project guardrails.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectName",
+          "principles",
+          "constraints"
+        ],
+        "properties": {
+          "principles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Project principles (e.g., \"Prefer functional patterns\")"
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Technical constraints (e.g., \"Max bundle size: 500KB\")"
+          },
+          "preferences": {
+            "type": "object",
+            "properties": {
+              "style": {
+                "type": "string",
+                "description": "Code style preference (e.g., \"Functional > OOP\")"
+              },
+              "patterns": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Preferred patterns (e.g., \"Repository pattern\")"
+              },
+              "libraries": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Preferred libraries (e.g., \"React Query over Redux\")"
+              }
+            },
+            "description": "Optional preferences for libraries, patterns, and style",
+            "additionalProperties": false
+          },
+          "projectName": {
+            "type": "string",
+            "description": "Name of the project"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "clarify_add",
+      "description": "Flag ambiguities or questions in specifications that need clarification. Creates a tracked clarification with unique ID.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "question"
+        ],
+        "properties": {
+          "context": {
+            "type": "string",
+            "description": "Context or section where clarification is needed"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Possible options or approaches to consider"
+          },
+          "question": {
+            "type": "string",
+            "description": "The clarification question to ask"
+          },
+          "specPath": {
+            "type": "string",
+            "description": "Path to specific spec file (optional)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "clarify_resolve",
+      "description": "Resolve a pending clarification with an answer. Updates spec.md and logs resolution in research.md.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "clarificationId",
+          "resolution"
+        ],
+        "properties": {
+          "rationale": {
+            "type": "string",
+            "description": "Reasoning behind the resolution"
+          },
+          "resolution": {
+            "type": "string",
+            "description": "The answer/resolution to the clarification"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          },
+          "clarificationId": {
+            "type": "string",
+            "description": "ID of the clarification to resolve (e.g., CLARIFY-001)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "clarify_list",
+      "description": "List all clarifications with optional status filter (pending/resolved/all). Useful for tracking progress.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "status": {
+            "enum": [
+              "pending",
+              "resolved",
+              "all"
+            ],
+            "type": "string",
+            "description": "Filter by status"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "spec_validate",
+      "description": "Check specification quality and completeness. Validates required sections, acceptance criteria, clarifications, and checks for premature implementation details.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "checks": {
+            "type": "object",
+            "properties": {
+              "completeness": {
+                "type": "boolean",
+                "description": "Check if all required sections are present"
+              },
+              "clarifications": {
+                "type": "boolean",
+                "description": "Check for unresolved [NEEDS CLARIFICATION] markers"
+              },
+              "acceptanceCriteria": {
+                "type": "boolean",
+                "description": "Check if features have testable criteria"
+              },
+              "prematureImplementation": {
+                "type": "boolean",
+                "description": "Check for HOW details in WHAT sections"
+              }
+            },
+            "description": "Which checks to run (default: all)",
+            "additionalProperties": false
+          },
+          "specPath": {
+            "type": "string",
+            "description": "Path to specific spec file (auto-detect if not provided)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "artifacts_analyze",
+      "description": "Analyze consistency across spec, plan, and tasks artifacts. Verifies that all artifacts are aligned and complete.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "spec",
+                "plan",
+                "tasks"
+              ],
+              "type": "string"
+            },
+            "description": "Which artifacts to analyze (default: all)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "spec_refine",
+      "description": "Refine/update an existing specification. Supports updating specific sections (goals, requirements, acceptance, edge-cases) or the full spec. Changes are logged to research.md.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "section",
+          "changes",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Why this refinement is needed"
+          },
+          "changes": {
+            "type": "string",
+            "description": "Markdown describing the refinements to make"
+          },
+          "section": {
+            "enum": [
+              "goals",
+              "requirements",
+              "acceptance",
+              "edge-cases",
+              "full"
+            ],
+            "type": "string",
+            "description": "Section to refine (goals | requirements | acceptance | edge-cases | full)"
+          },
+          "specPath": {
+            "type": "string",
+            "description": "Path to specific spec file (auto-detect if not provided)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "prereqs_check",
+      "description": "Check environment prerequisites before project setup. Verifies Node.js version, npm, git, and custom commands are available.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "checkFor": {
+            "type": "object",
+            "properties": {
+              "git": {
+                "type": "boolean",
+                "description": "Check if git is available"
+              },
+              "npm": {
+                "type": "boolean",
+                "description": "Check if npm is available"
+              },
+              "node": {
+                "type": "string",
+                "description": "Required Node.js version (e.g., \">=20\")"
+              },
+              "customCommands": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Custom commands to check (e.g., [\"docker\", \"kubectl\"])"
+              }
+            },
+            "description": "What to check for (default: node, npm, git)",
+            "additionalProperties": false
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "specify_start",
+      "description": "Initialize a new spec-driven project. Creates .dincoder directory with spec.json template. Use this as the first step when starting a new project.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "projectName",
+          "agent"
+        ],
+        "properties": {
+          "agent": {
+            "enum": [
+              "claude",
+              "copilot",
+              "gemini"
+            ],
+            "type": "string",
+            "description": "AI agent to use"
+          },
+          "projectName": {
+            "type": "string",
+            "description": "Name of the project to initialize"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "specify_describe",
+      "description": "Create or update project specification with detailed requirements, goals, and constraints. Use after specify_start to define what the project should do.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "description"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Project specification description"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "plan_create",
+      "description": "Generate technical implementation plan from the project specification. Creates a step-by-step technical approach with milestones and architecture decisions.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "constraintsText"
+        ],
+        "properties": {
+          "specPath": {
+            "type": "string",
+            "description": "Path to specification file"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          },
+          "constraintsText": {
+            "type": "string",
+            "description": "Technical constraints and requirements"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "tasks_generate",
+      "description": "Generate granular, actionable tasks from the technical plan. Creates a task list with specific implementation steps that can be executed sequentially.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "scope"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "description": "Scope or context for task generation"
+          },
+          "planPath": {
+            "type": "string",
+            "description": "Path to plan file"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "tasks_tick",
+      "description": "Mark a specific task as complete by its ID. Updates the task status and tracks progress through the implementation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "Task ID to mark as complete"
+          },
+          "tasksPath": {
+            "type": "string",
+            "description": "Path to tasks file"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "tasks_visualize",
+      "description": "Generate visual dependency graphs from tasks.md. Supports Mermaid flowcharts, Graphviz DOT, and ASCII tree formats. Shows task dependencies, status colors, and optional phase grouping.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "format": {
+            "enum": [
+              "mermaid",
+              "graphviz",
+              "ascii"
+            ],
+            "type": "string",
+            "default": "mermaid",
+            "description": "Output format"
+          },
+          "tasksPath": {
+            "type": "string",
+            "description": "Direct path to tasks.md file (overrides workspacePath)"
+          },
+          "groupByPhase": {
+            "type": "boolean",
+            "default": false,
+            "description": "Group tasks by phase using subgraphs"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Path to workspace directory containing .dincoder folder"
+          },
+          "includeCompleted": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include completed tasks in visualization"
+          },
+          "highlightCriticalPath": {
+            "type": "boolean",
+            "default": false,
+            "description": "Highlight the critical path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "tasks_filter",
+      "description": "Filter tasks by status, phase, type, priority, blockers, or tags. Includes smart presets (next, frontend, backend, ready, cleanup) for common workflows. Returns markdown-formatted task list.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by tags (AND logic - task must have all tags)"
+          },
+          "type": {
+            "type": "string",
+            "description": "Filter by type (e.g., \"frontend\", \"backend\", \"test\", \"docs\")"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Limit number of results"
+          },
+          "phase": {
+            "type": "string",
+            "description": "Filter by phase (e.g., \"setup\", \"core\", \"polish\")"
+          },
+          "preset": {
+            "enum": [
+              "next",
+              "frontend",
+              "backend",
+              "ready",
+              "cleanup",
+              "none"
+            ],
+            "type": "string",
+            "default": "none",
+            "description": "Use a smart preset filter"
+          },
+          "sortBy": {
+            "enum": [
+              "id",
+              "priority",
+              "dependencies",
+              "phase"
+            ],
+            "type": "string",
+            "default": "id",
+            "description": "Sort results by field"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "all"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Filter by task status"
+          },
+          "blocker": {
+            "enum": [
+              "blocked",
+              "unblocked",
+              "all"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Filter by blocker status"
+          },
+          "priority": {
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              "all"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Filter by priority"
+          },
+          "tasksPath": {
+            "type": "string",
+            "description": "Direct path to tasks.md file (overrides workspacePath)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Path to workspace directory containing .dincoder folder"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "tasks_tick_range",
+      "description": "Mark multiple tasks as complete at once. Supports array format [\"T001\", \"T003\"], range format \"T001-T005\", or mixed format. Includes strict mode for all-or-nothing completion.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskIds"
+        ],
+        "properties": {
+          "notes": {
+            "type": "string",
+            "description": "Optional completion notes"
+          },
+          "strict": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, fail all if any task is invalid. If false, skip invalid tasks and continue."
+          },
+          "taskIds": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Task IDs to complete. Supports array [\"T001\", \"T003\"], range \"T001-T005\", or mixed [\"T001-T005\", \"T010\"]"
+          },
+          "tasksPath": {
+            "type": "string",
+            "description": "Direct path to tasks.md file (overrides workspacePath)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Path to workspace directory containing .dincoder folder"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "tasks_search",
+      "description": "Full-text search across task descriptions and metadata. Supports plain text, regex patterns, and fuzzy matching for typo tolerance. Returns ranked results with relevance scores.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "fuzzy": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable fuzzy matching for typo tolerance"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Limit number of results (default: 10, max: 100)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query (plain text or regex pattern)"
+          },
+          "useRegex": {
+            "type": "boolean",
+            "default": false,
+            "description": "Treat query as regex pattern"
+          },
+          "tasksPath": {
+            "type": "string",
+            "description": "Direct path to tasks.md file (overrides workspacePath)"
+          },
+          "searchFields": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "description",
+                "phase",
+                "type",
+                "tags",
+                "all"
+              ],
+              "type": "string"
+            },
+            "default": [
+              "description"
+            ],
+            "description": "Fields to search in"
+          },
+          "caseSensitive": {
+            "type": "boolean",
+            "default": false,
+            "description": "Case-sensitive search"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Path to workspace directory containing .dincoder folder"
+          },
+          "fuzzyThreshold": {
+            "type": "number",
+            "default": 70,
+            "maximum": 100,
+            "minimum": 0,
+            "description": "Fuzzy match similarity threshold (0-100%)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "tasks_stats",
+      "description": "Generate comprehensive task statistics and progress metrics. Provides insights on completion rates, phase/type distribution, priority breakdown, blocker analysis, and ASCII progress charts.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "groupBy": {
+            "enum": [
+              "status",
+              "phase",
+              "type",
+              "priority",
+              "all"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Group statistics by dimension"
+          },
+          "tasksPath": {
+            "type": "string",
+            "description": "Direct path to tasks.md file (overrides workspacePath)"
+          },
+          "showBlockers": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show blocker analysis"
+          },
+          "showVelocity": {
+            "type": "boolean",
+            "default": false,
+            "description": "Show velocity metrics (requires task completion timestamps)"
+          },
+          "includeCharts": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include ASCII progress charts"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Path to workspace directory containing .dincoder folder"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "contracts_generate",
+      "description": "Generate OpenAPI 3.1, GraphQL, or JSON Schema contracts from specifications. Supports automatic extraction from spec.md or TypeScript code using tsoa.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "format": {
+            "enum": [
+              "openapi",
+              "graphql",
+              "json-schema"
+            ],
+            "type": "string",
+            "default": "openapi",
+            "description": "Contract format to generate"
+          },
+          "specPath": {
+            "type": "string",
+            "description": "Path to specification file (auto-detect if not provided)"
+          },
+          "outputPath": {
+            "type": "string",
+            "description": "Output path for generated contract (default: contracts/ in spec directory)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          },
+          "includeExamples": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include example values in generated contract"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "templates_list",
+      "description": "List all available templates (built-in and custom). Filter by category and discover customization points.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "category": {
+            "enum": [
+              "project",
+              "spec",
+              "plan",
+              "task",
+              "all"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Filter by template category"
+          },
+          "includeCustom": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include custom templates"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "templates_customize",
+      "description": "Create or update template customization with hooks, variable substitution, and inheritance. Supports before/after/transform/validate hooks.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "templateId",
+          "customizationPath"
+        ],
+        "properties": {
+          "hooks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "script"
+              ],
+              "properties": {
+                "type": {
+                  "enum": [
+                    "before",
+                    "after",
+                    "transform",
+                    "validate"
+                  ],
+                  "type": "string",
+                  "description": "Hook type"
+                },
+                "script": {
+                  "type": "string",
+                  "description": "Hook script or function"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Hook description"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Template hooks for customization"
+          },
+          "extends": {
+            "type": "string",
+            "description": "Parent template ID for inheritance"
+          },
+          "variables": {
+            "type": "object",
+            "description": "Variable substitutions",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "templateId": {
+            "type": "string",
+            "description": "ID of the template to customize (e.g., \"web-app\", \"api-service\")"
+          },
+          "overridePath": {
+            "type": "string",
+            "description": "Path to custom template file (overrides built-in template)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          },
+          "customizationPath": {
+            "type": "string",
+            "description": "Path to save customization config (relative to workspace)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "metrics_report",
+      "description": "Generate comprehensive metrics report with DORA and SPACE metrics. Tracks development velocity, cycle time, quality, and trends using Git history for timestamps.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "format": {
+            "enum": [
+              "json",
+              "markdown"
+            ],
+            "type": "string",
+            "default": "json",
+            "description": "Output format"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (ISO 8601 format, defaults to now)"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (ISO 8601 format, defaults to 30 days ago)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "metrics_export",
+      "description": "Export metrics to CSV or JSON format for external analysis. Includes DORA metrics, cycle time, quality metrics, and custom date ranges.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "outputPath",
+          "format"
+        ],
+        "properties": {
+          "format": {
+            "enum": [
+              "csv",
+              "json"
+            ],
+            "type": "string",
+            "description": "Export format"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (ISO 8601 format, defaults to now)"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (ISO 8601 format, defaults to 30 days ago)"
+          },
+          "outputPath": {
+            "type": "string",
+            "description": "Output file path for export (e.g., metrics.csv or metrics.json)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "spec_lint",
+      "description": "Automated spec quality checking with markdownlint, spec-specific rules, and prose quality analysis. Checks for required sections, acceptance criteria format, passive voice, vague language, and more. Supports auto-fix for simple issues.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "config": {
+            "type": "object",
+            "properties": {
+              "specRules": {
+                "type": "object",
+                "properties": {
+                  "codeBlocks": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "requiredSections": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "acceptanceCriteria": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "additionalProperties": false
+              },
+              "proseRules": {
+                "type": "object",
+                "properties": {
+                  "passiveVoice": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "vagueLanguage": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "ambiguousPronouns": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "sentenceComplexity": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "additionalProperties": false
+              },
+              "customRules": {
+                "type": "object",
+                "properties": {
+                  "zodValidation": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "edgeCaseFormat": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "clarificationFormat": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "additionalProperties": false
+              },
+              "markdownlint": {
+                "type": "object",
+                "properties": {
+                  "config": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "additionalProperties": false
+              },
+              "severityOverrides": {
+                "type": "object",
+                "additionalProperties": {
+                  "enum": [
+                    "ERROR",
+                    "WARNING",
+                    "INFO"
+                  ],
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Custom lint configuration (overrides defaults)",
+            "additionalProperties": false
+          },
+          "format": {
+            "enum": [
+              "json",
+              "markdown"
+            ],
+            "type": "string",
+            "default": "markdown",
+            "description": "Output format"
+          },
+          "autoFix": {
+            "type": "boolean",
+            "default": false,
+            "description": "Automatically fix issues when possible"
+          },
+          "specPath": {
+            "type": "string",
+            "description": "Path to spec file (defaults to .dincoder/spec.md or auto-detect)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "quality_format",
+      "description": "Run Prettier code formatter to ensure consistent code style. Automatically formats JavaScript, TypeScript, JSON, and other supported files.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "fix": {
+            "type": "boolean",
+            "description": "Apply fixes automatically"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "quality_lint",
+      "description": "Run ESLint to check for code quality issues, potential bugs, and style violations. Helps maintain code standards and catch errors early.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "fix": {
+            "type": "boolean",
+            "description": "Apply fixes automatically"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "quality_test",
+      "description": "Run test suite with optional code coverage reporting. Executes all unit and integration tests to ensure code correctness.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "coverage": {
+            "type": "boolean",
+            "description": "Include coverage report"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "quality_security_audit",
+      "description": "Run npm/yarn security audit to check for known vulnerabilities in dependencies. Identifies and reports security issues that need attention.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "fix": {
+            "type": "boolean",
+            "description": "Apply fixes automatically"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "quality_deps_update",
+      "description": "Check for available updates to project dependencies. Lists outdated packages and their latest versions for potential upgrades.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "check": {
+            "type": "boolean",
+            "description": "Only check for updates without installing"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "quality_license_check",
+      "description": "Analyze licenses of all dependencies to ensure compatibility with project requirements. Identifies potential licensing conflicts or restrictions.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          },
+          "allowedLicenses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of allowed license types"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "artifacts_read",
+      "description": "Read and return the current state of spec.json, plan.json, or tasks.json files. Use to retrieve project artifacts in normalized JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "artifactType"
+        ],
+        "properties": {
+          "artifactType": {
+            "enum": [
+              "spec",
+              "plan",
+              "tasks",
+              "all"
+            ],
+            "type": "string",
+            "description": "Type of artifact to read"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "research_append",
+      "description": "Append technical decisions, trade-offs, and research findings to the research.md document. Maintains a record of architectural choices and reasoning.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "topic",
+          "content"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "Research topic or decision area"
+          },
+          "content": {
+            "type": "string",
+            "description": "Research content or decision rationale"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "git_create_branch",
+      "description": "Create a new Git branch for implementing a specific feature or fix. Follows naming conventions and ensures clean branch creation from main/master.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "branchName"
+        ],
+        "properties": {
+          "branchName": {
+            "type": "string",
+            "description": "Name of the branch to create"
+          },
+          "fromBranch": {
+            "type": "string",
+            "description": "Base branch to create from (default: current branch)"
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "Workspace directory path"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "test_echo",
+      "description": "Simple echo tool for testing MCP server connectivity. Returns the input message prefixed with \"Echo:\". Use for debugging and connection verification.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message to echo"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 34,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@flight505/mcp_dincoder/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "constitution_create",
+    "clarify_add",
+    "clarify_resolve",
+    "clarify_list",
+    "spec_validate",
+    "artifacts_analyze",
+    "spec_refine",
+    "prereqs_check",
+    "specify_start",
+    "specify_describe",
+    "plan_create",
+    "tasks_generate",
+    "tasks_tick",
+    "tasks_visualize",
+    "tasks_filter",
+    "tasks_tick_range",
+    "tasks_search",
+    "tasks_stats",
+    "contracts_generate",
+    "templates_list",
+    "templates_customize",
+    "metrics_report",
+    "metrics_export",
+    "spec_lint",
+    "quality_format",
+    "quality_lint",
+    "quality_test",
+    "quality_security_audit",
+    "quality_deps_update",
+    "quality_license_check",
+    "artifacts_read",
+    "research_append",
+    "git_create_branch",
+    "test_echo"
+  ]
+}

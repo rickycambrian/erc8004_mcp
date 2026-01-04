@@ -1,0 +1,2032 @@
+{
+  "id": "@francis-ros/rostro-mcp",
+  "name": "@francis-ros/rostro-mcp",
+  "display_name": "Rostro Image, Video, 3D, Voice, SFX, Music",
+  "version": null,
+  "description": "Turn any language model into a multimodal powerhouse that can generate images, music, videos and more on the fly. Rostro's tools are designed to be used by language models from the ground up, expanding capabilities with minimal context bloat.\n\n## Quick Setup\n\nYou will need a [Rostro account](https://rostro.dev/login/sign_up) for OAuth discovery and authentication in your client of choice.\n\n**MCP Server URL:** `https://proto.rostro.dev/mcp`\n\n## Quick Install Links\n\n- **Cursor**: [Install in Cursor](https://cursor.com/en/install-mcp?name=Rostro&config=eyJ1cmwiOiJodHRwczovL3Byb3RvLnJvc3Ryby5kZXYvbWNwIiwiaGVhZGVycyI6e319)\n- **LM Studio**: [Install in LM Studio](https://lmstudio.ai/install-mcp?name=rostro&config=eyJ1cmwiOiJodHRwczovL3Byb3RvLnJvc3Ryby5kZXYvbWNwIn0%3D)\n\n## API Key Setup (Optional)\n\nFor fixed API authentication instead of OAuth, add this to your settings:\n\n```json\n\"rostro\": {\n    \"url\": \"https://proto.rostro.dev/mcp\",\n    \"headers\": {\n        \"Authorization\": \"Bearer <YOUR_API_KEY>\"\n    }\n}\n```\n\nGet an API key from your [account page](https://rostro.dev/account).\n\n## Client-Specific Setup\n\n### Claude Desktop and Claude.ai\n\n1. Go to [Claude Connectors](https://claude.ai/settings/connectors)\n2. Click \"Add Custom Connector\"\n3. Fill out the form:\n   - Name: \"Rostro\"\n   - URL: \"https://proto.rostro.dev/mcp\"\n4. Click \"Add\"\n5. Hit \"Connect\" and follow the OAuth flow\n6. Optionally, click \"Configure\" to give Claude preapproval for individual tools\n\n### Claude Code\n\nInstall using the command line:\n\n```bash\nclaude mcp add rostro -t http https://proto.rostro.dev/mcp\n```\n\nThen start Claude and follow the instructions to complete authentication.\n\n## What is MCP?\n\nModel Context Protocol (MCP) is an open standard that allows language models to securely connect to third-party data sources and tools.\n\n[Learn more about MCP](https://modelcontextprotocol.io/docs/getting-started/intro)\n",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/e5e161ca-2bbe-47ee-98ef-8d039330023a.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "account",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Fetch account info",
+      "annotations": {
+        "title": "Fetch account info",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Response includes their identity, current scopes/access, subscription, and credit balance.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "OAuthUserStub",
+        "required": [
+          "identity",
+          "username"
+        ],
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note",
+            "default": null
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Scopes",
+            "default": [],
+            "description": "What scopes the user has access to."
+          },
+          "credits": {
+            "type": "integer",
+            "title": "Credits",
+            "default": 0,
+            "description": "The current number of credits remaining."
+          },
+          "identity": {
+            "type": "string",
+            "title": "Identity",
+            "description": "The user's unique identifier."
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "The user's username."
+          },
+          "subscription": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscription",
+            "default": null,
+            "description": "None, Basic, Full, or Max."
+          },
+          "credits_reset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credits Reset",
+            "default": "2025-08-14T23:44:22Z",
+            "description": "When the credits next reset, in ISO 8601 timestamp format in UTC."
+          },
+          "credits_reset_in": {
+            "type": "string",
+            "title": "Credits Reset In",
+            "default": "4 hours, 10 minutes",
+            "description": "A human-readable version of when credits reset."
+          }
+        }
+      }
+    },
+    {
+      "name": "imagine",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Generate media",
+      "annotations": {
+        "title": "Generate media",
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "A unified endpoint for multimedia asset generation. For example, if the user asks for you to 'make', 'create', 'generate', or 'imagine' an image, song, video, speech, sound effect, or 3D model, use this tool.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "Speed": {
+            "enum": [
+              "turbo",
+              "normal"
+            ],
+            "type": "string",
+            "title": "Speed"
+          },
+          "Voice": {
+            "enum": [
+              "bright_female_20s",
+              "gentle_female_30s",
+              "whispery_female_40s",
+              "formal_female_30s",
+              "professional_female_30s",
+              "resonant_male_40s",
+              "light_male_20s",
+              "animated_male_20s",
+              "calm_female_20s"
+            ],
+            "type": "string",
+            "title": "Voice"
+          },
+          "I2IType": {
+            "enum": [
+              "canny",
+              "face",
+              "edit"
+            ],
+            "type": "string",
+            "title": "I2IType"
+          },
+          "RigType": {
+            "enum": [
+              "biped",
+              "quadruped",
+              "unknown",
+              "none"
+            ],
+            "type": "string",
+            "title": "RigType"
+          },
+          "MusicGenre": {
+            "enum": [
+              "pop",
+              "rhythm_and_blues",
+              "dance",
+              "jazz",
+              "folk",
+              "rock",
+              "chinese_modern",
+              "eastern_traditional",
+              "eastern_opera",
+              "metal",
+              "reggae",
+              "automatic"
+            ],
+            "type": "string",
+            "title": "MusicGenre"
+          },
+          "AspectRatio": {
+            "enum": [
+              "w1h1",
+              "w1h2",
+              "w2h1",
+              "w16h9",
+              "w21h9",
+              "w2h3",
+              "w3h2",
+              "w3h4",
+              "w4h3",
+              "w4h5",
+              "w5h4",
+              "w9h16",
+              "w9h21"
+            ],
+            "type": "string",
+            "title": "AspectRatio"
+          },
+          "MusicGenType": {
+            "enum": [
+              "instrumental",
+              "vocals",
+              "mixed"
+            ],
+            "type": "string",
+            "title": "MusicGenType"
+          },
+          "Output3DType": {
+            "enum": [
+              "glb",
+              "vrm"
+            ],
+            "type": "string",
+            "title": "Output3DType"
+          },
+          "GenerationType": {
+            "enum": [
+              "text_to_speech",
+              "text_to_image",
+              "text_to_video",
+              "image_to_image",
+              "image_to_video",
+              "text_to_sfx",
+              "text_to_music",
+              "text_to_3d",
+              "image_to_3d"
+            ],
+            "type": "string",
+            "title": "GenerationType"
+          },
+          "GenerationRequest": {
+            "type": "object",
+            "title": "GenerationRequest",
+            "properties": {
+              "fps": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "maximum": 24,
+                    "minimum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Fps",
+                "default": 8,
+                "description": "The number of frames per second."
+              },
+              "seed": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Seed",
+                "default": -1,
+                "description": "Use this only if reproducible results are important."
+              },
+              "genre": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/MusicGenre"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": "automatic",
+                "description": "The musical genre."
+              },
+              "speed": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Speed"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": "normal",
+                "description": "Enabling turbo will make generations much faster but with slightly worse output."
+              },
+              "voice": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Voice"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": "bright_female_20s",
+                "description": "Select a voice to use."
+              },
+              "lyrics": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Lyrics",
+                "default": null,
+                "description": "The song's lyrics, if relevant. Each part should begin with a structure tag ([verse], [chorus], [bridge], [intro-short], [intro-medium], [intro-long], [outro-short], [outro-medium], [outro-long], [inst-short], [inst-medium], [inst-long], [silence]) and a newline, and end with two newlines. These segments should not contain lyrics: ([intro], [intro-short], [intro-medium], [inst], [inst-short], [inst-medium], [outro], [outro-short], [outro-medium])"
+              },
+              "prompt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Prompt",
+                "default": "",
+                "description": "It should be descriptive of exactly what you want, and fairly detailed."
+              },
+              "duration": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Duration",
+                "default": 4,
+                "description": "The desired duration, in seconds, of the video, sound effect, or other media. Does not affect music length."
+              },
+              "i2i_type": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/I2IType"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": "edit",
+                "description": "Whether to do edit-based i2i ('edit'), edge-based i2i ('canny'), or face/person-based i2i ('face'). Edit preserves the most of the structure and style of the original image; canny preserves the image's structure, but not its style; face preserves neither, but keeps the visual identity/face of a person in the source image."
+              },
+              "strength": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "maximum": 1,
+                    "minimum": 0.001
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Strength",
+                "default": 0.7,
+                "description": "The strength of any image-to-image transformation."
+              },
+              "end_image": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "End Image",
+                "default": null,
+                "description": "The final frame image for image-to-video, as a URL or base64 string. If you want a video to loop, give the same start and end image."
+              },
+              "do_autorig": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Do Autorig",
+                "default": false,
+                "description": "Whether to generate a rig as well."
+              },
+              "do_texture": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Do Texture",
+                "default": true,
+                "description": "Whether to generate a texture as well."
+              },
+              "init_image": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Init Image",
+                "default": null,
+                "examples": [
+                  "https://example.com/some_image_url.png"
+                ],
+                "description": "Base64 image string, or a URL to an image."
+              },
+              "mask_image": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Mask Image",
+                "default": null,
+                "description": "The mask image, as a URL or base64 string."
+              },
+              "music_type": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/MusicGenType"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": "mixed",
+                "description": "Whether to make instrumental music, only vocals, or a fully mixed song. If requesting 'vocals' or 'mixed', lyrics MUST be provided."
+              },
+              "transcript": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Transcript",
+                "default": "A wizard's job is to vex chumps quickly in fog.",
+                "description": "The text to read out."
+              },
+              "init_images": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Init Images",
+                "default": [],
+                "description": "Optional. Reference images. A list of base64 image string(s) and/or URL(s). If not provided, text-to-image will be done on the text prompt. Because of this, it is recommended to use text-to-image first and select the preferred appearance."
+              },
+              "output_type": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Output3DType"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": "glb",
+                "description": "What file type to output."
+              },
+              "aspect_ratio": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AspectRatio"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": "w1h1",
+                "description": "The desired aspect ratio."
+              },
+              "autorig_type": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/RigType"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": "unknown",
+                "description": "The type of rigging to use. 'Bipedal' is common and will create much better rigs for humans and other bipeds. The 'quadruped' option is best for non-anthropomorphic animals. If you aren't sure which to pick, use 'unknown'."
+              },
+              "texture_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Texture Size",
+                "default": 1024,
+                "description": "The pixel width of the generated texture for 3D models. Lower resolutions will generate faster, but be less detailed."
+              },
+              "guidance_scale": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "maximum": 20,
+                    "minimum": 0.1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Guidance Scale",
+                "default": 3.5,
+                "examples": [
+                  3.5
+                ],
+                "description": "How strongly the prompt affects the output."
+              },
+              "generation_type": {
+                "$ref": "#/$defs/GenerationType",
+                "default": "text_to_image",
+                "description": "The type of media to generate."
+              },
+              "negative_prompt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Negative Prompt",
+                "default": "",
+                "description": "What you don't want in the result."
+              },
+              "octree_resolution": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Octree Resolution",
+                "default": 384,
+                "description": "The octree resolution to generate for 3D models. Lower resolutions will generate faster, but be less detailed."
+              },
+              "remove_background": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Remove Background",
+                "default": false,
+                "description": "Whether to remove the background of any image(s) before/after this operation."
+              },
+              "num_inference_steps": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 2
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Num Inference Steps",
+                "default": 30,
+                "description": "Larger values may produce better outputs at the cost of longer generation times. Values over 50 are usually overkill."
+              },
+              "preserve_transparency": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Preserve Transparency",
+                "default": true,
+                "description": "If given, the transparency of the non-mask image(s) will be preserved. Useful if your input image has clear parts and you want to keep them clear."
+              }
+            }
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "properties": {
+          "request": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/GenerationRequest"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Request",
+            "description": "The request, either as an object (preferred) or a json-formatted string (tolerated for compatibility)."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "LayerInfo": {
+            "type": "object",
+            "title": "LayerInfo",
+            "properties": {
+              "dpi": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Dpi",
+                "default": null,
+                "description": "Optional. Canvas height."
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Width",
+                "default": null,
+                "description": "Optional. Canvas width."
+              },
+              "height": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Height",
+                "default": null,
+                "description": "Optional. Canvas height."
+              },
+              "locked": {
+                "type": "boolean",
+                "title": "Locked",
+                "default": false,
+                "description": "Layer locked."
+              },
+              "effects": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Effects",
+                "default": null,
+                "description": "Optional. Layer effects."
+              },
+              "opacity": {
+                "type": "integer",
+                "title": "Opacity",
+                "default": 100,
+                "description": "Optional. Layer opacity."
+              },
+              "visible": {
+                "type": "boolean",
+                "title": "Visible",
+                "default": true,
+                "description": "Layer visible."
+              },
+              "z_index": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Z Index",
+                "default": null,
+                "description": "Optional. Layer z index."
+              },
+              "children": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Children",
+                "default": null,
+                "description": "Optional. Layer children."
+              },
+              "duration": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Duration",
+                "default": null,
+                "description": "If animation or track, the total duration."
+              },
+              "end_time": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "End Time",
+                "default": null,
+                "description": "If animation or track, the end time."
+              },
+              "in_point": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "In Point",
+                "default": null,
+                "description": "If animation or track, the in point."
+              },
+              "out_point": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Out Point",
+                "default": null,
+                "description": "If animation or track, the out point."
+              },
+              "start_time": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Start Time",
+                "default": null,
+                "description": "If animation or track, the start time."
+              }
+            }
+          },
+          "Rejection": {
+            "type": "object",
+            "title": "Rejection",
+            "properties": {
+              "reason": {
+                "$ref": "#/$defs/RejectionReason",
+                "default": "unknown"
+              },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Location",
+                "default": null
+              }
+            }
+          },
+          "RejectionReason": {
+            "enum": [
+              "unknown",
+              "explicit_text",
+              "explicit_image",
+              "malformed_image",
+              "out_of_credits"
+            ],
+            "type": "string",
+            "title": "RejectionReason"
+          }
+        },
+        "title": "ImaginedItem",
+        "properties": {
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost",
+            "default": null,
+            "description": "Cost in credits, if any."
+          },
+          "info": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/LayerInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The layer info, if this is part of a project."
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note",
+            "default": null,
+            "description": "A note, typically for the LLM."
+          },
+          "uuid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uuid",
+            "default": null,
+            "description": "The unique identity of the media."
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Rejection"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "If there was an error, the reason may be here."
+          },
+          "prompt": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt",
+            "default": null,
+            "description": "Prompt metadata."
+          },
+          "is_done": {
+            "type": "boolean",
+            "title": "Is Done",
+            "default": true,
+            "description": "Whether this generation is completed."
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "default": null
+          },
+          "is_failed": {
+            "type": "boolean",
+            "title": "Is Failed",
+            "default": false,
+            "description": "Whether this generation is failed."
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "default": null,
+            "description": "A generated description of the item."
+          },
+          "generation_uuid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Uuid",
+            "default": null,
+            "examples": [
+              "b9ae-6f64957f986a"
+            ],
+            "description": "The unique identity of the generation, if any."
+          },
+          "primary_media_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1500,
+                "minLength": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Media Url",
+            "default": null,
+            "description": "The URL where the generated media is located. If this value is non-null, use it to show clickable link(s) in your response with a relevant call-to-action like this: [Watch the Video](put the primary_media_url here)."
+          },
+          "secondary_media_urls": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secondary Media Urls",
+            "default": null,
+            "description": "If this generated a compound asset like a 3D model, the URLS of other components of the asset, like texture images, will be here."
+          }
+        }
+      }
+    },
+    {
+      "name": "history",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Fetch generation history",
+      "annotations": {
+        "title": "Fetch generation history",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "A unified endpoint for fetching multimedia asset generation history.",
+      "inputSchema": {
+        "type": "object",
+        "$defs": {
+          "OrderMediaBy": {
+            "enum": [
+              "created_at",
+              "updated_at",
+              "uuid"
+            ],
+            "type": "string",
+            "title": "OrderMediaBy"
+          },
+          "GenerationType": {
+            "enum": [
+              "text_to_speech",
+              "text_to_image",
+              "text_to_video",
+              "image_to_image",
+              "image_to_video",
+              "text_to_sfx",
+              "text_to_music",
+              "text_to_3d",
+              "image_to_3d"
+            ],
+            "type": "string",
+            "title": "GenerationType"
+          }
+        },
+        "properties": {
+          "asc": {
+            "type": "boolean",
+            "title": "Asc",
+            "default": false,
+            "description": "Whether to sort results in ascending order. Defaults to false."
+          },
+          "first": {
+            "type": "integer",
+            "title": "First",
+            "default": 10,
+            "examples": [
+              10
+            ],
+            "description": "The number of the results to get.",
+            "exclusiveMinimum": 0
+          },
+          "uuids": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uuids",
+            "default": null,
+            "examples": [
+              []
+            ],
+            "description": "If given, only these media UUIDs will be fetched."
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cursor",
+            "default": null,
+            "description": "The cursor to use to fetch the next page."
+          },
+          "order_by": {
+            "$ref": "#/$defs/OrderMediaBy",
+            "title": "Order By",
+            "default": "created_at",
+            "description": "What field to order results by. Defaults to created_at."
+          },
+          "media_types": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/GenerationType"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Types",
+            "default": null,
+            "description": "What generation types to fetch. If given, other types will be excluded."
+          },
+          "generated_only": {
+            "type": "boolean",
+            "title": "Generated Only",
+            "default": false,
+            "description": "Whether to return only generated images or not. If false, uploads like source images for image-to-image will be included."
+          },
+          "generation_uuids": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Uuids",
+            "default": null,
+            "examples": [
+              []
+            ],
+            "description": "If given, only these generation UUIDs will be fetched."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "LayerInfo": {
+            "type": "object",
+            "title": "LayerInfo",
+            "properties": {
+              "dpi": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Dpi",
+                "default": null,
+                "description": "Optional. Canvas height."
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Width",
+                "default": null,
+                "description": "Optional. Canvas width."
+              },
+              "height": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Height",
+                "default": null,
+                "description": "Optional. Canvas height."
+              },
+              "locked": {
+                "type": "boolean",
+                "title": "Locked",
+                "default": false,
+                "description": "Layer locked."
+              },
+              "effects": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Effects",
+                "default": null,
+                "description": "Optional. Layer effects."
+              },
+              "opacity": {
+                "type": "integer",
+                "title": "Opacity",
+                "default": 100,
+                "description": "Optional. Layer opacity."
+              },
+              "visible": {
+                "type": "boolean",
+                "title": "Visible",
+                "default": true,
+                "description": "Layer visible."
+              },
+              "z_index": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Z Index",
+                "default": null,
+                "description": "Optional. Layer z index."
+              },
+              "children": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Children",
+                "default": null,
+                "description": "Optional. Layer children."
+              },
+              "duration": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Duration",
+                "default": null,
+                "description": "If animation or track, the total duration."
+              },
+              "end_time": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "End Time",
+                "default": null,
+                "description": "If animation or track, the end time."
+              },
+              "in_point": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "In Point",
+                "default": null,
+                "description": "If animation or track, the in point."
+              },
+              "out_point": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Out Point",
+                "default": null,
+                "description": "If animation or track, the out point."
+              },
+              "start_time": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Start Time",
+                "default": null,
+                "description": "If animation or track, the start time."
+              }
+            }
+          },
+          "Rejection": {
+            "type": "object",
+            "title": "Rejection",
+            "properties": {
+              "reason": {
+                "$ref": "#/$defs/RejectionReason",
+                "default": "unknown"
+              },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Location",
+                "default": null
+              }
+            }
+          },
+          "ImaginedItem": {
+            "type": "object",
+            "title": "ImaginedItem",
+            "properties": {
+              "cost": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Cost",
+                "default": null,
+                "description": "Cost in credits, if any."
+              },
+              "info": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/LayerInfo"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The layer info, if this is part of a project."
+              },
+              "note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Note",
+                "default": null,
+                "description": "A note, typically for the LLM."
+              },
+              "uuid": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Uuid",
+                "default": null,
+                "description": "The unique identity of the media."
+              },
+              "error": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Rejection"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "If there was an error, the reason may be here."
+              },
+              "prompt": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Prompt",
+                "default": null,
+                "description": "Prompt metadata."
+              },
+              "is_done": {
+                "type": "boolean",
+                "title": "Is Done",
+                "default": true,
+                "description": "Whether this generation is completed."
+              },
+              "user_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "User Id",
+                "default": null
+              },
+              "is_failed": {
+                "type": "boolean",
+                "title": "Is Failed",
+                "default": false,
+                "description": "Whether this generation is failed."
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Description",
+                "default": null,
+                "description": "A generated description of the item."
+              },
+              "generation_uuid": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Generation Uuid",
+                "default": null,
+                "examples": [
+                  "b9ae-6f64957f986a"
+                ],
+                "description": "The unique identity of the generation, if any."
+              },
+              "primary_media_url": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 1500,
+                    "minLength": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Primary Media Url",
+                "default": null,
+                "description": "The URL where the generated media is located. If this value is non-null, use it to show clickable link(s) in your response with a relevant call-to-action like this: [Watch the Video](put the primary_media_url here)."
+              },
+              "secondary_media_urls": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Secondary Media Urls",
+                "default": null,
+                "description": "If this generated a compound asset like a 3D model, the URLS of other components of the asset, like texture images, will be here."
+              }
+            }
+          },
+          "RejectionReason": {
+            "enum": [
+              "unknown",
+              "explicit_text",
+              "explicit_image",
+              "malformed_image",
+              "out_of_credits"
+            ],
+            "type": "string",
+            "title": "RejectionReason"
+          }
+        },
+        "title": "ImaginedItems",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ImaginedItem"
+            },
+            "title": "Items",
+            "default": [],
+            "description": "The results."
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cursor",
+            "default": null,
+            "description": "The cursor to use to fetch the next page. If not given, there are no more results."
+          },
+          "previous_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Cursor",
+            "default": null,
+            "description": "The cursor of the previous fetched page, if any."
+          }
+        }
+      }
+    },
+    {
+      "name": "check",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Check on generation",
+      "annotations": {
+        "title": "Check on generation",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Continue to wait for a currently running generation. Usually only videos and 3D models take long enough to require this.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "generation_uuid"
+        ],
+        "properties": {
+          "generation_uuid": {
+            "type": "string",
+            "title": "Generation Uuid",
+            "description": "The generation UUID of the item to check on."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "$defs": {
+          "LayerInfo": {
+            "type": "object",
+            "title": "LayerInfo",
+            "properties": {
+              "dpi": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Dpi",
+                "default": null,
+                "description": "Optional. Canvas height."
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Width",
+                "default": null,
+                "description": "Optional. Canvas width."
+              },
+              "height": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Height",
+                "default": null,
+                "description": "Optional. Canvas height."
+              },
+              "locked": {
+                "type": "boolean",
+                "title": "Locked",
+                "default": false,
+                "description": "Layer locked."
+              },
+              "effects": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Effects",
+                "default": null,
+                "description": "Optional. Layer effects."
+              },
+              "opacity": {
+                "type": "integer",
+                "title": "Opacity",
+                "default": 100,
+                "description": "Optional. Layer opacity."
+              },
+              "visible": {
+                "type": "boolean",
+                "title": "Visible",
+                "default": true,
+                "description": "Layer visible."
+              },
+              "z_index": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Z Index",
+                "default": null,
+                "description": "Optional. Layer z index."
+              },
+              "children": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Children",
+                "default": null,
+                "description": "Optional. Layer children."
+              },
+              "duration": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Duration",
+                "default": null,
+                "description": "If animation or track, the total duration."
+              },
+              "end_time": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "End Time",
+                "default": null,
+                "description": "If animation or track, the end time."
+              },
+              "in_point": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "In Point",
+                "default": null,
+                "description": "If animation or track, the in point."
+              },
+              "out_point": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Out Point",
+                "default": null,
+                "description": "If animation or track, the out point."
+              },
+              "start_time": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Start Time",
+                "default": null,
+                "description": "If animation or track, the start time."
+              }
+            }
+          },
+          "Rejection": {
+            "type": "object",
+            "title": "Rejection",
+            "properties": {
+              "reason": {
+                "$ref": "#/$defs/RejectionReason",
+                "default": "unknown"
+              },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Location",
+                "default": null
+              }
+            }
+          },
+          "RejectionReason": {
+            "enum": [
+              "unknown",
+              "explicit_text",
+              "explicit_image",
+              "malformed_image",
+              "out_of_credits"
+            ],
+            "type": "string",
+            "title": "RejectionReason"
+          }
+        },
+        "title": "ImaginedItem",
+        "properties": {
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost",
+            "default": null,
+            "description": "Cost in credits, if any."
+          },
+          "info": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/LayerInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The layer info, if this is part of a project."
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note",
+            "default": null,
+            "description": "A note, typically for the LLM."
+          },
+          "uuid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uuid",
+            "default": null,
+            "description": "The unique identity of the media."
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Rejection"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "If there was an error, the reason may be here."
+          },
+          "prompt": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt",
+            "default": null,
+            "description": "Prompt metadata."
+          },
+          "is_done": {
+            "type": "boolean",
+            "title": "Is Done",
+            "default": true,
+            "description": "Whether this generation is completed."
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "default": null
+          },
+          "is_failed": {
+            "type": "boolean",
+            "title": "Is Failed",
+            "default": false,
+            "description": "Whether this generation is failed."
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "default": null,
+            "description": "A generated description of the item."
+          },
+          "generation_uuid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Uuid",
+            "default": null,
+            "examples": [
+              "b9ae-6f64957f986a"
+            ],
+            "description": "The unique identity of the generation, if any."
+          },
+          "primary_media_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1500,
+                "minLength": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Media Url",
+            "default": null,
+            "description": "The URL where the generated media is located. If this value is non-null, use it to show clickable link(s) in your response with a relevant call-to-action like this: [Watch the Video](put the primary_media_url here)."
+          },
+          "secondary_media_urls": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secondary Media Urls",
+            "default": null,
+            "description": "If this generated a compound asset like a 3D model, the URLS of other components of the asset, like texture images, will be here."
+          }
+        }
+      }
+    },
+    {
+      "name": "delete",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "title": "Delete media",
+      "annotations": {
+        "title": "Delete media",
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete the media with these uuids. Don't use this unless the user explicitly asks you to.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "uuids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Uuids",
+            "default": [],
+            "description": "A list of UUIDs to delete."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "DeletionResponse",
+        "properties": {
+          "failures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Failures",
+            "default": []
+          },
+          "successes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Successes",
+            "default": []
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 5,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@francis-ros/rostro-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "account",
+    "imagine",
+    "history",
+    "check",
+    "delete"
+  ]
+}

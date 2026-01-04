@@ -1,0 +1,466 @@
+{
+  "id": "local-filesystem/local-filesystem",
+  "name": "local-filesystem/local-filesystem",
+  "display_name": "local-filesystem",
+  "version": null,
+  "description": "Explore and organize files and folders across your workspace. Read, write, move, and delete items while inspecting detailed metadata. Find anything fast with name, glob, regex, and in-file text search.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "list_directories",
+      "description": "List all subdirectories in a given path with metadata (name, size, item count, timestamps)",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_directoriesArguments",
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": "/root"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_directory",
+      "description": "Create a new directory with optional parent directory creation",
+      "inputSchema": {
+        "type": "object",
+        "title": "create_directoryArguments",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "create_parents": {
+            "type": "boolean",
+            "title": "Create Parents",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_directory",
+      "description": "Delete a directory, optionally with all its contents (recursive delete)",
+      "inputSchema": {
+        "type": "object",
+        "title": "delete_directoryArguments",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "recursive": {
+            "type": "boolean",
+            "title": "Recursive",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "move_directory",
+      "description": "Move or rename a directory from source to destination path",
+      "inputSchema": {
+        "type": "object",
+        "title": "move_directoryArguments",
+        "required": [
+          "source_path",
+          "destination_path"
+        ],
+        "properties": {
+          "source_path": {
+            "type": "string",
+            "title": "Source Path"
+          },
+          "destination_path": {
+            "type": "string",
+            "title": "Destination Path"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_directory_metadata",
+      "description": "Get detailed metadata about a directory (size, item counts, timestamps, permissions)",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_directory_metadataArguments",
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": "."
+          }
+        }
+      }
+    },
+    {
+      "name": "list_files",
+      "description": "List all files in a directory with optional glob pattern filtering",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_filesArguments",
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": "."
+          },
+          "pattern": {
+            "type": "string",
+            "title": "Pattern",
+            "default": "*"
+          }
+        }
+      }
+    },
+    {
+      "name": "read_file",
+      "description": "Read file content with chunking support (returns text or base64 for binary files)",
+      "inputSchema": {
+        "type": "object",
+        "title": "read_fileArguments",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Limit",
+            "default": null
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "write_file",
+      "description": "Write or overwrite a file (supports text and base64-encoded binary content). REQUIRES USER CONFIRMATION before execution if file exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "write_fileArguments",
+        "required": [
+          "path",
+          "content"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "is_base64": {
+            "type": "boolean",
+            "title": "Is Base64",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "append_file",
+      "description": "Append text content to an existing file",
+      "inputSchema": {
+        "type": "object",
+        "title": "append_fileArguments",
+        "required": [
+          "path",
+          "content"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_file",
+      "description": "Delete a file permanently. REQUIRES USER CONFIRMATION before execution. This is a destructive operation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "delete_fileArguments",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          }
+        }
+      }
+    },
+    {
+      "name": "move_file",
+      "description": "Move or rename a file from source to destination path. REQUIRES USER CONFIRMATION before execution.",
+      "inputSchema": {
+        "type": "object",
+        "title": "move_fileArguments",
+        "required": [
+          "source_path",
+          "destination_path"
+        ],
+        "properties": {
+          "source_path": {
+            "type": "string",
+            "title": "Source Path"
+          },
+          "destination_path": {
+            "type": "string",
+            "title": "Destination Path"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_file_metadata",
+      "description": "Get detailed metadata about a file (size, MIME type, timestamps, permissions)",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_file_metadataArguments",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_by_name",
+      "description": "Search for files and directories by exact name match",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_by_nameArguments",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": "."
+          },
+          "recursive": {
+            "type": "boolean",
+            "title": "Recursive",
+            "default": true
+          },
+          "case_sensitive": {
+            "type": "boolean",
+            "title": "Case Sensitive",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "search_by_glob",
+      "description": "Search using glob patterns (*.txt, **/*.py) with wildcard support",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_by_globArguments",
+        "required": [
+          "pattern"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": "."
+          },
+          "pattern": {
+            "type": "string",
+            "title": "Pattern"
+          },
+          "recursive": {
+            "type": "boolean",
+            "title": "Recursive",
+            "default": true
+          }
+        }
+      }
+    },
+    {
+      "name": "search_by_filename_regex",
+      "description": "Search for files and directories using regex pattern on filenames",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_by_filename_regexArguments",
+        "required": [
+          "regex_pattern"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": "."
+          },
+          "recursive": {
+            "type": "boolean",
+            "title": "Recursive",
+            "default": true
+          },
+          "regex_pattern": {
+            "type": "string",
+            "title": "Regex Pattern"
+          },
+          "case_sensitive": {
+            "type": "boolean",
+            "title": "Case Sensitive",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "search_by_content_text",
+      "description": "Search for text files containing specific text with context preview",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_by_content_textArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": "."
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "recursive": {
+            "type": "boolean",
+            "title": "Recursive",
+            "default": true
+          },
+          "max_results": {
+            "type": "integer",
+            "title": "Max Results",
+            "default": 100
+          },
+          "case_sensitive": {
+            "type": "boolean",
+            "title": "Case Sensitive",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "search_by_content_regex",
+      "description": "Search for text files using regex pattern on content with context preview",
+      "inputSchema": {
+        "type": "object",
+        "title": "search_by_content_regexArguments",
+        "required": [
+          "regex_pattern"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": "."
+          },
+          "recursive": {
+            "type": "boolean",
+            "title": "Recursive",
+            "default": true
+          },
+          "max_results": {
+            "type": "integer",
+            "title": "Max Results",
+            "default": 100
+          },
+          "regex_pattern": {
+            "type": "string",
+            "title": "Regex Pattern"
+          },
+          "case_sensitive": {
+            "type": "boolean",
+            "title": "Case Sensitive",
+            "default": false
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 17,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/local-filesystem/local-filesystem/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "list_directories",
+    "create_directory",
+    "delete_directory",
+    "move_directory",
+    "get_directory_metadata",
+    "list_files",
+    "read_file",
+    "write_file",
+    "append_file",
+    "delete_file",
+    "move_file",
+    "get_file_metadata",
+    "search_by_name",
+    "search_by_glob",
+    "search_by_filename_regex",
+    "search_by_content_text",
+    "search_by_content_regex"
+  ]
+}

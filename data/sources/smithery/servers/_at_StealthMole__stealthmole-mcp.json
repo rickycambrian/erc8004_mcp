@@ -1,0 +1,940 @@
+{
+  "qualifiedName": "@StealthMole/stealthmole-mcp",
+  "displayName": "StealthMole",
+  "description": "Investigate cyber threats across the dark web, Telegram, and leak repositories with unified search. Monitor ransomware activity and exposed credentials to quickly assess risk. Drill into detailed findings to streamline incident response and threat hunting.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/www.stealthmole.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@StealthMole/stealthmole-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@StealthMole/stealthmole-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "ConfigSchema",
+        "required": [
+          "access_key",
+          "secret_key"
+        ],
+        "properties": {
+          "access_key": {
+            "type": "string",
+            "title": "Access Key",
+            "description": "Your StealthMole API access key"
+          },
+          "secret_key": {
+            "type": "string",
+            "title": "Secret Key",
+            "description": "Your StealthMole API secret key"
+          }
+        },
+        "description": "StealthMole API configuration.",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "dt_search_targets",
+      "description": "\n        Get list of searchable targets for a Darkweb Tracker indicator.\n\n        Args:\n            indicator: Search indicator (e.g., keyword, email, domain, ip, etc.)\n                Available indicators: adsense, analyticsid, band, bitcoin, blueprint,\n                creditcard, cve, discord, document, domain, email, ethereum, exefile,\n                facebook, filehosting, googledrive, gps, hash, hashstring, i2p, i2purl,\n                id, image, instagram, ioc, ip, kakaotalk, keyword, kssn, leakedaudio,\n                leakedemailfile, leakedvideo, line, linkedin, malware, monero, otherfile,\n                pastebin, pgp, serverstatus, session, shorten, sshkey, sslkey, tel,\n                telegram, tor, torurl, twitter, url\n\n        Returns:\n            JSON string with list of searchable targets and total count\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "dt_search_targetsArguments",
+        "required": [
+          "indicator"
+        ],
+        "properties": {
+          "indicator": {
+            "type": "string",
+            "title": "Indicator"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "dt_search_targetsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "dt_search_target",
+      "description": "\n        Search Darkweb Tracker for specific indicator and targets.\n\n        Args:\n            indicator: Search indicator type\n            targets: Comma-separated list of targets to search\n            text: Search query text (supports AND, OR, NOT operators)\n            limit: Number of results (default: 100, max: 100)\n            order_type: Sort by createDate or value\n            order: asc or desc (default: desc)\n\n        Returns:\n            JSON string with search results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "dt_search_targetArguments",
+        "required": [
+          "indicator",
+          "targets",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 100
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "targets": {
+            "type": "string",
+            "title": "Targets"
+          },
+          "indicator": {
+            "type": "string",
+            "title": "Indicator"
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "createDate"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "dt_search_targetOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "dt_search_all",
+      "description": "\n        Search Darkweb Tracker across all targets for an indicator.\n\n        Args:\n            indicator: Search indicator type\n            text: Search query text\n            limit: Number of results (default: 100, max: 100)\n            order_type: Sort by createDate or value\n            order: asc or desc\n\n        Returns:\n            JSON string with search results from all targets\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "dt_search_allArguments",
+        "required": [
+          "indicator",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 100
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "indicator": {
+            "type": "string",
+            "title": "Indicator"
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "createDate"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "dt_search_allOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "dt_search_by_id",
+      "description": "\n        Get paginated Darkweb Tracker search results by search ID.\n\n        Args:\n            search_id: Search result ID from previous search\n            limit: Number of results (default: 100, max: 100)\n            cursor: Pagination cursor (default: 0)\n            order_type: Sort by createDate or value\n            order: asc or desc\n\n        Returns:\n            JSON string with paginated results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "dt_search_by_idArguments",
+        "required": [
+          "search_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 100
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "cursor": {
+            "type": "integer",
+            "title": "Cursor",
+            "default": 0
+          },
+          "search_id": {
+            "type": "string",
+            "title": "Search Id"
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "createDate"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "dt_search_by_idOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "dt_get_node_details",
+      "description": "\n        Get detailed information for a Darkweb Tracker node.\n\n        Args:\n            node_id: Node ID from search results\n            parent_id: Parent node ID (optional)\n            data_from: Include data source list\n            include_url: Include URL list\n            include_contents: Include HTML source contents\n\n        Returns:\n            JSON string with detailed node information\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "dt_get_node_detailsArguments",
+        "required": [
+          "node_id"
+        ],
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "data_from": {
+            "type": "boolean",
+            "title": "Data From",
+            "default": false
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id",
+            "default": null
+          },
+          "include_url": {
+            "type": "boolean",
+            "title": "Include Url",
+            "default": false
+          },
+          "include_contents": {
+            "type": "boolean",
+            "title": "Include Contents",
+            "default": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "dt_get_node_detailsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "tt_search_targets",
+      "description": "\n        Get list of searchable targets for a Telegram Tracker indicator.\n\n        Args:\n            indicator: Search indicator (e.g., keyword, telegram.channel, telegram.user, etc.)\n\n        Returns:\n            JSON string with list of searchable targets\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "tt_search_targetsArguments",
+        "required": [
+          "indicator"
+        ],
+        "properties": {
+          "indicator": {
+            "type": "string",
+            "title": "Indicator"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "tt_search_targetsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "tt_search_target",
+      "description": "\n        Search Telegram Tracker for specific indicator and targets.\n\n        Args:\n            indicator: Search indicator type\n            targets: Comma-separated list of targets\n            text: Search query text\n            limit: Number of results (max: 100)\n            order_type: Sort by createDate or value\n            order: asc or desc\n\n        Returns:\n            JSON string with search results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "tt_search_targetArguments",
+        "required": [
+          "indicator",
+          "targets",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 100
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "targets": {
+            "type": "string",
+            "title": "Targets"
+          },
+          "indicator": {
+            "type": "string",
+            "title": "Indicator"
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "createDate"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "tt_search_targetOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "tt_get_node_details",
+      "description": "\n        Get detailed information for a Telegram Tracker node.\n\n        Args:\n            node_id: Node ID from search results\n            parent_id: Parent node ID (optional)\n            data_from: Include data source list\n            include_url: Include URL list\n            include_contents: Include HTML source contents\n\n        Returns:\n            JSON string with detailed node information\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "tt_get_node_detailsArguments",
+        "required": [
+          "node_id"
+        ],
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "data_from": {
+            "type": "boolean",
+            "title": "Data From",
+            "default": false
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id",
+            "default": null
+          },
+          "include_url": {
+            "type": "boolean",
+            "title": "Include Url",
+            "default": false
+          },
+          "include_contents": {
+            "type": "boolean",
+            "title": "Include Contents",
+            "default": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "tt_get_node_detailsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "cl_search",
+      "description": "\n        Search Credential Lookout for leaked credentials.\n\n        Args:\n            query: Search query with indicators (domain:, email:, id:, password:, after:, before:)\n            limit: Number of results (default: 50, max: 50)\n            cursor: Pagination cursor\n            order_type: Sort by LeakedDate, domain, email, password, or leakedFrom\n            order: asc or desc\n            start: Filter by UTC timestamp (data added after)\n            end: Filter by UTC timestamp (data added before)\n\n        Returns:\n            JSON string with leaked credential results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "cl_searchArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "end": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start",
+            "default": null
+          },
+          "cursor": {
+            "type": "integer",
+            "title": "Cursor",
+            "default": 0
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "LeakedDate"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "cl_searchOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "cds_search",
+      "description": "\n        Search Compromised Data Set for infected device leaks.\n\n        Args:\n            query: Search query with indicators (domain:, url:, email:, id:, password:, ip:, country:, after:, before:)\n            limit: Number of results (default: 50, max: 50)\n            cursor: Pagination cursor\n            order_type: Sort by LeakedDate, host, user, password, or regdate\n            order: asc or desc\n            start: Filter by UTC timestamp\n            end: Filter by UTC timestamp\n\n        Returns:\n            JSON string with compromised data results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "cds_searchArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "end": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start",
+            "default": null
+          },
+          "cursor": {
+            "type": "integer",
+            "title": "Cursor",
+            "default": 0
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "LeakedDate"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "cds_searchOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "cds_get_node_details",
+      "description": "\n        Get detailed information for a Compromised Data Set node (Cyber Security Edition required).\n\n        Args:\n            node_id: Node ID from search results\n\n        Returns:\n            JSON string with detailed CDS information including stealer path and type\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "cds_get_node_detailsArguments",
+        "required": [
+          "node_id"
+        ],
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "cds_get_node_detailsOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "cb_search",
+      "description": "\n        Search Combo Binder for leaked ID/Password combos.\n\n        Args:\n            query: Search query with indicators (domain:, email:, id:, password:, after:, before:)\n            limit: Number of results (max: 50)\n            cursor: Pagination cursor\n            order_type: Sort by LeakedDate, user, or password\n            order: asc or desc\n            start: Filter by UTC timestamp\n            end: Filter by UTC timestamp\n\n        Returns:\n            JSON string with combo leak results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "cb_searchArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "end": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start",
+            "default": null
+          },
+          "cursor": {
+            "type": "integer",
+            "title": "Cursor",
+            "default": 0
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "LeakedDate"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "cb_searchOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "ub_search",
+      "description": "\n        Search ULP Binder for leaked accounts in URL-Login-Password format.\n\n        Args:\n            query: Search query with indicators (domain:, url:, email:, id:, password:, after:, before:)\n            limit: Number of results (max: 50)\n            cursor: Pagination cursor\n            order_type: Sort by LeakedDate, host, user, or password\n            order: asc or desc\n            start: Filter by UTC timestamp\n            end: Filter by UTC timestamp\n\n        Returns:\n            JSON string with ULP leak results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "ub_searchArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "end": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start",
+            "default": null
+          },
+          "cursor": {
+            "type": "integer",
+            "title": "Cursor",
+            "default": 0
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "LeakedDate"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "ub_searchOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "rm_search",
+      "description": "\n        Search Ransomware Monitoring for ransomware breach incidents.\n\n        Args:\n            query: Search query with indicators (torurl:, domain:) or empty for recent list\n            limit: Number of results (max: 50)\n            cursor: Pagination cursor\n            order_type: Sort by detectionTime, victim, or attackGroup\n            order: asc or desc\n\n        Returns:\n            JSON string with ransomware incident results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "rm_searchArguments",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query",
+            "default": null
+          },
+          "cursor": {
+            "type": "integer",
+            "title": "Cursor",
+            "default": 0
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "detectionTime"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "rm_searchOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "gm_search",
+      "description": "\n        Search Government Monitoring for threats against government and public sector.\n\n        Args:\n            query: Search query with indicators (url:, id:) or empty for recent list\n            limit: Number of results (max: 50)\n            cursor: Pagination cursor\n            order_type: Sort by detectionTime, title, or author\n            order: asc or desc\n\n        Returns:\n            JSON string with government threat results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "gm_searchArguments",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query",
+            "default": null
+          },
+          "cursor": {
+            "type": "integer",
+            "title": "Cursor",
+            "default": 0
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "detectionTime"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "gm_searchOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "lm_search",
+      "description": "\n        Search Leaked Monitoring for threats against enterprise and private sector.\n\n        Args:\n            query: Search query with indicators (url:, id:) or empty for recent list\n            limit: Number of results (max: 50)\n            cursor: Pagination cursor\n            order_type: Sort by detectionTime, title, or author\n            order: asc or desc\n\n        Returns:\n            JSON string with leaked threat results\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "lm_searchArguments",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "order": {
+            "type": "string",
+            "title": "Order",
+            "default": "desc"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query",
+            "default": null
+          },
+          "cursor": {
+            "type": "integer",
+            "title": "Cursor",
+            "default": 0
+          },
+          "order_type": {
+            "type": "string",
+            "title": "Order Type",
+            "default": "detectionTime"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "lm_searchOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_user_quotas",
+      "description": "\n        Get API query usage per service for the current month.\n\n        Returns:\n            JSON string with quota information (allowed and used queries) for each service\n        ",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_user_quotasArguments",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "title": "get_user_quotasOutput",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:19:28.153349+00:00",
+    "source": "smithery"
+  }
+}

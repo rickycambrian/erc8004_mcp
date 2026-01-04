@@ -1,0 +1,2041 @@
+{
+  "id": "one_drive",
+  "name": "one_drive",
+  "display_name": "One drive",
+  "version": null,
+  "description": "OneDrive is Microsoft\u2019s cloud storage solution enabling users to store, sync, and share files across devices, offering offline access, real-time collaboration, and enterprise-grade security",
+  "icon_url": "https://logos.composio.dev/api/one_drive",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "ONE_DRIVE_COPY_ITEM",
+      "description": "Tool to copy a DriveItem (file or folder) to a new location asynchronously. Use when you need to duplicate an item, optionally renaming it or specifying a different parent folder. The operation is asynchronous; the response provides a URL to monitor the copy progress.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CopyItemRequest",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "new_document_copy.docx"
+            ],
+            "nullable": true,
+            "description": "The new name for the copied item. If not provided, the original name is used."
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "01BYE5RZZ5OJQ5X6X1W4Q6V8T2Y4A8P7C5"
+            ],
+            "description": "The ID of the DriveItem to be copied."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "default": null,
+            "examples": [
+              "contoso.sharepoint.com,2C712604-132D-4AC7-A58A-9919A6B0A862,D8A48A4A-274E-4494-8B2A-40E71A6E1D8A"
+            ],
+            "nullable": true,
+            "description": "The ID of the site if the item is in a SharePoint site."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": null,
+            "examples": [
+              "024d423a-35ef-450e-9317-5669101788f0"
+            ],
+            "nullable": true,
+            "description": "The ID of the user if accessing another user's drive."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "examples": [
+              "b!s8RqPCGh0ESQS2EYnKM0IKS3lM7GxjdAviiob7oc5pXv_0LiL-62Qq3IXyrXnEop"
+            ],
+            "nullable": true,
+            "description": "The ID of the drive where the item is located. If not provided, 'me' (user's default drive) is assumed."
+          },
+          "group_id": {
+            "type": "string",
+            "title": "Group Id",
+            "default": null,
+            "examples": [
+              "024d423a-35ef-450e-9317-5669101788f0"
+            ],
+            "nullable": true,
+            "description": "The ID of the group if the item is in a group drive."
+          },
+          "children_only": {
+            "type": "boolean",
+            "title": "Children Only",
+            "default": false,
+            "nullable": true,
+            "description": "If set to true, only the children of the source driveItem (if it's a folder) are copied, not the driveItem itself. Defaults to false. Cannot be used with name parameter."
+          },
+          "parent_reference": {
+            "type": "object",
+            "title": "CopyItemParentReference",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "default": null,
+                "examples": [
+                  "DCD0D3AD-8989-4F23-A5A2-2C086050513F"
+                ],
+                "nullable": true,
+                "description": "The ID of the parent item."
+              },
+              "driveId": {
+                "type": "string",
+                "title": "Drive Id",
+                "default": null,
+                "examples": [
+                  "b!s8RqPCGh0ESQS2EYnKM0IKS3lM7GxjdAviiob7oc5pXv_0LiL-62Qq3IXyrXnEop"
+                ],
+                "nullable": true,
+                "description": "The ID of the drive that contains the parent item."
+              }
+            },
+            "description": "Reference to the parent item (folder) where the copy will be created. If not provided, the item is copied to the same folder as the original.",
+            "additionalProperties": false
+          },
+          "include_all_version_history": {
+            "type": "boolean",
+            "title": "Include All Version History",
+            "default": false,
+            "nullable": true,
+            "description": "If set to true, the version history of the source file is copied to the destination. Defaults to false."
+          },
+          "@microsoft.graph.conflictBehavior": {
+            "enum": [
+              "fail",
+              "replace",
+              "rename"
+            ],
+            "type": "string",
+            "title": "@Microsoft.Graph.Conflict Behavior",
+            "default": "fail",
+            "nullable": true,
+            "description": "Specifies how to handle a naming conflict if an item with the same name already exists in the destination. 'fail' (default), 'replace', or 'rename'."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_CREATE_LINK",
+      "description": "Tool to create a sharing link for a DriveItem (file or folder) by its unique ID. Use when you need to generate a shareable link for an item in OneDrive or SharePoint.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateLinkRequest",
+        "required": [
+          "item_id",
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "view",
+              "edit",
+              "embed"
+            ],
+            "type": "string",
+            "title": "Type",
+            "description": "The type of sharing link to create."
+          },
+          "scope": {
+            "enum": [
+              "anonymous",
+              "organization",
+              "users"
+            ],
+            "type": "string",
+            "title": "Scope",
+            "default": null,
+            "nullable": true,
+            "description": "The scope of the link to create. If not specified, the default link type for the organization is created."
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "description": "The unique identifier of the drive item (file or folder) for which to create the link."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "default": null,
+            "nullable": true,
+            "description": "The unique identifier of the site. Use this if the item is in a SharePoint site's drive."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": null,
+            "nullable": true,
+            "description": "The unique identifier of the user. Use this if the item is in another user's drive."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "nullable": true,
+            "description": "The unique identifier of the drive. If not provided, the link will be created in the current user's drive (me/drive)."
+          },
+          "group_id": {
+            "type": "string",
+            "title": "Group Id",
+            "default": null,
+            "nullable": true,
+            "description": "The unique identifier of the group. Use this if the item is in a group's drive."
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "default": null,
+            "nullable": true,
+            "description": "The password for the sharing link. Optional and OneDrive Personal only."
+          },
+          "expiration_date_time": {
+            "type": "string",
+            "title": "Expiration Date Time",
+            "default": null,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+            "nullable": true,
+            "description": "The expiration date and time for the permission, in yyyy-MM-ddTHH:mm:ssZ format. Example: 2023-12-31T23:59:59Z"
+          },
+          "retain_inherited_permissions": {
+            "type": "boolean",
+            "title": "Retain Inherited Permissions",
+            "default": null,
+            "nullable": true,
+            "description": "If true (default), existing inherited permissions are retained. If false, all existing permissions are removed when sharing for the first time."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_DELETE_ITEM",
+      "description": "Tool to delete a DriveItem (file or folder) by its unique ID from the authenticated user's OneDrive. Use when you need to remove an item from OneDrive. This action moves the item to the recycle bin, not permanently deleting it.",
+      "inputSchema": {
+        "type": "object",
+        "title": "OneDriveDeleteItemRequest",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "01BYE5LBA66X3J2X2T2K2S2J2Y2T2K2S2J"
+            ],
+            "description": "The unique identifier of the DriveItem (file or folder) to be deleted."
+          },
+          "if_match": {
+            "type": "string",
+            "title": "If Match",
+            "default": null,
+            "examples": [
+              "abcdef1234567890"
+            ],
+            "nullable": true,
+            "description": "(Optional) If this request header is included and the eTag (or cTag) provided doesn't match the current tag on the item, a `412 Precondition Failed` response is returned, and the item won't be deleted."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_DOWNLOAD_FILE",
+      "description": "Downloads a file from a user's OneDrive using its item ID, which must refer to a file and not a folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DownloadItemRequest",
+        "required": [
+          "item_id",
+          "file_name"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "1234567890ABC"
+            ],
+            "description": "Unique ID of the file to download; must be a file, not a folder."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com",
+              "specific_user_id"
+            ],
+            "description": "User's ID or User Principal Name (UPN), or 'me' for the authenticated user's OneDrive."
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name",
+            "examples": [
+              "report.docx",
+              "photo.png",
+              "archive.zip"
+            ],
+            "description": "Desired filename (including extension) for the downloaded content."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_DRIVE",
+      "description": "Retrieves the properties and relationships of a Drive resource by its unique ID. Use this action when you need to get details about a specific OneDrive, user's OneDrive, group's document library, or a site's document library.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetDriveRequest",
+        "required": [
+          "drive_id"
+        ],
+        "properties": {
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "examples": [
+              "b!t18F8ybsHUq1z3LTz8xvZqP8zaSWjkFNhsME-Fepo75dTf9vQKfeRblBZjoSQrd7",
+              "me",
+              "users/{user_id_or_principal_name}",
+              "groups/{group_id}",
+              "sites/{site_id}"
+            ],
+            "description": "The unique identifier of the drive. This can be the ID of the user's personal OneDrive, a group's document library, or a specific drive ID."
+          },
+          "select_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select Fields",
+            "default": null,
+            "examples": [
+              [
+                "id",
+                "name",
+                "driveType"
+              ]
+            ],
+            "nullable": true,
+            "description": "A comma-separated list of properties to include in the response. Use this to retrieve specific fields and reduce the response size. For example, \"id,name,driveType\". If not provided, all default properties are returned."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_ITEM",
+      "description": "Retrieves the metadata of a DriveItem by its unique ID. Use this tool to get information about a specific file or folder in OneDrive when you have its ID. If a `drive_id` is not provided, it defaults to the user's main drive.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetItemRequest",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "01NKDM7HMOJTVYMDOSXFDK2QJDXCDI3WUK"
+            ],
+            "description": "The unique identifier of the DriveItem (file or folder)."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "examples": [
+              "b!C1N9xkeL9Ea4Y0bdYcYWjXn7b0Un2adItX1s59n5N7Y"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the Drive where the item is located. If not provided, the action will target the user's personal OneDrive (me/drive)."
+          },
+          "select_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select Fields",
+            "default": null,
+            "examples": [
+              [
+                "id",
+                "name",
+                "size",
+                "file",
+                "folder",
+                "createdDateTime",
+                "lastModifiedDateTime"
+              ]
+            ],
+            "nullable": true,
+            "description": "A list of DriveItem properties to return. If not specified, a default set of properties is returned. Refer to the DriveItem resource documentation for available fields."
+          },
+          "expand_relations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Expand Relations",
+            "default": null,
+            "examples": [
+              [
+                "children"
+              ]
+            ],
+            "nullable": true,
+            "description": "A list of relationships to expand in the response, such as 'children'."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_ITEM_PERMISSIONS",
+      "description": "Retrieves the permissions of a DriveItem by its unique ID or path within a specific Drive. Use when you need to check who has access to a file or folder and what level of access they have.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetItemPermissionsRequest",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": null,
+            "examples": [
+              "id,roles,link"
+            ],
+            "nullable": true,
+            "description": "A comma-separated list of properties to include in the response. For example, 'id,roles,link'."
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "0123456789ABCDEF!123"
+            ],
+            "description": "The unique identifier of the drive item."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "default": null,
+            "examples": [
+              "contoso.sharepoint.com,2C712604-1397-42ED-85C7-5843590F0202,2D22A158-83D2-4D48-92C1-502810230D0A"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of a SharePoint site. Use this if the item is in a SharePoint site's drive."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": null,
+            "examples": [
+              "024d426a-2f0f-4e9a-92c1-502810230d0a"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of a user. Use this if the item is in a specific user's drive (other than 'me')."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "examples": [
+              "b!C1234567890ABCDEFGH"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the drive. Required if not using other identifiers like group_id, site_id, or user_id in the path."
+          },
+          "group_id": {
+            "type": "string",
+            "title": "Group Id",
+            "default": null,
+            "examples": [
+              "024d426a-2f0f-4e9a-92c1-502810230d0a"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of a group. Use this if the item is in a group's drive."
+          },
+          "item_path": {
+            "type": "string",
+            "title": "Item Path",
+            "default": null,
+            "examples": [
+              ":/MyFolder/MyFile.txt:/"
+            ],
+            "nullable": true,
+            "description": "The path to the item relative to the drive's root. Use this if item_id is not known. Must start with ':/' and end with ':/'. Example: ':/FolderA/FileB.txt:/'. Only applicable when accessing items in the current user's drive (me/drive/root)."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_ITEM_THUMBNAILS",
+      "description": "Tool to retrieve the thumbnails associated with a DriveItem. Use when you need to display visual previews of files.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetItemThumbnailsRequest",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": null,
+            "examples": [
+              "medium,large"
+            ],
+            "nullable": true,
+            "description": "A comma-separated list of thumbnail sizes to retrieve (e.g., \"small,medium,large\", or \"c300x400_crop\"). If not specified, all available thumbnails for the first thumbnailSet (id: \"0\") are returned."
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "01BYE5RZZ5S2R2YJ2V2XSW42X2YJ2V2XSW"
+            ],
+            "description": "The unique identifier of the DriveItem."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "default": null,
+            "examples": [
+              "contoso.sharepoint.com,01234567-89ab-cdef-0123-456789abcdef,01234567-89ab-cdef-0123-456789abcdef"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of a Site. Provide either drive_id, group_id, site_id, or user_id."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": null,
+            "examples": [
+              "01234567-89ab-cdef-0123-456789abcdef"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of a User. Provide either drive_id, group_id, site_id, or user_id."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "examples": [
+              "b!C1b_fJ0P9k6XwXkKzXkKzXkKzXkKzXkKzXkKzXkKzXkKzXkKzXkKzXkKzXkKzXkK"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the Drive. If not provided, 'me' will be used for the current user's drive."
+          },
+          "group_id": {
+            "type": "string",
+            "title": "Group Id",
+            "default": null,
+            "examples": [
+              "01234567-89ab-cdef-0123-456789abcdef"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of a Group. Provide either drive_id, group_id, site_id, or user_id."
+          },
+          "original_orientation": {
+            "type": "boolean",
+            "title": "Original Orientation",
+            "default": false,
+            "nullable": true,
+            "description": "If true, retrieves the thumbnail with its original EXIF orientation. This is only supported on OneDrive Personal. Defaults to false."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_ITEM_VERSIONS",
+      "description": "Tool to retrieve the version history of a DriveItem by its unique ID. Use when you need to access or list previous versions of a file.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetItemVersionsRequest",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "01BYE5RZZ5WNL2W2T7J7234P7R6IOF7M2M"
+            ],
+            "description": "The unique identifier of the item (file or folder)."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "default": null,
+            "examples": [
+              "contoso.sharepoint.com,2C712CB0-1531-4950-8391-53C884381F08,2C08C37A-CE38-4E8A-877A-B96EF858F078"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the site. Mutually exclusive with drive_id, group_id, and user_id."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": null,
+            "examples": [
+              "024d491a-1568-4b21-8302-5804e392b078"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the user. Mutually exclusive with drive_id, group_id, and site_id."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "examples": [
+              "b!C1zX0a9GEE20kL9aMCxJjB"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the drive. Mutually exclusive with group_id, site_id, and user_id. One of these must be provided if not using the /me path."
+          },
+          "group_id": {
+            "type": "string",
+            "title": "Group Id",
+            "default": null,
+            "examples": [
+              "024d491a-1568-4b21-8302-5804e392b078"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the group. Mutually exclusive with drive_id, site_id, and user_id."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_QUOTA",
+      "description": "Tool to retrieve the quota information for the authenticated user's OneDrive. Use this action to check the storage space details like total, used, and remaining space on the user's OneDrive.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetQuotaRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_RECENT_ITEMS",
+      "description": "Get files and folders recently accessed by the user. Returns items based on activity history (opened, edited, viewed), sorted by most recent first. Use when you need to see what the user worked on recently (e.g., 'Show me files I worked on today'). Different from search - this tracks activity, not content.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetRecentItemsRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 50,
+            "maximum": 200,
+            "minimum": 1,
+            "examples": [
+              20,
+              50,
+              100
+            ],
+            "nullable": true,
+            "description": "Maximum number of recent items to return (1-200). Controls response size for better performance. Use pagination with @odata.nextLink for larger datasets."
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": null,
+            "examples": [
+              "id,name,webUrl,lastModifiedDateTime",
+              "id,name,size,file,folder",
+              "id,name,webUrl,size,lastModifiedDateTime,parentReference"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of properties to include in the response. Significantly reduces payload size by returning only specified fields. Common properties: id, name, webUrl, size, lastModifiedDateTime, lastAccessedDateTime, file, folder, parentReference. If not specified, all properties are returned (large payload)."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_SHARED_ITEMS",
+      "description": "Tool to retrieve a list of items that have been shared with the authenticated user. Use this action to get details of files and folders shared with the current user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSharedItemsRequest",
+        "properties": {
+          "allow_external": {
+            "type": "boolean",
+            "title": "Allow External",
+            "default": false,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Set to true to include items shared from external tenants. Defaults to false, which only returns items shared within the user's own tenant."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_SHAREPOINT_LIST_ITEMS",
+      "description": "Tool to get the items (list items) within a specific SharePoint list on a site. Use when you need to retrieve data from a SharePoint list.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSharepointListItemsRequest",
+        "required": [
+          "site_id",
+          "list_id"
+        ],
+        "properties": {
+          "expand": {
+            "type": "string",
+            "title": "Expand",
+            "default": null,
+            "examples": [
+              "fields($select=Name,Color,Quantity)"
+            ],
+            "nullable": true,
+            "description": "A comma-separated list of relationships to expand, or 'fields($select=columnName1,columnName2)' to retrieve specific fields. For example, to get specific columns 'Name' and 'Color', use 'fields($select=Name,Color)'."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "fields/Quantity lt 600"
+            ],
+            "nullable": true,
+            "description": "An OData filter query to restrict the results. For example, to filter items where 'Quantity' is less than 600, use 'fields/Quantity lt 600'."
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": null,
+            "examples": [
+              "id,name,fields"
+            ],
+            "nullable": true,
+            "description": "A comma-separated list of properties to include in the response. Often used in conjunction with '$expand=fields(select=...)'. For example, 'id,name,fields'."
+          },
+          "list_id": {
+            "type": "string",
+            "title": "List Id",
+            "examples": [
+              "243bca4b-4e5e-45af-b37d-25f6135a740d"
+            ],
+            "description": "The unique identifier of the list within the SharePoint site."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "examples": [
+              "contoso.sharepoint.com,2C712604-1370-44E7-A1F5-426573FDA80A,2D2244C3-251A-49EA-93A8-39E1C3A060FE"
+            ],
+            "description": "The unique identifier of the SharePoint site."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_SITE_DETAILS",
+      "description": "Retrieves metadata for a specific SharePoint site by its ID. Use this action when you need to get details like display name, web URL, and creation/modification dates for a known SharePoint site.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSiteDetailsRequest",
+        "required": [
+          "site_id"
+        ],
+        "properties": {
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "examples": [
+              "contoso.sharepoint.com,2C712604-1370-44E7-A1F5-426573FDA80A,2D2244C3-251A-49EA-93A8-39E1C3A060FE"
+            ],
+            "description": "The unique identifier of the SharePoint site. This is the id property of the site resource."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_GET_SITE_PAGE_CONTENT",
+      "description": "Gets the content of a modern SharePoint site page. Use when you need to retrieve the details and content of a specific page within a SharePoint site.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSitePageContentRequest",
+        "required": [
+          "site_id",
+          "page_id"
+        ],
+        "properties": {
+          "expand": {
+            "type": "string",
+            "title": "Expand",
+            "default": null,
+            "examples": [
+              "canvasLayout"
+            ],
+            "nullable": true,
+            "description": "Expands related entities. For example, use 'canvasLayout' to include the page's layout and web part content."
+          },
+          "page_id": {
+            "type": "string",
+            "title": "Page Id",
+            "examples": [
+              "b575a07c-e9d9-4959-87a1-0e27ea020722"
+            ],
+            "description": "The unique identifier of the site page."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "examples": [
+              "contoso.sharepoint.com,2C712414-2D96-4DB6-9A7C-27B7F651699E,A5DB89B3-59A8-45B6-9278-A843A5088E11"
+            ],
+            "description": "The unique identifier of the SharePoint site."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_INVITE_USER_TO_DRIVE_ITEM",
+      "description": "Tool to invite users or grant permissions to a specific item in a OneDrive drive. Use when you need to share a file or folder with other users and define their access level (e.g., read or write).",
+      "inputSchema": {
+        "type": "object",
+        "title": "InviteUserToDriveItemRequest",
+        "required": [
+          "item_id",
+          "recipients",
+          "roles"
+        ],
+        "properties": {
+          "roles": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "read",
+                "write"
+              ],
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Roles",
+            "description": "Specifies the roles to be granted to the recipients."
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "description": "The unique identifier of the drive item (file or folder)."
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": null,
+            "nullable": true,
+            "description": "A plain text formatted message that is included in the sharing invitation. Maximum length 2000 characters."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "default": null,
+            "nullable": true,
+            "description": "The unique identifier of a SharePoint site. Use this if the item is in a SharePoint site's drive."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": null,
+            "nullable": true,
+            "description": "The unique identifier of a user. Use this if the item is in another user's drive that you have access to."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "nullable": true,
+            "description": "The unique identifier of the drive. If not provided, the authenticated user's personal drive (me/drive) will be used."
+          },
+          "group_id": {
+            "type": "string",
+            "title": "Group Id",
+            "default": null,
+            "nullable": true,
+            "description": "The unique identifier of a Microsoft 365 group. Use this if the item is in a group's drive."
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "default": null,
+            "nullable": true,
+            "description": "The password set on the invite by the creator. Optional and OneDrive Personal only."
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "DriveRecipient",
+              "properties": {
+                "alias": {
+                  "type": "string",
+                  "title": "Alias",
+                  "default": null,
+                  "nullable": true,
+                  "description": "The alias of the recipient, if a personal Microsoft Account."
+                },
+                "email": {
+                  "type": "string",
+                  "title": "Email",
+                  "format": "email",
+                  "default": null,
+                  "nullable": true,
+                  "description": "The email address of the recipient."
+                },
+                "object_id": {
+                  "type": "string",
+                  "title": "Object Id",
+                  "default": null,
+                  "nullable": true,
+                  "description": "The object ID of the recipient, if a user or group in Azure AD."
+                }
+              }
+            },
+            "title": "Recipients",
+            "description": "A collection of recipients who will receive access and the sharing invitation."
+          },
+          "require_sign_in": {
+            "type": "boolean",
+            "title": "Require Sign In",
+            "default": false,
+            "nullable": true,
+            "description": "Specifies whether the recipient of the invitation is required to sign-in to view the shared item. At least one of require_sign_in or send_invitation must be true."
+          },
+          "send_invitation": {
+            "type": "boolean",
+            "title": "Send Invitation",
+            "default": false,
+            "nullable": true,
+            "description": "If true, a sharing link is sent to the recipient. Otherwise, a permission is granted directly without sending a notification."
+          },
+          "expiration_date_time": {
+            "type": "string",
+            "title": "Expiration Date Time",
+            "default": null,
+            "nullable": true,
+            "description": "Specifies the dateTime after which the permission expires. ISO 8601 format. Example: \"2023-12-31T23:59:59.000Z\""
+          },
+          "retain_inherited_permissions": {
+            "type": "boolean",
+            "title": "Retain Inherited Permissions",
+            "default": true,
+            "nullable": true,
+            "description": "Optional. If true (default), any existing inherited permissions are retained on the shared item when sharing this item for the first time. If false, all existing permissions are removed when sharing for the first time."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_LIST_DRIVE_ITEM_ACTIVITIES",
+      "description": "Tool to list recent activities for a specific item in a OneDrive drive. Use when you need to track changes or actions performed on a file or folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListDriveItemActivitiesRequest",
+        "required": [
+          "drive_id",
+          "item_id"
+        ],
+        "properties": {
+          "$top": {
+            "type": "integer",
+            "title": "$Top",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Show only the first n items."
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "01BYE5RZZ5W2W6Z2X2Y7YF2X2Y7YF2X2Y7"
+            ],
+            "description": "The unique identifier of the driveItem."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "examples": [
+              "b!C1zZc0a2F0K2Y8P0Z6X2Uw"
+            ],
+            "description": "The unique identifier of the drive."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_LIST_DRIVES",
+      "description": "Tool to retrieve a list of Drive resources available to the authenticated user, or for a specific user, group, or site. Use when you need to find out what drives are accessible.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListDrivesRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "examples": [
+              25
+            ],
+            "nullable": true,
+            "description": "The maximum number of items to return in a single page. Must be between 1 and 999."
+          },
+          "expand": {
+            "type": "string",
+            "title": "Expand",
+            "default": null,
+            "examples": [
+              "root,list"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of relationships to expand (e.g., \"root,list\")."
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": null,
+            "examples": [
+              "id,name,driveType"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of properties to include in the response (e.g., \"id,name,driveType\")."
+          },
+          "orderby": {
+            "type": "string",
+            "title": "Orderby",
+            "default": null,
+            "examples": [
+              "name desc"
+            ],
+            "nullable": true,
+            "description": "A comma-separated list of properties to order the results by, optionally followed by \"asc\" or \"desc\" (e.g., \"name desc\")."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "default": null,
+            "examples": [
+              "contoso.sharepoint.com,2C712604-131D-49FC-857B-AF2775FC24E3,2D1C721E-289F-412A-96E9-ADD9707C0167"
+            ],
+            "nullable": true,
+            "description": "The ID of the site to list drives for. If provided, group_id and user_id should not be used."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": null,
+            "examples": [
+              "48d31887-5fad-4d73-a9f5-3c356e68a038"
+            ],
+            "nullable": true,
+            "description": "The ID of the user to list drives for. If provided, group_id and site_id should not be used. If none of group_id, site_id, or user_id are provided, the drives for the current authenticated user (/me/drives) will be listed."
+          },
+          "group_id": {
+            "type": "string",
+            "title": "Group Id",
+            "default": null,
+            "examples": [
+              "80957564-4f36-480e-a079-99963a083854"
+            ],
+            "nullable": true,
+            "description": "The ID of the group to list drives for. If provided, site_id and user_id should not be used."
+          },
+          "skip_token": {
+            "type": "string",
+            "title": "Skip Token",
+            "default": null,
+            "examples": [
+              "xxxxxxxx"
+            ],
+            "nullable": true,
+            "description": "A token used to retrieve the next page of results."
+          }
+        },
+        "description": "Request model for listing OneDrive drives."
+      }
+    },
+    {
+      "name": "ONE_DRIVE_LIST_ROOT_DRIVE_CHANGES",
+      "description": "Tool to list changes in the root of the user's primary drive using a delta token. Use when you need to track file and folder modifications, additions, or deletions in the main OneDrive directory.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListRootDriveChangesRequest",
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "default": null,
+            "examples": [
+              "latest",
+              "1230919asd190410jlka"
+            ],
+            "nullable": true,
+            "description": "A string token that represents the state of the drive from a previous call. It can be a deltaLink from a previous response, the literal string 'latest' to get a token for future calls without enumerating current items, or omitted to get all current items and a nextLink or deltaLink."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_LIST_SHAREPOINT_LIST_ITEMS_DELTA",
+      "description": "Tool to track changes to items in a SharePoint list using a delta query. Use when you need to get newly created, updated, or deleted list items without performing a full read of the entire item collection.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSharepointListItemsDeltaRequest",
+        "required": [
+          "site_id",
+          "list_id"
+        ],
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "examples": [
+              50
+            ],
+            "nullable": true,
+            "description": "Maximum number of items to return in a single response."
+          },
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "default": null,
+            "examples": [
+              "1230919asd190410jlka"
+            ],
+            "nullable": true,
+            "description": "If unspecified or empty, enumerates the current state. If 'latest', returns an empty response with the latest delta token. If a previous delta token, returns changes since that token."
+          },
+          "expand": {
+            "type": "string",
+            "title": "Expand",
+            "default": null,
+            "examples": [
+              "fields($select=ColumnA,ColumnB)"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of relationships to expand. Use 'fields($select=ColumnA,ColumnB)' format for field selection."
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": null,
+            "examples": [
+              "id,name,lastModifiedDateTime"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of listItem properties to return."
+          },
+          "list_id": {
+            "type": "string",
+            "title": "List Id",
+            "examples": [
+              "22e03ef3-6ef4-424d-a1d3-92a337807c30"
+            ],
+            "description": "The unique identifier of the list within the site."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "examples": [
+              "contoso.sharepoint.com,2C712604-1370-44E7-A1F5-426573FDA80A,2D2244C3-251A-49EA-93A8-39E1C3A060FE"
+            ],
+            "description": "The unique identifier of the SharePoint site."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_LIST_SITE_COLUMNS",
+      "description": "Tool to list all column definitions for a SharePoint site. Use this when you need to retrieve the schema or structure of columns within a specific SharePoint site.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSiteColumnsRequest",
+        "required": [
+          "site_id"
+        ],
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "The maximum number of items to return."
+          },
+          "expand": {
+            "type": "string",
+            "title": "Expand",
+            "default": null,
+            "examples": [
+              "sourceColumn"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of related resources to expand in the response."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "startswith(displayName,'Custom')"
+            ],
+            "nullable": true,
+            "description": "OData filter expression to apply to the results."
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": null,
+            "examples": [
+              "id,name,displayName"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of properties to include in the response."
+          },
+          "orderby": {
+            "type": "string",
+            "title": "Orderby",
+            "default": null,
+            "examples": [
+              "displayName asc"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of properties used to sort the results."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "examples": [
+              "contoso.sharepoint.com,2C712604-133D-4A7C-9194-F53CE4C952A2,A704AEF5-C2C0-43C3-A3D8-9F55A73A02E2"
+            ],
+            "description": "The unique identifier of the SharePoint site. Example: `contoso.sharepoint.com,2C712604-133D-4A7C-9194-F53CE4C952A2,A704AEF5-C2C0-43C3-A3D8-9F55A73A02E2`"
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_LIST_SITE_DRIVE_ITEMS_DELTA",
+      "description": "Tool to track changes to DriveItems in the default document library of a SharePoint site. Use when you need to get a list of items that have been added, modified, or deleted since a previous state or to get an initial enumeration of all items.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSiteDriveItemsDeltaRequest",
+        "required": [
+          "site_id"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "default": null,
+            "examples": [
+              "https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,2C002417-A74E-4F5E-8786-3748AFF6941A,2C22A44A-725F-4959-8B9E-8ABA2197E7A4/drive/root/delta?$skiptoken=1230919asd190410jlka",
+              "latest",
+              "2023-10-26T10:00:00Z"
+            ],
+            "nullable": true,
+            "description": "A token used to retrieve a specific page of results or to get changes since a previous state. Can be 'latest' to get the most recent delta token without items, a deltaLink URL, or a timestamp (YYYY-MM-DDTHH:MM:SSZ)."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "examples": [
+              "contoso.sharepoint.com,2C002417-A74E-4F5E-8786-3748AFF6941A,2C22A44A-725F-4959-8B9E-8ABA2197E7A4"
+            ],
+            "description": "The unique identifier of the SharePoint site."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_LIST_SITE_LISTS",
+      "description": "Tool to list all lists under a specific SharePoint site. Use when you need to enumerate lists within a known site.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSiteListsRequest",
+        "required": [
+          "site_id"
+        ],
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "The maximum number of items to return."
+          },
+          "expand": {
+            "type": "string",
+            "title": "Expand",
+            "default": null,
+            "examples": [
+              "columns,items"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of relationships to expand in the response. Example: columns,items"
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "startswith(name,'Doc')"
+            ],
+            "nullable": true,
+            "description": "OData filter expression. Example: startswith(name,'Doc')"
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": null,
+            "examples": [
+              "id,name,list"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of properties to include in the response. Example: id,name,list"
+          },
+          "orderby": {
+            "type": "string",
+            "title": "Orderby",
+            "default": null,
+            "examples": [
+              "name asc"
+            ],
+            "nullable": true,
+            "description": "OData order by expression. Example: name asc"
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "examples": [
+              "contoso.sharepoint.com,2C712604-1370-44E7-A1F5-426573FDA80A,2D4B0860-D7DE-419B-88E6-5866AF240000"
+            ],
+            "description": "The unique identifier of the SharePoint site."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_LIST_SITE_SUBSITES",
+      "description": "Tool to list all subsites of a SharePoint site. Use when you need to retrieve a collection of subsites for a given parent site.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSiteSubsitesRequest",
+        "required": [
+          "site_id"
+        ],
+        "properties": {
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "examples": [
+              "contoso.sharepoint.com,da60e844-ba1d-49bc-b4d4-d5e36bae9019,712a596e-90a1-49e3-9b48-bfa80bee8740"
+            ],
+            "description": "The unique identifier of the SharePoint site for which to list subsites."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_LIST_SUBSCRIPTIONS",
+      "description": "Tool to list the current subscriptions for the authenticated user or app. Use this to retrieve details of existing webhook subscriptions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSubscriptionsRequest",
+        "properties": {}
+      }
+    },
+    {
+      "name": "ONE_DRIVE_MOVE_ITEM",
+      "description": "Tool to move a file or folder to a new parent folder in OneDrive. Use when you need to reorganize your files or folders by changing their location. You can optionally rename the item during the move.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MoveItemRequest",
+        "required": [
+          "itemId",
+          "parentReference"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "new-document.docx"
+            ],
+            "nullable": true,
+            "description": "The new name for the DriveItem. If not provided, the item retains its original name."
+          },
+          "itemId": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "01BYE5RZZ272Y2AM3L22L22Z2Y2Y2Y2Y2Y"
+            ],
+            "description": "The unique identifier of the file or folder (DriveItem) to be moved."
+          },
+          "driveId": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "examples": [
+              "b!C1b2A3d4E5f6G7h8I9j0K1l2M3n4O5p6"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the Drive that contains the item. If not specified, it defaults to the user's personal drive (`/me/drive`)."
+          },
+          "parentReference": {
+            "type": "object",
+            "title": "Parent Reference",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Id",
+                "examples": [
+                  "01BYE5RZZ272Y2AM3L22L22Z2Y2Y2Y2Y2Y"
+                ],
+                "description": "The unique identifier of the new parent folder where the item will be moved."
+              },
+              "driveId": {
+                "type": "string",
+                "title": "Drive Id",
+                "default": null,
+                "examples": [
+                  "b!C1b2A3d4E5f6G7h8I9j0K1l2M3n4O5p6"
+                ],
+                "nullable": true,
+                "description": "The unique identifier of the Drive that contains the new parent folder. If not specified, it's assumed the parent folder is in the same drive as the item being moved."
+              }
+            },
+            "description": "The new parent folder reference.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_ONEDRIVE_CREATE_FOLDER",
+      "description": "Creates a new folder in the user's OneDrive, automatically renaming on conflict, optionally within a specified parent_folder (by ID or full path from root) which, if not the root, must exist and be accessible.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateFolderRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The desired name for the new folder. If a folder with this name already exists in the specified parent_folder, the new folder will be automatically renamed (e.g., 'New Folder' might become 'New Folder 1'). Examples: ['Annual Reports', 'Client Meeting Notes']"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "description": "Identifier for the user. This action operates on the currently authenticated user's OneDrive. Examples: ['me']"
+          },
+          "parent_folder": {
+            "type": "string",
+            "title": "Parent Folder",
+            "default": "/",
+            "description": "ID or full path of the parent folder for the new folder. Paths must start from the root (e.g., '/Documents/Reports'). If an ID is provided, it refers to an existing folder's unique ID. Examples: ['/Projects/Alpha', 'folder_id_12345ABC', '/']"
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_ONEDRIVE_CREATE_TEXT_FILE",
+      "description": "Creates a new text file with specified content in a OneDrive folder, using either the folder's unique ID or its absolute path (paths are automatically resolved to IDs); note that OneDrive may rename or create a new version if the filename already exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateTextFileRequest",
+        "required": [
+          "name",
+          "content"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Annual Report 2023.txt",
+              "Meeting Notes.md",
+              "script.sh"
+            ],
+            "description": "The desired name for the new text file, including its extension (e.g., 'report.txt', 'notes.log')."
+          },
+          "folder": {
+            "type": "string",
+            "title": "Folder",
+            "default": "/",
+            "examples": [
+              "/Documents/Projects",
+              "folder_id_example_abc123"
+            ],
+            "description": "The unique identifier (ID) or an absolute path of the OneDrive folder where the new text file will be created."
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "examples": [
+              "This is the content of the new text file.",
+              "TODO: Finalize the project proposal by EOD."
+            ],
+            "description": "The plain text content to be written into the new file."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user_principal_name_or_id"
+            ],
+            "description": "The user's ID or the literal 'me' to represent the currently authenticated user."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_ONEDRIVE_FIND_FILE",
+      "description": "Non-recursively finds an item (file or folder) in a specified OneDrive folder; if `folder` is provided as a path, it must actually exist.",
+      "inputSchema": {
+        "type": "object",
+        "title": "FindItemRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "QuarterlyReport.docx",
+              "Project Alpha"
+            ],
+            "description": "The exact name of the file or folder to find within the specified `folder`."
+          },
+          "folder": {
+            "type": "string",
+            "title": "Folder",
+            "default": "/",
+            "examples": [
+              "/Documents/Projects",
+              "folder_id_example"
+            ],
+            "description": "The unique identifier (ID) or absolute path of the OneDrive folder for the search. For the root folder, use '/'. Paths must start with '/'."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "user_guid_example",
+              "me"
+            ],
+            "description": "The unique identifier of the user (e.g., a GUID) or the alias 'me' to represent the currently authenticated user. This determines whose OneDrive will be accessed."
+          },
+          "include_metadata": {
+            "type": "boolean",
+            "title": "Include Metadata",
+            "default": false,
+            "description": "If set to true, the response will include the complete metadata for each found item. If false (default), only essential properties like id, name, and webUrl are returned."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_ONEDRIVE_FIND_FOLDER",
+      "description": "Finds folders by name within an accessible parent folder in OneDrive, or lists all its direct child folders if no name is specified.",
+      "inputSchema": {
+        "type": "object",
+        "title": "FindFolderRequest",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "Annual Reports",
+              "Meeting Notes"
+            ],
+            "nullable": true,
+            "description": "Exact name of the folder to find. If omitted, all direct child folders of the parent `folder` are returned."
+          },
+          "folder": {
+            "type": "string",
+            "title": "Folder",
+            "default": "/",
+            "examples": [
+              "/Documents/Projects",
+              "folder_id_example"
+            ],
+            "description": "Path (e.g., '/My Files/Work', '/' for root) or unique ID of the parent folder where child folders are searched."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "user@example.com",
+              "me"
+            ],
+            "description": "User's unique identifier (e.g., email, UPN) or 'me' for the authenticated user, specifying the OneDrive account."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_ONEDRIVE_LIST_ITEMS",
+      "description": "Retrieves all files and folders as `driveItem` resources from the root of a specified user's OneDrive, automatically handling pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListItemsRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 50,
+            "examples": [
+              "20",
+              "100",
+              "999"
+            ],
+            "description": "Maximum items per API request, setting the batch size; the action automatically handles pagination to fetch all items. The Microsoft Graph API may limit this (e.g., to 999)."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": [],
+            "examples": [
+              "[\"id\", \"name\", \"webUrl\"]",
+              "[\"name\", \"size\", \"lastModifiedDateTime\", \"fileSystemInfo\"]"
+            ],
+            "description": "Specifies `driveItem` properties to return. If omitted or empty, default properties are returned. Refer to Microsoft Graph API documentation for a complete list of `driveItem` properties."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com",
+              "12345678-90ab-cdef-1234-567890abcdef"
+            ],
+            "description": "User's unique identifier (e.g., 'user@example.com', object ID) or 'me' for the authenticated user's OneDrive."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_ONEDRIVE_UPLOAD_FILE",
+      "description": "Uploads a file to a specified OneDrive folder, automatically renaming on conflict and supporting large files via chunking.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UploadFileRequest",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "The file to be uploaded, including its name and access to its binary content.",
+            "file_uploadable": true
+          },
+          "folder": {
+            "type": "string",
+            "title": "Folder",
+            "default": "/",
+            "examples": [
+              "/Documents/Projects",
+              "folder_id_example"
+            ],
+            "description": "Destination folder path from root (e.g., '/Documents/Reports') or a unique folder ID."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "testuser@contoso.com",
+              "00000000-0000-0000-0000-000000000000"
+            ],
+            "description": "User ID (e.g., user_principal_name, unique GUID) or 'me' for the authenticated user, determining the target OneDrive."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_PREVIEW_DRIVE_ITEM",
+      "description": "Generates or retrieves a short-lived embeddable URL for a preview of a specific item. Use when you need to display a temporary preview of a file.",
+      "inputSchema": {
+        "type": "object",
+        "title": "PreviewDriveItemRequest",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "page": {
+            "type": "string",
+            "title": "Page",
+            "default": null,
+            "examples": [
+              "1",
+              "page1"
+            ],
+            "nullable": true,
+            "description": "Optional. Page number of document to start at, if applicable. Specified as string for future use cases around file types such as ZIP."
+          },
+          "zoom": {
+            "type": "number",
+            "title": "Zoom",
+            "default": null,
+            "examples": [
+              0.5,
+              1
+            ],
+            "nullable": true,
+            "description": "Optional. Zoom level to start at, if applicable."
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "01BYE56RBCN4TCN3ORBZZ3S22LMR4LKL2A"
+            ],
+            "description": "The unique identifier of the DriveItem."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "default": null,
+            "examples": [
+              "contoso.sharepoint.com,2C712CB0-1531-4134-855A-67A093E71074,5A503C24-A59A-407C-BD5A-D392B8F7F000"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the Site. Provide if the item is in a SharePoint site."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": null,
+            "examples": [
+              "024d4213-a6f0-4997-9010-217011398186"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the User. Provide if the item is in another user's drive."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "examples": [
+              "b!C1zX0j7x00G2vQj2foDUXn4xYp_XFVNKrjYpyIKs1x8"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the Drive. If not provided, the request will be made to the current user's drive."
+          },
+          "group_id": {
+            "type": "string",
+            "title": "Group Id",
+            "default": null,
+            "examples": [
+              "024d4213-a6f0-4997-9010-217011398186"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the Group. Provide if the item is in a group drive."
+          },
+          "share_id": {
+            "type": "string",
+            "title": "Share Id",
+            "default": null,
+            "examples": [
+              "s!Aln-sA4j5UeNpX1x92bAbS1bXn0Z"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the shared item. Provide if the item is accessed via a share link."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_SEARCH_ITEMS",
+      "description": "Search OneDrive for files and folders by keyword. Searches filenames, metadata, and file content to find matching items. Use when you need to find specific files based on keywords, file types, or content (e.g., 'Find all PDFs containing budget'). Supports filtering, sorting, and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SearchItemsRequest",
+        "required": [
+          "q"
+        ],
+        "properties": {
+          "q": {
+            "type": "string",
+            "title": "Q",
+            "examples": [
+              "Contoso Project"
+            ],
+            "description": "The query text used to search for items. Values may be matched across several fields including filename, metadata, and file content."
+          },
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "The maximum number of items to return in a single page. Default is 200."
+          },
+          "select": {
+            "type": "string",
+            "title": "Select",
+            "default": null,
+            "examples": [
+              "id,name,webUrl"
+            ],
+            "nullable": true,
+            "description": "Comma-separated list of properties to include in the response."
+          },
+          "orderby": {
+            "type": "string",
+            "title": "Orderby",
+            "default": null,
+            "examples": [
+              "name desc"
+            ],
+            "nullable": true,
+            "description": "A comma-separated list of properties used to sort the order of the items in the response. Use 'asc' or 'desc' for ascending or descending order, e.g., 'name asc'."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "examples": [
+              "b!C378D127A8A967E6!115"
+            ],
+            "nullable": true,
+            "description": "The ID of the drive to search within. If not provided, the user's personal drive (me/drive) will be searched. Can also be a group ID, site ID, or user ID."
+          },
+          "skip_token": {
+            "type": "string",
+            "title": "Skip Token",
+            "default": null,
+            "nullable": true,
+            "description": "A token to retrieve the next page of results, obtained from the @odata.nextLink in a previous response."
+          },
+          "search_scope": {
+            "enum": [
+              "drive",
+              "root"
+            ],
+            "type": "string",
+            "title": "Search Scope",
+            "default": "root",
+            "nullable": true,
+            "description": "Specifies the scope of the search. 'root' searches within a specific folder hierarchy (default if drive_id is specified for a drive item, or /me/drive/root). 'drive' broadens the search to include items shared with the current user (used with /me/drive/search)."
+          }
+        }
+      }
+    },
+    {
+      "name": "ONE_DRIVE_UPDATE_DRIVE_ITEM_METADATA",
+      "description": "Tool to update the metadata of a specific item (file or folder) in OneDrive. Use this to rename items, change descriptions, or move items to a new parent folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateDriveItemMetadataRequest",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": null,
+            "examples": [
+              "new-file-name.docx"
+            ],
+            "nullable": true,
+            "description": "The new name for the drive item."
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "examples": [
+              "01NKDM7HMOJTVYMDOSXFDK2QJDXCDI3WUK"
+            ],
+            "description": "The unique identifier of the drive item (file or folder) to update."
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "default": null,
+            "examples": [
+              "contoso.sharepoint.com,024d491a-4d09-4194-ae1f-7413535507dc,024d491a-4d09-4194-ae1f-7413535507dc"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the site. Used when updating an item within a site's drive."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": null,
+            "examples": [
+              "024d491a-4d09-4194-ae1f-7413535507dc"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the user. Used when updating an item within a specific user's drive."
+          },
+          "drive_id": {
+            "type": "string",
+            "title": "Drive Id",
+            "default": null,
+            "examples": [
+              "b!C3NkF4b2GU2msLpLqgZ4oYd_S4P0S6_FhG0bS-WpTkYwGVc_FmBYSZ7d0x_ZJpG-"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the drive. Required if not using other specific paths like /me, /groups/{group-id}, /sites/{site-id}, or /users/{user-id}."
+          },
+          "group_id": {
+            "type": "string",
+            "title": "Group Id",
+            "default": null,
+            "examples": [
+              "024d491a-4d09-4194-ae1f-7413535507dc"
+            ],
+            "nullable": true,
+            "description": "The unique identifier of the group. Used when updating an item within a group's drive."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": null,
+            "examples": [
+              "Updated project proposal document."
+            ],
+            "nullable": true,
+            "description": "The new description for the drive item."
+          },
+          "parent_reference_id": {
+            "type": "string",
+            "title": "Parent Reference Id",
+            "default": null,
+            "examples": [
+              "01NKDM7HMOJTVYMDOSXFDK2QJDXCDI3WUK"
+            ],
+            "nullable": true,
+            "description": "The ID of the new parent item. Use this to move the item. The driveId of the parentReference can also be specified if moving between drives."
+          },
+          "additional_properties": {
+            "type": "object",
+            "title": "Additional Properties",
+            "default": null,
+            "nullable": true,
+            "description": "Allows passing any other updatable DriveItem properties not explicitly defined in the model.",
+            "additionalProperties": true
+          },
+          "parent_reference_drive_id": {
+            "type": "string",
+            "title": "Parent Reference Drive Id",
+            "default": null,
+            "examples": [
+              "b!C3NkF4b2GU2msLpLqgZ4oYd_S4P0S6_FhG0bS-WpTkYwGVc_FmBYSZ7d0x_ZJpG-"
+            ],
+            "nullable": true,
+            "description": "The drive ID of the new parent item, if moving to a different drive."
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 35,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/one_drive/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "ONE_DRIVE_COPY_ITEM",
+    "ONE_DRIVE_CREATE_LINK",
+    "ONE_DRIVE_DELETE_ITEM",
+    "ONE_DRIVE_DOWNLOAD_FILE",
+    "ONE_DRIVE_GET_DRIVE",
+    "ONE_DRIVE_GET_ITEM",
+    "ONE_DRIVE_GET_ITEM_PERMISSIONS",
+    "ONE_DRIVE_GET_ITEM_THUMBNAILS",
+    "ONE_DRIVE_GET_ITEM_VERSIONS",
+    "ONE_DRIVE_GET_QUOTA",
+    "ONE_DRIVE_GET_RECENT_ITEMS",
+    "ONE_DRIVE_GET_SHARED_ITEMS",
+    "ONE_DRIVE_GET_SHAREPOINT_LIST_ITEMS",
+    "ONE_DRIVE_GET_SITE_DETAILS",
+    "ONE_DRIVE_GET_SITE_PAGE_CONTENT",
+    "ONE_DRIVE_INVITE_USER_TO_DRIVE_ITEM",
+    "ONE_DRIVE_LIST_DRIVE_ITEM_ACTIVITIES",
+    "ONE_DRIVE_LIST_DRIVES",
+    "ONE_DRIVE_LIST_ROOT_DRIVE_CHANGES",
+    "ONE_DRIVE_LIST_SHAREPOINT_LIST_ITEMS_DELTA",
+    "ONE_DRIVE_LIST_SITE_COLUMNS",
+    "ONE_DRIVE_LIST_SITE_DRIVE_ITEMS_DELTA",
+    "ONE_DRIVE_LIST_SITE_LISTS",
+    "ONE_DRIVE_LIST_SITE_SUBSITES",
+    "ONE_DRIVE_LIST_SUBSCRIPTIONS",
+    "ONE_DRIVE_MOVE_ITEM",
+    "ONE_DRIVE_ONEDRIVE_CREATE_FOLDER",
+    "ONE_DRIVE_ONEDRIVE_CREATE_TEXT_FILE",
+    "ONE_DRIVE_ONEDRIVE_FIND_FILE",
+    "ONE_DRIVE_ONEDRIVE_FIND_FOLDER",
+    "ONE_DRIVE_ONEDRIVE_LIST_ITEMS",
+    "ONE_DRIVE_ONEDRIVE_UPLOAD_FILE",
+    "ONE_DRIVE_PREVIEW_DRIVE_ITEM",
+    "ONE_DRIVE_SEARCH_ITEMS",
+    "ONE_DRIVE_UPDATE_DRIVE_ITEM_METADATA"
+  ]
+}

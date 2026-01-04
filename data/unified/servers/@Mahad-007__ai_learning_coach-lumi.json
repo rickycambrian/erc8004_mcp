@@ -1,0 +1,280 @@
+{
+  "id": "@Mahad-007/ai_learning_coach-lumi",
+  "name": "@Mahad-007/ai_learning_coach-lumi",
+  "display_name": "ai_learning_coach-lumi",
+  "version": null,
+  "description": "Personalize your study with on\u2011demand tutoring that generates tailored lessons and adaptive quizzes. Track progress and stay motivated with achievements, streaks, and leaderboards. Collaborate with friends in shared study sessions.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "generate_lesson",
+      "title": "Generate Lesson",
+      "description": "Generate and store an AI-powered lesson for a learner. Provide a prompt and the tool will infer missing details automatically.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Gemini model override for this request"
+          },
+          "topic": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Lesson topic"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Natural language request to infer subject/topic/difficulty automatically"
+          },
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Supabase user id (optional, defaults to configured demo user)"
+          },
+          "persona": {
+            "enum": [
+              "friendly",
+              "strict",
+              "fun",
+              "scholar"
+            ],
+            "type": "string",
+            "description": "Tutor persona override"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Lesson subject"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Estimated duration in minutes",
+            "exclusiveMinimum": 0
+          },
+          "difficulty": {
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "type": "string",
+            "description": "Lesson difficulty"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "message",
+          "xpReward",
+          "lesson"
+        ],
+        "properties": {
+          "lesson": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "xpReward": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "generate_quiz",
+      "title": "Generate Quiz",
+      "description": "Create an adaptive quiz. Provide an existing lesson id or a natural language prompt\u2014the tool will handle the rest.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Gemini model override for this request"
+          },
+          "topic": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional topic hint when lessonId is omitted"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Natural language request to infer lesson and quiz details"
+          },
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Supabase user id (optional, defaults to configured demo user)"
+          },
+          "persona": {
+            "enum": [
+              "friendly",
+              "strict",
+              "fun",
+              "scholar"
+            ],
+            "type": "string",
+            "description": "Tutor persona override"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional subject hint when lessonId is omitted"
+          },
+          "lessonId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Lesson id to build the quiz from"
+          },
+          "difficulty": {
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "type": "string",
+            "description": "Target quiz difficulty"
+          },
+          "numQuestions": {
+            "type": "integer",
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Number of quiz questions (default 5)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "message",
+          "xpReward",
+          "quiz"
+        ],
+        "properties": {
+          "quiz": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "xpReward": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "chat_with_student",
+      "title": "Tutor Chat Message",
+      "description": "Send a tutoring message and get the AI reply while logging chat history",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "userId",
+          "message"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Gemini model override for this request"
+          },
+          "topic": {
+            "type": "string",
+            "description": "Optional conversation topic"
+          },
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Supabase user id"
+          },
+          "context": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional context messages to include"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Student message to respond to"
+          },
+          "persona": {
+            "enum": [
+              "friendly",
+              "strict",
+              "fun",
+              "scholar"
+            ],
+            "type": "string",
+            "description": "Tutor persona override"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "reply",
+          "xpGained",
+          "messageId"
+        ],
+        "properties": {
+          "reply": {
+            "type": "string"
+          },
+          "xpGained": {
+            "type": "number"
+          },
+          "messageId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 3,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@Mahad-007/ai_learning_coach-lumi/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "generate_lesson",
+    "generate_quiz",
+    "chat_with_student"
+  ]
+}

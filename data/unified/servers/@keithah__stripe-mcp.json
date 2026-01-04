@@ -1,0 +1,172 @@
+{
+  "id": "@keithah/stripe-mcp",
+  "name": "@keithah/stripe-mcp",
+  "display_name": "Stripe Fraud Control",
+  "version": null,
+  "description": "Investigate suspicious payments with Radar risk signals, early fraud warnings, disputes, and refund history. Mitigate losses by issuing full or partial refunds fast. Go beyond the basics by tapping any Stripe API resource when you need custom actions.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "stripe_status",
+      "title": "Stripe MCP Status",
+      "description": "Returns server health information and validates Stripe API connectivity.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "stripe_account": {
+            "type": "string",
+            "description": "Optional connected account ID override for the status probe."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "stripe_fraud_insight",
+      "title": "Stripe Radar Fraud Insight",
+      "description": "Fetches Radar risk data, early fraud warnings, disputes, and refunds for a payment.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "charge_id": {
+            "type": "string",
+            "description": "Stripe Charge ID (ch_...) to analyse."
+          },
+          "include_events": {
+            "type": "boolean",
+            "default": true,
+            "description": "When true, include disputes, refunds, and related events for additional context."
+          },
+          "payment_intent_id": {
+            "type": "string",
+            "description": "Stripe PaymentIntent ID (pi_...) to analyse."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "stripe_create_refund",
+      "title": "Stripe Refund Creator",
+      "description": "Creates a refund for a charge or payment intent, supporting partial refunds and metadata.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "description": "Optional amount in the smallest currency unit for partial refunds.",
+            "exclusiveMinimum": 0
+          },
+          "reason": {
+            "enum": [
+              "duplicate",
+              "fraudulent",
+              "requested_by_customer"
+            ],
+            "type": "string",
+            "description": "Optional refund reason."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Optional metadata to attach to the refund.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "charge_id": {
+            "type": "string",
+            "description": "Stripe Charge ID to refund."
+          },
+          "payment_intent_id": {
+            "type": "string",
+            "description": "Stripe PaymentIntent ID to refund."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "stripe_raw_request",
+      "title": "Stripe Raw API Request",
+      "description": "Direct access to any Stripe REST endpoint using the authenticated SDK client.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "method",
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Stripe API path (e.g. /v1/customers or /v1/payment_intents/pi_xxx). Include query params directly in the path for non-POST requests."
+          },
+          "query": {
+            "type": "object",
+            "description": "Optional query parameters. Applied only when method is GET or DELETE.",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          },
+          "method": {
+            "enum": [
+              "GET",
+              "POST",
+              "DELETE"
+            ],
+            "type": "string",
+            "description": "HTTP method to use for the Stripe API request."
+          },
+          "payload": {
+            "type": "object",
+            "description": "Optional payload for POST requests.",
+            "additionalProperties": {}
+          },
+          "api_version": {
+            "type": "string",
+            "description": "Optional Stripe API version override."
+          },
+          "stripe_account": {
+            "type": "string",
+            "description": "Optional connected account ID for the request."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "description": "Optional Idempotency-Key header to apply."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 4,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@keithah/stripe-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "stripe_status",
+    "stripe_fraud_insight",
+    "stripe_create_refund",
+    "stripe_raw_request"
+  ]
+}

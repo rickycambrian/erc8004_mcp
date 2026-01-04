@@ -1,0 +1,229 @@
+{
+  "id": "@navanithbharadwaj/stream",
+  "name": "@navanithbharadwaj/stream",
+  "display_name": "stream",
+  "version": null,
+  "description": "Connect to Synorb Streams to explore and query live streams. Search, filter, and retrieve events on demand or in real time. Streamline monitoring and build workflows triggered by updates.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/www.synorb.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "synorb-stream-catalog",
+      "description": "Retrieve the complete catalog of Synorb data streams available to your API token. Synorb provides machine-readable intelligence through three stream types:\n\n1. DISCOVERY STREAMS: Summaries and structured extracts from human web content (news, podcasts, blogs, reports)\n2. NARRATIVE STREAMS: Textual narratives generated from numerical/statistical data sources\n3. RESEARCH STREAMS: Research reports and analysis written specifically for machine consumption\n\nRETURNS: Array of stream objects with:\n- stream_id: Unique identifier (required for all other operations)\n- title, description, stream_class: Stream identification\n- subject_domains, cross_domains: Topical categorization\n- update_cadence: Refresh frequency\n- filters: Available query dimensions (varies by stream)\n- last_updated: Most recent content timestamp\n- volume metrics: Story counts over time periods\n\nWHEN TO USE:\n- Beginning any research task - discover relevant intelligence sources\n- User asks about available data or capabilities\n- Exploring new topic areas\n- Planning multi-stream queries\n\nBEST PRACTICES:\n- Start here when uncertain which streams are relevant\n- Examine 'filters' to understand each stream's query dimensions\n- Match user intent to stream descriptions and domains\n- Note: Catalog grows continuously - don't hardcode stream assumptions",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "synorb-stream-details",
+      "description": "Fetch deep metadata and configuration for a specific stream. Reveals the internal structure, available filters with exact values, content schema, and usage patterns for a single stream.\n\nREQUIRED PARAMETER:\n- stream_id: Identifier from synorb-stream-catalog\n\nRETURNS: Extended stream metadata including:\n- body_sections: Content structure and available fields\n- filters.allowed: Exact enumerated values for each filter dimension\n- nlq: Natural language query examples (human-readable usage patterns)\n- granularity: Scope specifications (geographic, temporal, entity-level)\n- provenance: Data pipeline and processing information\n- rights: Licensing and data sensitivity indicators\n\nWHEN TO USE:\n- After identifying a target stream from catalog\n- Need exact filter values before querying (e.g., which cities, organizations, topics are available)\n- Planning complex filtered queries\n- Understanding content structure for parsing\n- User asks about specific stream capabilities\n\nBEST PRACTICES:\n- Call this before synorb-stream-stories to get valid filter values\n- Cache results - stream schemas change infrequently\n- Use 'nlq' examples as query templates\n- Check 'body_sections' to know what fields will be returned",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "stream_id"
+        ],
+        "properties": {
+          "stream_id": {
+            "type": "string",
+            "description": "stream id of the stream to fetch the details"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "synorb-stream-stories",
+      "description": "Retrieve stream content (stories) with filtering, date ranges, and pagination. This is your primary data retrieval tool - use it to fetch intelligence from any single stream with optional key-value filtering. REQUIRED PARAMETERS: - stream_id: Target stream identifier (single stream only) - Date range (one pair required): * published_date_from + published_date_to (YYYY-MM-DD format) OR * created_on_from + created_on_to (YYYY-MM-DD format) OPTIONAL PARAMETERS: - filters: Array of simple key-value filter objects * Format: [{\"key\": \"dimension\", \"value\": \"filter_value\"}] * Use synorb-stream-details to discover valid keys and allowed values * All filters must match (implicit AND behavior) - page_size: Results per page (max 200, no default - recommend 50-100 to start) - page_num: Page index for pagination, 0-based (default 0) - body_sections: Array of specific content sections to return (optional) * Format: [\"headline\", \"summary\", \"analysis\"] * Discovers what sections are available: 1. Call synorb-stream-details for your stream_id 2. Look for the 'body_sections' field in the response 3. Use those exact section names in your query * If omitted, returns complete story.body with all available sections * Use this to optimize response size and speed when you only need specific parts * Invalid section names are silently ignored (no error, just not returned) * Common sections by stream type: - Discovery streams: \"headline\", \"summary\", \"entities\", \"quotes\", \"key_points\", \"links\" - Research streams: \"executive_summary\", \"methodology\", \"findings\", \"analysis\", \"conclusions\" - Narrative streams: \"narrative\", \"body\", \"context\", \"interpretation\" * Example: body_sections: [\"headline\", \"summary\"] returns only those two sections RETURNS: - stories[]: Array of content objects * story_id: Unique identifier for this story * published_date: When the story was published (YYYY-MM-DD) * created_on: When the story was created in Synorb system (ISO timestamp) * filters: Filter dimensions that matched this story * evidence_ref.source_urls: Array of original source URLs (ALWAYS cite these in your outputs) * story.body: Structured content (format varies by stream - can be JSON, markdown, or structured text) * story.body_sections: Array showing which sections are included in this story's body - pagination: Navigation metadata * total_count: Total stories matching your query across all pages * page_num: Current page number (0-indexed) * page_size: Number of stories per page * next: Next page number (null if you're on the last page) * prev: Previous page number (null if you're on the first page) WHEN TO USE: - Retrieving stories from a single stream - User requests specific information from a stream - Building reports, analysis, or derivative content - Monitoring recent activity in a stream - Filtering content by specific dimensions (topic, region, company, etc.) - Simple exploration of stream content CRITICAL REQUIREMENTS: - MUST provide date ranges - no default behavior - Date ranges required even if searching by other filters - MUST provide both 'from' AND 'to' dates (no open-ended ranges) - Date format must be YYYY-MM-DD - ALWAYS cite source_urls from evidence_ref in your outputs PRACTICAL EXAMPLES: Example 1 - Basic query with full content: { \"stream_id\": \"42\", \"published_date_from\": \"2025-01-01\", \"published_date_to\": \"2025-01-31\", \"page_size\": 50 } \u2192 Returns all stories from stream 42 in January with complete body content Example 2 - Query with simple filters: { \"stream_id\": \"15\", \"published_date_from\": \"2025-01-15\", \"published_date_to\": \"2025-01-27\", \"filters\": [{\"key\": \"topic\", \"value\": \"artificial_intelligence\"}, {\"key\": \"region\", \"value\": \"north_america\"}] } \u2192 Returns stories that match BOTH topic=AI AND region=North America (implicit AND) Example 3 - Optimized query requesting only specific sections: { \"stream_id\": \"8\", \"published_date_from\": \"2025-01-20\", \"published_date_to\": \"2025-01-27\", \"body_sections\": [\"headline\", \"summary\"], \"page_size\": 100 } \u2192 Returns stories but only includes headline and summary sections (smaller, faster response) Example 4 - Pagination through large result set: { \"stream_id\": \"23\", \"published_date_from\": \"2025-01-01\", \"published_date_to\": \"2025-01-31\", \"page_size\": 50, \"page_num\": 2 } \u2192 Returns page 3 (0-indexed) of results with 50 stories per page BEST PRACTICES: - Start with recent dates (last 30 days) unless user specifies otherwise - Use page_size=50-100 initially for exploration - Always call synorb-stream-details first to: * Get valid filter keys and allowed values * Discover available body_sections for the stream * Understand the stream's content structure - Use body_sections to optimize performance: * Request only [\"headline\", \"summary\"] for preview/dashboard views * Request full body only when detailed content is needed * Reduces bandwidth and speeds up response time - For empty or unexpected results: 1. Expand date range 2. Remove or relax filters one by one 3. Try alternate date field (published_date vs created_on) 4. Check stream was active during date range using synorb-stream-catalog metrics 5. Verify filter keys/values are correct (check for typos) - Parse story.body carefully - format varies by stream (JSON, markdown, structured text) - ALWAYS cite source_urls in your outputs - this is the original source attribution - Cache responses when working with historical/static date ranges STREAM TYPES BEHAVIOR: - Discovery streams: Often rich in quotes, entities, links; sections like \"headline\", \"summary\", \"entities\", \"quotes\" - Narrative streams: Focus on body text narratives derived from data; typically \"narrative\" or \"body\" sections - Research streams: Structured analysis sections with methodology; sections like \"executive_summary\", \"methodology\", \"findings\", \"analysis\" RECOMMENDED QUERY WORKFLOW: 1. synorb-stream-catalog \u2192 Find relevant streams (get stream_id) 2. synorb-stream-details \u2192 Understand available filters and body_sections for that stream 3. synorb-stream-stories \u2192 Execute filtered query with appropriate body_sections 4. Iterate based on results (adjust filters, date ranges, or sections as needed) WHEN TO PAGINATE: - If total_count > page_size, more results are available - Use pagination.next to get the next page: set page_num to that value - Continue until pagination.next is null (indicates last page) - Example: If total_count=500 and page_size=100, you'll need 5 requests (page_num: 0, 1, 2, 3, 4) BODY_SECTIONS DISCOVERY WORKFLOW: 1. Call synorb-stream-details with your target stream_id 2. Examine the response for 'body_sections' field - this lists available sections 3. Use those exact section names in your synorb-stream-stories query 4. If body_sections field is empty or not present, request full body (omit parameter) WHY USE BODY_SECTIONS: - Faster API responses (less data to transfer) - Reduced token usage when working with LLMs - Better for building lightweight interfaces (dashboards, previews, lists) - When you only need summaries/headlines, not full content - Iterative exploration: get headlines first, then fetch full stories for interesting ones",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "stream_id"
+        ],
+        "properties": {
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "value"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "List of filters"
+          },
+          "page_num": {
+            "type": "number",
+            "default": 0,
+            "description": "Page number for pagination"
+          },
+          "page_size": {
+            "type": "number",
+            "description": "Page size for pagination (max 200)"
+          },
+          "stream_id": {
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Stream ID (can be number or string)"
+          },
+          "body_sections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Body sections"
+          },
+          "created_on_to": {
+            "type": "string",
+            "description": "Created on end date (YYYY-MM-DD)"
+          },
+          "created_on_from": {
+            "type": "string",
+            "description": "Created on start date (YYYY-MM-DD)"
+          },
+          "published_date_to": {
+            "type": "string",
+            "description": "End date (YYYY-MM-DD)"
+          },
+          "published_date_from": {
+            "type": "string",
+            "description": "Start date (YYYY-MM-DD)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "synorb-stream-stories-advanced",
+      "description": "Search for stream stories with flexible filtering, date ranges, and pagination. This endpoint performs advanced content retrieval across one or multiple streams and supports logical filter grouping (AND/OR) for precise queries. WHEN TO USE THIS TOOL: - Retrieving stories from one or more streams - Need AND/OR filter logic: \"Find stories about (Tesla OR SpaceX) AND (funding)\" - Combining multiple conditions: \"Show AI stories in Europe OR crypto stories in Asia\" - Complex filter requirements with logical grouping - Building reports, dashboards, or analysis requiring filtered content - Simple queries work too - filters are optional REQUIRED PARAMETERS: - stream_ids: Array of stream identifiers (numbers only) * Single stream: [123] * Multiple streams: [123, 456, 789] * Must contain at least one numeric ID - Date range (one pair required): * published_date_from + published_date_to (YYYY-MM-DD format) OR * created_on_from + created_on_to (YYYY-MM-DD format) OPTIONAL PARAMETERS: - filters: Array of filter objects with logical operators * Format: [{\"key\": \"dimension\", \"operator\": \"AND|OR\", \"value\": \"filter_value\"}] * Use synorb-stream-details first to get valid keys and values * All filters must include the \"operator\" field - page_size: Results per page (default 50, max 200) - page_num: Page index for pagination, 0-based (default 0) - body_sections: Array of specific content sections to return (optional) * Format: [\"headline\", \"summary\", \"analysis\"] * Use synorb-stream-details to discover available sections for each stream * Look for 'body_sections' field in the stream details response * If omitted, returns complete story.body with all available sections * Use this to reduce payload size when you only need specific parts * Invalid section names are silently ignored (no error thrown) * Common sections include: \"headline\", \"summary\", \"analysis\", \"key_points\", \"entities\", \"quotes\" * Section availability varies by stream type and content structure UNDERSTANDING FILTER OPERATORS: operator=\"AND\" \u2192 ALL conditions must match (intersection) Example: [{\"key\": \"topic\", \"operator\": \"AND\", \"value\": \"ai\"}, {\"key\": \"region\", \"operator\": \"AND\", \"value\": \"europe\"}] Result: Stories that are BOTH about AI AND in Europe operator=\"OR\" \u2192 ANY condition can match (union) Example: [{\"key\": \"company\", \"operator\": \"OR\", \"value\": \"apple\"}, {\"key\": \"company\", \"operator\": \"OR\", \"value\": \"microsoft\"}] Result: Stories mentioning Apple OR Microsoft (or both) MIXING OPERATORS: - All filters with operator=\"AND\" must ALL match together - All filters with operator=\"OR\" means ANY can match - For complex nested logic like \"(A AND B) OR C\", run separate queries and combine results PRACTICAL EXAMPLES: Example 1 - Single stream with AND logic: {\"stream_ids\": [42], \"published_date_from\": \"2025-01-01\", \"published_date_to\": \"2025-01-31\", \"filters\": [{\"key\": \"topic\", \"operator\": \"AND\", \"value\": \"fintech\"}, {\"key\": \"stage\", \"operator\": \"AND\", \"value\": \"series_b\"}]} \u2192 Returns fintech stories that are ALSO series B stage Example 2 - Single stream with OR logic: {\"stream_ids\": [42], \"published_date_from\": \"2025-01-01\", \"published_date_to\": \"2025-01-31\", \"filters\": [{\"key\": \"investor\", \"operator\": \"OR\", \"value\": \"sequoia\"}, {\"key\": \"investor\", \"operator\": \"OR\", \"value\": \"a16z\"}]} \u2192 Returns stories mentioning Sequoia OR Andreessen Horowitz Example 3 - Multiple streams with filters: {\"stream_ids\": [10, 15, 23], \"published_date_from\": \"2025-01-15\", \"published_date_to\": \"2025-01-31\", \"filters\": [{\"key\": \"region\", \"operator\": \"AND\", \"value\": \"asia\"}], \"page_size\": 100} \u2192 Returns stories from three streams, all filtered to Asia region Example 4 - Using body_sections to reduce payload: {\"stream_ids\": [5], \"published_date_from\": \"2025-01-20\", \"published_date_to\": \"2025-01-27\", \"body_sections\": [\"headline\", \"summary\"]} \u2192 Returns only headline and summary, omitting full analysis/content (faster, smaller response) Example 5 - No filters (just multi-stream): {\"stream_ids\": [5, 8], \"published_date_from\": \"2025-01-20\", \"published_date_to\": \"2025-01-27\"} \u2192 Returns all stories from both streams in date range (filters are optional) RETURNS: {\"stories\": [{\"story_id\": \"uuid-string\", \"stream_id\": 123, \"published_date\": \"2025-01-15\", \"created_on\": \"2025-01-15T10:30:00Z\", \"filters\": {...}, \"body\": {...}, \"body_sections\": [\"headline\", \"summary\", \"analysis\"]}], \"pagination\": {\"total_count\": 150, \"page_num\": 0, \"page_size\": 50, \"next\": 1, \"prev\": null}} CRITICAL REQUIREMENTS: \u2705 stream_ids must be an array of numbers: [123] or [123, 456] \u2705 Date range is mandatory - must provide both from AND to dates \u2705 Every filter must include \"operator\": \"AND\" or \"OR\" \u2705 Always call synorb-stream-details first to validate filter keys and values \u2705 Date format must be YYYY-MM-DD COMMON MISTAKES TO AVOID: \u274c Using string IDs: stream_ids: [\"123\"] \u2705 Use numbers: stream_ids: [123] \u274c Forgetting operator in filters \u2705 Always include \"operator\": \"AND\" or \"OR\" in every filter \u274c Not validating filters beforehand \u2705 Call synorb-stream-details to get valid filter keys and allowed values \u274c Omitting date ranges \u2705 Always provide both from and to dates \u274c Requesting body_sections without checking what's available \u2705 Call synorb-stream-details first to see available sections for each stream BEST PRACTICES: - Start with page_size=50-100 for exploration, increase for batch exports - Always define explicit date ranges (reduces payload and improves performance) - Call synorb-stream-details before querying to get: * Valid filter dimensions and allowed values * Available body_sections for the stream * Stream structure and content format - Use body_sections parameter to: * Reduce response size when you only need headlines/summaries * Speed up queries when full content isn't needed * Build lightweight dashboards or preview interfaces - For empty or unexpected results: 1. Expand date range (check stream was active in that period) 2. Try switching operator from AND to OR (broader matching) 3. Verify filter keys/values are correct (check for typos) 4. Remove filters one by one to identify the problematic condition - Stories are complete in the response - no additional API calls needed - Use pagination metadata (next/prev) for navigating large result sets - Cache responses when working with historical/static date ranges STREAM TYPE BEHAVIOR: - Discovery Streams: Frequent updates, rich metadata, common sections include \"headline\", \"summary\", \"entities\", \"quotes\", \"links\" - Research Streams: Long-form content, sections like \"executive_summary\", \"methodology\", \"analysis\", \"conclusions\", \"recommendations\" - Narrative Streams: Continuous narrative text, typically \"body\" or \"narrative\" sections, minimal structural breakdown RECOMMENDED WORKFLOW: 1. synorb-stream-catalog \u2192 Identify relevant streams (get stream IDs) 2. synorb-stream-details \u2192 Check available filters, allowed values, and body_sections for those streams 3. synorb-stream-stories-search \u2192 Execute search with logical filter combinations 4. Parse results directly (stories contain complete content) 5. Iterate: Adjust filters, date ranges, operators, or body_sections based on results WHEN TO PAGINATE: - total_count > page_size indicates more results available - Use pagination.next to get the next page: set page_num to that value - Continue until pagination.next is null (no more pages) - Example: If total_count=500 and page_size=100, you'll need 5 requests (page_num: 0,1,2,3,4)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "stream_ids"
+        ],
+        "properties": {
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "operator"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "allowed": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "operator": {
+                  "enum": [
+                    "AND",
+                    "OR"
+                  ],
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "List of filters"
+          },
+          "page_num": {
+            "type": "number",
+            "default": 0,
+            "description": "Page number for pagination"
+          },
+          "page_size": {
+            "type": "number",
+            "description": "Page size for pagination (max 200)"
+          },
+          "stream_ids": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 1,
+            "description": "Stream ID(s) (numbers only)"
+          },
+          "body_sections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Body sections"
+          },
+          "created_on_to": {
+            "type": "string",
+            "description": "Created on end date (YYYY-MM-DD)"
+          },
+          "created_on_from": {
+            "type": "string",
+            "description": "Created on start date (YYYY-MM-DD)"
+          },
+          "published_date_to": {
+            "type": "string",
+            "description": "End date (YYYY-MM-DD)"
+          },
+          "published_date_from": {
+            "type": "string",
+            "description": "Start date (YYYY-MM-DD)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "synorb-profile",
+      "description": "Retrieve authenticated account metadata and access configuration.\n\nNO PARAMETERS REQUIRED\n\nRETURNS:\n- Account identifiers\n- API token scope and permissions\n- Usage limits and quotas\n- Configuration settings\n\nWHEN TO USE:\n- User asks about account or access level\n- Debugging authentication\n- Verifying token validity\n\nBEST PRACTICES:\n- Rarely needed for standard intelligence queries\n- Call only when specifically required\n- Not part of typical stream query workflow",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 5,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@navanithbharadwaj/stream/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "synorb-stream-catalog",
+    "synorb-stream-details",
+    "synorb-stream-stories",
+    "synorb-stream-stories-advanced",
+    "synorb-profile"
+  ]
+}

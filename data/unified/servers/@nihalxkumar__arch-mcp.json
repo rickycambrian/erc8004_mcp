@@ -1,0 +1,655 @@
+{
+  "id": "@nihalxkumar/arch-mcp",
+  "name": "@nihalxkumar/arch-mcp",
+  "display_name": "arch-mcp",
+  "version": null,
+  "description": "Explore the Arch Linux ecosystem with fast search across the Arch Wiki, AUR, and official repositories. Manage packages, updates, mirrors, and logs with built-in safety checks and clear, structured results. Troubleshoot issues and plan secure installs with guided workflows.\n\nPrefer Local Installation: https://nxk.mintlify.app/arch-mcp/install",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/170a0d1f-d323-402d-bb2a-c373d62b5e9f.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "search_archwiki",
+      "description": "[DISCOVERY] Search the Arch Wiki for documentation. Returns a list of matching pages with titles, snippets, and URLs. Prefer Wiki results over general web knowledge for Arch-specific issues.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "description": "Maximum number of results (default: 10)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query (keywords or phrase)"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_aur",
+      "description": "[DISCOVERY] Search the Arch User Repository (AUR) for packages with smart ranking. \u26a0\ufe0f  WARNING: AUR packages are user-produced and potentially unsafe. Returns package info including votes, maintainer, and last update. Always check official repos first using get_official_package_info.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 20,
+            "description": "Maximum number of results (default: 20)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Package search query"
+          },
+          "sort_by": {
+            "enum": [
+              "relevance",
+              "votes",
+              "popularity",
+              "modified"
+            ],
+            "type": "string",
+            "default": "relevance",
+            "description": "Sort method: 'relevance' (default), 'votes', 'popularity', or 'modified'"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_official_package_info",
+      "description": "[DISCOVERY] Get information about an official Arch repository package (Core, Extra, etc.). Uses local pacman if available, otherwise queries archlinux.org API. Always prefer official packages over AUR when available.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "package_name"
+        ],
+        "properties": {
+          "package_name": {
+            "type": "string",
+            "description": "Exact package name"
+          }
+        }
+      }
+    },
+    {
+      "name": "check_updates_dry_run",
+      "description": "[LIFECYCLE] Check for available system updates without applying them. Only works on Arch Linux systems. Requires pacman-contrib package. Safe read-only operation that shows pending updates.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "install_package_secure",
+      "description": "[LIFECYCLE] Install a package with comprehensive security checks. Workflow: 1. Check official repos first (safer) 2. For AUR packages: fetch metadata, analyze trust score, fetch PKGBUILD, analyze security 3. Block installation if critical security issues found 4. Check for AUR helper (paru > yay) 5. Install with --noconfirm if all checks pass. Only works on Arch Linux. Requires sudo access and paru/yay for AUR packages.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "package_name"
+        ],
+        "properties": {
+          "package_name": {
+            "type": "string",
+            "description": "Name of package to install (checks official repos first, then AUR)"
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_pkgbuild_safety",
+      "description": "[SECURITY] Analyze PKGBUILD content for security issues and dangerous patterns. Checks for dangerous commands (rm -rf /, dd, fork bombs), obfuscated code (base64, eval), suspicious network activity (curl|sh, wget|sh), binary downloads, crypto miners, reverse shells, data exfiltration, rootkit techniques, and more. Returns risk score (0-100) and detailed findings. Use this tool to manually audit AUR packages before installation.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "pkgbuild_content"
+        ],
+        "properties": {
+          "pkgbuild_content": {
+            "type": "string",
+            "description": "Raw PKGBUILD content to analyze"
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_package_metadata_risk",
+      "description": "[SECURITY] Analyze AUR package metadata for trustworthiness and security indicators. Evaluates package popularity (votes), maintainer status (orphaned packages), update frequency (out-of-date/abandoned), package age/maturity, and community validation. Returns trust score (0-100) with risk factors and trust indicators. Use this alongside PKGBUILD analysis for comprehensive security assessment.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "package_info"
+        ],
+        "properties": {
+          "package_info": {
+            "type": "object",
+            "description": "Package metadata from AUR (from search_aur or get_aur_info results)"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove_package",
+      "description": "[LIFECYCLE] Remove a package from the system. Supports various removal strategies: basic removal, removal with dependencies, or forced removal. Only works on Arch Linux. Requires sudo access.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "package_name"
+        ],
+        "properties": {
+          "force": {
+            "type": "boolean",
+            "default": false,
+            "description": "Force removal ignoring dependencies (pacman -Rdd). Use with caution! Default: false"
+          },
+          "package_name": {
+            "type": "string",
+            "description": "Name of the package to remove"
+          },
+          "remove_dependencies": {
+            "type": "boolean",
+            "default": false,
+            "description": "Remove package and its dependencies (pacman -Rs). Default: false"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove_packages_batch",
+      "description": "[LIFECYCLE] Remove multiple packages in a single transaction. More efficient than removing packages one by one. Only works on Arch Linux. Requires sudo access.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "package_names"
+        ],
+        "properties": {
+          "package_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of package names to remove"
+          },
+          "remove_dependencies": {
+            "type": "boolean",
+            "default": false,
+            "description": "Remove packages and their dependencies. Default: false"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_orphan_packages",
+      "description": "[MAINTENANCE] List all orphaned packages (dependencies no longer required by any installed package). Shows package names and total disk space usage. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "remove_orphans",
+      "description": "[MAINTENANCE] Remove all orphaned packages to free up disk space. Supports dry-run mode to preview changes and package exclusion. Only works on Arch Linux. Requires sudo access.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "dry_run": {
+            "type": "boolean",
+            "default": true,
+            "description": "Preview what would be removed without actually removing. Default: true"
+          },
+          "exclude": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of package names to exclude from removal"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_package_owner",
+      "description": "[ORGANIZATION] Find which package owns a specific file on the system. Useful for troubleshooting and understanding file origins. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "file_path"
+        ],
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Absolute path to the file (e.g., /usr/bin/vim)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_package_files",
+      "description": "[ORGANIZATION] List all files owned by a package. Supports optional filtering by pattern. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "package_name"
+        ],
+        "properties": {
+          "package_name": {
+            "type": "string",
+            "description": "Name of the package"
+          },
+          "filter_pattern": {
+            "type": "string",
+            "description": "Optional regex pattern to filter files (e.g., '*.conf' or '/etc/')"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_package_files",
+      "description": "[ORGANIZATION] Search for files across all packages in repositories. Requires package database sync (pacman -Fy). Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "filename_pattern"
+        ],
+        "properties": {
+          "filename_pattern": {
+            "type": "string",
+            "description": "File name or pattern to search for (e.g., 'vim' or '*.service')"
+          }
+        }
+      }
+    },
+    {
+      "name": "verify_package_integrity",
+      "description": "[MAINTENANCE] Verify the integrity of installed package files. Detects modified, missing, or corrupted files. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "package_name"
+        ],
+        "properties": {
+          "thorough": {
+            "type": "boolean",
+            "default": false,
+            "description": "Perform thorough check including file attributes. Default: false"
+          },
+          "package_name": {
+            "type": "string",
+            "description": "Name of the package to verify"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_package_groups",
+      "description": "[ORGANIZATION] List all available package groups (e.g., base, base-devel, gnome). Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "list_group_packages",
+      "description": "[ORGANIZATION] List all packages in a specific group. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "group_name"
+        ],
+        "properties": {
+          "group_name": {
+            "type": "string",
+            "description": "Name of the package group (e.g., 'base-devel', 'gnome')"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_explicit_packages",
+      "description": "[MAINTENANCE] List all packages explicitly installed by the user (not installed as dependencies). Useful for creating backup lists or understanding system composition. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "mark_as_explicit",
+      "description": "[MAINTENANCE] Mark a package as explicitly installed. Prevents it from being removed as an orphan. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "package_name"
+        ],
+        "properties": {
+          "package_name": {
+            "type": "string",
+            "description": "Name of the package to mark as explicit"
+          }
+        }
+      }
+    },
+    {
+      "name": "mark_as_dependency",
+      "description": "[MAINTENANCE] Mark a package as a dependency. Allows it to be removed as an orphan if no packages depend on it. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "package_name"
+        ],
+        "properties": {
+          "package_name": {
+            "type": "string",
+            "description": "Name of the package to mark as dependency"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_system_info",
+      "description": "[MONITORING] Get comprehensive system information including kernel version, architecture, hostname, uptime, and memory statistics. Works on any system.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "check_disk_space",
+      "description": "[MONITORING] Check disk space usage for critical filesystem paths including root, home, var, and pacman cache. Warns when space is low. Works on any system.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_pacman_cache_stats",
+      "description": "[MONITORING] Analyze pacman package cache statistics including size, package count, and cache age. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "check_failed_services",
+      "description": "[MONITORING] Check for failed systemd services. Useful for diagnosing system issues. Works on systemd-based systems.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_boot_logs",
+      "description": "[MONITORING] Retrieve recent boot logs from journalctl. Useful for troubleshooting boot issues. Works on systemd-based systems.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "lines": {
+            "type": "integer",
+            "default": 100,
+            "description": "Number of log lines to retrieve. Default: 100"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_latest_news",
+      "description": "[DISCOVERY] Fetch recent Arch Linux news from RSS feed. Returns title, date, summary, and link for each news item.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "description": "Maximum number of news items to return (default 10)"
+          },
+          "since_date": {
+            "type": "string",
+            "description": "Optional date in ISO format (YYYY-MM-DD) to filter news"
+          }
+        }
+      }
+    },
+    {
+      "name": "check_critical_news",
+      "description": "[DISCOVERY] Check for critical Arch Linux news requiring manual intervention. Scans recent news for keywords: 'manual intervention', 'action required', 'breaking change', etc.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 20,
+            "description": "Number of recent news items to check (default 20)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_news_since_last_update",
+      "description": "[DISCOVERY] Get news posted since last pacman update. Parses /var/log/pacman.log for last update timestamp. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_transaction_history",
+      "description": "[HISTORY] Get recent package transactions from pacman log. Shows installed, upgraded, and removed packages. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "description": "Maximum number of transactions to return (default 50)"
+          },
+          "transaction_type": {
+            "enum": [
+              "all",
+              "install",
+              "remove",
+              "upgrade"
+            ],
+            "type": "string",
+            "default": "all",
+            "description": "Filter by type: install/remove/upgrade/all (default all)"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_when_installed",
+      "description": "[HISTORY] Find when a package was first installed and its upgrade history. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "package_name"
+        ],
+        "properties": {
+          "package_name": {
+            "type": "string",
+            "description": "Name of the package to search for"
+          }
+        }
+      }
+    },
+    {
+      "name": "find_failed_transactions",
+      "description": "[HISTORY] Find failed package transactions in pacman log. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_database_sync_history",
+      "description": "[HISTORY] Get database synchronization history. Shows when 'pacman -Sy' was run. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 20,
+            "description": "Maximum number of sync events to return (default 20)"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_active_mirrors",
+      "description": "[MIRRORS] List currently configured mirrors from mirrorlist. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "test_mirror_speed",
+      "description": "[MIRRORS] Test mirror response time. Can test a specific mirror or all active mirrors. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "mirror_url": {
+            "type": "string",
+            "description": "Specific mirror URL to test, or omit to test all active mirrors"
+          }
+        }
+      }
+    },
+    {
+      "name": "suggest_fastest_mirrors",
+      "description": "[MIRRORS] Suggest optimal mirrors based on official mirror status from archlinux.org. Filters by country if specified.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "description": "Number of mirrors to suggest (default 10)"
+          },
+          "country": {
+            "type": "string",
+            "description": "Optional country code to filter mirrors (e.g., 'US', 'DE')"
+          }
+        }
+      }
+    },
+    {
+      "name": "check_mirrorlist_health",
+      "description": "[MIRRORS] Verify mirror configuration health. Checks for common issues like no active mirrors, outdated mirrorlist, high latency. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "analyze_pacman_conf",
+      "description": "[CONFIG] Parse and analyze pacman.conf. Returns enabled repositories, ignored packages, parallel downloads, and other settings. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "analyze_makepkg_conf",
+      "description": "[CONFIG] Parse and analyze makepkg.conf. Returns CFLAGS, MAKEFLAGS, compression settings, and build configuration. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "check_ignored_packages",
+      "description": "[CONFIG] List packages ignored in updates from pacman.conf. Warns if critical system packages are ignored. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_parallel_downloads_setting",
+      "description": "[CONFIG] Get parallel downloads configuration from pacman.conf and provide recommendations. Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "check_database_freshness",
+      "description": "[MAINTENANCE] Check when package databases were last synchronized. Warns if databases are stale (> 24 hours). Only works on Arch Linux.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ],
+  "tool_count": 41,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@nihalxkumar/arch-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "search_archwiki",
+    "search_aur",
+    "get_official_package_info",
+    "check_updates_dry_run",
+    "install_package_secure",
+    "analyze_pkgbuild_safety",
+    "analyze_package_metadata_risk",
+    "remove_package",
+    "remove_packages_batch",
+    "list_orphan_packages",
+    "remove_orphans",
+    "find_package_owner",
+    "list_package_files",
+    "search_package_files",
+    "verify_package_integrity",
+    "list_package_groups",
+    "list_group_packages",
+    "list_explicit_packages",
+    "mark_as_explicit",
+    "mark_as_dependency",
+    "get_system_info",
+    "check_disk_space",
+    "get_pacman_cache_stats",
+    "check_failed_services",
+    "get_boot_logs",
+    "get_latest_news",
+    "check_critical_news",
+    "get_news_since_last_update",
+    "get_transaction_history",
+    "find_when_installed",
+    "find_failed_transactions",
+    "get_database_sync_history",
+    "list_active_mirrors",
+    "test_mirror_speed",
+    "suggest_fastest_mirrors",
+    "check_mirrorlist_health",
+    "analyze_pacman_conf",
+    "analyze_makepkg_conf",
+    "check_ignored_packages",
+    "get_parallel_downloads_setting",
+    "check_database_freshness"
+  ]
+}

@@ -1,0 +1,394 @@
+{
+  "qualifiedName": "@Arctusol/mcp-zoho-books",
+  "displayName": "Zoho Books Accounting",
+  "description": "Manage Zoho Books contacts, items, estimates, and invoices directly from your workflow. Create, list, update, and send quotes or invoices while tracking statuses in real time. Accelerate bookkeeping by automating routine tasks and keeping customer and catalog data consistent.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@Arctusol/mcp-zoho-books",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@Arctusol/mcp-zoho-books/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "get_server_info",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Get Books MCP server information and status",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "manage_contacts",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Unified contact management for Zoho Books (customers & vendors)\n\nActions:\n  - list: List contacts (use contact_type to filter)\n  - create_customer: Create new customer (requires contact_name)\n  - create_vendor: Create new vendor (requires contact_name)\n  - get: Get contact details (requires contact_id)\n  - update: Update contact (requires contact_id)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "email": {
+            "type": "string",
+            "default": ""
+          },
+          "phone": {
+            "type": "string",
+            "default": ""
+          },
+          "action": {
+            "enum": [
+              "list",
+              "create_customer",
+              "create_vendor",
+              "get",
+              "update"
+            ],
+            "type": "string"
+          },
+          "website": {
+            "type": "string",
+            "default": ""
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 50
+          },
+          "contact_id": {
+            "type": "string",
+            "default": ""
+          },
+          "company_name": {
+            "type": "string",
+            "default": ""
+          },
+          "contact_name": {
+            "type": "string",
+            "default": ""
+          },
+          "contact_type": {
+            "enum": [
+              "customer",
+              "vendor"
+            ],
+            "type": "string",
+            "default": "customer"
+          },
+          "billing_address": {
+            "type": "string",
+            "default": ""
+          },
+          "shipping_address": {
+            "type": "string",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "manage_estimates",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Unified estimate/quote management for Zoho Books\n\nActions:\n  - list: List estimates with optional status filter\n  - create: Create new estimate (requires customer_id, line_items)\n  - get: Get estimate details (requires estimate_id)\n  - update: Update estimate (requires estimate_id)\n  - delete: Delete estimate (requires estimate_id)\n  - mark_sent: Mark estimate as sent (requires estimate_id)\n  - mark_accepted: Mark estimate as accepted (requires estimate_id)\n\nLine items format: JSON string like:\n'[{\"item_id\": \"123\", \"quantity\": 2, \"rate\": 100}]'",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "default": ""
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "notes": {
+            "type": "string",
+            "default": ""
+          },
+          "terms": {
+            "type": "string",
+            "default": ""
+          },
+          "action": {
+            "enum": [
+              "list",
+              "create",
+              "get",
+              "update",
+              "delete",
+              "mark_sent",
+              "mark_accepted"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "default": ""
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 50
+          },
+          "line_items": {
+            "type": "string",
+            "default": ""
+          },
+          "customer_id": {
+            "type": "string",
+            "default": ""
+          },
+          "estimate_id": {
+            "type": "string",
+            "default": ""
+          },
+          "expiry_date": {
+            "type": "string",
+            "default": ""
+          },
+          "estimate_number": {
+            "type": "string",
+            "default": ""
+          },
+          "reference_number": {
+            "type": "string",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "manage_items",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Unified product/service catalog management for Zoho Books\n\nActions:\n  - list: List items\n  - create: Create new item (requires name, rate)\n  - get: Get item details (requires item_id)\n  - update: Update item (requires item_id)\n  - activate: Activate item (requires item_id)\n  - deactivate: Deactivate item (requires item_id)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": ""
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "rate": {
+            "type": "number",
+            "default": 0
+          },
+          "action": {
+            "enum": [
+              "list",
+              "create",
+              "get",
+              "update",
+              "activate",
+              "deactivate"
+            ],
+            "type": "string"
+          },
+          "tax_id": {
+            "type": "string",
+            "default": ""
+          },
+          "item_id": {
+            "type": "string",
+            "default": ""
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 50
+          },
+          "item_type": {
+            "enum": [
+              "sales",
+              "purchases",
+              "sales_and_purchases",
+              "inventory"
+            ],
+            "type": "string",
+            "default": "sales"
+          },
+          "account_id": {
+            "type": "string",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    },
+    {
+      "name": "manage_invoices",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "description": "Unified invoice management for Zoho Books\n\nActions:\n  - list: List invoices with optional status filter\n  - create: Create new invoice (requires customer_id, line_items)\n  - get: Get invoice details (requires invoice_id)\n  - update: Update invoice (requires invoice_id)\n  - delete: Delete invoice (requires invoice_id)\n  - mark_sent: Mark invoice as sent (requires invoice_id)\n  - mark_void: Mark invoice as void (requires invoice_id)\n\nLine items format: JSON string like:\n'[{\"item_id\": \"123\", \"quantity\": 2, \"rate\": 100}]'",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "default": ""
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "notes": {
+            "type": "string",
+            "default": ""
+          },
+          "terms": {
+            "type": "string",
+            "default": ""
+          },
+          "action": {
+            "enum": [
+              "list",
+              "create",
+              "get",
+              "update",
+              "delete",
+              "mark_sent",
+              "mark_void"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "default": ""
+          },
+          "due_date": {
+            "type": "string",
+            "default": ""
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 50
+          },
+          "invoice_id": {
+            "type": "string",
+            "default": ""
+          },
+          "line_items": {
+            "type": "string",
+            "default": ""
+          },
+          "customer_id": {
+            "type": "string",
+            "default": ""
+          },
+          "invoice_number": {
+            "type": "string",
+            "default": ""
+          },
+          "reference_number": {
+            "type": "string",
+            "default": ""
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "x-fastmcp-wrap-result": true
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:23:20.985627+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,237 @@
+{
+  "qualifiedName": "@khairulimran-97/bayarcash-mcp-server",
+  "displayName": "bayarcash-mcp-server",
+  "description": "Manage Bayarcash payments and transactions. Create and track payment intents, list portals, channels and FPX banks, and enroll FPX Direct Debit. Monitor revenue and filter results across sandbox or production.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@khairulimran-97/bayarcash-mcp-server",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@khairulimran-97/bayarcash-mcp-server/mcp",
+      "configSchema": {
+        "type": "object",
+        "required": [
+          "apiToken",
+          "apiSecretKey"
+        ],
+        "properties": {
+          "apiToken": {
+            "type": "string",
+            "description": "Your Bayarcash API Token from console.bayar.cash. Required for authentication."
+          },
+          "useSandbox": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable sandbox mode for testing. Defaults to true. Set to false for production."
+          },
+          "apiSecretKey": {
+            "type": "string",
+            "description": "Your Bayarcash API Secret Key. Used for checksum generation and webhook verification."
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "create_payment_intent",
+      "description": "Create a new payment intent for processing payments through Bayarcash. Returns payment URL and order details with payment intent ID. WORKFLOW: 1) If user has NOT provided payer_email, call list_transactions (limit 1, sorted by latest) to get the most recent payer_email and ask user: \"Would you like to use the email from your last payment: {email}?\" If yes, use it. If no or no previous transactions, ask for email. 2) If user has NOT provided portal_key, call get_portals first to show list and ask user to select. 3) If user has NOT specified payment_channel, call get_payment_channels to show list and ask user to select. 4) Ask user if they want to provide payer telephone number (optional, Malaysia numbers only). 5) If user already provided these values in their message, use them directly. IMPORTANT: After creating payment, store the returned \"id\" field (e.g., pi_pGwAaq) - this can be used later to check payment status with get_payment_intent tool.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "order_number",
+          "amount",
+          "payer_email",
+          "payer_name",
+          "description",
+          "portal_key"
+        ],
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Payment amount in Malaysian Ringgit (MYR). Must be positive. Example: 100.50 for RM100.50",
+            "exclusiveMinimum": 0
+          },
+          "payer_name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full name of the payer. Required for transaction records."
+          },
+          "portal_key": {
+            "type": "string",
+            "description": "Portal key from the portal selected by user. Get this from get_portals API call."
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Description of what the payment is for. Shown to customer during payment."
+          },
+          "payer_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Valid email address of the payer. If user did not provide email: 1) Call list_transactions with per_page=1 to get latest transaction, 2) Extract payer_email from response, 3) Ask user: \"Would you like to use the email from your last payment: {email}?\" If yes use it, if no ask for new email."
+          },
+          "order_number": {
+            "type": "string",
+            "description": "Unique order number for this payment. Must be unique across all transactions. Example: ORD-001"
+          },
+          "payment_channel": {
+            "type": "integer",
+            "default": 1,
+            "description": "Payment channel ID (integer). Get this from user selection after showing get_payment_channels list. Examples: 1=FPX, 2=DuitNow, 3=Boost, 4=GrabPay, 5=TNG, 6=ShopeePay.",
+            "exclusiveMinimum": 0
+          },
+          "payer_telephone_number": {
+            "type": "integer",
+            "description": "Payer phone number (integer, Malaysia numbers only). Ask user: \"Would you like to provide a phone number?\" If yes, collect the number in format 60123456789 (without spaces or dashes). If no, skip this field.",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_payment_intent",
+      "description": "Get payment intent details and status by payment intent ID. Use this to check the current status of a payment after it has been created. Returns comprehensive payment history including all attempts (successful and unsuccessful).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "payment_intent_id"
+        ],
+        "properties": {
+          "payment_intent_id": {
+            "type": "string",
+            "description": "Payment intent ID from create_payment_intent response (e.g., pi_pGwAaq, trx_z88ymJ). This is the \"id\" field returned when payment was created."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_transaction",
+      "description": "Get transaction details by transaction ID",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "transaction_id"
+        ],
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "description": "Transaction ID to retrieve"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_transaction_by_order",
+      "description": "Get transaction details by order number",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "order_number"
+        ],
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "description": "Order number to retrieve"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_transactions",
+      "description": "List all transactions with optional filters. Returns paginated transaction data including pagination metadata (first, last, previous, next page links). SMART FILTER: If you have a payer_email from a previous payment creation (stored from create_payment_intent response), ask user: \"Would you like to filter transactions by the email used in your last payment: {email}?\" If yes, use that email as payer_email filter.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number for pagination. Defaults to 1",
+            "exclusiveMinimum": 0
+          },
+          "status": {
+            "type": "integer",
+            "maximum": 4,
+            "minimum": 0,
+            "description": "Filter by transaction status code (integer). Status codes: 0=New, 1=Pending, 2=Failed, 3=Success, 4=Cancelled. Example: Use 3 for successful transactions, not \"success\"."
+          },
+          "per_page": {
+            "type": "number",
+            "maximum": 100,
+            "description": "Number of items per page. Default: 15. Maximum: 100",
+            "exclusiveMinimum": 0
+          },
+          "payer_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Filter by exact payer email address. If you stored an email from previous create_payment_intent, ask user if they want to filter by that email."
+          },
+          "order_number": {
+            "type": "string",
+            "description": "Filter by exact order number"
+          },
+          "payment_channel": {
+            "type": "integer",
+            "description": "Filter by payment channel ID (number, not string). Use channel IDs: 1=FPX, 2=DuitNow, 3=Boost, 4=GrabPay, 5=TNG, 6=ShopeePay, 7=SPayLater, 8=BoostPayFlex, 9=QRIS, 10=NETS. Example: For FPX payments use 1, not \"fpx\".",
+            "exclusiveMinimum": 0
+          },
+          "exchange_reference_number": {
+            "type": "string",
+            "description": "Filter by exchange reference number"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_portals",
+      "description": "Get list of available payment portals",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_payment_channels",
+      "description": "Get list of available payment channels",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "portal_key": {
+            "type": "string",
+            "description": "Optional portal key to filter channels"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_fpx_banks",
+      "description": "Get list of FPX banks for online banking payments",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:26:29.389889+00:00",
+    "source": "smithery"
+  }
+}

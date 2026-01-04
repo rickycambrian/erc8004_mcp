@@ -1,0 +1,224 @@
+{
+  "id": "@linxule/mineru-mcp",
+  "name": "@linxule/mineru-mcp",
+  "display_name": "mineru-mcp",
+  "version": null,
+  "description": "MCP server for [MinerU](https://mineru.net) document parsing API - extract text, tables, and formulas from PDFs, DOCs, and images.\n\n  ## Features\n\n  - **VLM model** - 90%+ accuracy for complex documents\n  - **Pipeline model** - Fast processing for simple documents\n  - **Batch processing** - Parse up to 200 documents at once\n  - **Page ranges** - Extract specific pages only\n  - **109 language OCR** support\n  - **Optimized for Claude Code** - 73% token reduction vs alternatives\n\n  ## Tools\n\n  | Tool | Description |\n  |------|-------------|\n  | `mineru_parse` | Parse a document URL |\n  | `mineru_status` | Check task progress, get download URL |\n  | `mineru_batch` | Parse multiple URLs (max 200) |\n  | `mineru_batch_status` | Get batch results with pagination |\n\n  ## Supported Formats\n\n  PDF, DOC, DOCX, PPT, PPTX, PNG, JPG, JPEG\n\n  ## Requirements\n\n  Get your API key at [mineru.net](https://mineru.net)",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "mineru_parse",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Parse a document URL. Returns task_id to check status.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "ocr": {
+            "type": "boolean",
+            "description": "Enable OCR (pipeline only)"
+          },
+          "url": {
+            "type": "string",
+            "description": "Document URL (PDF, DOC, PPT, images)"
+          },
+          "model": {
+            "enum": [
+              "pipeline",
+              "vlm"
+            ],
+            "type": "string",
+            "description": "pipeline=fast, vlm=90% accuracy"
+          },
+          "pages": {
+            "type": "string",
+            "description": "Page range: 1-10,15 or 2--2"
+          },
+          "table": {
+            "type": "boolean",
+            "description": "Table recognition"
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "docx",
+                "html",
+                "latex"
+              ],
+              "type": "string"
+            },
+            "description": "Extra export formats"
+          },
+          "formula": {
+            "type": "boolean",
+            "description": "Formula recognition"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code: ch, en, etc"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mineru_status",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Check task progress. Returns download URL when done.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "task_id"
+        ],
+        "properties": {
+          "format": {
+            "enum": [
+              "concise",
+              "detailed"
+            ],
+            "type": "string",
+            "default": "concise",
+            "description": "Output format"
+          },
+          "task_id": {
+            "type": "string",
+            "description": "Task ID from mineru_parse"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mineru_batch",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Parse multiple URLs in one batch (max 200).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "urls"
+        ],
+        "properties": {
+          "ocr": {
+            "type": "boolean",
+            "description": "Enable OCR (pipeline only)"
+          },
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of document URLs"
+          },
+          "model": {
+            "enum": [
+              "pipeline",
+              "vlm"
+            ],
+            "type": "string",
+            "description": "pipeline=fast, vlm=90% accuracy"
+          },
+          "table": {
+            "type": "boolean",
+            "description": "Table recognition"
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "docx",
+                "html",
+                "latex"
+              ],
+              "type": "string"
+            },
+            "description": "Extra export formats"
+          },
+          "formula": {
+            "type": "boolean",
+            "description": "Formula recognition"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code: ch, en, etc"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mineru_batch_status",
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "description": "Get batch results. Supports pagination for large batches.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "batch_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Max results to return"
+          },
+          "format": {
+            "enum": [
+              "concise",
+              "detailed"
+            ],
+            "type": "string",
+            "default": "concise",
+            "description": "Output format"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Skip first N results"
+          },
+          "batch_id": {
+            "type": "string",
+            "description": "Batch ID from mineru_batch"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 4,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@linxule/mineru-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "mineru_parse",
+    "mineru_status",
+    "mineru_batch",
+    "mineru_batch_status"
+  ]
+}

@@ -1,0 +1,2317 @@
+{
+  "id": "googledocs",
+  "name": "googledocs",
+  "display_name": "Google Docs",
+  "version": null,
+  "description": "Google Docs is a cloud-based word processor with real-time collaboration, version history, and integration with other Google Workspace apps",
+  "icon_url": "https://logos.composio.dev/api/googledocs",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "GOOGLEDOCS_COPY_DOCUMENT",
+      "description": "Tool to create a copy of an existing Google Document. Use this to duplicate a document, for example, when using an existing document as a template. The copied document will have a default title (e.g., 'Copy of [original title]') if no new title is provided, and will be placed in the user's root Google Drive folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CopyDocumentRequest",
+        "required": [
+          "document_id"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": null,
+            "examples": [
+              "My New Document Title"
+            ],
+            "nullable": true,
+            "description": "The title for the new copied document. If not provided, the title will be 'Copy of [original document's title]'."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "1a2b3c-example-document-id"
+            ],
+            "description": "The ID of the Google Document to be copied."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_CREATE_DOCUMENT",
+      "description": "Creates a new Google Docs document using the provided title as filename and inserts the initial text at the beginning if non-empty, returning the document's ID and metadata (excluding body content).",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateDocumentRequest",
+        "required": [
+          "title",
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "examples": [
+              "This document outlines the key findings...",
+              "## Agenda\n1. Welcome\n2. Presentation\n3. Q&A",
+              "Start of the report."
+            ],
+            "description": "Initial text content to insert at the beginning of the new document."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "Quarterly Business Review",
+              "Project Alpha - Brainstorming Notes",
+              "My Vacation Itinerary"
+            ],
+            "description": "Title for the new document, used as its filename in Google Drive."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN",
+      "description": "Creates a new Google Docs document, optionally initializing it with a title and content provided as Markdown text.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateDocumentMarkdownRequest",
+        "required": [
+          "title",
+          "markdown_text"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "Meeting Notes Q3",
+              "Project Alpha Proposal",
+              "My New Story Draft"
+            ],
+            "description": "The title for the new Google Docs document."
+          },
+          "markdown_text": {
+            "type": "string",
+            "title": "Markdown Text",
+            "description": "The initial content for the document, formatted as Markdown. Supports various Markdown elements including headings, lists (nested lists are not supported), tables, images (via publicly accessible URLs), blockquotes, code blocks, and text formatting (bold, italic, etc.). If an empty string is provided, the document will be created with only the title. Image URL constraints: URLs must be less than or equal to 2KB in length. Supported image formats: JPEG, PNG, GIF (SVG is not supported)."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_CREATE_FOOTER",
+      "description": "Tool to create a new footer in a Google Document. Use when you need to add a footer, optionally specifying its type and the section it applies to.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateFooterRequest",
+        "required": [
+          "document_id",
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "HEADER_FOOTER_TYPE_UNSPECIFIED",
+              "DEFAULT"
+            ],
+            "type": "string",
+            "title": "Type",
+            "examples": [
+              "DEFAULT"
+            ],
+            "description": "The type of footer to create."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "12345abcdef"
+            ],
+            "description": "The ID of the document to create the footer in."
+          },
+          "section_break_location": {
+            "type": "object",
+            "title": "Location",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "index": {
+                "type": "integer",
+                "title": "Index",
+                "default": null,
+                "nullable": true,
+                "description": "The zero-based index, in UTF-16 code units, relative to the beginning of the segment."
+              },
+              "tabId": {
+                "type": "string",
+                "title": "Tab Id",
+                "default": null,
+                "nullable": true,
+                "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+              },
+              "segmentId": {
+                "type": "string",
+                "title": "Segment Id",
+                "default": null,
+                "nullable": true,
+                "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+              }
+            },
+            "description": "The location of the SectionBreak immediately preceding the section whose SectionStyle this footer should belong to. If this is unset or refers to the first section break in the document, the footer applies to the document style.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_CREATE_FOOTNOTE",
+      "description": "Tool to create a new footnote in a Google Document. Use this when you need to add a footnote at a specific location or at the end of the document body.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateFootnoteRequestModel",
+        "required": [
+          "documentId"
+        ],
+        "properties": {
+          "location": {
+            "type": "object",
+            "title": "Location",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "index": {
+                "type": "integer",
+                "title": "Index",
+                "default": null,
+                "examples": [
+                  100
+                ],
+                "nullable": true,
+                "description": "The zero-based index, in UTF-16 code units. The index is relative to the beginning of the segment specified by segment_id."
+              },
+              "tabId": {
+                "type": "string",
+                "title": "Tab Id",
+                "default": null,
+                "examples": [
+                  "t.1a2b3c4d5e6f7g8h9i0j"
+                ],
+                "nullable": true,
+                "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+              },
+              "segmentId": {
+                "type": "string",
+                "title": "Segment Id",
+                "default": null,
+                "examples": [
+                  "h.1a2b3c4d5e6f7g8h9i0j"
+                ],
+                "nullable": true,
+                "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+              }
+            },
+            "description": "Inserts the footnote reference at a specific index in the document. The segmentId within this Location object must be empty as footnotes can only be inserted in the document body.",
+            "additionalProperties": false
+          },
+          "documentId": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "1a2b3c4d5e6f7g8h9i0j"
+            ],
+            "description": "The ID of the document to create the footnote in."
+          },
+          "endOfSegmentLocation": {
+            "type": "object",
+            "title": "EndOfSegmentLocation",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "tabId": {
+                "type": "string",
+                "title": "Tab Id",
+                "default": null,
+                "examples": [
+                  "t.1a2b3c4d5e6f7g8h9i0j"
+                ],
+                "nullable": true,
+                "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+              },
+              "segmentId": {
+                "type": "string",
+                "title": "Segment Id",
+                "default": null,
+                "examples": [
+                  "h.1a2b3c4d5e6f7g8h9i0j"
+                ],
+                "nullable": true,
+                "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+              }
+            },
+            "description": "Inserts the footnote reference at the end of the document body. The segmentId within this EndOfSegmentLocation object must be empty.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_CREATE_HEADER",
+      "description": "Tool to create a new header in a Google Document. Use this tool when you need to add a header to a document, optionally specifying the section it applies to.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateHeaderRequest",
+        "required": [
+          "documentId",
+          "createHeader"
+        ],
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "12345abcdef"
+            ],
+            "description": "The ID of the document to create the header in."
+          },
+          "createHeader": {
+            "type": "object",
+            "title": "Create Header",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "enum": [
+                  "HEADER_FOOTER_TYPE_UNSPECIFIED",
+                  "DEFAULT"
+                ],
+                "type": "string",
+                "title": "Type",
+                "description": "The type of header to create."
+              },
+              "sectionBreakLocation": {
+                "type": "object",
+                "title": "Location",
+                "default": null,
+                "nullable": true,
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "title": "Index",
+                    "default": null,
+                    "nullable": true,
+                    "description": "The zero-based index, in UTF-16 code units."
+                  },
+                  "tabId": {
+                    "type": "string",
+                    "title": "Tab Id",
+                    "default": null,
+                    "nullable": true,
+                    "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+                  },
+                  "segmentId": {
+                    "type": "string",
+                    "title": "Segment Id",
+                    "default": null,
+                    "nullable": true,
+                    "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+                  }
+                },
+                "description": "The location of the SectionBreak which begins the section this header should belong to.",
+                "additionalProperties": false
+              }
+            },
+            "description": "The details of the header to create.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_CREATE_NAMED_RANGE",
+      "description": "Tool to create a new named range in a Google Document. Use this to assign a name to a specific part of the document for easier reference or programmatic manipulation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateNamedRangeRequest",
+        "required": [
+          "documentId",
+          "name",
+          "rangeStartIndex",
+          "rangeEndIndex"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Chapter1Intro",
+              "ImportantSection"
+            ],
+            "maxLength": 256,
+            "minLength": 1,
+            "description": "The name for the new named range. Must be 1-256 characters."
+          },
+          "documentId": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "1aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789_AbCdEf"
+            ],
+            "description": "The ID of the document where the named range will be created."
+          },
+          "rangeEndIndex": {
+            "type": "integer",
+            "title": "Range End Index",
+            "minimum": 0,
+            "examples": [
+              200
+            ],
+            "description": "The zero-based end index of the range."
+          },
+          "rangeSegmentId": {
+            "type": "string",
+            "title": "Range Segment Id",
+            "default": null,
+            "examples": [
+              "h.1a2b3c4d5e6f",
+              ""
+            ],
+            "nullable": true,
+            "description": "Optional. The ID of the header, footer, or footnote. Empty for document body."
+          },
+          "rangeStartIndex": {
+            "type": "integer",
+            "title": "Range Start Index",
+            "minimum": 0,
+            "examples": [
+              100
+            ],
+            "description": "The zero-based start index of the range."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_CREATE_PARAGRAPH_BULLETS",
+      "description": "Tool to add bullets to paragraphs within a specified range in a Google Document. Use when you need to format a list or a set of paragraphs as bullet points.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateParagraphBulletsRequestModel",
+        "required": [
+          "document_id",
+          "createParagraphBullets"
+        ],
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "12345abcdef"
+            ],
+            "description": "The ID of the document to update."
+          },
+          "createParagraphBullets": {
+            "type": "object",
+            "title": "Create Paragraph Bullets",
+            "required": [
+              "range",
+              "bulletPreset"
+            ],
+            "properties": {
+              "range": {
+                "type": "object",
+                "title": "Range",
+                "required": [
+                  "startIndex",
+                  "endIndex"
+                ],
+                "properties": {
+                  "endIndex": {
+                    "type": "integer",
+                    "title": "End Index",
+                    "examples": [
+                      200
+                    ],
+                    "description": "The zero-based end index of the range, exclusive."
+                  },
+                  "segmentId": {
+                    "type": "string",
+                    "title": "Segment Id",
+                    "default": null,
+                    "examples": [
+                      "header_id"
+                    ],
+                    "nullable": true,
+                    "description": "The ID of the header, footer, or footnote that this range is contained in. An empty segment ID signifies the document's body."
+                  },
+                  "startIndex": {
+                    "type": "integer",
+                    "title": "Start Index",
+                    "examples": [
+                      100
+                    ],
+                    "description": "The zero-based start index of the range, inclusive."
+                  }
+                },
+                "description": "The range to apply the bullet preset to.",
+                "additionalProperties": false
+              },
+              "bulletPreset": {
+                "enum": [
+                  "BULLET_GLYPH_PRESET_UNSPECIFIED",
+                  "BULLET_DISC_CIRCLE_SQUARE",
+                  "BULLET_DIAMONDX_ARROW3D_SQUARE",
+                  "BULLET_CHECKBOX",
+                  "BULLET_ARROW_DIAMOND_DISC",
+                  "BULLET_STAR_CIRCLE_SQUARE",
+                  "BULLET_ARROW3D_CIRCLE_SQUARE",
+                  "BULLET_LEFTTRIANGLE_DIAMOND_DISC",
+                  "BULLET_DIAMONDX_HOLLOWDIAMOND_SQUARE",
+                  "BULLET_DIAMOND_CIRCLE_SQUARE",
+                  "NUMBERED_DECIMAL_ALPHA_ROMAN",
+                  "NUMBERED_DECIMAL_ALPHA_ROMAN_PARENS",
+                  "NUMBERED_DECIMAL_NESTED",
+                  "NUMBERED_UPPERALPHA_ALPHA_ROMAN",
+                  "NUMBERED_UPPERROMAN_UPPERALPHA_DECIMAL",
+                  "NUMBERED_ZERODECIMAL_ALPHA_ROMAN"
+                ],
+                "type": "string",
+                "title": "Bullet Preset",
+                "examples": [
+                  "BULLET_DISC_CIRCLE_SQUARE"
+                ],
+                "description": "The kinds of bullet glyphs to be used."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_DELETE_CONTENT_RANGE",
+      "description": "Tool to delete a range of content from a Google Document. Use when you need to remove a specific portion of text or other structural elements within a document.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteContentRangeRequestModel",
+        "required": [
+          "document_id",
+          "range"
+        ],
+        "properties": {
+          "range": {
+            "type": "object",
+            "title": "Range",
+            "properties": {
+              "tabId": {
+                "type": "string",
+                "title": "Tab Id",
+                "default": null,
+                "examples": [
+                  "t.abcdef123456"
+                ],
+                "nullable": true,
+                "description": "The ID of the tab the range is in. When omitted, the request is applied to the first tab. In a document with a single tab, if provided, it must match the singular tab's ID; if omitted, it applies to the singular tab. In a multi-tab document, if provided, it applies to the specified tab; if omitted, it applies to the first tab."
+              },
+              "endIndex": {
+                "type": "integer",
+                "title": "End Index",
+                "default": null,
+                "examples": [
+                  200
+                ],
+                "nullable": true,
+                "description": "The zero-based end index of the range, in UTF-16 code units, relative to the beginning of the segment."
+              },
+              "segmentId": {
+                "type": "string",
+                "title": "Segment Id",
+                "default": null,
+                "examples": [
+                  "h.1a2b3c4d5e6f",
+                  ""
+                ],
+                "nullable": true,
+                "description": "The ID of the header, footer, or footnote the range is in. An empty segment ID or omitting this field signifies the document's body."
+              },
+              "startIndex": {
+                "type": "integer",
+                "title": "Start Index",
+                "default": null,
+                "examples": [
+                  100
+                ],
+                "nullable": true,
+                "description": "The zero-based start index of the range, in UTF-16 code units, relative to the beginning of the segment."
+              }
+            },
+            "description": "The range of content to delete. Deleting text across paragraph boundaries may merge paragraphs and affect styles. Certain deletions can invalidate document structure (e.g., part of a surrogate pair, last newline of critical elements, incomplete deletion of tables/equations).",
+            "additionalProperties": false
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "1aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789"
+            ],
+            "description": "The ID of the document from which to delete content. This ID can be found in the URL of the Google Doc."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_DELETE_FOOTER",
+      "description": "Tool to delete a footer from a Google Document. Use when you need to remove a footer from a specific section or the default footer.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteFooterRequestModel",
+        "required": [
+          "document_id",
+          "footer_id"
+        ],
+        "properties": {
+          "tab_id": {
+            "type": "string",
+            "title": "Tab Id",
+            "default": null,
+            "examples": [
+              "tab_abc"
+            ],
+            "nullable": true,
+            "description": "The tab that contains the footer to delete. When omitted, the request is applied to the first tab."
+          },
+          "footer_id": {
+            "type": "string",
+            "title": "Footer Id",
+            "examples": [
+              "footer_123"
+            ],
+            "description": "The ID of the footer to delete. If this footer is defined on DocumentStyle, the reference to this footer is removed, resulting in no footer of that type for the first section of the document. If this footer is defined on a SectionStyle, the reference to this footer is removed and the footer of that type is now continued from the previous section."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "12345abcdef"
+            ],
+            "description": "The ID of the document to delete the footer from."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_DELETE_HEADER",
+      "description": "Deletes the header from the specified section or the default header if no section is specified. Use this tool to remove a header from a Google Document.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteHeaderRequest",
+        "required": [
+          "document_id",
+          "header_id"
+        ],
+        "properties": {
+          "tab_id": {
+            "type": "string",
+            "title": "Tab Id",
+            "default": null,
+            "examples": [
+              "tab_abc"
+            ],
+            "nullable": true,
+            "description": "The tab containing the header to delete. When omitted, the request is applied to the first tab."
+          },
+          "header_id": {
+            "type": "string",
+            "title": "Header Id",
+            "examples": [
+              "header_123"
+            ],
+            "description": "The ID of the header to delete. If this header is defined on `DocumentStyle`, the reference to this header is removed, resulting in no header of that type for the first section of the document. If this header is defined on a `SectionStyle`, the reference to this header is removed and the header of that type is now continued from the previous section."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "12345abcdef"
+            ],
+            "description": "The ID of the document from which to delete the header."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_DELETE_NAMED_RANGE",
+      "description": "Tool to delete a named range from a Google Document. Use when you need to remove a previously defined named range by its ID or name.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteNamedRangeActionRequest",
+        "required": [
+          "document_id",
+          "deleteNamedRange"
+        ],
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "description": "The ID of the document."
+          },
+          "deleteNamedRange": {
+            "type": "object",
+            "title": "Delete Named Range",
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "default": null,
+                "nullable": true,
+                "description": "The name of the range(s) to delete. All named ranges with the given name will be deleted."
+              },
+              "namedRangeId": {
+                "type": "string",
+                "title": "Named Range Id",
+                "default": null,
+                "nullable": true,
+                "description": "The ID of the named range to delete."
+              },
+              "tabsCriteria": {
+                "type": "object",
+                "title": "TabsCriteria",
+                "default": null,
+                "nullable": true,
+                "required": [
+                  "tabIds"
+                ],
+                "properties": {
+                  "tabIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "properties": {}
+                    },
+                    "title": "Tab Ids",
+                    "description": "The list of tab IDs in which the request executes."
+                  }
+                },
+                "description": "Optional. The criteria used to specify which tab(s) the range deletion should occur in. When omitted, the range deletion is applied to all tabs.",
+                "additionalProperties": false
+              }
+            },
+            "description": "Specifies the named range to delete.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_DELETE_PARAGRAPH_BULLETS",
+      "description": "Tool to remove bullets from paragraphs within a specified range in a Google Document. Use when you need to clear bullet formatting from a section of a document.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteParagraphBulletsActionRequest",
+        "required": [
+          "document_id",
+          "range"
+        ],
+        "properties": {
+          "range": {
+            "type": "object",
+            "title": "Range",
+            "examples": [
+              {
+                "tabId": null,
+                "endIndex": 100,
+                "segmentId": null,
+                "startIndex": 1
+              }
+            ],
+            "properties": {
+              "tabId": {
+                "type": "string",
+                "title": "Tab Id",
+                "default": null,
+                "nullable": true,
+                "description": "The ID of the tab the range is in. If omitted, it applies to the first tab or the singular tab in a single-tab document."
+              },
+              "endIndex": {
+                "type": "integer",
+                "title": "End Index",
+                "default": null,
+                "nullable": true,
+                "description": "The zero-based end index of the range, in UTF-16 code units, relative to the start of the segment."
+              },
+              "segmentId": {
+                "type": "string",
+                "title": "Segment Id",
+                "default": null,
+                "nullable": true,
+                "description": "The ID of the header, footer, or footnote the range is in. An empty segment ID signifies the document's body."
+              },
+              "startIndex": {
+                "type": "integer",
+                "title": "Start Index",
+                "default": null,
+                "nullable": true,
+                "description": "The zero-based start index of the range, in UTF-16 code units, relative to the start of the segment."
+              }
+            },
+            "description": "The range of the document from which to delete paragraph bullets. The range is applied to the document body by default. To specify a different segment (e.g. header, footer), include segment_id in the range object.",
+            "additionalProperties": false
+          },
+          "tab_id": {
+            "type": "string",
+            "title": "Tab Id",
+            "default": null,
+            "examples": [
+              "0"
+            ],
+            "nullable": true,
+            "description": "The ID of the tab the range is in. If omitted, it applies to the first tab or the singular tab in a single-tab document."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "195j9eDD34FqNGOnnU_S-321gW1WkStiF72rIosvBM4E"
+            ],
+            "description": "The ID of the document to update."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_DELETE_TABLE",
+      "description": "Tool to delete an entire table from a Google Document. Use when you have the document ID and the specific start and end index of the table element to be removed. The table's range can be found by inspecting the document's content structure.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTableRequest",
+        "required": [
+          "document_id",
+          "table_start_index",
+          "table_end_index"
+        ],
+        "properties": {
+          "tab_id": {
+            "type": "string",
+            "title": "Tab Id",
+            "default": null,
+            "examples": [
+              "sheet1"
+            ],
+            "nullable": true,
+            "description": "The ID of the tab containing the table, if the document uses tabs. If omitted, the action applies to the first tab or the only tab."
+          },
+          "segment_id": {
+            "type": "string",
+            "title": "Segment Id",
+            "default": null,
+            "examples": [
+              "kix.header.1a2b3c"
+            ],
+            "nullable": true,
+            "description": "The ID of the segment (e.g., header, footer) containing the table. If omitted or empty, the table is assumed to be in the main document body."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "1a2B3c4D5e6F7g8H9i0J"
+            ],
+            "description": "The ID of the Google Document from which the table will be deleted."
+          },
+          "table_end_index": {
+            "type": "integer",
+            "title": "Table End Index",
+            "examples": [
+              150
+            ],
+            "description": "The end index (UTF-16 code unit) of the table's range to be deleted."
+          },
+          "table_start_index": {
+            "type": "integer",
+            "title": "Table Start Index",
+            "examples": [
+              100
+            ],
+            "description": "The start index (UTF-16 code unit) of the table's range to be deleted."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_DELETE_TABLE_COLUMN",
+      "description": "Tool to delete a column from a table in a Google Document. Use this tool when you need to remove a specific column from an existing table within a document.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTableColumnRequest",
+        "required": [
+          "document_id",
+          "requests"
+        ],
+        "properties": {
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "DeleteTableColumnRequestRequest",
+              "required": [
+                "deleteTableColumn"
+              ],
+              "properties": {
+                "deleteTableColumn": {
+                  "type": "object",
+                  "title": "Delete Table Column",
+                  "required": [
+                    "tableCellLocation"
+                  ],
+                  "properties": {
+                    "tableCellLocation": {
+                      "type": "object",
+                      "title": "Table Cell Location",
+                      "required": [
+                        "tableStartLocation",
+                        "rowIndex",
+                        "columnIndex"
+                      ],
+                      "properties": {
+                        "rowIndex": {
+                          "type": "integer",
+                          "title": "Row Index",
+                          "description": "The zero-based row index. For example, the second row in the table has a row index of 1."
+                        },
+                        "columnIndex": {
+                          "type": "integer",
+                          "title": "Column Index",
+                          "description": "The zero-based column index. For example, the second column in the table has a column index of 1."
+                        },
+                        "tableStartLocation": {
+                          "type": "object",
+                          "title": "Table Start Location",
+                          "properties": {
+                            "index": {
+                              "type": "integer",
+                              "title": "Index",
+                              "default": null,
+                              "nullable": true,
+                              "description": "The zero-based index, in UTF-16 code units."
+                            },
+                            "tabId": {
+                              "type": "string",
+                              "title": "Tab Id",
+                              "default": null,
+                              "nullable": true,
+                              "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+                            },
+                            "segmentId": {
+                              "type": "string",
+                              "title": "Segment Id",
+                              "default": null,
+                              "nullable": true,
+                              "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+                            }
+                          },
+                          "description": "The location where the table starts in the document.",
+                          "additionalProperties": false
+                        }
+                      },
+                      "description": "The reference table cell location from which the column will be deleted.",
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "title": "Requests",
+            "description": "A list of requests to be applied to the document."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "12345abcdef"
+            ],
+            "description": "The ID of the document to delete the table column from."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_DELETE_TABLE_ROW",
+      "description": "Tool to delete a row from a table in a Google Document. Use when you need to remove a specific row from an existing table.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteTableRowRequestModel",
+        "required": [
+          "documentId",
+          "tableCellLocation"
+        ],
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "195j9eDD34F53d2g2HMJ-N0kKc_P8tq3/edit"
+            ],
+            "description": "The ID of the document."
+          },
+          "tableCellLocation": {
+            "type": "object",
+            "title": "Table Cell Location",
+            "required": [
+              "tableStartLocation",
+              "rowIndex",
+              "columnIndex"
+            ],
+            "properties": {
+              "rowIndex": {
+                "type": "integer",
+                "title": "Row Index",
+                "examples": [
+                  1
+                ],
+                "description": "The zero-based row index. For example, the second row in the table has a row index of 1."
+              },
+              "columnIndex": {
+                "type": "integer",
+                "title": "Column Index",
+                "examples": [
+                  1
+                ],
+                "description": "The zero-based column index. For example, the second column in the table has a column index of 1."
+              },
+              "tableStartLocation": {
+                "type": "object",
+                "title": "Table Start Location",
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "title": "Index",
+                    "default": null,
+                    "examples": [
+                      100
+                    ],
+                    "nullable": true,
+                    "description": "The zero-based index, in UTF-16 code units. The index is relative to the beginning of the segment specified by segment_id."
+                  },
+                  "tabId": {
+                    "type": "string",
+                    "title": "Tab Id",
+                    "default": null,
+                    "examples": [
+                      "tab_id1"
+                    ],
+                    "nullable": true,
+                    "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+                  },
+                  "segmentId": {
+                    "type": "string",
+                    "title": "Segment Id",
+                    "default": null,
+                    "examples": [
+                      "header_id1"
+                    ],
+                    "nullable": true,
+                    "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+                  }
+                },
+                "description": "The location where the table starts in the document.",
+                "additionalProperties": false
+              }
+            },
+            "description": "The reference table cell location from which the row will be deleted.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_GET_CHARTS_FROM_SPREADSHEET",
+      "description": "Tool to retrieve a list of all charts from a specified Google Sheets spreadsheet. Use when you need to get chart IDs and their specifications for embedding or referencing elsewhere, such as in Google Docs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetChartsFromSpreadsheetRequest",
+        "required": [
+          "spreadsheet_id"
+        ],
+        "properties": {
+          "spreadsheet_id": {
+            "type": "string",
+            "title": "Spreadsheet Id",
+            "examples": [
+              "1aBcDeFgHiJkLmNoPqRsTuVwXyZ_1234567890abcdef"
+            ],
+            "description": "The ID of the Google Sheets spreadsheet from which to retrieve charts."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_GET_DOCUMENT_BY_ID",
+      "description": "Retrieves an existing Google Document by its ID; will error if the document is not found.",
+      "inputSchema": {
+        "type": "object",
+        "title": "FindOrCreateDocumentRequest",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "examples": [
+              "123abcDeFgHiJkLmNoPqRsTuVwXyZ_0123456789AB"
+            ],
+            "description": "The unique identifier for the Google Document to be retrieved. This action specifically fetches an existing document and will not create a new one if the ID is not found. You can fetch the documents using GOOGLEDOCS_SEARCH_DOCUMENTS action"
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_INSERT_INLINE_IMAGE",
+      "description": "Tool to insert an image from a given URI at a specified location in a Google Document as an inline image. Use when you need to add an image to a document programmatically.",
+      "inputSchema": {
+        "type": "object",
+        "title": "InsertInlineImageRequestModel",
+        "required": [
+          "documentId",
+          "uri",
+          "location"
+        ],
+        "properties": {
+          "uri": {
+            "type": "string",
+            "title": "Uri",
+            "examples": [
+              "https://www.example.com/image.png"
+            ],
+            "description": "The URI of the image. Must be a publicly accessible direct image URL (no redirects or viewer links like Google Drive preview pages). Images must be less than 50MB, not exceed 25 megapixels, and be in PNG, JPEG, or GIF format (SVG not supported). The URI can be at most 2 kB in length."
+          },
+          "location": {
+            "type": "object",
+            "title": "Location",
+            "required": [
+              "index"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer",
+                "title": "Index",
+                "examples": [
+                  1,
+                  10
+                ],
+                "description": "The zero-based index within the segment where the image will be inserted (required). Use 1 to insert at the beginning of the document body, or a higher number to insert at a specific position."
+              },
+              "segmentId": {
+                "type": "string",
+                "title": "Segment Id",
+                "default": null,
+                "examples": [
+                  "my-segment-id"
+                ],
+                "nullable": true,
+                "description": "The ID of the segment where the image will be inserted. If not provided, the image is inserted in the document body."
+              }
+            },
+            "description": "The location in the document to insert the image. The index field is required to specify the insertion point.",
+            "additionalProperties": false
+          },
+          "documentId": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "195j9eDD34F5f92P1i-P7Hj1S_t8h0hE4k2g1g2g"
+            ],
+            "description": "The ID of the document to update."
+          },
+          "objectSize": {
+            "type": "object",
+            "title": "ObjectSize",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "width": {
+                "type": "object",
+                "title": "Dimension",
+                "default": null,
+                "nullable": true,
+                "properties": {
+                  "unit": {
+                    "enum": [
+                      "EMU",
+                      "PT"
+                    ],
+                    "type": "string",
+                    "title": "UnitEnum",
+                    "default": null,
+                    "nullable": true,
+                    "description": "The units for magnitude. Supported units: EMU, PT (PX is not supported by the API)."
+                  },
+                  "magnitude": {
+                    "type": "number",
+                    "title": "Magnitude",
+                    "default": null,
+                    "nullable": true,
+                    "description": "The magnitude of the size."
+                  }
+                },
+                "description": "The width of the image.",
+                "additionalProperties": false
+              },
+              "height": {
+                "type": "object",
+                "title": "Dimension",
+                "default": null,
+                "nullable": true,
+                "properties": {
+                  "unit": {
+                    "enum": [
+                      "EMU",
+                      "PT"
+                    ],
+                    "type": "string",
+                    "title": "UnitEnum",
+                    "default": null,
+                    "nullable": true,
+                    "description": "The units for magnitude. Supported units: EMU, PT (PX is not supported by the API)."
+                  },
+                  "magnitude": {
+                    "type": "number",
+                    "title": "Magnitude",
+                    "default": null,
+                    "nullable": true,
+                    "description": "The magnitude of the size."
+                  }
+                },
+                "description": "The height of the image.",
+                "additionalProperties": false
+              }
+            },
+            "description": "The size of the image. If not specified, the image is rendered at its intrinsic size.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_INSERT_PAGE_BREAK",
+      "description": "Tool to insert a page break into a Google Document. Use when you need to start new content on a fresh page, such as at the end of a chapter or section.",
+      "inputSchema": {
+        "type": "object",
+        "title": "InsertPageBreakRequest",
+        "required": [
+          "documentId",
+          "insertPageBreak"
+        ],
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "1a2B3c4D5e6F7g8H9i0J"
+            ],
+            "description": "The ID of the document to update."
+          },
+          "insertPageBreak": {
+            "type": "object",
+            "title": "Insert Page Break",
+            "properties": {
+              "location": {
+                "type": "object",
+                "title": "Location",
+                "default": null,
+                "nullable": true,
+                "required": [
+                  "index"
+                ],
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "title": "Index",
+                    "examples": [
+                      100
+                    ],
+                    "description": "The zero-based index, in UTF-16 code units. The page break is inserted before this index."
+                  },
+                  "segmentId": {
+                    "type": "string",
+                    "title": "Segment Id",
+                    "default": null,
+                    "examples": [
+                      ""
+                    ],
+                    "nullable": true,
+                    "description": "The ID of the segment where the page break is to be inserted. For page breaks, this should typically be null or empty, indicating the main document body, as page breaks are not allowed in headers, footers, or footnotes."
+                  }
+                },
+                "description": "Specifies the location to insert the page break using a zero-based index. Use this or end_of_segment_location.",
+                "additionalProperties": false
+              },
+              "endOfSegmentLocation": {
+                "type": "object",
+                "title": "EndOfSegmentLocation",
+                "default": null,
+                "nullable": true,
+                "properties": {
+                  "segmentId": {
+                    "type": "string",
+                    "title": "Segment Id",
+                    "default": null,
+                    "examples": [
+                      ""
+                    ],
+                    "nullable": true,
+                    "description": "The ID of the segment where the page break is to be inserted. For page breaks, this must be null or an empty string, indicating the end of the main document body."
+                  }
+                },
+                "description": "Specifies that the page break should be inserted at the end of a segment (document body). Use this or location.",
+                "additionalProperties": false
+              }
+            },
+            "description": "The details for the insertPageBreak request.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_INSERT_TABLE_ACTION",
+      "description": "Tool to insert a table into a Google Document. Use when you need to add a new table at a specific location or at the end of a segment (like document body, header, or footer) in a document.",
+      "inputSchema": {
+        "type": "object",
+        "title": "InsertTableRequest",
+        "required": [
+          "documentId",
+          "rows",
+          "columns"
+        ],
+        "properties": {
+          "rows": {
+            "type": "integer",
+            "title": "Rows",
+            "minimum": 1,
+            "description": "The number of rows in the table."
+          },
+          "index": {
+            "type": "integer",
+            "title": "Index",
+            "default": null,
+            "nullable": true,
+            "description": "The zero-based index where the table will be inserted. If provided, 'location' will be used. If omitted and 'insertAtEndOfSegment' is false or omitted, 'endOfSegmentLocation' will be used for the document body."
+          },
+          "tabId": {
+            "type": "string",
+            "title": "Tab Id",
+            "default": null,
+            "nullable": true,
+            "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+          },
+          "columns": {
+            "type": "integer",
+            "title": "Columns",
+            "minimum": 1,
+            "description": "The number of columns in the table."
+          },
+          "segmentId": {
+            "type": "string",
+            "title": "Segment Id",
+            "default": null,
+            "nullable": true,
+            "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+          },
+          "documentId": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "195j9eDD34F5f92m1_r4T3Y0N4WX_gXYs-y6uDxBYFpc"
+            ],
+            "description": "The ID of the document to update."
+          },
+          "insertAtEndOfSegment": {
+            "type": "boolean",
+            "title": "Insert At End Of Segment",
+            "default": null,
+            "nullable": true,
+            "description": "If true, inserts the table at the end of the segment (document body, header, or footer specified by segment_id). If false or omitted, and 'index' is not provided, it defaults to inserting at the end of the document body. If 'index' is provided, this field is ignored."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_INSERT_TABLE_COLUMN",
+      "description": "Tool to insert a new column into a table in a Google Document. Use this tool when you need to add a column to an existing table at a specific location.",
+      "inputSchema": {
+        "type": "object",
+        "title": "InsertTableColumnRequest",
+        "required": [
+          "document_id",
+          "requests"
+        ],
+        "properties": {
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "InsertTableColumnRequestDetails",
+              "required": [
+                "insertTableColumn"
+              ],
+              "properties": {
+                "insertTableColumn": {
+                  "type": "object",
+                  "title": "Insert Table Column",
+                  "required": [
+                    "tableCellLocation"
+                  ],
+                  "properties": {
+                    "insertRight": {
+                      "type": "boolean",
+                      "title": "Insert Right",
+                      "default": false,
+                      "nullable": true,
+                      "description": "Whether to insert new column to the right of the reference cell location. True: insert to the right. False: insert to the left."
+                    },
+                    "tableCellLocation": {
+                      "type": "object",
+                      "title": "Table Cell Location",
+                      "required": [
+                        "rowIndex",
+                        "columnIndex"
+                      ],
+                      "properties": {
+                        "rowIndex": {
+                          "type": "integer",
+                          "title": "Row Index",
+                          "examples": [
+                            0
+                          ],
+                          "description": "The zero-based row index of the reference cell."
+                        },
+                        "columnIndex": {
+                          "type": "integer",
+                          "title": "Column Index",
+                          "examples": [
+                            0
+                          ],
+                          "description": "The zero-based column index of the reference cell."
+                        },
+                        "tableStartLocation": {
+                          "type": "object",
+                          "title": "Location",
+                          "default": null,
+                          "nullable": true,
+                          "properties": {
+                            "index": {
+                              "type": "integer",
+                              "title": "Index",
+                              "default": null,
+                              "nullable": true,
+                              "description": "The zero-based index, in UTF-16 code units, relative to the beginning of the segment."
+                            },
+                            "tabId": {
+                              "type": "string",
+                              "title": "Tab Id",
+                              "default": null,
+                              "nullable": true,
+                              "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+                            },
+                            "segmentId": {
+                              "type": "string",
+                              "title": "Segment Id",
+                              "default": null,
+                              "nullable": true,
+                              "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+                            }
+                          },
+                          "description": "The location where the table starts in the document.",
+                          "additionalProperties": false
+                        }
+                      },
+                      "description": "The reference table cell location from which columns will be inserted.",
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "title": "Requests",
+            "description": "A list of requests to be applied to the document. For this action, it will contain one InsertTableColumnRequest."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "1aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789"
+            ],
+            "description": "The ID of the document to update."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_INSERT_TEXT_ACTION",
+      "description": "Tool to insert a string of text at a specified location within a Google Document. Use when you need to add new text content to an existing document.",
+      "inputSchema": {
+        "type": "object",
+        "title": "InsertTextActionRequest",
+        "required": [
+          "document_id",
+          "text_to_insert",
+          "insertion_index"
+        ],
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "195j9e2fm7q-gL2mmx61gh-oXMUrV2Vl45678ZA"
+            ],
+            "description": "The ID of the document to insert text into."
+          },
+          "text_to_insert": {
+            "type": "string",
+            "title": "Text To Insert",
+            "examples": [
+              "This is a new paragraph."
+            ],
+            "description": "The string of text to insert."
+          },
+          "insertion_index": {
+            "type": "integer",
+            "title": "Insertion Index",
+            "examples": [
+              1,
+              50
+            ],
+            "description": "The EOL character of the paragraph will be moved to the end of the inserted text. The index where the text will be inserted. The index is zero-based and refers to the UTF-16 code unit. For example, to insert text at the beginning of the document, use an index of 1 (to account for the first paragraph)."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_LIST_SPREADSHEET_CHARTS_ACTION",
+      "description": "Tool to retrieve a list of charts with their IDs and metadata from a Google Sheets spreadsheet. Use to identify charts available for embedding into Google Docs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListSpreadsheetChartsRequest",
+        "required": [
+          "spreadsheet_id"
+        ],
+        "properties": {
+          "fields_mask": {
+            "type": "string",
+            "title": "Fields Mask",
+            "default": "sheets(properties(sheetId,title),charts(chartId,spec(title,altText)))",
+            "description": "Field mask to specify which parts of the spreadsheet and chart resources to include. Example: '''sheets(properties(sheetId,title),charts(chartId,spec(title,altText)))'''"
+          },
+          "spreadsheet_id": {
+            "type": "string",
+            "title": "Spreadsheet Id",
+            "examples": [
+              "1gja9Z3N3w9y0p9xJ0y1z8s7f6e5d4c3b2a1"
+            ],
+            "description": "The ID of the Google Sheets spreadsheet."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_REPLACE_ALL_TEXT",
+      "description": "Tool to replace all occurrences of a specified text string with another text string throughout a Google Document. Use when you need to perform a global find and replace operation within a document.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReplaceAllTextRequest",
+        "required": [
+          "document_id",
+          "find_text",
+          "replace_text",
+          "match_case"
+        ],
+        "properties": {
+          "tab_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Tab Ids",
+            "default": null,
+            "examples": [
+              [
+                "tabId1",
+                "tabId2"
+              ]
+            ],
+            "nullable": true,
+            "description": "Optional. A list of specific tab IDs to perform the replacement on. If not provided, replacement occurs on all tabs."
+          },
+          "find_text": {
+            "type": "string",
+            "title": "Find Text",
+            "examples": [
+              "old_text"
+            ],
+            "description": "The text to search for in the document."
+          },
+          "match_case": {
+            "type": "boolean",
+            "title": "Match Case",
+            "examples": [
+              false
+            ],
+            "description": "Indicates whether the search should be case sensitive."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "12345abcdef"
+            ],
+            "description": "The ID of the document to update."
+          },
+          "replace_text": {
+            "type": "string",
+            "title": "Replace Text",
+            "examples": [
+              "new_world"
+            ],
+            "description": "The text that will replace the matched text."
+          },
+          "search_by_regex": {
+            "type": "boolean",
+            "title": "Search By Regex",
+            "default": false,
+            "examples": [
+              false
+            ],
+            "nullable": true,
+            "description": "Optional. If True, the find_text is treated as a regular expression. Defaults to False."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_REPLACE_IMAGE",
+      "description": "Tool to replace a specific image in a document with a new image from a URI. Use when you need to update an existing image within a Google Doc.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReplaceImageRequest",
+        "required": [
+          "document_id",
+          "replace_image"
+        ],
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "1a2B3c4D5e6F7g8H9i0J"
+            ],
+            "description": "The ID of the document containing the image to replace."
+          },
+          "replace_image": {
+            "type": "object",
+            "title": "Replace Image",
+            "required": [
+              "image_object_id",
+              "uri"
+            ],
+            "properties": {
+              "uri": {
+                "type": "string",
+                "title": "Uri",
+                "examples": [
+                  "https://www.example.com/new_image.png"
+                ],
+                "description": "The URI of the new image. The image is fetched once at insertion time and a copy is stored for display inside the document. Images must be less than 50MB in size, cannot exceed 25 megapixels, and must be in one of PNG, JPEG, or GIF format. The provided URI must be publicly accessible and at most 2 kB in length. The URI itself is saved with the image, and exposed via the ImageProperties.content_uri field."
+              },
+              "tab_id": {
+                "type": "string",
+                "title": "Tab Id",
+                "default": null,
+                "examples": [
+                  "0"
+                ],
+                "nullable": true,
+                "description": "The tab that the image to be replaced is in. When omitted, the request is applied to the first tab."
+              },
+              "image_object_id": {
+                "type": "string",
+                "title": "Image Object Id",
+                "examples": [
+                  "gc.0123456789abcdef"
+                ],
+                "description": "The ID of the existing image that will be replaced. The ID can be retrieved from the response of a get request."
+              },
+              "image_replace_method": {
+                "enum": [
+                  "CENTER_CROP",
+                  "IMAGE_REPLACE_METHOD_UNSPECIFIED"
+                ],
+                "type": "string",
+                "title": "ImageReplaceMethod",
+                "default": "CENTER_CROP",
+                "examples": [
+                  "CENTER_CROP"
+                ],
+                "nullable": true,
+                "description": "The replacement method. Defaults to CENTER_CROP if not specified."
+              }
+            },
+            "description": "The details of the image replacement request.",
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_SEARCH_DOCUMENTS",
+      "description": "Search for Google Documents using various filters including name, content, date ranges, and more.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SearchDocumentsRequest",
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "default": null,
+            "examples": [
+              "name contains 'report'",
+              "fullText contains 'important'",
+              "name contains 'project' and fullText contains 'status'"
+            ],
+            "nullable": true,
+            "description": "Search query to filter documents. Can search by name (name contains 'report'), full text content (fullText contains 'important'), or use complex queries with operators like 'and', 'or', 'not'. Leave empty to get all documents."
+          },
+          "order_by": {
+            "type": "string",
+            "title": "Order By",
+            "default": "modifiedTime desc",
+            "examples": [
+              "modifiedTime desc",
+              "name",
+              "createdTime desc",
+              "viewedByMeTime desc"
+            ],
+            "nullable": true,
+            "description": "Order results by field. Common options: 'modifiedTime desc', 'modifiedTime asc', 'name', 'createdTime desc'"
+          },
+          "max_results": {
+            "type": "integer",
+            "title": "Max Results",
+            "default": 10,
+            "maximum": 1000,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Maximum number of documents to return (1-1000). Defaults to 10."
+          },
+          "starred_only": {
+            "type": "boolean",
+            "title": "Starred Only",
+            "default": false,
+            "nullable": true,
+            "description": "Whether to return only starred documents. Defaults to False."
+          },
+          "created_after": {
+            "type": "string",
+            "title": "Created After",
+            "default": null,
+            "examples": [
+              "2024-01-01T00:00:00Z",
+              "2024-12-01T12:00:00-08:00"
+            ],
+            "nullable": true,
+            "description": "Return documents created after this date. Use RFC 3339 format like '2024-01-01T00:00:00Z'."
+          },
+          "modified_after": {
+            "type": "string",
+            "title": "Modified After",
+            "default": null,
+            "examples": [
+              "2024-01-01T00:00:00Z",
+              "2024-12-01T12:00:00-08:00"
+            ],
+            "nullable": true,
+            "description": "Return documents modified after this date. Use RFC 3339 format like '2024-01-01T00:00:00Z'."
+          },
+          "shared_with_me": {
+            "type": "boolean",
+            "title": "Shared With Me",
+            "default": false,
+            "nullable": true,
+            "description": "Whether to return only documents shared with the current user. Defaults to False."
+          },
+          "include_trashed": {
+            "type": "boolean",
+            "title": "Include Trashed",
+            "default": false,
+            "nullable": true,
+            "description": "Whether to include documents in trash. Defaults to False."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_UNMERGE_TABLE_CELLS",
+      "description": "Tool to unmerge previously merged cells in a table. Use this when you need to revert merged cells in a Google Document table back to their individual cell states.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UnmergeTableCellsRequest",
+        "required": [
+          "document_id",
+          "tableRange"
+        ],
+        "properties": {
+          "tableRange": {
+            "type": "object",
+            "title": "Table Range",
+            "required": [
+              "tableCellLocation",
+              "rowSpan",
+              "columnSpan"
+            ],
+            "properties": {
+              "rowSpan": {
+                "type": "integer",
+                "title": "Row Span",
+                "description": "The row span of the table range."
+              },
+              "columnSpan": {
+                "type": "integer",
+                "title": "Column Span",
+                "description": "The column span of the table range."
+              },
+              "tableCellLocation": {
+                "type": "object",
+                "title": "Table Cell Location",
+                "required": [
+                  "rowIndex",
+                  "columnIndex"
+                ],
+                "properties": {
+                  "rowIndex": {
+                    "type": "integer",
+                    "title": "Row Index",
+                    "description": "The zero-based row index. For example, the second row in the table has a row index of 1."
+                  },
+                  "columnIndex": {
+                    "type": "integer",
+                    "title": "Column Index",
+                    "description": "The zero-based column index. For example, the second column in the table has a column index of 1."
+                  },
+                  "tableStartLocation": {
+                    "type": "object",
+                    "title": "Location",
+                    "default": null,
+                    "nullable": true,
+                    "properties": {
+                      "index": {
+                        "type": "integer",
+                        "title": "Index",
+                        "default": null,
+                        "nullable": true,
+                        "description": "The zero-based index, in UTF-16 code units."
+                      },
+                      "tabId": {
+                        "type": "string",
+                        "title": "Tab Id",
+                        "default": null,
+                        "nullable": true,
+                        "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+                      },
+                      "segmentId": {
+                        "type": "string",
+                        "title": "Segment Id",
+                        "default": null,
+                        "nullable": true,
+                        "description": "The ID of the header, footer or footnote the table is in. An empty segment ID signifies the document's body."
+                      }
+                    },
+                    "description": "The location where the table starts in the document.",
+                    "additionalProperties": false
+                  }
+                },
+                "description": "The cell location where the table range starts.",
+                "additionalProperties": false
+              }
+            },
+            "description": "The table range specifying which cells of the table to unmerge.",
+            "additionalProperties": false
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "195j9eDD34F53d2g2HMJ-N0kKc_PzA3qdr3c31234567"
+            ],
+            "description": "The ID of the document to unmerge table cells in."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN",
+      "description": "Replaces the entire content of an existing Google Docs document with new Markdown text; requires edit permissions for the document.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateDocumentMarkdownRequest",
+        "required": [
+          "document_id",
+          "new_markdown_text"
+        ],
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "description": "Identifier of the Google Docs document to update, found in the document's URL."
+          },
+          "new_markdown_text": {
+            "type": "string",
+            "title": "New Markdown Text",
+            "examples": [
+              "# Document Title\n\nThis is a paragraph with **bold** and *italic* text.\n\n- Unordered list item 1\n- Unordered list item 2\n\n1. Ordered list item 1\n2. Ordered list item 2\n\nAn image: ![Alt text for image](https://www.example.com/image.png)",
+              "## Advanced Markdown\n\n\n# Example Python code\ndef greet(name):\n    print(f'Hello, {name}!')\ngreet('World')\n\n\n| Column A | Column B |\n|----------|----------|\n|   Data 1 |   Data 2 |\n|   Data 3 |   Data 4 |\n\n> This is a blockquote."
+            ],
+            "description": "Markdown content that will replace the document's entire existing content. Supports standard Markdown features."
+          }
+        },
+        "description": "Defines the request schema for updating an existing Google Docs document by replacing its content with new text formatted in Markdown."
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_UPDATE_DOCUMENT_SECTION_MARKDOWN",
+      "description": "Tool to insert or replace a section of a Google Docs document with Markdown content. Use when you need to update only a section of a document by specifying start and optional end indices. Supports full Markdown formatting.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateDocumentSectionMarkdownRequest",
+        "required": [
+          "document_id",
+          "markdown_text",
+          "start_index"
+        ],
+        "properties": {
+          "end_index": {
+            "type": "integer",
+            "title": "End Index",
+            "default": null,
+            "minimum": 1,
+            "nullable": true,
+            "description": "Optional one-based end index of the content to replace; must be greater than or equal to start_index if provided. If end_index is not provided, the content is inserted at the start_index. The index is 1-based to match the Google Docs API."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "1ABcDeFGhIjKlMnOpQRsT"
+            ],
+            "description": "The ID of the Google Docs document to update."
+          },
+          "start_index": {
+            "type": "integer",
+            "title": "Start Index",
+            "minimum": 1,
+            "description": "One-based UTF-16 code unit index where to insert or start replacement. The index is 1-based to match the Google Docs API."
+          },
+          "markdown_text": {
+            "type": "string",
+            "title": "Markdown Text",
+            "description": "Markdown content to insert or replace in the document section."
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_UPDATE_DOCUMENT_STYLE",
+      "description": "Tool to update the overall document style, such as page size, margins, and default text direction. Use when you need to modify the global style settings of a Google Document.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateDocumentStyleRequestModel",
+        "required": [
+          "document_id",
+          "document_style",
+          "fields"
+        ],
+        "properties": {
+          "fields": {
+            "type": "string",
+            "title": "Fields",
+            "description": "A comma-separated list of fields to update. Use '*' to update all fields in document_style. For example: \"pageSize,marginTop,marginBottom\"."
+          },
+          "tab_id": {
+            "type": "string",
+            "title": "Tab Id",
+            "default": null,
+            "nullable": true,
+            "description": "The ID of the tab to update the style for. If not provided, the first tab is used."
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "description": "The ID of the document to update."
+          },
+          "document_style": {
+            "type": "object",
+            "title": "Document Style",
+            "properties": {
+              "pageSize": {
+                "type": "object",
+                "title": "Page Size",
+                "default": null,
+                "nullable": true,
+                "description": "The size of a page in the document.",
+                "additionalProperties": true
+              },
+              "marginTop": {
+                "type": "object",
+                "title": "Margin Top",
+                "default": null,
+                "nullable": true,
+                "description": "The top margin of the page.",
+                "additionalProperties": true
+              },
+              "background": {
+                "type": "object",
+                "title": "Background",
+                "default": null,
+                "examples": [
+                  {
+                    "color": {
+                      "rgbColor": {
+                        "red": 1,
+                        "blue": 0.9,
+                        "green": 1
+                      }
+                    }
+                  }
+                ],
+                "nullable": true,
+                "description": "The background of the document. The background fill must be specified as a solid fill with nested OptionalColor schema. Structure: {'color': {'rgbColor': {'red': float, 'green': float, 'blue': float}}}. RGB values should be between 0.0 and 1.0.",
+                "additionalProperties": true
+              },
+              "marginLeft": {
+                "type": "object",
+                "title": "Margin Left",
+                "default": null,
+                "nullable": true,
+                "description": "The left margin of the page.",
+                "additionalProperties": true
+              },
+              "marginRight": {
+                "type": "object",
+                "title": "Margin Right",
+                "default": null,
+                "nullable": true,
+                "description": "The right margin of the page.",
+                "additionalProperties": true
+              },
+              "marginBottom": {
+                "type": "object",
+                "title": "Margin Bottom",
+                "default": null,
+                "nullable": true,
+                "description": "The bottom margin of the page.",
+                "additionalProperties": true
+              },
+              "marginFooter": {
+                "type": "object",
+                "title": "Margin Footer",
+                "default": null,
+                "nullable": true,
+                "description": "The footer margin of the page (distance from bottom of page to footer content).",
+                "additionalProperties": true
+              },
+              "marginHeader": {
+                "type": "object",
+                "title": "Margin Header",
+                "default": null,
+                "nullable": true,
+                "description": "The header margin of the page (distance from top of page to header content).",
+                "additionalProperties": true
+              },
+              "defaultFooterId": {
+                "type": "string",
+                "title": "Default Footer Id",
+                "default": null,
+                "nullable": true,
+                "description": "The ID of the default footer. If unset, the document inherits the default footer from the parent document. This property is read-only."
+              },
+              "defaultHeaderId": {
+                "type": "string",
+                "title": "Default Header Id",
+                "default": null,
+                "nullable": true,
+                "description": "The ID of the default header. If unset, the document inherits the default header from the parent document. This property is read-only."
+              },
+              "oddPageFooterId": {
+                "type": "string",
+                "title": "Odd Page Footer Id",
+                "default": null,
+                "nullable": true,
+                "description": "The ID of the footer for odd pages. If unset, the document inherits the odd page footer from the parent document. This property is read-only."
+              },
+              "oddPageHeaderId": {
+                "type": "string",
+                "title": "Odd Page Header Id",
+                "default": null,
+                "nullable": true,
+                "description": "The ID of the header for odd pages. If unset, the document inherits the odd page header from the parent document. This property is read-only."
+              },
+              "pageNumberStart": {
+                "type": "integer",
+                "title": "Page Number Start",
+                "default": null,
+                "nullable": true,
+                "description": "The page number from which to start counting the number of pages."
+              },
+              "evenPageFooterId": {
+                "type": "string",
+                "title": "Even Page Footer Id",
+                "default": null,
+                "nullable": true,
+                "description": "The ID of the footer for even pages. If unset, the document inherits the even page footer from the parent document. This property is read-only."
+              },
+              "evenPageHeaderId": {
+                "type": "string",
+                "title": "Even Page Header Id",
+                "default": null,
+                "nullable": true,
+                "description": "The ID of the header for even pages. If unset, the document inherits the even page header from the parent document. This property is read-only."
+              },
+              "useEvenPageHeaderFooter": {
+                "type": "boolean",
+                "title": "Use Even Page Header Footer",
+                "default": null,
+                "nullable": true,
+                "description": "Indicates whether to use the even page header / footer, used in conjunction with use_first_page_header_footer."
+              },
+              "useFirstPageHeaderFooter": {
+                "type": "boolean",
+                "title": "Use First Page Header Footer",
+                "default": null,
+                "nullable": true,
+                "description": "Indicates whether to use the first page header / footer."
+              }
+            },
+            "description": "The DocumentStyle object with the new style settings.",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_UPDATE_EXISTING_DOCUMENT",
+      "description": "Applies programmatic edits, such as text insertion, deletion, or formatting, to a specified Google Doc using the `batchUpdate` API method.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DocumentRequest",
+        "required": [
+          "document_id",
+          "editDocs"
+        ],
+        "properties": {
+          "editDocs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            "title": "Edit Docs",
+            "description": "Requests conforming to the Google Docs API `batchUpdate` method, where each item specifies an operation. For full details and more request types, see https://developers.google.com/docs/api/reference/rest/v1/documents/batchUpdate.\nFor example, to insert text at the beginning of the document:\n[\n  {\n    \"insertText\": {\n      \"text\": \"This is a new paragraph.\\n\",\n      \"location\": {\n        \"index\": 1\n      }\n    }\n  }\n]\n\nTo delete a paragraph by its index:\n[{\n  \"deleteContentRange\": {\n    \"range\": {\n      \"startIndex\": 1,\n      \"endIndex\": 20\n    }\n  }\n}]\n\nTo replace all text:\n[{\n  \"replaceAllText\": {\n    \"containsText\": {\n      \"text\": \"old text\"\n    },\n    \"replaceText\": \"new text\"\n  }\n}]"
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "examples": [
+              "12345abcdef",
+              "your_document_id_here"
+            ],
+            "description": "The unique identifier of the Google Docs document to be updated."
+          }
+        },
+        "description": "Request model for updating an existing Google Docs document with specified edit operations."
+      }
+    },
+    {
+      "name": "GOOGLEDOCS_UPDATE_TABLE_ROW_STYLE",
+      "description": "Tool to update the style of a table row in a Google Document. Use when you need to modify the appearance of specific rows within a table, such as setting minimum row height or marking rows as headers.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateTableRowStyleRequest",
+        "required": [
+          "documentId",
+          "updateTableRowStyle"
+        ],
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "title": "Document Id",
+            "description": "The ID of the document to update."
+          },
+          "updateTableRowStyle": {
+            "type": "object",
+            "title": "Update Table Row Style",
+            "required": [
+              "tableStartLocation",
+              "tableRowStyle",
+              "fields"
+            ],
+            "properties": {
+              "fields": {
+                "type": "string",
+                "title": "Fields",
+                "description": "The fields that should be updated. At least one field must be specified. The root tableRowStyle is implied and should not be specified. A single \"*\" can be used as short-hand for listing every field. For example to update the minimum row height, set fields to \"minRowHeight\"."
+              },
+              "rowIndices": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "properties": {}
+                },
+                "title": "Row Indices",
+                "default": null,
+                "nullable": true,
+                "description": "The list of zero-based row indices whose style should be updated. If no indices are specified, all rows will be updated."
+              },
+              "tableRowStyle": {
+                "type": "object",
+                "title": "Table Row Style",
+                "properties": {
+                  "tableHeader": {
+                    "type": "boolean",
+                    "title": "Table Header",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Whether the row is a table header."
+                  },
+                  "minRowHeight": {
+                    "type": "object",
+                    "title": "Dimension",
+                    "default": null,
+                    "nullable": true,
+                    "properties": {
+                      "unit": {
+                        "enum": [
+                          "PT",
+                          "UNIT_UNSPECIFIED"
+                        ],
+                        "type": "string",
+                        "title": "Unit",
+                        "default": null,
+                        "nullable": true,
+                        "description": "The units for magnitude."
+                      },
+                      "magnitude": {
+                        "type": "number",
+                        "title": "Magnitude",
+                        "default": null,
+                        "nullable": true,
+                        "description": "The magnitude."
+                      }
+                    },
+                    "description": "The minimum height of the row. The row will be rendered in the Docs editor at a height equal to or greater than this value in order to show all the content in the row's cells.",
+                    "additionalProperties": false
+                  },
+                  "preventOverflow": {
+                    "type": "boolean",
+                    "title": "Prevent Overflow",
+                    "default": null,
+                    "nullable": true,
+                    "description": "Whether the row cannot overflow across page or column boundaries."
+                  }
+                },
+                "description": "The styles to be set on the rows.",
+                "additionalProperties": false
+              },
+              "tableStartLocation": {
+                "type": "object",
+                "title": "Table Start Location",
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "title": "Index",
+                    "default": null,
+                    "nullable": true,
+                    "description": "The zero-based index, in UTF-16 code units."
+                  },
+                  "tabId": {
+                    "type": "string",
+                    "title": "Tab Id",
+                    "default": null,
+                    "nullable": true,
+                    "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+                  },
+                  "segmentId": {
+                    "type": "string",
+                    "title": "Segment Id",
+                    "default": null,
+                    "nullable": true,
+                    "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+                  }
+                },
+                "description": "The location where the table starts in the document.",
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 33,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/googledocs/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "GOOGLEDOCS_COPY_DOCUMENT",
+    "GOOGLEDOCS_CREATE_DOCUMENT",
+    "GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN",
+    "GOOGLEDOCS_CREATE_FOOTER",
+    "GOOGLEDOCS_CREATE_FOOTNOTE",
+    "GOOGLEDOCS_CREATE_HEADER",
+    "GOOGLEDOCS_CREATE_NAMED_RANGE",
+    "GOOGLEDOCS_CREATE_PARAGRAPH_BULLETS",
+    "GOOGLEDOCS_DELETE_CONTENT_RANGE",
+    "GOOGLEDOCS_DELETE_FOOTER",
+    "GOOGLEDOCS_DELETE_HEADER",
+    "GOOGLEDOCS_DELETE_NAMED_RANGE",
+    "GOOGLEDOCS_DELETE_PARAGRAPH_BULLETS",
+    "GOOGLEDOCS_DELETE_TABLE",
+    "GOOGLEDOCS_DELETE_TABLE_COLUMN",
+    "GOOGLEDOCS_DELETE_TABLE_ROW",
+    "GOOGLEDOCS_GET_CHARTS_FROM_SPREADSHEET",
+    "GOOGLEDOCS_GET_DOCUMENT_BY_ID",
+    "GOOGLEDOCS_INSERT_INLINE_IMAGE",
+    "GOOGLEDOCS_INSERT_PAGE_BREAK",
+    "GOOGLEDOCS_INSERT_TABLE_ACTION",
+    "GOOGLEDOCS_INSERT_TABLE_COLUMN",
+    "GOOGLEDOCS_INSERT_TEXT_ACTION",
+    "GOOGLEDOCS_LIST_SPREADSHEET_CHARTS_ACTION",
+    "GOOGLEDOCS_REPLACE_ALL_TEXT",
+    "GOOGLEDOCS_REPLACE_IMAGE",
+    "GOOGLEDOCS_SEARCH_DOCUMENTS",
+    "GOOGLEDOCS_UNMERGE_TABLE_CELLS",
+    "GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN",
+    "GOOGLEDOCS_UPDATE_DOCUMENT_SECTION_MARKDOWN",
+    "GOOGLEDOCS_UPDATE_DOCUMENT_STYLE",
+    "GOOGLEDOCS_UPDATE_EXISTING_DOCUMENT",
+    "GOOGLEDOCS_UPDATE_TABLE_ROW_STYLE"
+  ]
+}

@@ -1,0 +1,398 @@
+{
+  "id": "@gigachadtrey/websimm",
+  "name": "@gigachadtrey/websimm",
+  "display_name": "WebSim Explorer",
+  "version": null,
+  "description": "Discover WebSim projects, creators, and trending content with powerful search and filters. Inspect project details, screenshots, comments, and engagement stats to guide research and curation. Track user profiles and activity to surface influential creators and relevant assets.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "get_project",
+      "description": "Get detailed information about a WebSim project by its ID. Perfect for 'Show me project [ID]' or 'Tell me about project [ID]' questions.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the WebSim project"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_project_by_slug",
+      "description": "Get detailed information about a WebSim project using the owner's username and project slug. Perfect for 'Show me @username/project-slug' or 'Tell me about [username]/[slug]' questions.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "user",
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "The project slug/identifier"
+          },
+          "user": {
+            "type": "string",
+            "description": "The username of the project owner"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_trending_projects",
+      "description": "Get a list of trending WebSim projects. Perfect for 'Show me trending projects' or 'What are the popular projects?' questions. Supports pagination and filtering by time range.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "feed": {
+            "enum": [
+              "trending",
+              "popular",
+              "new"
+            ],
+            "type": "string",
+            "default": "trending",
+            "description": "Type of feed to fetch"
+          },
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of projects to return (1-100, default: 20)"
+          },
+          "range": {
+            "enum": [
+              "hour",
+              "day",
+              "week",
+              "month",
+              "all"
+            ],
+            "type": "string",
+            "default": "day",
+            "description": "Time range for trending calculation"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0,
+            "description": "Number of projects to skip for pagination (default: 0)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_user",
+      "description": "Get detailed information about a WebSim user profile. Perfect for 'Tell me about user [username]' or 'Show me @[username]' questions.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "The username of the WebSim user"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_user_projects",
+      "description": "Get a list of projects created by a specific WebSim user. Perfect for 'Show me [username]'s projects' or 'List projects by @[username]' questions. Supports sorting and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of projects to return (1-100, default: 20)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query to filter projects"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0,
+            "description": "Number of projects to skip for pagination (default: 0)"
+          },
+          "sort_by": {
+            "enum": [
+              "created",
+              "updated",
+              "views",
+              "likes",
+              "title"
+            ],
+            "type": "string",
+            "default": "updated",
+            "description": "Sort field"
+          },
+          "username": {
+            "type": "string",
+            "description": "The username of the WebSim user"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_user_stats",
+      "description": "Get detailed statistics for a WebSim user. Perfect for 'Show me [username]'s statistics' or 'What are @[username]'s stats?' questions.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "The username of the WebSim user"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_projects",
+      "description": "Search for WebSim projects by keywords, tags, or descriptions. Perfect for 'Find projects about [topic]' or 'Search for [keyword] projects' questions. Supports sorting and pagination.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "sort": {
+            "enum": [
+              "relevance",
+              "date",
+              "views",
+              "likes",
+              "trending"
+            ],
+            "type": "string",
+            "default": "relevance",
+            "description": "Sort results by"
+          },
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of results to return (1-100, default: 20)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query to find projects"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0,
+            "description": "Number of results to skip for pagination (default: 0)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_assets",
+      "description": "Search for assets (images, files, resources) in WebSim projects. Perfect for 'Find assets about [topic]' or 'Search for [keyword] files' questions. Supports MIME type filtering.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of results to return (1-100, default: 20)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query to find assets"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0,
+            "description": "Number of results to skip for pagination (default: 0)"
+          },
+          "mime_type": {
+            "type": "string",
+            "description": "Filter by MIME type (e.g., 'image/', 'text/', 'application/json')"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_project_comments",
+      "description": "Get comments on a WebSim project. Perfect for 'Show me comments on project [ID]' or 'What are people saying about [project]?' questions. Supports pagination and different sorting orders.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the WebSim project"
+          },
+          "last": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of last comments to return"
+          },
+          "after": {
+            "type": "string",
+            "description": "Get comments after this comment ID"
+          },
+          "first": {
+            "type": "number",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Number of first comments to return"
+          },
+          "before": {
+            "type": "string",
+            "description": "Get comments before this comment ID"
+          },
+          "sort_by": {
+            "enum": [
+              "created",
+              "likes"
+            ],
+            "type": "string",
+            "default": "created",
+            "description": "Sort comments by"
+          },
+          "sort_order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string",
+            "default": "desc",
+            "description": "Sort order"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_related_keywords",
+      "description": "Get related keywords and search suggestions based on a query. Perfect for 'What keywords are related to [topic]?' or 'Show me suggestions for [keyword]' questions. Helps discover related content and trending topics.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Number of related keywords to return (1-50, default: 10)"
+          },
+          "query": {
+            "type": "string",
+            "description": "The search query to get related keywords for"
+          },
+          "min_frequency": {
+            "type": "number",
+            "default": 1,
+            "minimum": 1,
+            "description": "Minimum frequency threshold for keywords"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_project_screenshots",
+      "description": "Get screenshots of a WebSim project revision. Perfect for 'Show me screenshots of project [ID]' or 'What does [project] version [X] look like?' questions.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the WebSim project"
+          },
+          "version": {
+            "type": "number",
+            "default": 1,
+            "description": "Project revision version number (default: 1)"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 11,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@gigachadtrey/websimm/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "get_project",
+    "get_project_by_slug",
+    "list_trending_projects",
+    "get_user",
+    "get_user_projects",
+    "get_user_stats",
+    "search_projects",
+    "search_assets",
+    "list_project_comments",
+    "get_related_keywords",
+    "list_project_screenshots"
+  ]
+}

@@ -1,0 +1,4836 @@
+{
+  "id": "outlook",
+  "name": "outlook",
+  "display_name": "Outlook",
+  "version": null,
+  "description": "Outlook is Microsoft's email and calendaring platform integrating contacts and scheduling, enabling users to manage communications and events in a unified workspace",
+  "icon_url": "https://logos.composio.dev/api/outlook",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "OUTLOOK_ADD_EVENT_ATTACHMENT",
+      "description": "Adds an attachment to a specific Outlook calendar event. Use when you need to attach a file or nested item to an existing event.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddEventAttachmentRequest",
+        "required": [
+          "event_id",
+          "odata_type",
+          "name"
+        ],
+        "properties": {
+          "item": {
+            "type": "object",
+            "title": "Item",
+            "default": null,
+            "nullable": true,
+            "description": "The nested item payload; required when '@odata.type' is itemAttachment.",
+            "additionalProperties": true
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "menu.txt",
+              "document.pdf"
+            ],
+            "description": "The display name of the attachment."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "The user's email address or 'me' for the authenticated user."
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id",
+            "examples": [
+              "AAMkAGI1AAAt9AHjAAA="
+            ],
+            "description": "The unique identifier of the calendar event to which the attachment will be added."
+          },
+          "odata_type": {
+            "enum": [
+              "#microsoft.graph.fileAttachment",
+              "#microsoft.graph.itemAttachment"
+            ],
+            "type": "string",
+            "title": "Odata Type",
+            "description": "Attachment type: '#microsoft.graph.fileAttachment' requires 'contentBytes'; '#microsoft.graph.itemAttachment' requires 'item'."
+          },
+          "contentBytes": {
+            "type": "string",
+            "title": "Content Bytes",
+            "default": null,
+            "examples": [
+              "aGVsbG8gd29ybGQ="
+            ],
+            "nullable": true,
+            "description": "Base64-encoded file contents; required when '@odata.type' is fileAttachment."
+          }
+        },
+        "description": "Request parameters for adding an attachment to an Outlook calendar event."
+      }
+    },
+    {
+      "name": "OUTLOOK_ADD_MAIL_ATTACHMENT",
+      "description": "Tool to add an attachment to an email message. Use when you have a message ID and need to attach a small (<3 MB) file or reference.",
+      "inputSchema": {
+        "type": "object",
+        "title": "AddMailAttachmentRequest",
+        "required": [
+          "message_id",
+          "odata_type",
+          "name",
+          "contentBytes"
+        ],
+        "properties": {
+          "item": {
+            "type": "object",
+            "title": "Item",
+            "default": null,
+            "nullable": true,
+            "description": "Embedded item (e.g., message, event) for itemAttachment; must include its own '@odata.type'.",
+            "additionalProperties": true
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "report.pdf"
+            ],
+            "description": "Display name of the attachment (e.g., file name)."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "The user's principal name or 'me' for the authenticated user."
+          },
+          "isInline": {
+            "type": "boolean",
+            "title": "Is Inline",
+            "default": null,
+            "nullable": true,
+            "description": "Set to true if the attachment should appear inline in the message body."
+          },
+          "contentId": {
+            "type": "string",
+            "title": "Content Id",
+            "default": null,
+            "nullable": true,
+            "description": "Content ID for inline attachments, used in HTML body references."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "Unique identifier of the email message to attach to."
+          },
+          "odata_type": {
+            "type": "string",
+            "title": "Odata Type",
+            "examples": [
+              "#microsoft.graph.fileAttachment"
+            ],
+            "description": "The OData type of the attachment. For file attachments, use '#microsoft.graph.fileAttachment'."
+          },
+          "contentType": {
+            "type": "string",
+            "title": "Content Type",
+            "default": null,
+            "examples": [
+              "application/pdf"
+            ],
+            "nullable": true,
+            "description": "MIME type of the attachment (e.g., 'application/pdf')."
+          },
+          "contentBytes": {
+            "type": "string",
+            "title": "Content Bytes",
+            "examples": [
+              "SGVsbG8gd29ybGQh"
+            ],
+            "description": "Base64-encoded content of the file attachment (max size 3 MB)."
+          },
+          "contentLocation": {
+            "type": "string",
+            "title": "Content Location",
+            "default": null,
+            "nullable": true,
+            "description": "URL location or path for reference attachments."
+          }
+        },
+        "description": "Request model to add an attachment to a specific Outlook email message."
+      }
+    },
+    {
+      "name": "OUTLOOK_CALENDAR_CREATE_EVENT",
+      "description": "Creates a new Outlook calendar event, ensuring `start_datetime` is chronologically before `end_datetime`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateEventRequest",
+        "required": [
+          "subject",
+          "body",
+          "start_datetime",
+          "end_datetime",
+          "time_zone"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "examples": [
+              "Weekly team synchronization meeting.",
+              "<h1>Project Update</h1><p>Discuss critical path items.</p>"
+            ],
+            "description": "The body of the event. This can be in plain text or HTML format, as specified by the 'is_html' field."
+          },
+          "is_html": {
+            "type": "boolean",
+            "title": "Is Html",
+            "default": false,
+            "description": "Specifies whether the 'body' content is HTML. Set to true for HTML content; otherwise, it's treated as plain text."
+          },
+          "show_as": {
+            "type": "string",
+            "title": "Show As",
+            "default": "busy",
+            "examples": [
+              "busy",
+              "tentative",
+              "free"
+            ],
+            "description": "The status to show on the calendar for the duration of the event. Valid values are: 'free', 'tentative', 'busy', 'oof' (out of office), 'workingElsewhere', 'unknown'."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "examples": [
+              "Team Sync",
+              "Project Deadline Discussion"
+            ],
+            "description": "The subject of the calendar event."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com",
+              "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+            ],
+            "description": "The UPN (User Principal Name) or object ID of the user whose calendar the event will be created in. Use 'me' for the currently authenticated user."
+          },
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "default": "",
+            "examples": [
+              "Conference Room A",
+              "Client's Office"
+            ],
+            "description": "The physical location of the event."
+          },
+          "time_zone": {
+            "type": "string",
+            "title": "Time Zone",
+            "examples": [
+              "UTC",
+              "Pacific Standard Time",
+              "America/New_York"
+            ],
+            "description": "The time zone for the start and end times of the event. Uses Windows time zone names (e.g., 'Pacific Standard Time') or IANA time zone names (e.g., 'America/Los_Angeles'). UTC is also a valid input."
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Categories",
+            "default": [],
+            "examples": [
+              [
+                "Project Alpha",
+                "Urgent"
+              ],
+              [
+                "Client Meeting"
+              ]
+            ],
+            "description": "A list of categories associated with the event. These categories must already exist in the user's mailbox."
+          },
+          "end_datetime": {
+            "type": "string",
+            "title": "End Datetime",
+            "format": "date-time",
+            "examples": [
+              "2025-01-03T11:00:00",
+              "2024-12-15T15:30:00"
+            ],
+            "description": "The end date and time of the event in ISO 8601 format. Time zone is specified in 'time_zone'."
+          },
+          "attendees_info": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "AttendeeInfo",
+              "required": [
+                "email"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "default": "",
+                  "examples": [
+                    "John Doe",
+                    "Jane Smith"
+                  ],
+                  "description": "The display name of the attendee."
+                },
+                "type": {
+                  "type": "string",
+                  "title": "Type",
+                  "default": "required",
+                  "examples": [
+                    "required",
+                    "optional"
+                  ],
+                  "description": "The type of attendee. Valid values are 'required', 'optional', and 'resource'."
+                },
+                "email": {
+                  "type": "string",
+                  "title": "Email",
+                  "examples": [
+                    "john.doe@example.com",
+                    "jane.smith@example.com"
+                  ],
+                  "description": "The email address of the attendee."
+                }
+              },
+              "description": "Specifies the email, name, and type of an attendee for a calendar event."
+            },
+            "title": "Attendees Info",
+            "default": [],
+            "examples": [
+              [
+                {
+                  "name": "Team",
+                  "type": "required",
+                  "email": "team@example.com"
+                }
+              ],
+              [
+                {
+                  "type": "optional",
+                  "email": "other@example.com"
+                },
+                {
+                  "name": "Conf Room",
+                  "type": "resource",
+                  "email": "resource@example.com"
+                }
+              ]
+            ],
+            "description": "A list of attendees for the event. Each attendee object requires an 'email'. 'name' and 'type' ('required', 'optional', 'resource') are optional."
+          },
+          "start_datetime": {
+            "type": "string",
+            "title": "Start Datetime",
+            "format": "date-time",
+            "examples": [
+              "2025-01-03T10:00:00",
+              "2024-12-15T14:30:00"
+            ],
+            "description": "The start date and time of the event in ISO 8601 format. Time zone is specified in 'time_zone'."
+          },
+          "is_online_meeting": {
+            "type": "boolean",
+            "title": "Is Online Meeting",
+            "default": false,
+            "description": "Set to true to indicate that the event is an online meeting. This will automatically generate an online meeting link if 'online_meeting_provider' is set (e.g., a Microsoft Teams link)."
+          },
+          "online_meeting_provider": {
+            "type": "string",
+            "title": "Online Meeting Provider",
+            "default": null,
+            "examples": [
+              "teamsForBusiness"
+            ],
+            "nullable": true,
+            "description": "Specifies the online meeting provider. Currently, only 'teamsForBusiness' is supported. If 'is_online_meeting' is true and this is set, a meeting link for the provider will be created."
+          }
+        },
+        "description": "Defines the request schema for creating a new event in an Outlook calendar."
+      }
+    },
+    {
+      "name": "OUTLOOK_CREATE_ATTACHMENT_UPLOAD_SESSION",
+      "description": "Tool to create an upload session for large (>3 MB) message attachments. Use when you need to upload attachments in chunks.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateAttachmentUploadSessionRequest",
+        "required": [
+          "message_id",
+          "attachmentItem"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User ID or user principal name; use 'me' for the signed-in user."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "The unique identifier of the message to attach to."
+          },
+          "attachmentItem": {
+            "type": "object",
+            "title": "Attachment Item",
+            "required": [
+              "attachmentType",
+              "name",
+              "size"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Name",
+                "examples": [
+                  "large_report.pdf"
+                ],
+                "description": "Display name of the attachment (e.g., 'report.pdf')."
+              },
+              "size": {
+                "type": "integer",
+                "title": "Size",
+                "minimum": 3145728,
+                "examples": [
+                  5242880
+                ],
+                "description": "Size of the attachment in bytes; must be at least 3 MB (3,145,728 bytes)."
+              },
+              "isInline": {
+                "type": "boolean",
+                "title": "Is Inline",
+                "default": null,
+                "nullable": true,
+                "description": "Whether the attachment is inline in the message body."
+              },
+              "contentId": {
+                "type": "string",
+                "title": "Content Id",
+                "default": null,
+                "nullable": true,
+                "description": "Content-ID for inline attachments, referenced in HTML body if isInline is true."
+              },
+              "contentType": {
+                "type": "string",
+                "title": "Content Type",
+                "default": null,
+                "examples": [
+                  "application/pdf"
+                ],
+                "nullable": true,
+                "description": "MIME type of the attachment (e.g., 'application/pdf')."
+              },
+              "attachmentType": {
+                "enum": [
+                  "file",
+                  "item",
+                  "reference"
+                ],
+                "type": "string",
+                "title": "Attachment Type",
+                "examples": [
+                  "file"
+                ],
+                "description": "Type of the attachment; set to 'file' for file uploads."
+              }
+            },
+            "description": "AttachmentItem object describing the attachment in the upload session.",
+            "additionalProperties": false
+          }
+        },
+        "description": "Request parameters for creating an Outlook attachment upload session."
+      }
+    },
+    {
+      "name": "OUTLOOK_CREATE_CALENDAR",
+      "description": "Tool to create a new calendar in the signed-in user's mailbox. Use when organizing events into a separate calendar.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateCalendarRequest",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Family Calendar",
+              "Project Plan Calendar"
+            ],
+            "description": "The display name of the new calendar."
+          },
+          "color": {
+            "enum": [
+              "auto",
+              "lightBlue",
+              "lightGreen",
+              "lightOrange",
+              "lightGray",
+              "lightYellow",
+              "lightTeal",
+              "lightPink",
+              "lightBrown",
+              "lightPurple",
+              "lightRed"
+            ],
+            "type": "string",
+            "title": "Color",
+            "default": null,
+            "nullable": true,
+            "description": "The theme color to assign to the calendar. Supported values: auto, lightBlue, lightGreen, lightOrange, lightGray, lightYellow, lightTeal, lightPink, lightBrown, lightPurple, lightRed."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com",
+              "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+            ],
+            "description": "The UPN (User Principal Name) or object ID of the user where the calendar will be created. Use 'me' for the signed-in user."
+          },
+          "hexColor": {
+            "type": "string",
+            "title": "Hex Color",
+            "default": null,
+            "examples": [
+              "#ff0000",
+              "#00ff00"
+            ],
+            "nullable": true,
+            "description": "An optional hexadecimal color code for the calendar in the format '#RRGGBB'."
+          }
+        },
+        "description": "Request schema for creating a new calendar in the user's mailbox."
+      }
+    },
+    {
+      "name": "OUTLOOK_CREATE_CONTACT",
+      "description": "Creates a new contact in a Microsoft Outlook user's contacts folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateContactRequest",
+        "properties": {
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": "",
+            "examples": [
+              "Met at the 2023 Tech Conference."
+            ],
+            "description": "Personal notes about the contact. These notes are stored as 'personalNotes' in the Outlook contact details."
+          },
+          "surname": {
+            "type": "string",
+            "title": "Surname",
+            "default": "",
+            "examples": [
+              "Doe"
+            ],
+            "description": "The contact's surname (last name)."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "description": "Identifier for the user whose contact list will be modified. Use 'me' for the authenticated user, or provide the user's principal name (e.g., 'user@example.com')."
+          },
+          "birthday": {
+            "type": "string",
+            "title": "Birthday",
+            "default": "",
+            "examples": [
+              "1990-01-01"
+            ],
+            "description": "The contact's birthday in 'YYYY-MM-DD' format. The time component will be set to midnight UTC (e.g., '1990-01-01' becomes '1990-01-01T00:00:00Z' in the API request)."
+          },
+          "jobTitle": {
+            "type": "string",
+            "title": "Job Title",
+            "default": "",
+            "examples": [
+              "Software Engineer"
+            ],
+            "description": "The contact's job title."
+          },
+          "givenName": {
+            "type": "string",
+            "title": "Given Name",
+            "default": "",
+            "examples": [
+              "Jane"
+            ],
+            "description": "The contact's given (first) name."
+          },
+          "homePhone": {
+            "type": "string",
+            "title": "Home Phone",
+            "default": "",
+            "examples": [
+              "+1 555 555 5557"
+            ],
+            "description": "The contact's home phone number. If provided, this will be stored in Outlook as a list containing this single number."
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Categories",
+            "examples": [
+              "Friend",
+              "Colleague"
+            ],
+            "description": "A list of categories to assign to the contact."
+          },
+          "department": {
+            "type": "string",
+            "title": "Department",
+            "default": "",
+            "examples": [
+              "Engineering"
+            ],
+            "description": "The department the contact belongs to within their company."
+          },
+          "companyName": {
+            "type": "string",
+            "title": "Company Name",
+            "default": "",
+            "examples": [
+              "Example Corp"
+            ],
+            "description": "The name of the company the contact is associated with."
+          },
+          "displayName": {
+            "type": "string",
+            "title": "Display Name",
+            "default": "",
+            "examples": [
+              "Jane Doe"
+            ],
+            "description": "The contact's display name, typically their full name."
+          },
+          "mobilePhone": {
+            "type": "string",
+            "title": "Mobile Phone",
+            "default": "",
+            "examples": [
+              "+1 555 555 5556"
+            ],
+            "description": "The contact's mobile phone number."
+          },
+          "businessPhones": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Business Phones",
+            "examples": [
+              "+1 555 555 5555"
+            ],
+            "description": "A list of business phone numbers for the contact. Each number should be a string."
+          },
+          "emailAddresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "EmailAddress",
+              "required": [
+                "address"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "default": "",
+                  "examples": [
+                    "Jane Doe"
+                  ],
+                  "description": "The display name for the contact's email address."
+                },
+                "address": {
+                  "type": "string",
+                  "title": "Address",
+                  "examples": [
+                    "jane.doe@example.com"
+                  ],
+                  "description": "The contact's email address."
+                }
+              }
+            },
+            "title": "Email Addresses",
+            "description": "A list of email addresses for the contact."
+          },
+          "officeLocation": {
+            "type": "string",
+            "title": "Office Location",
+            "default": "",
+            "examples": [
+              "Building 1, Room 101"
+            ],
+            "description": "The contact's office location."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_CREATE_CONTACT_FOLDER",
+      "description": "Tool to create a new contact folder in the user's mailbox. Use when needing to organize contacts into custom folders.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateContactFolderRequest",
+        "required": [
+          "displayName"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com",
+              "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+            ],
+            "description": "The user's principal name or object ID. Use 'me' for the authenticated user."
+          },
+          "displayName": {
+            "type": "string",
+            "title": "Display Name",
+            "examples": [
+              "Friends"
+            ],
+            "description": "The display name of the new contact folder."
+          },
+          "parentFolderId": {
+            "type": "string",
+            "title": "Parent Folder Id",
+            "default": null,
+            "examples": [
+              "AAMkAGI2T...ZlJS"
+            ],
+            "nullable": true,
+            "description": "The ID of the parent contact folder. If omitted, created under the default contacts folder."
+          }
+        },
+        "description": "Request schema for creating a new contact folder in the user's mailbox."
+      }
+    },
+    {
+      "name": "OUTLOOK_CREATE_DRAFT",
+      "description": "Creates an Outlook email draft with subject, body, recipients, and an optional attachment. Supports creating drafts as part of existing conversation threads by specifying a conversationId; attachments require a name, mimetype, and content.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateEmailDraftRequest",
+        "required": [
+          "subject",
+          "body",
+          "to_recipients"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "examples": [
+              "Let's meet to discuss the project."
+            ],
+            "description": "Content of the email draft; use `is_html` to specify if HTML or plain text."
+          },
+          "is_html": {
+            "type": "boolean",
+            "title": "Is Html",
+            "default": false,
+            "description": "Specifies if the `body` is HTML. If `False`, `body` is plain text."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "examples": [
+              "Team Meeting"
+            ],
+            "maxLength": 255,
+            "minLength": 1,
+            "description": "Subject line for the email draft."
+          },
+          "attachment": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "Optional file to attach. If provided, must include the file's content, name, and mimetype.",
+            "file_uploadable": true
+          },
+          "cc_recipients": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Cc Recipients",
+            "default": [],
+            "examples": [
+              [
+                "manager@example.com"
+              ]
+            ],
+            "description": "Optional list of CC (carbon copy) recipient email addresses."
+          },
+          "to_recipients": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "To Recipients",
+            "examples": [
+              [
+                "johndoe@example.com",
+                "janedoe@example.com"
+              ]
+            ],
+            "description": "List of primary 'To' recipient email addresses."
+          },
+          "bcc_recipients": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Bcc Recipients",
+            "default": [],
+            "examples": [
+              [
+                "stakeholder@example.com"
+              ]
+            ],
+            "description": "Optional list of BCC (blind carbon copy) recipient email addresses."
+          },
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id",
+            "default": null,
+            "examples": [
+              "AAQkAGI2NGNjOTExLTg0Y2ItNGIzYi05Y2Q0LWEwY2I4YWI1N2I4MQAQAMiRK4HaTUGVgCcBVBr5p3g="
+            ],
+            "nullable": true,
+            "description": "Optional conversation ID to create the draft as part of an existing email conversation thread. If provided, the draft will be part of the specified conversation instead of starting a new one."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_CREATE_DRAFT_REPLY",
+      "description": "Creates a draft reply in the specified user's Outlook mailbox to an existing message (identified by a valid `message_id`), optionally including a `comment` and CC/BCC recipients.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateDraftReplyRequest",
+        "required": [
+          "message_id"
+        ],
+        "properties": {
+          "comment": {
+            "type": "string",
+            "title": "Comment",
+            "default": null,
+            "examples": [
+              "Thank you for your email. I'll review and respond shortly."
+            ],
+            "nullable": true,
+            "description": "Plain text comment to include in the body of the reply draft."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "john.doe@example.com"
+            ],
+            "description": "User's mailbox identifier (email or 'me') for the original message and new draft location."
+          },
+          "cc_emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Cc Emails",
+            "default": [],
+            "examples": [
+              [
+                "jane.doe@example.com",
+                "other@example.com"
+              ]
+            ],
+            "description": "List of email addresses to add as CC recipients to the draft reply."
+          },
+          "bcc_emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Bcc Emails",
+            "default": [],
+            "examples": [
+              [
+                "manager@example.com",
+                "supervisor@example.com"
+              ]
+            ],
+            "description": "List of email addresses to add as BCC recipients to the draft reply."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "Unique ID of the message to reply to, typically obtained from actions like 'List Messages' or 'Get Message'."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_CREATE_EMAIL_RULE",
+      "description": "Create email rule filter with conditions and actions",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateEmailRuleRequest",
+        "required": [
+          "displayName",
+          "conditions",
+          "actions"
+        ],
+        "properties": {
+          "actions": {
+            "type": "object",
+            "title": "Actions",
+            "properties": {
+              "delete": {
+                "type": "boolean",
+                "title": "Delete",
+                "default": null,
+                "nullable": true,
+                "description": "Whether to delete matching messages."
+              },
+              "forwardTo": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Forward To",
+                "default": null,
+                "examples": [
+                  [
+                    "assistant@company.com"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of email addresses to forward matching messages to."
+              },
+              "markAsRead": {
+                "type": "boolean",
+                "title": "Mark As Read",
+                "default": null,
+                "nullable": true,
+                "description": "Whether to mark matching messages as read."
+              },
+              "copyToFolder": {
+                "type": "string",
+                "title": "Copy To Folder",
+                "default": null,
+                "examples": [
+                  "AAMkAGI2NGNjOTExLTg0Y2ItNGIzYi05Y2Q0LWEwY2I4YWI1N2I4MQAuAAAAAACzMsPHYH6HQoSwfdpDx-2bAQCiGq-PkzMrQqW_3OC5Q5fDAAABBjsWAAA="
+                ],
+                "nullable": true,
+                "description": "Folder ID to copy matching messages to."
+              },
+              "moveToFolder": {
+                "type": "string",
+                "title": "Move To Folder",
+                "default": null,
+                "examples": [
+                  "AAMkAGI2NGNjOTExLTg0Y2ItNGIzYi05Y2Q0LWEwY2I4YWI1N2I4MQAuAAAAAACzMsPHYH6HQoSwfdpDx-2bAQCiGq-PkzMrQqW_3OC5Q5fDAAABBjsWAAA="
+                ],
+                "nullable": true,
+                "description": "Folder ID to move matching messages to."
+              },
+              "assignCategories": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Assign Categories",
+                "default": null,
+                "examples": [
+                  [
+                    "Important",
+                    "Work"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of categories to assign to matching messages."
+              },
+              "stopProcessingRules": {
+                "type": "boolean",
+                "title": "Stop Processing Rules",
+                "default": null,
+                "examples": [
+                  true,
+                  false
+                ],
+                "nullable": true,
+                "description": "If true, stops processing other rules after this rule's actions execute. Useful for priority rules where you want to prevent lower-priority rules from running. Example: High-priority sender rule that moves to VIP folder and stops other filing rules."
+              }
+            },
+            "description": "Actions to take when the rule conditions are met.",
+            "additionalProperties": false
+          },
+          "sequence": {
+            "type": "integer",
+            "title": "Sequence",
+            "default": 1,
+            "examples": [
+              1,
+              2,
+              5
+            ],
+            "nullable": true,
+            "description": "Order in which the rule is executed (lower numbers execute first)."
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "title": "Is Enabled",
+            "default": true,
+            "description": "Whether the rule is enabled."
+          },
+          "conditions": {
+            "type": "object",
+            "title": "Conditions",
+            "properties": {
+              "importance": {
+                "type": "string",
+                "title": "Importance",
+                "default": null,
+                "examples": [
+                  "high",
+                  "normal",
+                  "low"
+                ],
+                "nullable": true,
+                "description": "Message importance level to match (low, normal, high)."
+              },
+              "bodyContains": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Body Contains",
+                "default": null,
+                "examples": [
+                  [
+                    "urgent",
+                    "important"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of strings that the message body must contain."
+              },
+              "fromAddresses": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "From Addresses",
+                "default": null,
+                "examples": [
+                  [
+                    "boss@company.com",
+                    "client@external.com"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of exact sender email addresses to match (e.g., 'boss@company.com'). For partial/domain matching, use senderContains instead."
+              },
+              "hasAttachments": {
+                "type": "boolean",
+                "title": "Has Attachments",
+                "default": null,
+                "nullable": true,
+                "description": "Whether the message must have attachments."
+              },
+              "senderContains": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Sender Contains",
+                "default": null,
+                "examples": [
+                  [
+                    "noreply",
+                    "no-reply",
+                    "donotreply"
+                  ],
+                  [
+                    "@github.com",
+                    "@linkedin.com"
+                  ],
+                  [
+                    "notifications",
+                    "alerts",
+                    "automated"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of strings for partial sender email matching. If sender email contains ANY of these strings, rule triggers. Useful for domain matching (e.g., '@openai.com') or pattern matching (e.g., 'noreply', 'no-reply', 'notifications'). More flexible than fromAddresses which requires exact matches."
+              },
+              "subjectContains": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Subject Contains",
+                "default": null,
+                "examples": [
+                  [
+                    "meeting",
+                    "project"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of strings that the message subject must contain."
+              }
+            },
+            "description": "Conditions that must be met for the rule to apply.",
+            "additionalProperties": false
+          },
+          "displayName": {
+            "type": "string",
+            "title": "Display Name",
+            "examples": [
+              "High Priority Filter",
+              "Boss Emails"
+            ],
+            "maxLength": 255,
+            "minLength": 1,
+            "description": "Display name for the email rule."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_CREATE_MAIL_FOLDER",
+      "description": "Tool to create a new mail folder. Use when you need to organize email into a new folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateMailFolderRequest",
+        "required": [
+          "displayName"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com",
+              "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+            ],
+            "description": "Identifier for the user whose mailbox the folder will be created in. Use 'me' for the authenticated user or provide the user's principal name or ID."
+          },
+          "isHidden": {
+            "type": "boolean",
+            "title": "Is Hidden",
+            "default": false,
+            "examples": [
+              true
+            ],
+            "description": "Indicates whether the new folder is hidden. Default is false. Once set, this property cannot be updated."
+          },
+          "displayName": {
+            "type": "string",
+            "title": "Display Name",
+            "examples": [
+              "Clutter",
+              "ProjectX"
+            ],
+            "description": "The display name of the new mail folder."
+          }
+        },
+        "description": "Defines the request schema for creating a new mail folder in the user's mailbox."
+      }
+    },
+    {
+      "name": "OUTLOOK_CREATE_MASTER_CATEGORY",
+      "description": "Tool to create a new category in the user's master category list. Use after selecting a unique display name.",
+      "inputSchema": {
+        "type": "object",
+        "title": "CreateMasterCategoryRequest",
+        "required": [
+          "displayName"
+        ],
+        "properties": {
+          "color": {
+            "enum": [
+              "preset0",
+              "preset1",
+              "preset2",
+              "preset3",
+              "preset4",
+              "preset5",
+              "preset6",
+              "preset7",
+              "preset8",
+              "preset9",
+              "preset10",
+              "preset11",
+              "preset12",
+              "preset13",
+              "preset14",
+              "preset15",
+              "preset16",
+              "preset17",
+              "preset18",
+              "preset19",
+              "preset20",
+              "preset21",
+              "preset22",
+              "preset23",
+              "preset24"
+            ],
+            "type": "string",
+            "title": "Color",
+            "default": null,
+            "examples": [
+              "preset9"
+            ],
+            "nullable": true,
+            "description": "A pre-set color constant for the category. Allowed values: preset0 through preset24."
+          },
+          "displayName": {
+            "type": "string",
+            "title": "Display Name",
+            "examples": [
+              "Project expenses",
+              "Urgent"
+            ],
+            "description": "Unique name that identifies the category in the user's mailbox."
+          }
+        },
+        "description": "Request schema for creating a new Outlook master category in the user's mailbox."
+      }
+    },
+    {
+      "name": "OUTLOOK_DELETE_CONTACT",
+      "description": "Permanently deletes an existing contact, using its `contact_id` (obtainable via 'List User Contacts' or 'Get Contact'), from the Outlook contacts of the user specified by `user_id`.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteContactRequest",
+        "required": [
+          "contact_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com",
+              "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6"
+            ],
+            "description": "The UPN (User Principal Name) or ID of the user; use 'me' for the signed-in user."
+          },
+          "contact_id": {
+            "type": "string",
+            "title": "Contact Id",
+            "examples": [
+              "AAMkAGViNGRjYTkEtcAAA=",
+              "AAMkADcLjUyMQUtZTFlOC00NzU0LTk3ZWMtZTA3NGQ4ZWI1N2YyAAAA="
+            ],
+            "description": "Identifier of the contact to be deleted, typically obtained from 'List User Contacts' or 'Get Contact'."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_DELETE_EMAIL_RULE",
+      "description": "Delete an email rule",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteEmailRuleRequest",
+        "required": [
+          "ruleId"
+        ],
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "title": "Rule Id",
+            "examples": [
+              "AAMkAGI2NGNjOTExLTg0Y2ItNGIzYi05Y2Q0LWEwY2I4YWI1N2I4MQAuAAAAAACzMsPHYH6HQoSwfdpDx-2bAQCiGq-PkzMrQqW_3OC5Q5fDAAABBjsWAAA="
+            ],
+            "description": "ID of the email rule to delete."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_DELETE_EVENT",
+      "description": "Deletes an existing calendar event, identified by its unique `event_id`, from a specified user's Microsoft Outlook calendar, with an option to send cancellation notifications to attendees.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteEventRequest",
+        "required": [
+          "event_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "specific_user@example.com"
+            ],
+            "description": "User's email address or 'me' for the current user."
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "Unique identifier of the calendar event to delete, typically obtained from event listing or retrieval actions."
+          },
+          "send_notifications": {
+            "type": "boolean",
+            "title": "Send Notifications",
+            "default": true,
+            "examples": [
+              true,
+              false
+            ],
+            "description": "If `True`, sends cancellation notifications to event attendees upon deletion."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_DELETE_MAIL_FOLDER",
+      "description": "Delete a mail folder from the user's mailbox. Use when you need to remove an existing mail folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DeleteMailFolderRequest",
+        "required": [
+          "folder_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com",
+              "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+            ],
+            "description": "Identifier for the user whose mailbox contains the folder to delete. Use 'me' for the authenticated user or provide the user's principal name or ID."
+          },
+          "folder_id": {
+            "type": "string",
+            "title": "Folder Id",
+            "examples": [
+              "AAMkAGI0ZjExAAA=",
+              "Drafts",
+              "SentItems"
+            ],
+            "description": "The unique identifier or well-known name of the mail folder to delete (e.g., folder ID or 'Drafts', 'SentItems')."
+          }
+        },
+        "description": "Defines the request schema for deleting a mail folder from the user's mailbox."
+      }
+    },
+    {
+      "name": "OUTLOOK_DOWNLOAD_OUTLOOK_ATTACHMENT",
+      "description": "Downloads a specific file attachment from an email message in a Microsoft Outlook mailbox; the attachment must contain 'contentBytes' (binary data) and not be a link or embedded item.",
+      "inputSchema": {
+        "type": "object",
+        "title": "DownloadOutlookAttachmentRequest",
+        "required": [
+          "message_id",
+          "attachment_id",
+          "file_name"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com",
+              "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6"
+            ],
+            "description": "The user's UPN (User Principal Name) or 'me' for the authenticated user. This identifies the mailbox where the message is located."
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name",
+            "examples": [
+              "document.pdf",
+              "report.docx",
+              "image.png"
+            ],
+            "description": "The desired filename for the downloaded attachment. This name will be assigned to the `FileDownloadable` object."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "description": "The unique identifier of the email message that contains the attachment to be downloaded. This ID is typically obtained when listing or retrieving messages."
+          },
+          "attachment_id": {
+            "type": "string",
+            "title": "Attachment Id",
+            "description": "The unique identifier of the attachment to be downloaded. This ID is typically obtained from the message's details when an email message object is retrieved."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_CALENDAR_VIEW",
+      "description": "Get events ACTIVE during a time window (includes multi-day events). Use for \"what's on my calendar today/this week\" or availability checks. Returns events overlapping the time range. For keyword search or filters by category, use OUTLOOK_LIST_EVENTS instead.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetCalendarViewRequest",
+        "required": [
+          "start_datetime",
+          "end_datetime"
+        ],
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 100,
+            "maximum": 999,
+            "minimum": 1,
+            "examples": [
+              10,
+              50,
+              100
+            ],
+            "description": "Maximum number of events to retrieve. Default is 100."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": null,
+            "examples": [
+              [
+                "subject",
+                "start",
+                "end",
+                "location"
+              ],
+              [
+                "id",
+                "subject",
+                "organizer",
+                "isAllDay"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of specific event properties to return (e.g., ['subject', 'start', 'end']). If omitted, returns default properties."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "john.doe@example.com"
+            ],
+            "description": "Email address of the target user (or 'me' for authenticated user)."
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": "UTC",
+            "examples": [
+              "America/New_York",
+              "UTC",
+              "Europe/London"
+            ],
+            "description": "IANA or Windows timezone for event times (e.g., 'America/New_York'). Defaults to UTC."
+          },
+          "calendar_id": {
+            "type": "string",
+            "title": "Calendar Id",
+            "default": null,
+            "examples": [
+              "AAMkAGI2TG93AAA=",
+              "AAMkADAwATY3ZmYAZS1h"
+            ],
+            "nullable": true,
+            "description": "Optional ID of a specific calendar to query. If not provided, uses the primary calendar. Get calendar IDs using LIST_CALENDARS action."
+          },
+          "end_datetime": {
+            "type": "string",
+            "title": "End Datetime",
+            "examples": [
+              "2025-10-04T00:00:00Z",
+              "2025-10-03T16:00:00Z"
+            ],
+            "description": "End of the time window in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). Events active during this window will be returned."
+          },
+          "start_datetime": {
+            "type": "string",
+            "title": "Start Datetime",
+            "examples": [
+              "2025-10-03T00:00:00Z",
+              "2025-10-03T14:00:00Z"
+            ],
+            "description": "Start of the time window in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). Events active during this window will be returned."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_CONTACT",
+      "description": "Retrieves a specific Outlook contact by its `contact_id` from the contacts of a specified `user_id` (defaults to 'me' for the authenticated user).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetContactRequest",
+        "required": [
+          "contact_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "AdeleV@contoso.onmicrosoft.com"
+            ],
+            "description": "User's principal name (e.g., 'AdeleV@contoso.onmicrosoft.com') or 'me' for the authenticated user. Using 'me' is recommended for accessing one's own contacts."
+          },
+          "contact_id": {
+            "type": "string",
+            "title": "Contact Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "Unique identifier for the contact within the specified user's Outlook address book."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_CONTACT_FOLDERS",
+      "description": "Tool to retrieve a list of contact folders in the signed-in user's mailbox. Use after authentication when you need to browse or select among contact folders.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetContactFoldersRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              10,
+              50
+            ],
+            "nullable": true,
+            "description": "Maximum number of contact folders to return."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0,
+              10
+            ],
+            "nullable": true,
+            "description": "Number of contact folders to skip for pagination."
+          },
+          "expand": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Expand",
+            "examples": [
+              [
+                "contacts"
+              ]
+            ],
+            "description": "Related entities to expand inline, e.g., ['contacts']."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "startswith(displayName,'A')"
+            ],
+            "nullable": true,
+            "description": "OData filter expression, e.g., startswith(displayName,'A')."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "examples": [
+              [
+                "id",
+                "displayName"
+              ]
+            ],
+            "description": "List of properties to include in the response, e.g., ['id','displayName']."
+          },
+          "orderby": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Orderby",
+            "examples": [
+              [
+                "displayName asc"
+              ]
+            ],
+            "description": "List of properties to order results by, e.g., ['displayName asc']."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User principal name or ID. Use 'me' for the authenticated user."
+          }
+        },
+        "description": "Request parameters for retrieving contact folders in a user's mailbox."
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_EVENT",
+      "description": "Retrieves the full details of a specific calendar event by its ID from a user's Outlook calendar, provided the event exists.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetEventRequest",
+        "required": [
+          "event_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "AdeleV@contoso.onmicrosoft.com"
+            ],
+            "description": "The user's primary SMTP address, user principal name (UPN), or the alias 'me' (for the signed-in user) to identify the calendar owner."
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id",
+            "examples": [
+              "AAMkAGI2TG9tYVyGdUHg=="
+            ],
+            "description": "The unique identifier of the calendar event to retrieve."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_MAILBOX_SETTINGS",
+      "description": "Tool to retrieve mailbox settings. Use when you need to view settings such as automatic replies, time zone, and working hours for the signed-in or specified user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMailboxSettingsRequest",
+        "properties": {
+          "expand": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Expand",
+            "default": null,
+            "examples": [
+              [
+                "automaticRepliesSetting"
+              ]
+            ],
+            "nullable": true,
+            "description": "OData $expand query to include related entities."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": null,
+            "examples": [
+              [
+                "automaticRepliesSetting",
+                "timeZone",
+                "workingHours"
+              ]
+            ],
+            "nullable": true,
+            "description": "OData $select query to specify mailbox settings properties to include."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "AdeleV@contoso.onmicrosoft.com"
+            ],
+            "description": "The user's unique identifier or principal name. Use 'me' for the signed-in user."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_MAIL_DELTA",
+      "description": "Retrieve incremental changes (delta) of messages in a mailbox. FIRST RUN: Returns ALL messages in folder (use top=50 to limit). Response has @odata.deltaLink. SUBSEQUENT: Pass stored deltaLink to get only NEW/UPDATED/DELETED messages since last sync. Properties available: id, subject, from, receivedDateTime, isRead, etc. NOT available: internetMessageHeaders, full body, attachment content (response size limits).",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMailDeltaRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              10,
+              50,
+              100
+            ],
+            "nullable": true,
+            "description": "Maximum number of items to return per page. For first run without delta_token, use top=50 or top=100 to limit results. First delta call without token returns all messages in folder. Paginate through results using @odata.nextLink, then store @odata.deltaLink for next sync."
+          },
+          "expand": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Expand",
+            "default": null,
+            "examples": [
+              [
+                "attachments"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of related entities to expand (e.g. ['attachments'])."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": null,
+            "examples": [
+              [
+                "subject",
+                "from",
+                "receivedDateTime"
+              ],
+              [
+                "id",
+                "subject",
+                "isRead",
+                "receivedDateTime",
+                "webLink"
+              ],
+              [
+                "subject",
+                "from",
+                "hasAttachments",
+                "importance"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of message properties to include (e.g. ['subject','receivedDateTime']). Delta sync has property limitations due to response size constraints. Not available in delta: internetMessageHeaders, body (full), attachments (full content). Available: id, subject, from, toRecipients, ccRecipients, bccRecipients, receivedDateTime, sentDateTime, isRead, isDraft, importance, hasAttachments, categories, conversationId, flag, webLink, bodyPreview (first 255 chars)."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User identifier: 'me' for the signed-in user or the user's email/UPN."
+          },
+          "folder_id": {
+            "type": "string",
+            "title": "Folder Id",
+            "default": null,
+            "examples": [
+              "Inbox",
+              "AQMkADAw...="
+            ],
+            "nullable": true,
+            "description": "Mail folder identifier to scope the delta query to that folder (e.g., 'Inbox' or folder ID GUID). Defaults to Inbox when omitted."
+          },
+          "skip_token": {
+            "type": "string",
+            "title": "Skip Token",
+            "default": null,
+            "examples": [
+              "RPT_CxkRnN...truncated..."
+            ],
+            "nullable": true,
+            "description": "Skip token for paging through large result sets during initial sync. Automatically provided in response '@odata.nextLink' when there are more results. Extract from nextLink URL and pass here for next page. Keep paginating until you receive '@odata.deltaLink' instead of nextLink."
+          },
+          "delta_token": {
+            "type": "string",
+            "title": "Delta Token",
+            "default": null,
+            "examples": [
+              "h4sICxN9...truncated..."
+            ],
+            "nullable": true,
+            "description": "Delta token from a previous call to get only changes since that state. If delta_token is not provided, the API returns all messages in the folder (initial sync). Use top parameter (e.g., top=50) on first run to limit results. Response includes @odata.deltaLink - extract and store this for next call to get only new changes. Subsequent calls with deltaLink return only: new messages, updated messages, deleted message IDs."
+          }
+        },
+        "description": "Request schema for retrieving incremental changes (delta) of messages in a mailbox."
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_MAIL_TIPS",
+      "description": "Tool to retrieve mail tips such as automatic replies and mailbox full status. Use when you need to check recipient status before sending mail.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMailTipsRequest",
+        "required": [
+          "EmailAddresses",
+          "MailTipsOptions"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User principal name (UPN) or 'me' for the signed-in user."
+          },
+          "EmailAddresses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email",
+              "properties": {}
+            },
+            "title": "Email Addresses",
+            "examples": [
+              [
+                "danas@contoso.com",
+                "fannyd@contoso.com"
+              ]
+            ],
+            "description": "Collection of SMTP addresses of recipients to get MailTips for."
+          },
+          "MailTipsOptions": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "automaticReplies",
+                "customMailTip",
+                "deliveryRestriction",
+                "externalMemberCount",
+                "mailboxFullStatus",
+                "maxMessageSize",
+                "moderationStatus",
+                "recipientScope",
+                "recipientSuggestions",
+                "totalMemberCount"
+              ],
+              "type": "string",
+              "title": "MailTipsOption",
+              "properties": {}
+            },
+            "title": "Mail Tips Options",
+            "examples": [
+              [
+                "automaticReplies",
+                "mailboxFullStatus"
+              ]
+            ],
+            "description": "List of mail tip types to retrieve for each recipient."
+          }
+        },
+        "description": "Request model to retrieve MailTips for specified recipients."
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_MASTER_CATEGORIES",
+      "description": "Tool to retrieve the user's master category list. Use when you need to get all categories defined for the user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMasterCategoriesRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              5,
+              10
+            ],
+            "nullable": true,
+            "description": "Maximum number of master categories to return (OData $top)."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0,
+              5
+            ],
+            "nullable": true,
+            "description": "Number of master categories to skip for pagination (OData $skip)."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "color eq 'preset0'"
+            ],
+            "nullable": true,
+            "description": "OData $filter query to filter master categories."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": null,
+            "examples": [
+              [
+                "id",
+                "displayName",
+                "color"
+              ]
+            ],
+            "nullable": true,
+            "description": "OData $select query to specify properties to include."
+          },
+          "orderby": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Orderby",
+            "default": null,
+            "examples": [
+              [
+                "displayName asc"
+              ]
+            ],
+            "nullable": true,
+            "description": "OData $orderby query to order master categories by property values."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "The user's unique identifier or principal name. Use 'me' for the signed-in user."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_MESSAGE",
+      "description": "Retrieves a specific email message by its ID from the specified user's Outlook mailbox. Use the 'select' parameter to include specific fields like 'internetMessageHeaders' for filtering automated emails.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetMessageRequest",
+        "required": [
+          "message_id"
+        ],
+        "properties": {
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "examples": [
+              [
+                "id",
+                "subject",
+                "from",
+                "receivedDateTime",
+                "webLink"
+              ],
+              [
+                "subject",
+                "from",
+                "toRecipients",
+                "receivedDateTime",
+                "bodyPreview"
+              ],
+              [
+                "id",
+                "subject",
+                "from",
+                "internetMessageHeaders",
+                "webLink"
+              ],
+              [
+                "subject",
+                "body",
+                "from",
+                "toRecipients",
+                "ccRecipients",
+                "receivedDateTime",
+                "hasAttachments"
+              ]
+            ],
+            "description": "List of message properties to include in the response. Each item is a property name. MUST be provided as a list. Reduces data transfer and improves performance. Common fields: id, subject, from, toRecipients, ccRecipients, receivedDateTime, sentDateTime, body, bodyPreview, hasAttachments, webLink, internetMessageHeaders, isRead, importance, categories. Leave empty to return all fields."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "AdeleV@contoso.onmicrosoft.com"
+            ],
+            "description": "User's email address, UPN, or 'me' for the currently authenticated user."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "Unique ID of the Outlook email message to retrieve."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_PROFILE",
+      "description": "Retrieves the Microsoft Outlook profile for a specified user.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetProfileRequest",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "AdeleV@contoso.onmicrosoft.com"
+            ],
+            "description": "The user's unique identifier or principal name. Use 'me' to get the profile of the authenticated user."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_SCHEDULE",
+      "description": "Retrieves free/busy schedule information for specified email addresses within a defined time window.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetScheduleRequest",
+        "required": [
+          "Schedules",
+          "StartTime",
+          "EndTime"
+        ],
+        "properties": {
+          "EndTime": {
+            "type": "object",
+            "title": "End Time",
+            "required": [
+              "dateTime",
+              "timeZone"
+            ],
+            "properties": {
+              "dateTime": {
+                "type": "string",
+                "title": "Date Time",
+                "examples": [
+                  "2024-07-15T09:00:00",
+                  "2024-12-25T18:30:00"
+                ],
+                "description": "A single point in time, expressed in a combined date and time format (ISO 8601). Example: '2023-10-26T10:00:00'."
+              },
+              "timeZone": {
+                "type": "string",
+                "title": "Time Zone",
+                "examples": [
+                  "UTC",
+                  "Eastern Standard Time",
+                  "Pacific Standard Time"
+                ],
+                "description": "The time zone for the 'dateTime'. Uses standard time zone names. Example: 'Pacific Standard Time'."
+              }
+            },
+            "description": "The end date, time, and time zone for the period for which to retrieve schedules. The period can be up to 62 days.",
+            "additionalProperties": false
+          },
+          "Schedules": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Schedules",
+            "examples": [
+              [
+                "user1@example.com",
+                "room1@example.com"
+              ],
+              [
+                "user2@example.com"
+              ]
+            ],
+            "description": "A list of SMTP email addresses for users, distribution lists, or resources whose schedules are to be retrieved. Maximum of 20 addresses."
+          },
+          "StartTime": {
+            "type": "object",
+            "title": "Start Time",
+            "required": [
+              "dateTime",
+              "timeZone"
+            ],
+            "properties": {
+              "dateTime": {
+                "type": "string",
+                "title": "Date Time",
+                "examples": [
+                  "2024-07-15T09:00:00",
+                  "2024-12-25T18:30:00"
+                ],
+                "description": "A single point in time, expressed in a combined date and time format (ISO 8601). Example: '2023-10-26T10:00:00'."
+              },
+              "timeZone": {
+                "type": "string",
+                "title": "Time Zone",
+                "examples": [
+                  "UTC",
+                  "Eastern Standard Time",
+                  "Pacific Standard Time"
+                ],
+                "description": "The time zone for the 'dateTime'. Uses standard time zone names. Example: 'Pacific Standard Time'."
+              }
+            },
+            "description": "The start date, time, and time zone for the period for which to retrieve schedules.",
+            "additionalProperties": false
+          },
+          "availabilityViewInterval": {
+            "type": "string",
+            "title": "Availability View Interval",
+            "default": "30",
+            "examples": [
+              "15",
+              "30",
+              "60"
+            ],
+            "description": "The duration of each time slot in the availability view, specified in minutes. Minimum: 5, Maximum: 1440. Default: 30."
+          }
+        },
+        "description": "Request schema for retrieving free/busy schedule information."
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_SUPPORTED_LANGUAGES",
+      "description": "Tool to retrieve supported languages in the user's mailbox. Use when you need to display or select from available mailbox languages.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSupportedLanguagesRequest",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@contoso.onmicrosoft.com"
+            ],
+            "description": "The user's unique identifier or principal name. Use 'me' for the signed-in user."
+          }
+        },
+        "description": "Request schema for retrieving supported mailbox languages."
+      }
+    },
+    {
+      "name": "OUTLOOK_GET_SUPPORTED_TIME_ZONES",
+      "description": "Tool to retrieve supported time zones in the user's mailbox. Use when you need a list of time zones to display or choose from for event scheduling.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetSupportedTimeZonesRequest",
+        "properties": {
+          "timeZoneStandard": {
+            "enum": [
+              "Windows",
+              "Iana"
+            ],
+            "type": "string",
+            "title": "Time Zone Standard",
+            "default": null,
+            "examples": [
+              "Windows",
+              "Iana"
+            ],
+            "nullable": true,
+            "description": "Specifies the time zone format to return. Supported values: 'Windows' or 'Iana'. Default is 'Windows' if not specified."
+          }
+        },
+        "description": "Request schema for retrieving supported time zones."
+      }
+    },
+    {
+      "name": "OUTLOOK_LIST_CALENDARS",
+      "description": "Tool to list calendars in the signed-in user's mailbox. Use when you need to retrieve calendars with optional OData queries.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListCalendarsRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              5,
+              10
+            ],
+            "nullable": true,
+            "description": "Maximum number of calendars to return (OData $top)."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0,
+              5
+            ],
+            "nullable": true,
+            "description": "Number of calendars to skip (OData $skip)."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "startswith(name,'Team')"
+            ],
+            "nullable": true,
+            "description": "OData filter expression (OData $filter)."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": null,
+            "examples": [
+              [
+                "id",
+                "name",
+                "owner"
+              ]
+            ],
+            "nullable": true,
+            "description": "Properties to include (OData $select)."
+          },
+          "orderby": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Orderby",
+            "default": null,
+            "examples": [
+              [
+                "name asc"
+              ]
+            ],
+            "nullable": true,
+            "description": "Order by expressions (OData $orderby)."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User ID or userPrincipalName. Use 'me' for the signed-in user."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_LIST_CONTACTS",
+      "description": "Retrieves a user's Microsoft Outlook contacts, from the default or a specified contact folder.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListOutlookContactsRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 10,
+            "examples": [
+              "25",
+              "50"
+            ],
+            "description": "Maximum number of contacts to retrieve."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "startsWith(displayName,'B')",
+              "givenName eq 'John' and surname eq 'Doe'"
+            ],
+            "nullable": true,
+            "description": "OData V4 filter expression for targeted retrieval."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": [],
+            "examples": [
+              [
+                "displayName",
+                "emailAddresses"
+              ],
+              [
+                "givenName",
+                "surname",
+                "companyName"
+              ]
+            ],
+            "description": "List of specific contact properties to retrieve. Each item is a property name. MUST be provided as a list. If empty, a default set of properties is returned."
+          },
+          "orderby": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Orderby",
+            "default": [],
+            "examples": [
+              [
+                "displayName asc"
+              ],
+              [
+                "surname desc",
+                "givenName asc"
+              ]
+            ],
+            "description": "List of properties to sort results by. Each item is a string like 'displayName asc' or 'createdDateTime desc'. MUST be provided as a list, even for single sort criteria. 'asc' is default."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "AdeleV@contoso.onmicrosoft.com"
+            ],
+            "description": "User Principal Name (UPN) or ID of the user. 'me' refers to the authenticated user."
+          },
+          "contact_folder_id": {
+            "type": "string",
+            "title": "Contact Folder Id",
+            "default": null,
+            "nullable": true,
+            "description": "ID of a specific contact folder. If omitted, contacts are retrieved from the default contact folder."
+          }
+        },
+        "description": "Defines the request parameters for listing Outlook contacts."
+      }
+    },
+    {
+      "name": "OUTLOOK_LIST_EMAIL_RULES",
+      "description": "List all email rules from inbox",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListEmailRulesRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "maximum": 999,
+            "minimum": 1,
+            "examples": [
+              10,
+              50,
+              100
+            ],
+            "nullable": true,
+            "description": "Number of rules to retrieve. Default is 100."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_LIST_EVENT_ATTACHMENTS",
+      "description": "Tool to list attachments for a specific Outlook calendar event. Use when you have an event ID and need to view its attachments.",
+      "inputSchema": {
+        "type": "object",
+        "title": "GetEventAttachmentRequest",
+        "required": [
+          "event_id"
+        ],
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "minimum": 1,
+            "examples": [
+              10
+            ],
+            "nullable": true,
+            "description": "Maximum number of attachments to return (OData $top)."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0
+            ],
+            "nullable": true,
+            "description": "Number of attachments to skip (OData $skip)."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "startswith(name,'Agenda')"
+            ],
+            "nullable": true,
+            "description": "OData filter string to filter the attachments (OData $filter)."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": null,
+            "examples": [
+              [
+                "id",
+                "name",
+                "contentType"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of attachment properties to include (OData $select)."
+          },
+          "orderby": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Orderby",
+            "default": null,
+            "examples": [
+              [
+                "name asc"
+              ]
+            ],
+            "nullable": true,
+            "description": "Order by clauses to sort the results (OData $orderby)."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "The user's primary SMTP address, UPN, or 'me' for the signed-in user."
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id",
+            "examples": [
+              "AAMkAGI2TG9tYVyGdUHg=="
+            ],
+            "description": "The unique identifier of the calendar event to retrieve attachments for."
+          }
+        },
+        "description": "Request parameters for retrieving attachments of a specific Outlook calendar event."
+      }
+    },
+    {
+      "name": "OUTLOOK_LIST_EVENTS",
+      "description": "Retrieves events from a user's Outlook calendar via Microsoft Graph API. Supports primary/secondary/shared calendars, pagination, filtering, property selection, sorting, and timezone specification. Use calendar_id to access non-primary calendars.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListEventsRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 10,
+            "examples": [
+              "10",
+              "50",
+              "100"
+            ],
+            "description": "Maximum number of events to retrieve per page for pagination."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "default": 0,
+            "examples": [
+              "0",
+              "10",
+              "20"
+            ],
+            "description": "Number of initial events to bypass, used for pagination."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": "",
+            "examples": [
+              "start/dateTime ge '2024-07-01T00:00:00Z'",
+              "contains(subject, 'Project Review') and categories/any(c:c eq 'Work')"
+            ],
+            "description": "OData query string to filter events (e.g., \"start/dateTime ge 'YYYY-MM-DDTHH:MM:SSZ'\"); string literals use single quotes."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": null,
+            "examples": [
+              [
+                "subject",
+                "start",
+                "end",
+                "location"
+              ],
+              [
+                "id",
+                "subject",
+                "organizer",
+                "webLink"
+              ],
+              [
+                "body"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of specific event property names to return. Each item is a property name like 'subject' or 'start'. MUST be provided as a list. If omitted, a default set of properties is returned."
+          },
+          "orderby": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Orderby",
+            "default": null,
+            "examples": [
+              [
+                "start/dateTime desc"
+              ],
+              [
+                "subject asc",
+                "importance desc"
+              ],
+              [
+                "lastModifiedDateTime"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of properties to sort results by. Each item is a string like 'start/dateTime desc' or 'subject asc'. MUST be provided as a list, even for single sort criteria. Use 'asc' (default) or 'desc' for order."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "john.doe@example.com"
+            ],
+            "description": "Email address of the target user (or 'me' for authenticated user), identifying the calendar for event listing."
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": "UTC",
+            "examples": [
+              "America/New_York",
+              "Eastern Standard Time",
+              "UTC",
+              "Europe/London"
+            ],
+            "description": "Preferred IANA or Windows timezone for event start/end times (e.g., 'America/New_York'); defaults to UTC if unspecified/invalid."
+          },
+          "calendar_id": {
+            "type": "string",
+            "title": "Calendar Id",
+            "default": null,
+            "examples": [
+              "AAMkAGI2TG93AAA=",
+              "AAMkADAwATY3ZmYAZS1h"
+            ],
+            "nullable": true,
+            "description": "Optional ID of a specific calendar to retrieve events from.If not provided, uses the primary calendar. Get calendar IDs using LIST_CALENDARS action. Useful for accessing secondary calendars, shared calendars, or team calendars."
+          },
+          "expand_recurring_events": {
+            "type": "boolean",
+            "title": "Expand Recurring Events",
+            "default": false,
+            "examples": [
+              true,
+              false
+            ],
+            "description": "When true, automatically expands recurring events to show actual occurrences within the filtered date range instead of series masters. When false (default), returns series masters as before."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_LIST_MAIL_FOLDERS",
+      "description": "Tool to list a user's top-level mail folders. Use when you need folders like Inbox, Drafts, Sent Items; set include_hidden_folders=True to include hidden folders.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListMailFoldersRequest",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's id, userPrincipalName, or 'me' for the signed-in user."
+          },
+          "include_hidden_folders": {
+            "type": "boolean",
+            "title": "Include Hidden Folders",
+            "default": false,
+            "examples": [
+              true,
+              false
+            ],
+            "description": "Include hidden mail folders (isHidden=true) when set to true."
+          }
+        },
+        "description": "Request parameters for listing mail folders in a user's mailbox."
+      }
+    },
+    {
+      "name": "OUTLOOK_LIST_MESSAGES",
+      "description": "Retrieves a list of email messages from a specified mail folder in an Outlook mailbox, with options for filtering (including by conversationId to get all messages in a thread), pagination, and sorting; ensure 'user_id' and 'folder' are valid, and all date/time strings are in ISO 8601 format.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListMessagesRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 10,
+            "examples": [
+              "10",
+              "50",
+              "100"
+            ],
+            "description": "Maximum number of messages to return per request (1-1000). Always check response['@odata.nextLink'] for pagination. If present, make additional requests with that URL (includes $skiptoken). Repeat until '@odata.nextLink' is absent. For large mailboxes (1000+ messages), always paginate."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "default": 0,
+            "examples": [
+              "0",
+              "10",
+              "20"
+            ],
+            "description": "Number of messages to skip from the beginning of the result set, for pagination."
+          },
+          "folder": {
+            "type": "string",
+            "title": "Folder",
+            "default": "inbox",
+            "examples": [
+              "inbox",
+              "sentitems",
+              "AAMkAGI0ZjExAAA="
+            ],
+            "description": "ID or well-known name of the mail folder. Well-known names: inbox, sentitems, drafts, deleteditems, outbox, junkemail. Or use a valid folder ID."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "examples": [
+              [
+                "subject",
+                "from",
+                "receivedDateTime"
+              ]
+            ],
+            "description": "List of message properties to include. Valid properties: id, subject, from, toRecipients, ccRecipients, bccRecipients, receivedDateTime, sentDateTime, hasAttachments, importance, isRead, body, bodyPreview, categories, conversationId, conversationIndex, flag, internetMessageHeaders, parentFolderId, replyTo, sender, webLink, isDraft, isReadReceiptRequested, isDeliveryReceiptRequested, changeKey, createdDateTime, lastModifiedDateTime, inferenceClassification, size, internetMessageId. Note: attachments is not selectable."
+          },
+          "is_read": {
+            "type": "boolean",
+            "title": "Is Read",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Filter by read status: 'true' for read, 'false' for unread. Unspecified means no filter by read status."
+          },
+          "orderby": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Orderby",
+            "default": [
+              "receivedDateTime desc"
+            ],
+            "examples": [
+              [
+                "receivedDateTime desc"
+              ],
+              [
+                "receivedDateTime desc",
+                "subject asc"
+              ]
+            ],
+            "description": "List of properties to sort results by, with direction. Each item is a string like 'receivedDateTime desc' or 'subject asc'. Default is 'receivedDateTime desc'. Cannot be used with sentDateTime filters in Sent folder."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "examples": [
+              "Project Update Q3",
+              "Invoice #123",
+              "Meeting Notes"
+            ],
+            "nullable": true,
+            "description": "Filter by exact match of the subject line. Special characters like apostrophes, brackets will be automatically escaped. For complex subject searches, consider using 'Search Messages' instead."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "Target user's email or 'me' for authenticated user. For delegated access, use shared mailbox or delegated user's email."
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Categories",
+            "examples": [
+              [
+                "Work",
+                "Urgent"
+              ]
+            ],
+            "description": "Filter by categories (case-sensitive); matches if tagged with any specified category."
+          },
+          "importance": {
+            "type": "string",
+            "title": "Importance",
+            "default": null,
+            "examples": [
+              "high",
+              "normal",
+              "low"
+            ],
+            "nullable": true,
+            "description": "Filter by importance: 'low', 'normal', or 'high'."
+          },
+          "from_address": {
+            "type": "string",
+            "title": "From Address",
+            "default": null,
+            "examples": [
+              "sender@example.com"
+            ],
+            "nullable": true,
+            "description": "Filter by the sender's exact email address. NOTE: This filter is applied client-side on the returned results, not server-side."
+          },
+          "conversationId": {
+            "type": "string",
+            "title": "Conversation Id",
+            "default": null,
+            "examples": [
+              "AQQkADAwATY3ZmYAZS1hYQAzNC1lODkwLTAwAi0wMAoAEADJzjh8m93SQbP6BUCZcIuc"
+            ],
+            "nullable": true,
+            "description": "Filter messages by conversation ID to retrieve all messages in a specific email thread."
+          },
+          "has_attachments": {
+            "type": "boolean",
+            "title": "Has Attachments",
+            "default": null,
+            "nullable": true,
+            "description": "Filter by attachment presence: 'true' for messages with attachments, 'false' for those without. NOTE: This filter is applied client-side on the returned results."
+          },
+          "subject_contains": {
+            "type": "string",
+            "title": "Subject Contains",
+            "default": null,
+            "examples": [
+              "budget",
+              "report"
+            ],
+            "nullable": true,
+            "description": "Filter messages where the subject contains the specified case-insensitive substring. NOTE: This filter is applied client-side on the returned results. For better performance, use 'Search Messages' instead."
+          },
+          "subject_endswith": {
+            "type": "string",
+            "title": "Subject Endswith",
+            "default": null,
+            "examples": [
+              "- Confidential"
+            ],
+            "nullable": true,
+            "description": "Filter messages where the subject ends with the specified case-insensitive string. NOTE: This filter is applied client-side on the returned results. For better performance, use 'Search Messages' instead."
+          },
+          "sent_date_time_gt": {
+            "type": "string",
+            "title": "Sent Date Time Gt",
+            "default": null,
+            "examples": [
+              "2023-01-10T14:30:00Z"
+            ],
+            "nullable": true,
+            "description": "Filter messages sent after this ISO 8601 timestamp."
+          },
+          "sent_date_time_lt": {
+            "type": "string",
+            "title": "Sent Date Time Lt",
+            "default": null,
+            "examples": [
+              "2023-02-20T10:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Filter messages sent before this ISO 8601 timestamp."
+          },
+          "subject_startswith": {
+            "type": "string",
+            "title": "Subject Startswith",
+            "default": null,
+            "examples": [
+              "[Action Required]"
+            ],
+            "nullable": true,
+            "description": "Filter messages where the subject starts with the specified case-insensitive string."
+          },
+          "received_date_time_ge": {
+            "type": "string",
+            "title": "Received Date Time Ge",
+            "default": null,
+            "examples": [
+              "2023-03-15T08:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Filter messages received on or after this ISO 8601 timestamp."
+          },
+          "received_date_time_gt": {
+            "type": "string",
+            "title": "Received Date Time Gt",
+            "default": null,
+            "examples": [
+              "2023-01-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Filter messages received after this ISO 8601 timestamp (e.g., '2023-01-01T00:00:00Z')."
+          },
+          "received_date_time_le": {
+            "type": "string",
+            "title": "Received Date Time Le",
+            "default": null,
+            "examples": [
+              "2023-03-31T23:59:59Z"
+            ],
+            "nullable": true,
+            "description": "Filter messages received on or before this ISO 8601 timestamp."
+          },
+          "received_date_time_lt": {
+            "type": "string",
+            "title": "Received Date Time Lt",
+            "default": null,
+            "examples": [
+              "2023-04-01T00:00:00Z"
+            ],
+            "nullable": true,
+            "description": "Filter messages received before this ISO 8601 timestamp."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_LIST_OUTLOOK_ATTACHMENTS",
+      "description": "Lists metadata (like name, size, and type, but not `contentBytes`) for all attachments of a specified Outlook email message.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListOutlookAttachmentsRequest",
+        "required": [
+          "message_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "AdeleV@contoso.onmicrosoft.com"
+            ],
+            "description": "The unique identifier of the user. Use the user's UPN (e.g., 'AdeleV@contoso.onmicrosoft.com') or 'me' for the currently authenticated user. This specifies the mailbox to query."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "The unique identifier of the email message from which to retrieve attachments. This ID is specific to the Outlook message."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_LIST_REMINDERS",
+      "description": "Tool to retrieve reminders for events occurring within a specified time range. Use when you need to see upcoming reminders between two datetimes.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListRemindersRequest",
+        "required": [
+          "startDateTime",
+          "endDateTime"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@contoso.onmicrosoft.com"
+            ],
+            "description": "User Principal Name or ID. Use 'me' to indicate the signed-in user."
+          },
+          "endDateTime": {
+            "type": "string",
+            "title": "End Date Time",
+            "examples": [
+              "2023-10-26T20:00:00.0000000",
+              "2024-01-01T23:59:59.0000000"
+            ],
+            "description": "The end date and time in ISO 8601 format defining the window for reminders. Example: '2023-10-26T20:00:00.0000000'."
+          },
+          "startDateTime": {
+            "type": "string",
+            "title": "Start Date Time",
+            "examples": [
+              "2023-10-26T19:00:00.0000000",
+              "2024-01-01T00:00:00.0000000"
+            ],
+            "description": "The start date and time in ISO 8601 format defining the window for reminders. Example: '2023-10-26T19:00:00.0000000'."
+          }
+        },
+        "description": "Request schema for retrieving event reminders within a time window."
+      }
+    },
+    {
+      "name": "OUTLOOK_LIST_USERS",
+      "description": "Tool to list users in Microsoft Entra ID. Use when you need to retrieve a paginated list of users, optionally filtering or selecting specific properties.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ListUsersRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": null,
+            "maximum": 999,
+            "minimum": 1,
+            "examples": [
+              50,
+              100
+            ],
+            "nullable": true,
+            "description": "Maximum number of users to return (OData $top). Default page size is 100, maximum is 999."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "default": null,
+            "minimum": 0,
+            "examples": [
+              0,
+              50
+            ],
+            "nullable": true,
+            "description": "Number of users to skip (OData $skip) for pagination."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "startswith(displayName,'J')",
+              "accountEnabled eq true"
+            ],
+            "nullable": true,
+            "description": "OData filter expression to restrict returned users (OData $filter)."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "default": null,
+            "examples": [
+              [
+                "displayName",
+                "mail",
+                "userPrincipalName"
+              ]
+            ],
+            "nullable": true,
+            "description": "List of user properties to include in the response (OData $select)."
+          }
+        },
+        "description": "Request schema for listing users in Microsoft Entra ID (Azure AD)."
+      }
+    },
+    {
+      "name": "OUTLOOK_MOVE_MESSAGE",
+      "description": "Move a message to another folder within the specified user's mailbox. This creates a new copy of the message in the destination folder and removes the original message.",
+      "inputSchema": {
+        "type": "object",
+        "title": "MoveMessageRequest",
+        "required": [
+          "message_id",
+          "destination_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's email address, UPN, or 'me' for the currently authenticated user."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "Unique ID of the Outlook email message to move."
+          },
+          "destination_id": {
+            "type": "string",
+            "title": "Destination Id",
+            "examples": [
+              "deleteditems",
+              "inbox",
+              "AAMkADhAAAAAAEKAAA="
+            ],
+            "description": "The destination folder ID, or a well-known folder name (e.g., 'inbox', 'deleteditems', 'drafts', 'sentitems')."
+          }
+        },
+        "description": "Request parameters for moving a message to another folder."
+      }
+    },
+    {
+      "name": "OUTLOOK_QUERY_EMAILS",
+      "description": "Primary tool for querying Outlook emails with custom OData filters. Build precise server-side filters for dates, read status, importance, subjects, attachments, and conversations. Best for structured queries on message metadata. Returns up to 100 messages per request with pagination support. \u2022 Server-side filters: dates, importance, isRead, hasAttachments, subjects, conversationId \u2022 CRITICAL: Always check response['@odata.nextLink'] for pagination \u2022 Limitations: Recipient/sender/category filters require OUTLOOK_SEARCH_MESSAGES \u2022 For keyword/body search: Use OUTLOOK_SEARCH_MESSAGES (KQL syntax)",
+      "inputSchema": {
+        "type": "object",
+        "title": "QueryEmailsRequest",
+        "properties": {
+          "top": {
+            "type": "integer",
+            "title": "Top",
+            "default": 100,
+            "maximum": 1000,
+            "minimum": 1,
+            "examples": [
+              10,
+              50,
+              100,
+              500
+            ],
+            "description": "Maximum number of messages to return per request (1-1000). Default is 100. IMPORTANT: For large mailboxes, always check response['@odata.nextLink'] to fetch remaining messages. Pagination example: 1) Call with top=100, 2) Check if '@odata.nextLink' exists in response, 3) If present, make a new request to that full URL (includes $skiptoken), 4) Repeat until '@odata.nextLink' is absent."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "default": 0,
+            "minimum": 0,
+            "examples": [
+              0,
+              100,
+              200
+            ],
+            "description": "Number of messages to skip for pagination. NOTE: For large result sets, prefer using '@odata.nextLink' from responses instead of manual skip."
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter",
+            "default": null,
+            "examples": [
+              "isRead eq false",
+              "importance eq 'high'",
+              "hasAttachments eq true",
+              "receivedDateTime ge 2025-10-01T00:00:00Z",
+              "receivedDateTime ge 2025-10-01T00:00:00Z and receivedDateTime lt 2025-10-08T00:00:00Z",
+              "isRead eq false and receivedDateTime ge 2025-10-01T00:00:00Z",
+              "importance eq 'high' and hasAttachments eq true",
+              "startswith(subject, '[Task Update]')",
+              "startswith(subject, 'Re:') and hasAttachments eq true",
+              "subject eq 'Weekly Report'",
+              "conversationId eq 'AQQkADAwATY3ZmYAZS1hYQAzNC1lODkwLTAwAi0wMAoAEADJzjh8m93SQbP6BUCZcIuc'",
+              "sentDateTime gt 2025-10-01T14:30:00Z and sentDateTime lt 2025-10-01T18:00:00Z",
+              "isDraft eq false and isRead eq false and importance eq 'high'",
+              "(isRead eq false or importance eq 'high') and receivedDateTime ge 2025-10-01T00:00:00Z",
+              "(isRead eq false or importance eq 'high') and hasAttachments eq true"
+            ],
+            "nullable": true,
+            "description": "OData $filter query string to filter email messages. Syntax: 'field operator value' combined with 'and', 'or', 'not'.\n\n        **Operators:** eq, ne, lt, le, gt, ge, startswith(), endswith(), contains() (limited support), any()\n\n        **Common Fields (Server-Side Filterable):**\n        - `isRead` - Boolean: true/false\n        - `importance` - String: 'low', 'normal', 'high'\n        - `subject` - String (exact match or startswith)\n        - `hasAttachments` - Boolean: true/false\n        - `receivedDateTime`, `sentDateTime` - DateTime (ISO 8601: '2025-10-01T00:00:00Z')\n        - `conversationId` - String (exact match)\n        - `categories` - Array (use any() operator)\n        - `toRecipients`, `ccRecipients`, `bccRecipients` - Arrays of recipients (use any())\n        - `isDraft`, `isRead`, `flag/flagStatus` - Boolean/String flags\n\n        **Collection Filtering (LIMITED SUPPORT):**\n        - \u26a0\ufe0f Recipients (toRecipients, ccRecipients): NOT supported without advanced query headers\n\n        **Date Filtering:**\n        - Dates MUST be in ISO 8601 format with time zone: '2025-10-01T00:00:00Z'\n        - Use ge (>=), gt (>), le (<=), lt (<) operators\n        - Example: `receivedDateTime ge 2025-10-01T00:00:00Z and receivedDateTime lt 2025-10-02T00:00:00Z`\n\n        **String Filtering:**\n        - Exact match: `subject eq 'Meeting Notes'`\n        - Starts with: `startswith(subject, '[Action Required]')`\n        - Escape single quotes by doubling: `subject eq 'Owner''s Manual'`\n\n        **Complex Nested Properties (NOT directly filterable):**\n        - `from/emailAddress/address` - Use OUTLOOK_SEARCH_MESSAGES or client-side filtering instead\n        - `body/content` - Use OUTLOOK_SEARCH_MESSAGES for body text search\n\n        **Combining Conditions:**\n        - AND: `isRead eq false and importance eq 'high'`\n        - OR: `importance eq 'high' or importance eq 'low'`\n        - NOT: `not (isRead eq true)`\n        - Grouping: `(isRead eq false or importance eq 'high') and hasAttachments eq true`\n"
+          },
+          "folder": {
+            "type": "string",
+            "title": "Folder",
+            "default": "inbox",
+            "examples": [
+              "inbox",
+              "sentitems",
+              "drafts",
+              "AAMkAGI0ZjExAAA="
+            ],
+            "description": "ID or well-known name of the mail folder. Well-known names: 'inbox', 'sentitems', 'drafts', 'deleteditems', 'outbox', 'junkemail' (case-insensitive). Or use a valid folder ID."
+          },
+          "select": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Select",
+            "examples": [
+              [
+                "id",
+                "subject",
+                "from",
+                "receivedDateTime"
+              ],
+              [
+                "id",
+                "subject",
+                "from",
+                "receivedDateTime",
+                "webLink"
+              ],
+              [
+                "id",
+                "subject",
+                "from",
+                "toRecipients",
+                "receivedDateTime",
+                "hasAttachments",
+                "webLink"
+              ],
+              [
+                "subject",
+                "from",
+                "bodyPreview",
+                "receivedDateTime",
+                "internetMessageHeaders"
+              ]
+            ],
+            "description": "List of message properties to include in the response. Reduces data transfer and improves performance. Common fields: id, subject, from, toRecipients, ccRecipients, receivedDateTime, sentDateTime, hasAttachments, importance, isRead, body, bodyPreview, categories, conversationId, webLink, internetMessageHeaders, isDraft, flag. Leave empty to return all fields."
+          },
+          "orderby": {
+            "type": "string",
+            "title": "Orderby",
+            "default": "receivedDateTime desc",
+            "examples": [
+              "receivedDateTime desc",
+              "sentDateTime desc",
+              "subject asc",
+              "importance desc,receivedDateTime desc",
+              "receivedDateTime asc"
+            ],
+            "nullable": true,
+            "description": "Comma-separated sort keys with direction. Format: 'field asc' or 'field desc'. Common fields: receivedDateTime, sentDateTime, subject, importance, from. NOTE: Ordering may be automatically disabled by Microsoft Graph API when using certain filters (e.g., subject exact match, conversationId) to avoid 'InefficientFilter' errors. In those cases, results will be unsorted."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "Target user's email or 'me' for authenticated user. IMPORTANT: 'me' uses the currently connected account. For cross-mailbox access, ensure you have Mail.Read or Mail.ReadWrite permissions on the target mailbox. 403 errors indicate insufficient delegated/application permissions."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_REPLY_EMAIL",
+      "description": "Sends a plain text reply to an Outlook email message, identified by `message_id`, allowing optional CC and BCC recipients.",
+      "inputSchema": {
+        "type": "object",
+        "title": "ReplyToEmailRequest",
+        "required": [
+          "message_id",
+          "comment"
+        ],
+        "properties": {
+          "comment": {
+            "type": "string",
+            "title": "Comment",
+            "examples": [
+              "Thank you for your email. I'll review and respond shortly."
+            ],
+            "maxLength": 10000,
+            "minLength": 1,
+            "description": "The plain text body of the reply email."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "user@example.com",
+              "me"
+            ],
+            "description": "The user's email address or 'me' to indicate the authenticated user. This specifies the mailbox from which the reply will be sent."
+          },
+          "cc_emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Cc Emails",
+            "default": [],
+            "examples": [
+              [
+                "jane.doe@example.com",
+                "other@example.com"
+              ]
+            ],
+            "description": "List of email addresses for CC recipients."
+          },
+          "bcc_emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Bcc Emails",
+            "default": [],
+            "examples": [
+              [
+                "manager@example.com",
+                "supervisor@example.com"
+              ]
+            ],
+            "description": "List of email addresses for BCC recipients."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "The unique ID of the message to reply to. This ID can be obtained from the `OUTLOOK_LIST_MESSAGES` action."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_SEARCH_MESSAGES",
+      "description": "Search Outlook messages using powerful KQL syntax. Supports sender (from:), recipient (to:, cc:), subject, date filters (received:, sent:), attachments, and boolean logic. Only works with Microsoft 365/Enterprise accounts (no @hotmail.com/@outlook.com). Examples: 'from:user@example.com AND received>=2025-10-01', 'to:info@jcdn.nl AND subject:invoice', 'received>today-30 AND hasattachment:yes'",
+      "inputSchema": {
+        "type": "object",
+        "title": "SearchMessagesRequest",
+        "properties": {
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "default": 25,
+            "description": "The maximum number of search results to return per page. Use with from_index for pagination."
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "default": "",
+            "examples": [
+              "project report",
+              "from:manager@example.com AND subject:budget",
+              "to:info@jcdn.nl AND (subject:toegangscontrole OR subject:beveiligingspoorten)",
+              "received>=2025-10-01 AND received<=2025-10-31",
+              "received>today-30 AND hasattachment:yes",
+              "from:example.com AND subject:invoice AND received:2025-10",
+              "to:team@example.com AND received>=2025-10-01",
+              "cc:manager@example.com OR to:manager@example.com"
+            ],
+            "description": "KQL (Keyword Query Language) search query string. Supports advanced syntax for precise searches.\n\n**Basic Syntax:**\n- Simple keywords: 'budget report'\n- Exact phrases: '\"quarterly review\"'\n- Boolean operators: 'urgent AND deadline' or 'invoice OR receipt'\n\n**Property Filters (prefix:value):**\n- from: Sender email - 'from:user@example.com' or 'from:example.com'\n- to: Recipient email - 'to:info@jcdn.nl'\n- cc: CC recipient - 'cc:manager@example.com'\n- subject: Subject line - 'subject:invoice'\n- received: Date received - 'received:2025-10-01' or 'received>=2025-10-01'\n- sent: Date sent - 'sent:2025-10-01' or 'sent>=2025-10-01'\n- hasattachment: Has files - 'hasattachment:yes' or 'hasattachment:no'\n\n**Date Operators:**\n- Exact: 'received:2025-10-01'\n- Greater/equal: 'received>=2025-10-01'\n- Less/equal: 'received<=2025-10-31'\n- Range: 'received:2025-10-01..2025-10-31'\n- Relative: 'received>today-7' (last 7 days)\n\n**Combining Filters:**\n- AND: 'from:user@example.com AND subject:invoice'\n- OR: 'to:sales@example.com OR to:support@example.com'\n- Complex: 'from:example.com AND (subject:urgent OR subject:important) AND received>=2025-10-01'\n\nNote: Can be empty if using fromEmail, subject, hasAttachments parameters (legacy support)."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "examples": [
+              "Project Update",
+              "Budget Proposal Q4",
+              "Action Required: Review Document"
+            ],
+            "nullable": true,
+            "description": "Text to search for within the message subject line. Legacy parameter - prefer using 'subject:text' in the query parameter for more control. Example: Instead of subject='invoice', use query='subject:invoice AND received>=2025-10-01'"
+          },
+          "fromEmail": {
+            "type": "string",
+            "title": "From Email",
+            "default": null,
+            "examples": [
+              "manager@example.com",
+              "example.com",
+              "contact@partner.com"
+            ],
+            "nullable": true,
+            "description": "Filter messages by sender email address or domain. Supports exact email ('user@example.com') or domain matching ('example.com'). Legacy parameter - prefer using 'from:email@example.com' in the query parameter for more flexibility. Note: Only Microsoft 365/Enterprise accounts are supported (no @hotmail.com or @outlook.com)."
+          },
+          "from_index": {
+            "type": "integer",
+            "title": "From Index",
+            "default": 0,
+            "description": "The 0-based starting index for pagination. To paginate: check response['value'][0]['hitsContainers'][0]['moreResultsAvailable']. If true, call again with from_index += size (e.g., 0 \u2192 25 \u2192 50). Message ID is in hits[]['hitId'], not hits[]['resource']['id']."
+          },
+          "hasAttachments": {
+            "type": "boolean",
+            "title": "Has Attachments",
+            "default": null,
+            "nullable": true,
+            "description": "Filters messages based on the presence of attachments. Legacy parameter - prefer using 'hasattachment:yes' or 'hasattachment:no' in the query parameter."
+          },
+          "enable_top_results": {
+            "type": "boolean",
+            "title": "Enable Top Results",
+            "default": false,
+            "description": "If `true`, sorts results by relevance; otherwise, sorts by date in descending order (newest first)."
+          }
+        },
+        "description": "Searches Outlook messages for Microsoft 365/Enterprise accounts using the Microsoft Search API."
+      }
+    },
+    {
+      "name": "OUTLOOK_SEND_DRAFT",
+      "description": "Tool to send an existing draft message. Use after creating a draft when you want to deliver it to recipients immediately. Example: Send a draft message with ID 'AAMkAG\u2026'.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SendDraftRequest",
+        "required": [
+          "message_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "The user's email address or 'me' to represent the authenticated user."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "AAMkAGVi..."
+            ],
+            "description": "The unique identifier of the draft message to send."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_SEND_EMAIL",
+      "description": "Sends an email with subject, body, recipients, and an optional attachment via Microsoft Graph API. Supports comma-separated email addresses in the to_email field for multiple recipients. Attachments require a non-empty file with valid name and mimetype.",
+      "inputSchema": {
+        "type": "object",
+        "title": "SendEmailRequest",
+        "required": [
+          "subject",
+          "body",
+          "to_email"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "examples": [
+              "Hello team, please find the attached report.",
+              "<h1>Project Phoenix</h1><p>Initial proposal attached.</p>"
+            ],
+            "description": "The content of the email body, plain text or HTML based on `is_html`."
+          },
+          "from": {
+            "type": "string",
+            "title": "From",
+            "default": null,
+            "examples": [
+              "shared.mailbox@contoso.com",
+              "alias@example.com"
+            ],
+            "nullable": true,
+            "description": "Optional From address to set on the message (send as/on behalf). Provide a single email address. Requires appropriate mailbox permissions."
+          },
+          "is_html": {
+            "type": "boolean",
+            "title": "Is Html",
+            "default": false,
+            "examples": [
+              "true",
+              "false"
+            ],
+            "description": "Specifies if the email body is HTML; `True` for HTML, `False` for plain text."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "examples": [
+              "Project Update",
+              "Important Announcement"
+            ],
+            "maxLength": 255,
+            "minLength": 1,
+            "description": "The subject line of the email."
+          },
+          "to_name": {
+            "type": "string",
+            "title": "To Name",
+            "default": null,
+            "examples": [
+              "Valued Customer",
+              "John Doe"
+            ],
+            "nullable": true,
+            "description": "The display name of the primary recipient."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "specific.user@example.com"
+            ],
+            "description": "The user's email address or the alias 'me' to represent the authenticated user."
+          },
+          "to_email": {
+            "type": "string",
+            "title": "To Email",
+            "examples": [
+              "recipient@example.com",
+              "john.doe@company.com",
+              "alice@example.com, bob@example.com"
+            ],
+            "description": "The primary recipient's email address(es). You can provide a single email or multiple emails separated by commas. For CC/BCC recipients, use the respective fields."
+          },
+          "cc_emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Cc Emails",
+            "default": [],
+            "examples": [
+              [
+                "jane.doe@example.com",
+                "cc.recipient@example.com"
+              ],
+              [
+                "team@company.com"
+              ]
+            ],
+            "description": "List of email addresses for CC recipients. Each email should be a separate string in the array. Do NOT pass comma-separated values as a single string."
+          },
+          "attachment": {
+            "type": "string",
+            "title": "FileUploadable",
+            "format": "path",
+            "description": "Optional file to attach. If provided, its name, mimetype, and content must be valid and non-empty.",
+            "file_uploadable": true
+          },
+          "bcc_emails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Bcc Emails",
+            "default": [],
+            "examples": [
+              [
+                "manager@example.com",
+                "supervisor@example.com"
+              ],
+              [
+                "hr@company.com"
+              ]
+            ],
+            "description": "List of email addresses for BCC recipients. Each email should be a separate string in the array. Do NOT pass comma-separated values as a single string."
+          },
+          "save_to_sent_items": {
+            "type": "boolean",
+            "title": "Save To Sent Items",
+            "default": true,
+            "examples": [
+              "true",
+              "false"
+            ],
+            "description": "Indicates if the email should be saved in 'Sent Items'."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_UPDATE_CALENDAR_EVENT",
+      "description": "Updates specified fields of an existing Outlook calendar event. Implementation note: To avoid unintentionally clearing properties, the action first fetches the existing event, merges only the provided fields, and then PATCHes the merged updates. Unspecified fields remain unchanged.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateEventRequest",
+        "required": [
+          "event_id"
+        ],
+        "properties": {
+          "body": {
+            "type": "object",
+            "title": "BodyContent",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "contentType",
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "string",
+                "title": "Content",
+                "examples": [
+                  "Let's meet to discuss the updated project details."
+                ],
+                "description": "The actual content of the event body, corresponding to the specified contentType."
+              },
+              "contentType": {
+                "type": "string",
+                "title": "Content Type",
+                "examples": [
+                  "HTML"
+                ],
+                "description": "The format of the event body. Must be 'Text' for plain text or 'HTML' for HTML content."
+              }
+            },
+            "description": "Event body with content type ('Text' or 'HTML') and the content. If omitted, the existing body remains unchanged.",
+            "additionalProperties": false
+          },
+          "show_as": {
+            "type": "string",
+            "title": "Show As",
+            "default": null,
+            "examples": [
+              "busy"
+            ],
+            "nullable": true,
+            "description": "Availability status for the event. Valid values: 'free', 'tentative', 'busy', 'oof'. If omitted, the existing status remains unchanged."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "examples": [
+              "Updated Team Meeting"
+            ],
+            "nullable": true,
+            "description": "New subject for the event. If provided as an empty string, the subject will be cleared. If omitted, the existing subject remains unchanged."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "description": "The identifier of the user whose calendar event is to be updated. Accepts the user's principal name, ID, or 'me' for the currently authenticated user."
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "The unique identifier of the calendar event to be updated. This ID can be obtained from the OUTLOOK_LIST_EVENTS action."
+          },
+          "location": {
+            "type": "object",
+            "title": "Location",
+            "default": null,
+            "examples": [
+              "{\"displayName\": \"Conference Room A\"}"
+            ],
+            "nullable": true,
+            "description": "Event location as a dictionary. If provided, replaces the existing primary location. Omit to leave unchanged.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "attendees": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "Attendee",
+              "required": [
+                "emailAddress",
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "title": "Type",
+                  "examples": [
+                    "required"
+                  ],
+                  "description": "The attendee's type. Valid values are 'required' or 'optional'."
+                },
+                "emailAddress": {
+                  "type": "object",
+                  "title": "Email Address",
+                  "required": [
+                    "address"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "title": "Name",
+                      "default": "",
+                      "examples": [
+                        "Jane Doe"
+                      ],
+                      "description": "The display name of the attendee."
+                    },
+                    "address": {
+                      "type": "string",
+                      "title": "Address",
+                      "examples": [
+                        "jane.doe@example.com"
+                      ],
+                      "description": "The complete email address of the attendee."
+                    }
+                  },
+                  "description": "The email address and optional name of the attendee.",
+                  "additionalProperties": false
+                }
+              }
+            },
+            "title": "Attendees",
+            "default": null,
+            "nullable": true,
+            "description": "Attendee list for the event. If provided, replaces the existing attendees. If omitted, attendees remain unchanged."
+          },
+          "time_zone": {
+            "type": "string",
+            "title": "Time Zone",
+            "default": null,
+            "examples": [
+              "America/Los_Angeles"
+            ],
+            "nullable": true,
+            "description": "Time zone for the provided start_datetime and/or end_datetime (IANA or Windows time zone names). If omitted, the existing event's time zone is used."
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Categories",
+            "default": null,
+            "nullable": true,
+            "description": "Category names to associate with the event. If provided (even empty), replaces the existing categories. If omitted, categories remain unchanged."
+          },
+          "end_datetime": {
+            "type": "string",
+            "title": "End Datetime",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2024-05-01T10:00:00"
+            ],
+            "nullable": true,
+            "description": "New end date and time for the event. Provide together with a time zone, or the current event's time zone will be used. Must be after start_datetime if both are provided. If omitted, the end time remains unchanged."
+          },
+          "start_datetime": {
+            "type": "string",
+            "title": "Start Datetime",
+            "format": "date-time",
+            "default": null,
+            "examples": [
+              "2024-05-01T09:00:00"
+            ],
+            "nullable": true,
+            "description": "New start date and time for the event. Provide together with a time zone, or the current event's time zone will be used. If omitted, the start time remains unchanged."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_UPDATE_CONTACT",
+      "description": "Updates an existing Outlook contact, identified by `contact_id` for the specified `user_id`, requiring at least one other field to be modified.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateContactRequest",
+        "required": [
+          "contact_id"
+        ],
+        "properties": {
+          "notes": {
+            "type": "string",
+            "title": "Notes",
+            "default": "",
+            "examples": [
+              "Met at the annual tech conference. Interested in collaboration."
+            ],
+            "description": "Personal notes about the contact (maps to 'personalNotes' in Microsoft Graph API)."
+          },
+          "surname": {
+            "type": "string",
+            "title": "Surname",
+            "default": "",
+            "examples": [
+              "Doe"
+            ],
+            "description": "Contact's surname (last name)."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "user@example.com"
+            ],
+            "description": "User's identifier; 'me' for the signed-in user, or user's principal name/ID."
+          },
+          "birthday": {
+            "type": "string",
+            "title": "Birthday",
+            "default": "",
+            "examples": [
+              "1985-07-20"
+            ],
+            "description": "Contact's birthday (YYYY-MM-DD format)."
+          },
+          "jobTitle": {
+            "type": "string",
+            "title": "Job Title",
+            "default": "",
+            "examples": [
+              "Senior Product Manager"
+            ],
+            "description": "Contact's job title."
+          },
+          "givenName": {
+            "type": "string",
+            "title": "Given Name",
+            "default": "",
+            "examples": [
+              "Jane"
+            ],
+            "description": "Contact's given (first) name."
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Categories",
+            "examples": [
+              "Business",
+              "Networking"
+            ],
+            "description": "Categories for organizing the contact."
+          },
+          "contact_id": {
+            "type": "string",
+            "title": "Contact Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "Unique identifier of the contact to update."
+          },
+          "department": {
+            "type": "string",
+            "title": "Department",
+            "default": "",
+            "examples": [
+              "Product Development"
+            ],
+            "description": "Contact's department."
+          },
+          "homePhones": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Home Phones",
+            "examples": [
+              "+1 425 555 0103"
+            ],
+            "description": "Contact's home phone numbers."
+          },
+          "companyName": {
+            "type": "string",
+            "title": "Company Name",
+            "default": "",
+            "examples": [
+              "Contoso Ltd."
+            ],
+            "description": "Contact's company name."
+          },
+          "displayName": {
+            "type": "string",
+            "title": "Display Name",
+            "default": "",
+            "examples": [
+              "Jane Doe"
+            ],
+            "description": "Contact's full display name."
+          },
+          "mobilePhone": {
+            "type": "string",
+            "title": "Mobile Phone",
+            "default": "",
+            "examples": [
+              "+1 425 555 0102"
+            ],
+            "description": "Contact's mobile phone number."
+          },
+          "businessPhones": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "properties": {}
+            },
+            "title": "Business Phones",
+            "examples": [
+              "+1 425 555 0100",
+              "+1 425 555 0101"
+            ],
+            "description": "Contact's business phone numbers."
+          },
+          "emailAddresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "EmailAddress",
+              "required": [
+                "address"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "default": "",
+                  "examples": [
+                    "Jane Doe"
+                  ],
+                  "description": "Display name for the email address."
+                },
+                "address": {
+                  "type": "string",
+                  "title": "Address",
+                  "examples": [
+                    "jane.doe@example.com"
+                  ],
+                  "description": "Email address."
+                }
+              }
+            },
+            "title": "Email Addresses",
+            "description": "Contact's email addresses."
+          },
+          "officeLocation": {
+            "type": "string",
+            "title": "Office Location",
+            "default": "",
+            "examples": [
+              "Building 1, Redmond Campus"
+            ],
+            "description": "Contact's office location."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_UPDATE_EMAIL",
+      "description": "Updates specified properties of an existing email message; `message_id` must identify a valid message within the specified `user_id`'s mailbox.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateEmailRequest",
+        "required": [
+          "message_id"
+        ],
+        "properties": {
+          "body": {
+            "type": "object",
+            "title": "BodyContent",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "contentType",
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "string",
+                "title": "Content",
+                "examples": [
+                  "<p>This is the <b>updated</b> email body.</p>",
+                  "This is a plain text update."
+                ],
+                "description": "The actual email body content, formatted according to the `contentType`. For example, if contentType is 'HTML', this would be HTML markup."
+              },
+              "contentType": {
+                "type": "string",
+                "title": "Content Type",
+                "examples": [
+                  "Text",
+                  "HTML"
+                ],
+                "description": "Specifies the format of the email body content. Must be either 'Text' (for plain text) or 'HTML' (for HTML markup)."
+              }
+            },
+            "description": "New body content (Text or HTML). If omitted, the existing message body remains unchanged.",
+            "additionalProperties": false
+          },
+          "is_read": {
+            "type": "boolean",
+            "title": "Is Read",
+            "default": null,
+            "examples": [
+              true,
+              false
+            ],
+            "nullable": true,
+            "description": "Mark message as read (True) or unread (False). If omitted, read status remains unchanged."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "default": null,
+            "examples": [
+              "Updated Subject",
+              "Re: Important Update"
+            ],
+            "nullable": true,
+            "description": "New subject line. If omitted, the existing subject remains unchanged. Provide empty string to clear the subject."
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": "me",
+            "examples": [
+              "me",
+              "specific.user@example.com"
+            ],
+            "description": "The UPN (User Principal Name) of the user whose mailbox contains the message, or 'me' for the currently authenticated user. This determines whose message is updated."
+          },
+          "importance": {
+            "type": "string",
+            "title": "Importance",
+            "default": "normal",
+            "examples": [
+              "low",
+              "normal",
+              "high"
+            ],
+            "description": "New importance level ('low', 'normal', 'high'). If omitted, importance is set to 'normal'."
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id",
+            "examples": [
+              "AAMkAGI2TAAA="
+            ],
+            "description": "The unique identifier of the email message to be updated. This ID is typically obtained from listing messages or creating/sending a message."
+          },
+          "cc_recipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "EmailAddress",
+              "required": [
+                "address"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "default": "",
+                  "examples": [
+                    "Katherine Hughes",
+                    "Support Team"
+                  ],
+                  "description": "Optional display name for the recipient (e.g., 'Katherine Hughes')."
+                },
+                "address": {
+                  "type": "string",
+                  "title": "Address",
+                  "examples": [
+                    "kat.hughes@example.com",
+                    "support@company.org"
+                  ],
+                  "description": "The SMTP email address of the recipient. For example, 'kat.hughes@example.com'."
+                }
+              }
+            },
+            "title": "Cc Recipients",
+            "description": "List of CC recipients; replaces all existing CCs. Omitting this field removes all current CC recipients."
+          },
+          "to_recipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "EmailAddress",
+              "required": [
+                "address"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "default": "",
+                  "examples": [
+                    "Katherine Hughes",
+                    "Support Team"
+                  ],
+                  "description": "Optional display name for the recipient (e.g., 'Katherine Hughes')."
+                },
+                "address": {
+                  "type": "string",
+                  "title": "Address",
+                  "examples": [
+                    "kat.hughes@example.com",
+                    "support@company.org"
+                  ],
+                  "description": "The SMTP email address of the recipient. For example, 'kat.hughes@example.com'."
+                }
+              }
+            },
+            "title": "To Recipients",
+            "description": "List of TO recipients; replaces all existing TOs. Omitting this field removes all current TO recipients."
+          },
+          "bcc_recipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "EmailAddress",
+              "required": [
+                "address"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "default": "",
+                  "examples": [
+                    "Katherine Hughes",
+                    "Support Team"
+                  ],
+                  "description": "Optional display name for the recipient (e.g., 'Katherine Hughes')."
+                },
+                "address": {
+                  "type": "string",
+                  "title": "Address",
+                  "examples": [
+                    "kat.hughes@example.com",
+                    "support@company.org"
+                  ],
+                  "description": "The SMTP email address of the recipient. For example, 'kat.hughes@example.com'."
+                }
+              }
+            },
+            "title": "Bcc Recipients",
+            "description": "List of BCC recipients; replaces all existing BCCs. Omitting this field removes all current BCC recipients."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_UPDATE_EMAIL_RULE",
+      "description": "Update an existing email rule",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateEmailRuleRequest",
+        "required": [
+          "ruleId"
+        ],
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "title": "Rule Id",
+            "examples": [
+              "AAMkAGI2NGNjOTExLTg0Y2ItNGIzYi05Y2Q0LWEwY2I4YWI1N2I4MQAuAAAAAACzMsPHYH6HQoSwfdpDx-2bAQCiGq-PkzMrQqW_3OC5Q5fDAAABBjsWAAA="
+            ],
+            "description": "ID of the email rule to update."
+          },
+          "actions": {
+            "type": "object",
+            "title": "MessageRuleActions",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "delete": {
+                "type": "boolean",
+                "title": "Delete",
+                "default": null,
+                "nullable": true,
+                "description": "Whether to delete matching messages."
+              },
+              "forwardTo": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Forward To",
+                "default": null,
+                "examples": [
+                  [
+                    "assistant@company.com"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of email addresses to forward matching messages to."
+              },
+              "markAsRead": {
+                "type": "boolean",
+                "title": "Mark As Read",
+                "default": null,
+                "nullable": true,
+                "description": "Whether to mark matching messages as read."
+              },
+              "copyToFolder": {
+                "type": "string",
+                "title": "Copy To Folder",
+                "default": null,
+                "examples": [
+                  "AAMkAGI2NGNjOTExLTg0Y2ItNGIzYi05Y2Q0LWEwY2I4YWI1N2I4MQAuAAAAAACzMsPHYH6HQoSwfdpDx-2bAQCiGq-PkzMrQqW_3OC5Q5fDAAABBjsWAAA="
+                ],
+                "nullable": true,
+                "description": "Folder ID to copy matching messages to."
+              },
+              "moveToFolder": {
+                "type": "string",
+                "title": "Move To Folder",
+                "default": null,
+                "examples": [
+                  "AAMkAGI2NGNjOTExLTg0Y2ItNGIzYi05Y2Q0LWEwY2I4YWI1N2I4MQAuAAAAAACzMsPHYH6HQoSwfdpDx-2bAQCiGq-PkzMrQqW_3OC5Q5fDAAABBjsWAAA="
+                ],
+                "nullable": true,
+                "description": "Folder ID to move matching messages to."
+              },
+              "assignCategories": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Assign Categories",
+                "default": null,
+                "examples": [
+                  [
+                    "Important",
+                    "Work"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of categories to assign to matching messages."
+              },
+              "stopProcessingRules": {
+                "type": "boolean",
+                "title": "Stop Processing Rules",
+                "default": null,
+                "examples": [
+                  true,
+                  false
+                ],
+                "nullable": true,
+                "description": "If true, stops processing other rules after this rule's actions execute. Useful for priority rules where you want to prevent lower-priority rules from running. Example: High-priority sender rule that moves to VIP folder and stops other filing rules."
+              }
+            },
+            "description": "Updated actions to take when the rule conditions are met.",
+            "additionalProperties": false
+          },
+          "sequence": {
+            "type": "integer",
+            "title": "Sequence",
+            "default": null,
+            "examples": [
+              1,
+              2,
+              5
+            ],
+            "nullable": true,
+            "description": "Updated order in which the rule is executed (lower numbers execute first)."
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "title": "Is Enabled",
+            "default": null,
+            "nullable": true,
+            "description": "Whether the rule should be enabled or disabled."
+          },
+          "conditions": {
+            "type": "object",
+            "title": "MessageRulePredicates",
+            "default": null,
+            "nullable": true,
+            "properties": {
+              "importance": {
+                "type": "string",
+                "title": "Importance",
+                "default": null,
+                "examples": [
+                  "high",
+                  "normal",
+                  "low"
+                ],
+                "nullable": true,
+                "description": "Message importance level to match (low, normal, high)."
+              },
+              "bodyContains": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Body Contains",
+                "default": null,
+                "examples": [
+                  [
+                    "urgent",
+                    "important"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of strings that the message body must contain."
+              },
+              "fromAddresses": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "From Addresses",
+                "default": null,
+                "examples": [
+                  [
+                    "boss@company.com",
+                    "client@external.com"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of exact sender email addresses to match (e.g., 'boss@company.com'). For partial/domain matching, use senderContains instead."
+              },
+              "hasAttachments": {
+                "type": "boolean",
+                "title": "Has Attachments",
+                "default": null,
+                "nullable": true,
+                "description": "Whether the message must have attachments."
+              },
+              "senderContains": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Sender Contains",
+                "default": null,
+                "examples": [
+                  [
+                    "noreply",
+                    "no-reply",
+                    "donotreply"
+                  ],
+                  [
+                    "@github.com",
+                    "@linkedin.com"
+                  ],
+                  [
+                    "notifications",
+                    "alerts",
+                    "automated"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of strings for partial sender email matching. If sender email contains ANY of these strings, rule triggers. Useful for domain matching (e.g., '@openai.com') or pattern matching (e.g., 'noreply', 'no-reply', 'notifications'). More flexible than fromAddresses which requires exact matches."
+              },
+              "subjectContains": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Subject Contains",
+                "default": null,
+                "examples": [
+                  [
+                    "meeting",
+                    "project"
+                  ]
+                ],
+                "nullable": true,
+                "description": "List of strings that the message subject must contain."
+              }
+            },
+            "description": "Updated conditions that must be met for the rule to apply.",
+            "additionalProperties": false
+          },
+          "displayName": {
+            "type": "string",
+            "title": "Display Name",
+            "default": null,
+            "examples": [
+              "High Priority Filter Updated"
+            ],
+            "nullable": true,
+            "maxLength": 255,
+            "description": "Updated display name for the email rule."
+          }
+        }
+      }
+    },
+    {
+      "name": "OUTLOOK_UPDATE_MAILBOX_SETTINGS",
+      "description": "Tool to update mailbox settings for the signed-in user. Use when you need to configure automatic replies, default time zone, language, or working hours. Example: schedule automatic replies for vacation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "UpdateMailboxSettingsRequest",
+        "properties": {
+          "language": {
+            "type": "object",
+            "title": "LocaleInfo",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "locale"
+            ],
+            "properties": {
+              "locale": {
+                "type": "string",
+                "title": "Locale",
+                "description": "Locale in ISO 639-1 format (e.g., 'en-US')."
+              },
+              "displayName": {
+                "type": "string",
+                "title": "Display Name",
+                "default": null,
+                "nullable": true,
+                "description": "Display name of the locale (e.g., 'English (United States)')."
+              }
+            },
+            "description": "Locale preferences for date/time formatting.",
+            "additionalProperties": false
+          },
+          "timeZone": {
+            "type": "string",
+            "title": "Time Zone",
+            "default": null,
+            "nullable": true,
+            "description": "Default mailbox time zone (e.g., 'Pacific Standard Time')."
+          },
+          "workingHours": {
+            "type": "object",
+            "title": "WorkingHours",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "daysOfWeek",
+              "startTime",
+              "endTime",
+              "timeZone"
+            ],
+            "properties": {
+              "endTime": {
+                "type": "string",
+                "title": "End Time",
+                "description": "Workday end time in HH:mm:ss."
+              },
+              "timeZone": {
+                "type": "object",
+                "title": "Time Zone",
+                "required": [
+                  "name",
+                  "bias",
+                  "standardOffset",
+                  "daylightOffset"
+                ],
+                "properties": {
+                  "bias": {
+                    "type": "integer",
+                    "title": "Bias",
+                    "description": "UTC offset in minutes."
+                  },
+                  "name": {
+                    "type": "string",
+                    "title": "Name",
+                    "description": "Time zone name for working hours (e.g., 'Pacific Standard Time')."
+                  },
+                  "daylightOffset": {
+                    "type": "object",
+                    "title": "Daylight Offset",
+                    "required": [
+                      "time",
+                      "dayOccurrence",
+                      "dayOfWeek",
+                      "month",
+                      "year"
+                    ],
+                    "properties": {
+                      "time": {
+                        "type": "string",
+                        "title": "Time",
+                        "description": "Time of day when the offset starts in HH:mm:ss."
+                      },
+                      "year": {
+                        "type": "integer",
+                        "title": "Year",
+                        "description": "Year for the offset rule."
+                      },
+                      "month": {
+                        "type": "integer",
+                        "title": "Month",
+                        "description": "Month for the offset rule (1-12)."
+                      },
+                      "dayOfWeek": {
+                        "enum": [
+                          "sunday",
+                          "monday",
+                          "tuesday",
+                          "wednesday",
+                          "thursday",
+                          "friday",
+                          "saturday"
+                        ],
+                        "type": "string",
+                        "title": "Day Of Week",
+                        "description": "Day of the week for the offset rule."
+                      },
+                      "dayOccurrence": {
+                        "type": "integer",
+                        "title": "Day Occurrence",
+                        "description": "Occurrence of the day of week within the month (1-5)."
+                      }
+                    },
+                    "description": "Daylight saving time offset rule.",
+                    "additionalProperties": false
+                  },
+                  "standardOffset": {
+                    "type": "object",
+                    "title": "Standard Offset",
+                    "required": [
+                      "time",
+                      "dayOccurrence",
+                      "dayOfWeek",
+                      "month",
+                      "year"
+                    ],
+                    "properties": {
+                      "time": {
+                        "type": "string",
+                        "title": "Time",
+                        "description": "Time of day when the offset starts in HH:mm:ss."
+                      },
+                      "year": {
+                        "type": "integer",
+                        "title": "Year",
+                        "description": "Year for the offset rule."
+                      },
+                      "month": {
+                        "type": "integer",
+                        "title": "Month",
+                        "description": "Month for the offset rule (1-12)."
+                      },
+                      "dayOfWeek": {
+                        "enum": [
+                          "sunday",
+                          "monday",
+                          "tuesday",
+                          "wednesday",
+                          "thursday",
+                          "friday",
+                          "saturday"
+                        ],
+                        "type": "string",
+                        "title": "Day Of Week",
+                        "description": "Day of the week for the offset rule."
+                      },
+                      "dayOccurrence": {
+                        "type": "integer",
+                        "title": "Day Occurrence",
+                        "description": "Occurrence of the day of week within the month (1-5)."
+                      }
+                    },
+                    "description": "Standard time offset rule.",
+                    "additionalProperties": false
+                  }
+                },
+                "description": "Time zone details for working hours.",
+                "additionalProperties": false
+              },
+              "startTime": {
+                "type": "string",
+                "title": "Start Time",
+                "description": "Workday start time in HH:mm:ss."
+              },
+              "daysOfWeek": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "sunday",
+                    "monday",
+                    "tuesday",
+                    "wednesday",
+                    "thursday",
+                    "friday",
+                    "saturday"
+                  ],
+                  "type": "string",
+                  "properties": {}
+                },
+                "title": "Days Of Week",
+                "description": "Days of the week for working hours."
+              }
+            },
+            "description": "Working hours configuration for the user.",
+            "additionalProperties": false
+          },
+          "automaticRepliesSetting": {
+            "type": "object",
+            "title": "AutomaticRepliesSetting",
+            "default": null,
+            "nullable": true,
+            "required": [
+              "status",
+              "externalAudience"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "disabled",
+                  "alwaysEnabled",
+                  "scheduled"
+                ],
+                "type": "string",
+                "title": "Status",
+                "description": "The automatic replies status. Possible values: 'disabled', 'alwaysEnabled', 'scheduled'."
+              },
+              "externalAudience": {
+                "enum": [
+                  "none",
+                  "contactsOnly",
+                  "all"
+                ],
+                "type": "string",
+                "title": "External Audience",
+                "description": "Audience for external automatic replies. Possible values: 'none', 'contactsOnly', 'all'."
+              },
+              "externalReplyMessage": {
+                "type": "string",
+                "title": "External Reply Message",
+                "default": null,
+                "nullable": true,
+                "description": "Automatic reply message sent to external senders."
+              },
+              "internalReplyMessage": {
+                "type": "string",
+                "title": "Internal Reply Message",
+                "default": null,
+                "nullable": true,
+                "description": "Automatic reply message sent to internal senders."
+              },
+              "scheduledEndDateTime": {
+                "type": "object",
+                "title": "DateTimeTimeZone",
+                "default": null,
+                "nullable": true,
+                "required": [
+                  "dateTime",
+                  "timeZone"
+                ],
+                "properties": {
+                  "dateTime": {
+                    "type": "string",
+                    "title": "Date Time",
+                    "description": "Date and time in ISO 8601 format."
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "title": "Time Zone",
+                    "description": "Time zone of the dateTime value."
+                  }
+                },
+                "description": "End date and time for scheduled automatic replies.",
+                "additionalProperties": false
+              },
+              "scheduledStartDateTime": {
+                "type": "object",
+                "title": "DateTimeTimeZone",
+                "default": null,
+                "nullable": true,
+                "required": [
+                  "dateTime",
+                  "timeZone"
+                ],
+                "properties": {
+                  "dateTime": {
+                    "type": "string",
+                    "title": "Date Time",
+                    "description": "Date and time in ISO 8601 format."
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "title": "Time Zone",
+                    "description": "Time zone of the dateTime value."
+                  }
+                },
+                "description": "Start date and time for scheduled automatic replies.",
+                "additionalProperties": false
+              }
+            },
+            "description": "Configuration for automatic replies.",
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 51,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/outlook/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "OUTLOOK_ADD_EVENT_ATTACHMENT",
+    "OUTLOOK_ADD_MAIL_ATTACHMENT",
+    "OUTLOOK_CALENDAR_CREATE_EVENT",
+    "OUTLOOK_CREATE_ATTACHMENT_UPLOAD_SESSION",
+    "OUTLOOK_CREATE_CALENDAR",
+    "OUTLOOK_CREATE_CONTACT",
+    "OUTLOOK_CREATE_CONTACT_FOLDER",
+    "OUTLOOK_CREATE_DRAFT",
+    "OUTLOOK_CREATE_DRAFT_REPLY",
+    "OUTLOOK_CREATE_EMAIL_RULE",
+    "OUTLOOK_CREATE_MAIL_FOLDER",
+    "OUTLOOK_CREATE_MASTER_CATEGORY",
+    "OUTLOOK_DELETE_CONTACT",
+    "OUTLOOK_DELETE_EMAIL_RULE",
+    "OUTLOOK_DELETE_EVENT",
+    "OUTLOOK_DELETE_MAIL_FOLDER",
+    "OUTLOOK_DOWNLOAD_OUTLOOK_ATTACHMENT",
+    "OUTLOOK_GET_CALENDAR_VIEW",
+    "OUTLOOK_GET_CONTACT",
+    "OUTLOOK_GET_CONTACT_FOLDERS",
+    "OUTLOOK_GET_EVENT",
+    "OUTLOOK_GET_MAILBOX_SETTINGS",
+    "OUTLOOK_GET_MAIL_DELTA",
+    "OUTLOOK_GET_MAIL_TIPS",
+    "OUTLOOK_GET_MASTER_CATEGORIES",
+    "OUTLOOK_GET_MESSAGE",
+    "OUTLOOK_GET_PROFILE",
+    "OUTLOOK_GET_SCHEDULE",
+    "OUTLOOK_GET_SUPPORTED_LANGUAGES",
+    "OUTLOOK_GET_SUPPORTED_TIME_ZONES",
+    "OUTLOOK_LIST_CALENDARS",
+    "OUTLOOK_LIST_CONTACTS",
+    "OUTLOOK_LIST_EMAIL_RULES",
+    "OUTLOOK_LIST_EVENT_ATTACHMENTS",
+    "OUTLOOK_LIST_EVENTS",
+    "OUTLOOK_LIST_MAIL_FOLDERS",
+    "OUTLOOK_LIST_MESSAGES",
+    "OUTLOOK_LIST_OUTLOOK_ATTACHMENTS",
+    "OUTLOOK_LIST_REMINDERS",
+    "OUTLOOK_LIST_USERS",
+    "OUTLOOK_MOVE_MESSAGE",
+    "OUTLOOK_QUERY_EMAILS",
+    "OUTLOOK_REPLY_EMAIL",
+    "OUTLOOK_SEARCH_MESSAGES",
+    "OUTLOOK_SEND_DRAFT",
+    "OUTLOOK_SEND_EMAIL",
+    "OUTLOOK_UPDATE_CALENDAR_EVENT",
+    "OUTLOOK_UPDATE_CONTACT",
+    "OUTLOOK_UPDATE_EMAIL",
+    "OUTLOOK_UPDATE_EMAIL_RULE",
+    "OUTLOOK_UPDATE_MAILBOX_SETTINGS"
+  ]
+}

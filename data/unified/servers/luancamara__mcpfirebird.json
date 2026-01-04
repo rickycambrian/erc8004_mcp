@@ -1,0 +1,650 @@
+{
+  "id": "luancamara/mcpfirebird",
+  "name": "luancamara/mcpfirebird",
+  "display_name": "mcpfirebird",
+  "version": null,
+  "description": "Run queries, explore schemas, and retrieve table data with ease. Diagnose performance with execution plans, index recommendations, and table statistics to speed up workloads. Safeguard your database with backup, restore, validation, and health checks.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "execute-query",
+      "title": "Executes a SQL query in the Firebird database. Uses FIRST/ROWS for pagination.",
+      "description": "Executes a SQL query in the Firebird database. Uses FIRST/ROWS for pagination.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sql"
+        ],
+        "properties": {
+          "sql": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SQL query to execute (Firebird uses FIRST/ROWS for pagination instead of LIMIT)"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": [
+                        "string",
+                        "number"
+                      ]
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": "Parameters for parameterized queries to prevent SQL injection"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list-tables",
+      "title": "Lists all user tables in the current Firebird database.",
+      "description": "Lists all user tables in the current Firebird database.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "describe-table",
+      "title": "Gets the detailed schema (columns, types, etc.) of a specific table.",
+      "description": "Gets the detailed schema (columns, types, etc.) of a specific table.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "tableName"
+        ],
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the table to describe"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-field-descriptions",
+      "title": "Gets the stored descriptions for fields of a specific table (if they exist).",
+      "description": "Gets the stored descriptions for fields of a specific table (if they exist).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "tableName"
+        ],
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the table to get field descriptions for"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze-query-performance",
+      "title": "Analyzes the performance of a SQL query by executing it multiple times and measuring execution time",
+      "description": "Analyzes the performance of a SQL query by executing it multiple times and measuring execution time",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sql"
+        ],
+        "properties": {
+          "sql": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SQL query to analyze"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": [
+                        "string",
+                        "number"
+                      ]
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": "Parameters for parameterized queries"
+          },
+          "iterations": {
+            "type": "integer",
+            "default": 3,
+            "description": "Number of times to run the query for averaging performance",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-execution-plan",
+      "title": "Gets the execution plan for a SQL query to understand how the database will execute it",
+      "description": "Gets the execution plan for a SQL query to understand how the database will execute it",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sql"
+        ],
+        "properties": {
+          "sql": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SQL query to analyze"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": [
+                        "string",
+                        "number"
+                      ]
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": "Parameters for parameterized queries"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze-missing-indexes",
+      "title": "Analyzes a SQL query to identify missing indexes that could improve performance",
+      "description": "Analyzes a SQL query to identify missing indexes that could improve performance",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "sql"
+        ],
+        "properties": {
+          "sql": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SQL query to analyze for missing indexes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "backup-database",
+      "title": "Creates a backup of the Firebird database",
+      "description": "Creates a backup of the Firebird database",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "backupPath"
+        ],
+        "properties": {
+          "options": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "enum": [
+                  "gbak",
+                  "nbackup"
+                ],
+                "type": "string",
+                "default": "gbak",
+                "description": "Backup format: gbak (full backup) or nbackup (incremental)"
+              },
+              "verbose": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to show detailed progress"
+              },
+              "compress": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to compress the backup"
+              },
+              "metadata_only": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to backup only metadata (no data)"
+              }
+            },
+            "additionalProperties": false
+          },
+          "backupPath": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Path where the backup file will be saved"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "restore-database",
+      "title": "Restores a Firebird database from a backup",
+      "description": "Restores a Firebird database from a backup",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "backupPath",
+          "targetPath"
+        ],
+        "properties": {
+          "options": {
+            "type": "object",
+            "properties": {
+              "replace": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to replace the target database if it exists"
+              },
+              "verbose": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to show detailed progress"
+              },
+              "pageSize": {
+                "type": "integer",
+                "default": 4096,
+                "maximum": 16384,
+                "minimum": 1024,
+                "description": "Page size for the restored database"
+              }
+            },
+            "additionalProperties": false
+          },
+          "backupPath": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Path to the backup file"
+          },
+          "targetPath": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Path where the database will be restored"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "validate-database",
+      "title": "Validates the integrity of the Firebird database",
+      "description": "Validates the integrity of the Firebird database",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "options": {
+            "type": "object",
+            "properties": {
+              "verbose": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to show detailed progress"
+              },
+              "checkData": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether to validate data integrity"
+              },
+              "fixErrors": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to attempt to fix errors"
+              },
+              "checkIndexes": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether to validate indexes"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "execute-batch-queries",
+      "title": "Executes multiple SQL queries in parallel for improved performance.",
+      "description": "Executes multiple SQL queries in parallel for improved performance.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "queries"
+        ],
+        "properties": {
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "sql"
+              ],
+              "properties": {
+                "sql": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "SQL query to execute"
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": [
+                              "string",
+                              "number"
+                            ]
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "description": "Parameters for parameterized queries"
+                }
+              },
+              "additionalProperties": false
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "description": "Array of query objects, each containing SQL and optional parameters"
+          },
+          "maxConcurrent": {
+            "type": "integer",
+            "default": 5,
+            "maximum": 10,
+            "minimum": 1,
+            "description": "Maximum number of concurrent queries (default: 5)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "describe-batch-tables",
+      "title": "Gets the detailed schema of multiple tables in parallel for improved performance.",
+      "description": "Gets the detailed schema of multiple tables in parallel for improved performance.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "tableNames"
+        ],
+        "properties": {
+          "tableNames": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "description": "Array of table names to describe"
+          },
+          "maxConcurrent": {
+            "type": "integer",
+            "default": 5,
+            "maximum": 10,
+            "minimum": 1,
+            "description": "Maximum number of concurrent operations (default: 5)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-table-data",
+      "title": "Retrieves data from a specific table with optional filtering, pagination, and ordering.",
+      "description": "Retrieves data from a specific table with optional filtering, pagination, and ordering.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "tableName"
+        ],
+        "properties": {
+          "skip": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of rows to skip (SKIP clause in Firebird)"
+          },
+          "first": {
+            "type": "integer",
+            "description": "Number of rows to retrieve (FIRST clause in Firebird)",
+            "exclusiveMinimum": 0
+          },
+          "where": {
+            "type": "string",
+            "description": "Optional WHERE clause (without the WHERE keyword)"
+          },
+          "orderBy": {
+            "type": "string",
+            "description": "Optional ORDER BY clause (without the ORDER BY keyword)"
+          },
+          "tableName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the table to retrieve data from"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "analyze-table-statistics",
+      "title": "Analyzes statistical information about a table including row count, column statistics, and data distribution.",
+      "description": "Analyzes statistical information about a table including row count, column statistics, and data distribution.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "tableName"
+        ],
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the table to analyze"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "verify-wire-encryption",
+      "title": "Verifies if the current database connection is using wire encryption (requires native driver).",
+      "description": "Verifies if the current database connection is using wire encryption (requires native driver).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-database-info",
+      "title": "Retrieves general information about the connected Firebird database.",
+      "description": "Retrieves general information about the connected Firebird database.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-server-info",
+      "title": "Obtiene informaci\u00f3n sobre el servidor MCP Firebird y las herramientas disponibles",
+      "description": "Obtiene informaci\u00f3n sobre el servidor MCP Firebird y las herramientas disponibles",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list-available-tools",
+      "title": "Lista todas las herramientas disponibles en el servidor MCP",
+      "description": "Lista todas las herramientas disponibles en el servidor MCP",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Filtrar por categor\u00eda (database, metadata)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get-tool-help",
+      "title": "Obtiene informaci\u00f3n detallada sobre una herramienta espec\u00edfica",
+      "description": "Obtiene informaci\u00f3n detallada sobre una herramienta espec\u00edfica",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "toolName"
+        ],
+        "properties": {
+          "toolName": {
+            "type": "string",
+            "description": "Nombre de la herramienta sobre la que obtener ayuda"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "system-health-check",
+      "title": "Verifica el estado de salud del sistema y la conectividad de la base de datos",
+      "description": "Verifica el estado de salud del sistema y la conectividad de la base de datos",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "echo",
+      "title": "Echoes back the input message",
+      "description": "Echoes back the input message",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "The message to echo back"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 21,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/luancamara/mcpfirebird/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "execute-query",
+    "list-tables",
+    "describe-table",
+    "get-field-descriptions",
+    "analyze-query-performance",
+    "get-execution-plan",
+    "analyze-missing-indexes",
+    "backup-database",
+    "restore-database",
+    "validate-database",
+    "execute-batch-queries",
+    "describe-batch-tables",
+    "get-table-data",
+    "analyze-table-statistics",
+    "verify-wire-encryption",
+    "get-database-info",
+    "get-server-info",
+    "list-available-tools",
+    "get-tool-help",
+    "system-health-check",
+    "echo"
+  ]
+}

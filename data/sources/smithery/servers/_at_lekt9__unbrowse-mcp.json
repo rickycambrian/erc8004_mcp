@@ -1,0 +1,187 @@
+{
+  "qualifiedName": "@lekt9/unbrowse-mcp",
+  "displayName": "Unbrowse",
+  "description": "Connect to any website's backend directly by indexing it with our chrome extension. \nWrite API-level scraping code simply by asking for unbrowse RAG mode, where any indexed api's documentation is added to context, easily vibeable to be integrated into your codebase.\n\nExecute queries and actions at the network level without browser overhead. Pull competitor analytics, post content, extract reviews, and automate a plethora of workflows indexed by the public - using your existing credentials - up to 50x faster than browser automation.\n\nGrab your API key and set your encryption key at https://www.unbrowse.ai\n\nExamples:\nHelp me RAG unbrowse to fetch yahoo finance stock data in my codebase -> unbrowse provides a route that will be inserted to your python script to fetch live stock data.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/045c5f35-2bd2-4d55-97cf-bd7206010ac5.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@lekt9/unbrowse-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@lekt9/unbrowse-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "properties": {
+          "debug": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable debug logging"
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Your Unbrowse API key from the dashboard (starts with re_). Alternative to sessionToken or solanaPrivateKey."
+          },
+          "devMode": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable developer mode to see detailed API usage documentation in search results (RAG mode)"
+          },
+          "password": {
+            "type": "string",
+            "description": "Your encryption password for credential decryption. Only required if abilities need credentials."
+          },
+          "sessionToken": {
+            "type": "string",
+            "description": "Your session token (alternative to apiKey or solanaPrivateKey)."
+          },
+          "solanaRpcUrl": {
+            "type": "string",
+            "description": "Custom Solana RPC URL (defaults to devnet or mainnet based on server response)."
+          },
+          "enableIndexTool": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable the ingest_api_endpoint tool for indexing new APIs"
+          },
+          "solanaPrivateKey": {
+            "type": "string",
+            "description": "Base58 encoded Solana private key for x402 payment-based authentication. Alternative to apiKey/sessionToken. Wallet must have USDC balance for payments."
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "execute_abilities",
+      "title": "Execute Multiple Abilities in Parallel",
+      "description": "Executes multiple abilities simultaneously in parallel using Promise.all. Useful for batch operations like fetching multiple pages of a paginated API, or fetching data from multiple different APIs at once. Unlike execute_ability_chain (which runs sequentially with output piping), this runs all abilities independently and concurrently.\n\n\u26a0\ufe0f IMPORTANT: If responses are truncated (indicated by 'truncated: true' in results), use the 'transform_code' parameter to extract only the specific data you need. Transform code runs server-side BEFORE truncation, allowing you to get complete filtered data instead of cut-off responses.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "abilities"
+        ],
+        "properties": {
+          "abilities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "ability_id"
+              ],
+              "properties": {
+                "params": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  ],
+                  "description": "Parameters to pass to this ability. Can be JSON string or object."
+                },
+                "ability_id": {
+                  "type": "string",
+                  "description": "The abilityId to execute"
+                },
+                "transform_code": {
+                  "type": "string",
+                  "description": "Optional JavaScript transform code for this ability's response"
+                }
+              },
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "description": "Array of abilities to execute in parallel. Each executes independently with no data sharing.\n\nCommon use cases:\n\n1. **Pagination**: Fetch multiple pages of an API simultaneously\n   Example:\n   [\n     { \"ability_id\": \"github_search\", \"params\": { \"query\": \"react\", \"page\": 1 } },\n     { \"ability_id\": \"github_search\", \"params\": { \"query\": \"react\", \"page\": 2 } },\n     { \"ability_id\": \"github_search\", \"params\": { \"query\": \"react\", \"page\": 3 } }\n   ]\n\n2. **Multiple APIs**: Fetch from different services at once\n   Example:\n   [\n     { \"ability_id\": \"github_user_profile\", \"params\": { \"username\": \"octocat\" } },\n     { \"ability_id\": \"twitter_user_profile\", \"params\": { \"username\": \"octocat\" } }\n   ]\n\n3. **Batch Operations**: Execute same ability with different inputs\n   Example:\n   [\n     { \"ability_id\": \"stock_price\", \"params\": { \"symbol\": \"AAPL\" } },\n     { \"ability_id\": \"stock_price\", \"params\": { \"symbol\": \"GOOGL\" } },\n     { \"ability_id\": \"stock_price\", \"params\": { \"symbol\": \"MSFT\" } }\n   ]"
+          },
+          "aggregate_results": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, attempts to merge all successful results into a single array. Useful for pagination where each response has the same structure."
+          }
+        }
+      }
+    },
+    {
+      "name": "search_abilities_parallel",
+      "title": "Search Multiple Abilities in Parallel",
+      "description": "Executes multiple ability searches simultaneously in parallel. Useful when you need to search for different capabilities at once (e.g., searching for 'create user' and 'send email' and 'upload file' all at the same time).",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "searches"
+        ],
+        "properties": {
+          "searches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Natural language description of the capability needed"
+                },
+                "domains": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Optional array of domains to filter results for this specific search - Only use this after you discover what domains there are."
+                }
+              },
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "description": "Array of searches to execute in parallel. Each search runs independently.\n\nExample:\n[\n  { \"query\": \"create github repository\", \"domains\": [\"api.github.com\"] },\n  { \"query\": \"send email notification\", \"domains\": [\"api.sendgrid.com\"] },\n  { \"query\": \"upload file to s3\" }\n]"
+          },
+          "result_limit_per_search": {
+            "type": "number",
+            "default": 3,
+            "description": "Maximum number of results to return per search query. Default: 3"
+          }
+        }
+      }
+    },
+    {
+      "name": "search_abilities",
+      "title": "Search Abilities",
+      "description": "Searches for abilities across both your personal abilities and the global published index. Use this when user requests for something that you do not have capabilities of doing.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Detailed natural language description of the capability or action needed. Format your query with comprehensive context including: purpose, use cases, parameters (with types and defaults), concrete examples with parameter values, and related queries it can fulfill. Be explicit about what data is returned and how it relates to other abilities.\n\nExamples of well-formatted queries:\n\n\"Retrieves a paginated list of processed invoices from Zeemart's invoice management service, sorted by invoice date in descending order.\"\n\n\"Retrieves detailed information for a specific Statement of Account (SOA) by its ID for a given company from Zeemart's payment management service.\"\n\nFor simpler searches, you can use shorter queries like 'create trade', 'fetch token prices', or 'send email notification', but detailed queries following the format above will yield better-matched abilities with clearer usage instructions."
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional array of domains to filter results. Only abilities from these domains will be returned. This filtering happens at the Infraxa vector database level for optimal performance. Examples: [\"api.github.com\", \"github.com\"], [\"api.stripe.com\"], [\"twitter.com\", \"x.com\"] Only use this after you discover what abilities are available."
+          },
+          "rag_mode": {
+            "type": "boolean",
+            "description": "Force developer mode (RAG mode) to see detailed API usage documentation and code generation instructions, normally only available in dev mode."
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:23:39.459966+00:00",
+    "source": "smithery"
+  }
+}

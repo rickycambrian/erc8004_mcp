@@ -1,0 +1,531 @@
+{
+  "id": "@cpretzinger/ai-assistant-simple",
+  "name": "@cpretzinger/ai-assistant-simple",
+  "display_name": "MemoryForge AI with Redis, PostgreSQL, and Qdrant",
+  "version": null,
+  "description": "Updated 9-16-25 Fixed EV issues Connections should be solid! v3.1.0\nGREAT NEWS: The server will now work for everyone - Railway users, Heroku users, Render users, etc.!\n***ONLY ADD EVS that APPLY TO YOUR OWN INSTANCES - Leave Blank if unused - :) \nUpdate 9-15-25\nv3.0 fixed semantic search\ntemporal tool: Add this at the beginning of n8n workflows to give temporal context\n\nUPDATED 9/1/2025! NEW TOOLS!\n\nUse the Redis Stream tools with n8n MCP Client Node for use anywhere!\n\nThe Ultimate Context Intelligence Engine\nTransform your AI into a memory master with lightning-fast recall and semantic superpowers.\n\nMemoryForge AI is the most advanced context management system ever built for AI assistants. Combining blazing-fast Redis caching, rock-solid PostgreSQL persistence, and cutting-edge Qdrant vector search, it gives your AI perfect memory that never forgets and always finds exactly what you need.\n\n\u26a1 Why MemoryForge Dominates:\n\ud83d\ude80 Sub-millisecond Context Retrieval - Redis-powered cache makes your AI respond instantly\n\ud83c\udfaf Semantic Memory Search - Find related information even when you can't remember exact words\n\ud83d\udc8e Bulletproof Persistence - PostgreSQL ensures your context survives forever\n\ud83d\udd04 Real-time Sync - Pub/sub notifications keep everything perfectly synchronized\n\ud83e\uddec Auto-Embedding Magic - Automatically converts text into searchable vector embeddings\n\ud83c\udfad Multi-Session Mastery - Juggle unlimited parallel conversations and contexts\n\ud83c\udfaa Perfect For:\nConversation Continuity - Never lose track of what you were discussing\nDocument Intelligence - Instantly find relevant emails, notes, and files\nProject Memory - Maintain context across complex, long-term projects\nKnowledge Synthesis - Connect related ideas from different conversations\nPersonal AI Assistant - Build an AI that truly knows and remembers you\nStop fighting with forgetful AI. Start building with MemoryForge - where every conversation builds on the last, and every search finds exactly what matters.\n\nYour AI's memory just got a PhD in remembering everything that matters.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/d2a4574c-0685-4ab2-ba2e-f649724db663.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "get_context",
+      "description": "Get or create context for a topic or project",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_\\-\\.]+$",
+            "maxLength": 100,
+            "minLength": 1,
+            "description": "Topic or project name"
+          },
+          "autoCreate": {
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically create if not found"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_context",
+      "description": "Update or add context for a topic or project",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "replace",
+              "append"
+            ],
+            "type": "string",
+            "default": "append",
+            "description": "Update mode"
+          },
+          "topic": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_\\-\\.]+$",
+            "maxLength": 100,
+            "minLength": 1,
+            "description": "Topic or project name"
+          },
+          "context": {
+            "description": "Context data to store or append"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_topics",
+      "description": "List all available topics/projects",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "default": "*",
+            "description": "Optional filter pattern"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_context",
+      "description": "Delete context for a specific topic",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_\\-\\.]+$",
+            "maxLength": 100,
+            "minLength": 1,
+            "description": "Topic to delete"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_context",
+      "description": "Search for similar contexts using semantic search",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 5,
+            "description": "Maximum results to return"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_context_history",
+      "description": "Get history of updates for a topic",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum history entries"
+          },
+          "topic": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_\\-\\.]+$",
+            "maxLength": 100,
+            "minLength": 1,
+            "description": "Topic to get history for"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "export_contexts",
+      "description": "Export all contexts to JSON format",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Specific topics to export (empty for all)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "configure_auto_save",
+      "description": "Configure automatic context saving with custom frequency",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_\\-\\.]+$",
+            "maxLength": 100,
+            "minLength": 1,
+            "description": "Topic to auto-save"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable/disable auto-save"
+          },
+          "frequency": {
+            "type": "string",
+            "default": "5min",
+            "description": "Save frequency: 1min, 5min, 10min, 30min, 1hour, daily, or cron expression"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_auto_save_status",
+      "description": "Get current auto-save configuration and status",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_\\-\\.]+$",
+            "maxLength": 100,
+            "minLength": 1,
+            "description": "Topic to check auto-save status"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_stream_context",
+      "description": "Get context data directly from Redis events:raw stream",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum entries to return"
+          },
+          "topic": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_\\-\\.]+$",
+            "maxLength": 100,
+            "minLength": 1,
+            "description": "Context topic to search for"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_stream_context",
+      "description": "Write context data directly to Redis events:raw stream",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "topic"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_\\-\\.]+$",
+            "maxLength": 100,
+            "minLength": 1,
+            "description": "Context topic"
+          },
+          "context": {
+            "description": "Context data to store"
+          },
+          "metadata": {
+            "description": "Additional metadata"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_person_history",
+      "description": "Search for all interactions with a specific person",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Person's name or email to search for"
+          },
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "description": "Maximum results to return"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "find_similar_events",
+      "description": "Find semantically similar events using vector search",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "description"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum results to return"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of what to search for"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_temporal_patterns",
+      "description": "Analyze temporal patterns in events",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "groupBy": {
+            "type": "string",
+            "default": "hour",
+            "description": "Group by: hour, day, timeOfDay"
+          },
+          "timeframe": {
+            "type": "string",
+            "default": "24h",
+            "description": "Timeframe: 1h, 24h, 7d, 30d"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "cleanup_processed_streams",
+      "description": "Clean up processed entries from Redis streams",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "dryRun": {
+            "type": "boolean",
+            "default": true,
+            "description": "Preview cleanup without executing"
+          },
+          "streamName": {
+            "type": "string",
+            "default": "events:raw",
+            "description": "Stream name to clean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_stream_health",
+      "description": "Get health status of Redis streams and processing pipeline",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "streamName": {
+            "type": "string",
+            "default": "events:raw",
+            "description": "Stream name to check"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_processing_status",
+      "description": "Update processing status for a stream entry",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "streamId"
+        ],
+        "properties": {
+          "pgStatus": {
+            "enum": [
+              "pending",
+              "processing",
+              "completed",
+              "failed"
+            ],
+            "type": "string",
+            "description": "PostgreSQL processing status"
+          },
+          "streamId": {
+            "type": "string",
+            "description": "Stream entry ID to update"
+          },
+          "errorDetails": {
+            "type": "string",
+            "description": "Error details if failed"
+          },
+          "qdrantStatus": {
+            "enum": [
+              "pending",
+              "processing",
+              "completed",
+              "failed"
+            ],
+            "type": "string",
+            "description": "Qdrant processing status"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "trigger_recovery_scan",
+      "description": "Manually trigger a recovery scan for stuck entries",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "forceReset": {
+            "type": "boolean",
+            "default": false,
+            "description": "Force reset circuit breakers before scan"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_circuit_breaker_status",
+      "description": "Get current circuit breaker status and failure counts",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "verify_data_integrity",
+      "description": "Verify data integrity across Redis, PostgreSQL, and Qdrant",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "Specific topic to verify (all if not specified)"
+          },
+          "skipVector": {
+            "type": "boolean",
+            "default": false,
+            "description": "Skip vector verification for faster check"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "emergency_backup_stream",
+      "description": "Create emergency backup of Redis stream data to prevent data loss",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "streamName": {
+            "type": "string",
+            "default": "events:raw",
+            "description": "Stream to backup"
+          },
+          "backupLocation": {
+            "type": "string",
+            "default": "emergency_backup",
+            "description": "Backup identifier"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 21,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@cpretzinger/ai-assistant-simple/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "get_context",
+    "update_context",
+    "list_topics",
+    "delete_context",
+    "search_context",
+    "get_context_history",
+    "export_contexts",
+    "configure_auto_save",
+    "get_auto_save_status",
+    "get_stream_context",
+    "update_stream_context",
+    "search_person_history",
+    "find_similar_events",
+    "get_temporal_patterns",
+    "cleanup_processed_streams",
+    "get_stream_health",
+    "update_processing_status",
+    "trigger_recovery_scan",
+    "get_circuit_breaker_status",
+    "verify_data_integrity",
+    "emergency_backup_stream"
+  ]
+}
