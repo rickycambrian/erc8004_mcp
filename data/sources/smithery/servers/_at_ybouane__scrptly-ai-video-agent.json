@@ -1,0 +1,158 @@
+{
+  "qualifiedName": "@ybouane/scrptly-ai-video-agent",
+  "displayName": "Scrptly AI Video Agent",
+  "description": "Create videos from text prompts and optional reference images. Track progress and retrieve results as they\u2019re ready. Accelerate content production for marketing, education, and social media.",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/2df8e71b-3a2e-48a1-9f9f-5780fba2e307.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@ybouane/scrptly-ai-video-agent",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@ybouane/scrptly-ai-video-agent/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "generateAiVideo",
+      "title": "Generate AI Video",
+      "description": "Generate a video based on a text prompt and optional context images.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 10,
+            "description": "A detailed text prompt for generating the video. It should include the duration of the video, the visual style, the plot/content and anything relevant to generate a high quality video."
+          },
+          "context": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "url",
+                "description"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "The URL of a context image to be used in the video generation."
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 1000,
+                  "minLength": 0,
+                  "description": "A brief description of the context image and how it should be used in the video."
+                }
+              },
+              "additionalProperties": false
+            },
+            "maxItems": 5,
+            "description": "An optional array of context images to guide the video generation. Each image should have a URL and a brief description."
+          },
+          "approveUpTo": {
+            "type": "number",
+            "minimum": 0,
+            "description": "The maximum cost (in tokens) that the user approves for generating the video. Optional but highly recommended. Default is 10,000 tokens."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId",
+          "projectId",
+          "projectUrl"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "The ID of the task created to generate the AI video."
+          },
+          "projectId": {
+            "type": "string",
+            "description": "The ID of the AI video project created on Scrptly."
+          },
+          "projectUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL to view and manage/tweak the generated AI video project on Scrptly."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "getTaskStatus",
+      "title": "Get Task Status",
+      "description": "Check the status of an AI video generation task.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "taskId"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "The ID of the AI video generation task to check the status for."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "status",
+          "statusMessage"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "awaiting",
+              "processing",
+              "success",
+              "failed"
+            ],
+            "type": "string",
+            "description": "The current status of the AI video generation task."
+          },
+          "projectId": {
+            "type": "string",
+            "description": "The ID of the AI video project created on Scrptly."
+          },
+          "projectUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL to view and manage/tweak the generated AI video project on Scrptly."
+          },
+          "statusMessage": {
+            "type": "string",
+            "minLength": 0,
+            "description": "A detailed message about the current status of the task."
+          },
+          "resultVideoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL of the generated video file, if the task is completed successfully."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:50:14.786474+00:00",
+    "source": "smithery"
+  }
+}

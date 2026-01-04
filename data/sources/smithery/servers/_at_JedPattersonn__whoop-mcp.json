@@ -1,0 +1,578 @@
+{
+  "qualifiedName": "@JedPattersonn/whoop-mcp",
+  "displayName": "WHOOP",
+  "description": "Access your WHOOP fitness data\u2014overview, sleep, recovery, strain, and healthspan\u2014right where you work. Track daily trends and surface insights to understand readiness, workload, and sleep quality. Get quick summaries or deep dives by date to guide training and recovery decisions.",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@JedPattersonn/whoop-mcp",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@JedPattersonn/whoop-mcp/mcp",
+      "configSchema": {
+        "type": "object",
+        "title": "MCP Session Configuration",
+        "required": [
+          "whoopEmail",
+          "whoopPassword"
+        ],
+        "properties": {
+          "whoopEmail": {
+            "type": "string",
+            "description": "Your Whoop account email address"
+          },
+          "mcpAuthToken": {
+            "type": "string",
+            "description": "Optional authentication token for securing MCP endpoint access"
+          },
+          "whoopPassword": {
+            "type": "string",
+            "description": "Your Whoop account password"
+          }
+        },
+        "description": "Schema for the /mcp endpoint configuration",
+        "x-query-style": "dot+bracket"
+      }
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "whoop_get_overview",
+      "title": "Get Whoop Overview",
+      "description": "Get comprehensive Whoop data overview including cycle info, live metrics (recovery, strain, sleep, calories), gauges, activities, and key health statistics for a specific date",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Date in YYYY-MM-DD format (defaults to today if not provided)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "cycleInfo",
+          "liveMetrics",
+          "gauges",
+          "journal",
+          "activities",
+          "statistics"
+        ],
+        "properties": {
+          "gauges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "title",
+                "scoreDisplay",
+                "scoreSuffix",
+                "fillPercentage",
+                "progressStyle"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "scoreSuffix": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "scoreDisplay": {
+                  "type": "string"
+                },
+                "progressStyle": {
+                  "type": "string"
+                },
+                "fillPercentage": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "journal": {
+            "type": "object",
+            "required": [
+              "completed",
+              "hasRecovery",
+              "enabled"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "completed": {
+                "type": "boolean"
+              },
+              "hasRecovery": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "cycleInfo": {
+            "type": "object",
+            "required": [
+              "cycleId",
+              "cycleDay",
+              "cycleDateDisplay",
+              "sleepState"
+            ],
+            "properties": {
+              "cycleId": {
+                "type": "number"
+              },
+              "cycleDay": {
+                "type": "string"
+              },
+              "sleepState": {
+                "type": "string"
+              },
+              "cycleDateDisplay": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "activities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "title",
+                "type",
+                "scoreDisplay",
+                "startTime",
+                "endTime",
+                "status"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "endTime": {
+                  "type": "string"
+                },
+                "startTime": {
+                  "type": "string"
+                },
+                "scoreDisplay": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "statistics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "title",
+                "currentValue",
+                "thirtyDayAverage",
+                "state"
+              ],
+              "properties": {
+                "state": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "currentValue": {
+                  "type": "string"
+                },
+                "thirtyDayAverage": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "liveMetrics": {
+            "type": "object",
+            "required": [
+              "recoveryScore",
+              "dayStrain",
+              "sleepHours",
+              "calories"
+            ],
+            "properties": {
+              "calories": {
+                "type": "number"
+              },
+              "dayStrain": {
+                "type": "number"
+              },
+              "sleepHours": {
+                "type": "number"
+              },
+              "recoveryScore": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "whoop_get_sleep",
+      "title": "Get Sleep Deep Dive",
+      "description": "Get detailed sleep data including sleep performance score, contributors (hours vs needed, consistency, efficiency, sleep stress), and insights for a specific date",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Date in YYYY-MM-DD format (defaults to today if not provided)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "whoop_get_recovery",
+      "title": "Get Whoop Recovery Deep Dive",
+      "description": "Get comprehensive recovery analysis including recovery score, HRV, RHR, respiratory rate, sleep performance, and recovery contributors with trends",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Date in YYYY-MM-DD format (defaults to today if not provided)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "title",
+          "recoveryScore",
+          "contributors",
+          "coachInsight"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "coachInsight": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "contributors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "title",
+                "value",
+                "baseline",
+                "status",
+                "icon"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "icon": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "baseline": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "recoveryScore": {
+            "type": "object",
+            "required": [
+              "score",
+              "percentage",
+              "style"
+            ],
+            "properties": {
+              "score": {
+                "type": "string"
+              },
+              "style": {
+                "type": "string"
+              },
+              "percentage": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "whoop_get_strain",
+      "title": "Get Whoop Strain Deep Dive",
+      "description": "Get comprehensive strain analysis including day strain score, heart rate zones, strength training time, steps, activities, and strain contributors with trends",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Date in YYYY-MM-DD format (defaults to today if not provided)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "title",
+          "strainScore",
+          "contributors",
+          "activities",
+          "coachInsight"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "activities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "title",
+                "strainScore",
+                "startTime",
+                "endTime",
+                "type",
+                "status"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "endTime": {
+                  "type": "string"
+                },
+                "startTime": {
+                  "type": "string"
+                },
+                "strainScore": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "strainScore": {
+            "type": "object",
+            "required": [
+              "score",
+              "percentage",
+              "target",
+              "lowerOptimal",
+              "higherOptimal"
+            ],
+            "properties": {
+              "score": {
+                "type": "string"
+              },
+              "target": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "percentage": {
+                "type": "number"
+              },
+              "lowerOptimal": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "higherOptimal": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "coachInsight": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "contributors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "title",
+                "value",
+                "baseline",
+                "status",
+                "icon"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "icon": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "baseline": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "whoop_get_healthspan",
+      "title": "Get Whoop Healthspan (Biological Age)",
+      "description": "Get comprehensive healthspan analysis including WHOOP Age (biological age), pace of aging, and comparison to chronological age",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Date in YYYY-MM-DD format (defaults to today if not provided)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "navigationTitle",
+          "navigationSubtitle",
+          "dateRange",
+          "isCalibrating",
+          "currentPeriod",
+          "previousPeriod"
+        ],
+        "properties": {
+          "dateRange": {
+            "type": "string"
+          },
+          "currentPeriod": {
+            "type": "object",
+            "required": [
+              "whoopAge",
+              "ageStatus",
+              "yearsDifference",
+              "paceOfAging"
+            ],
+            "properties": {
+              "whoopAge": {
+                "type": "string"
+              },
+              "ageStatus": {
+                "type": "string"
+              },
+              "paceOfAging": {
+                "type": "string"
+              },
+              "yearsDifference": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "isCalibrating": {
+            "type": "boolean"
+          },
+          "previousPeriod": {
+            "type": "object",
+            "required": [
+              "whoopAge",
+              "paceOfAging"
+            ],
+            "properties": {
+              "whoopAge": {
+                "type": "string"
+              },
+              "paceOfAging": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "navigationTitle": {
+            "type": "string"
+          },
+          "navigationSubtitle": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:47:59.314189+00:00",
+    "source": "smithery"
+  }
+}

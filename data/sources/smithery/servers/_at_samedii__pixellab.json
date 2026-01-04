@@ -1,0 +1,1197 @@
+{
+  "qualifiedName": "@samedii/pixellab",
+  "displayName": "PixelLab",
+  "description": "Generate animated pixel art characters, tilesets, and object directly from your AI coding assistant!",
+  "iconUrl": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/6a410054-50eb-4814-8d89-03538aad6c01.png",
+  "remote": true,
+  "deploymentUrl": "https://server.smithery.ai/@samedii/pixellab",
+  "connections": [
+    {
+      "type": "http",
+      "deploymentUrl": "https://server.smithery.ai/@samedii/pixellab/mcp",
+      "configSchema": {}
+    }
+  ],
+  "security": null,
+  "tools": [
+    {
+      "name": "create_character",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Queue a character creation job with 4 or 8 directional views.\n\n4 directions: south, west, east, north\n8 directions: south, south-west, west, north-west, north, north-east, east, south-east\n\nReturns immediately with job and character IDs.\nProcessing takes 2-3 minutes for 4 directions, 3-5 minutes for 8 directions.\nUse get_character to check on your character and animations.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Character name for reference (e.g., 'Blue Wizard')"
+          },
+          "size": {
+            "type": "integer",
+            "default": 48,
+            "maximum": 128,
+            "minimum": 16,
+            "description": "Canvas size in pixels. Character will be ~60% of canvas height (e.g., 48px canvas = ~29px tall character)"
+          },
+          "view": {
+            "enum": [
+              "low top-down",
+              "high top-down",
+              "side"
+            ],
+            "type": "string",
+            "default": "low top-down",
+            "description": "Camera angle. Options: \"low top-down\", \"high top-down\", \"side\""
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low detail",
+                  "medium detail",
+                  "high detail"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "medium detail",
+            "description": "Detail level. Options: \"low detail\", \"medium detail\", \"high detail\""
+          },
+          "outline": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single color black outline",
+                  "single color outline",
+                  "selective outline",
+                  "lineless"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "single color black outline",
+            "description": "Outline style. Options: \"single color black outline\", \"single color outline\", \"selective outline\", \"lineless\""
+          },
+          "shading": {
+            "anyOf": [
+              {
+                "enum": [
+                  "flat shading",
+                  "basic shading",
+                  "medium shading",
+                  "detailed shading"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "basic shading",
+            "description": "Shading complexity. Options: \"flat shading\", \"basic shading\", \"medium shading\", \"detailed shading\""
+          },
+          "ai_freedom": {
+            "type": "number",
+            "default": 750,
+            "maximum": 999,
+            "minimum": 100,
+            "description": "Creative freedom (100=strict, 999=creative)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Character appearance (e.g., 'cute wizard with blue robes')"
+          },
+          "proportions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "{\"type\": \"preset\", \"name\": \"default\"}",
+            "description": "Character body proportions as JSON string. PRESET: Use built-in proportions like '{\"type\": \"preset\", \"name\": \"chibi\"}' (options: default, chibi, cartoon, stylized, realistic_male, realistic_female, heroic). CUSTOM: Define exact values like '{\"type\": \"custom\", \"head_size\": 1.5, \"arms_length\": 0.8, \"legs_length\": 0.9, \"shoulder_width\": 0.7, \"hip_width\": 0.8}' (all values 0.5-2.0)"
+          },
+          "n_directions": {
+            "enum": [
+              4,
+              8
+            ],
+            "type": "integer",
+            "default": 8,
+            "description": "Number of directional views (4 or 8)"
+          }
+        }
+      }
+    },
+    {
+      "name": "animate_character",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Queue animation jobs for an existing character.\n\nAutomatically generates the animation for all stored directions (4 or 8).\nThe animation inherits the character's style settings.\nFrame count is determined by the template animation.\nReturns immediately with job IDs.\n\nProcessing takes 2-4 minutes depending on number of directions.\nUse get_character to check on your character and animations.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "character_id",
+          "template_animation_id"
+        ],
+        "properties": {
+          "character_id": {
+            "type": "string",
+            "description": "Character ID from create_character_X_directions"
+          },
+          "animation_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Custom name for this animation (defaults to action name)"
+          },
+          "action_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Custom action description focusing on the movement or pose only (e.g., 'walking stealthily', 'walking quickly', 'running', 'jumping', 'casting spell'). Avoid environmental details like locations or objects. If not provided, uses default for template_animation_id."
+          },
+          "template_animation_id": {
+            "type": "string",
+            "description": "Template animation ID (required). Available: `backflip`, `breathing-idle`, `cross-punch`, `crouched-walking`, `crouching`, `drinking`, `falling-back-death`, `fight-stance-idle-8-frames`, `fireball`, `flying-kick`, `front-flip`, `getting-up`, `high-kick`, `hurricane-kick`, `jumping-1`, `jumping-2`, `lead-jab`, `leg-sweep`, `picking-up`, `pull-heavy-object`, `pushing`, `roundhouse-kick`, `running-4-frames`, `running-6-frames`, `running-8-frames`, `running-jump`, `running-slide`, `sad-walk`, `scary-walk`, `surprise-uppercut`, `taking-punch`, `throw-object`, `two-footed-jump`, `walk`, `walk-1`, `walk-2`, `walking`, `walking-10`, `walking-2`, `walking-3`, `walking-4`, `walking-4-frames`, `walking-5`, `walking-6`, `walking-6-frames`, `walking-7`, `walking-8`, `walking-8-frames`, `walking-9`"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_character",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get complete character information including rotations, animations, and download link.\n\nReturns:\n- Character details and metadata\n- All rotation image URLs\n- List of animations with their status\n- Pending jobs for this character\n- ZIP download URL\n- Optional preview image",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "character_id"
+        ],
+        "properties": {
+          "character_id": {
+            "type": "string",
+            "description": "Character ID to retrieve"
+          },
+          "include_preview": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include preview image of all directions"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_characters",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List all your created characters.\n\nReturns a paginated list of characters with basic information.\nUse get_character for detailed information about a specific character.\n\n**Tag Filtering:**\nUse the `tags` parameter to filter characters by tags. Characters matching any of the provided tags will be returned.\nExample: tags=\"wizard,fire\" returns characters tagged with either \"wizard\" OR \"fire\"",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Comma-separated tags to filter by (e.g. 'wizard,magic'). Returns characters matching ANY tag."
+          },
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of characters to return"
+          },
+          "offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "Number of characters to skip"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_character",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete a character and all its associated data.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "character_id"
+        ],
+        "properties": {
+          "character_id": {
+            "type": "string",
+            "description": "Character ID to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_isometric_tile",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create an isometric tile with pixel art style.\n\nThis tool starts an asynchronous tile generation that returns immediately with a tile ID.\nUse the get_isometric_tile tool to check status and retrieve the completed tile.\n\nGenerates a single isometric tile based on the description and parameters.\nSuitable for creating individual game assets like blocks, items, or terrain pieces.\n\nNote: Sizes above 24px often produce better quality results. Default is 32px.\n\nExamples:\n- Basic: \"grass on top of dirt\"\n- Detailed: \"stone brick wall with moss\"\n- Complex: \"wooden treasure chest with gold trim\"\n\nGeneration time: ~10-20 seconds (async processing)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "description"
+        ],
+        "properties": {
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Seed for reproducible generation"
+          },
+          "size": {
+            "type": "integer",
+            "default": 32,
+            "maximum": 64,
+            "minimum": 16,
+            "description": "Tile canvas size in pixels (16-64). Sizes above 24px often produce better quality results."
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low detail",
+                  "medium detail",
+                  "highly detailed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "medium detail",
+            "description": "Detail level (weakly guiding)."
+          },
+          "outline": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single color outline",
+                  "selective outline",
+                  "lineless"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "lineless",
+            "description": "Outline style (weakly guiding)."
+          },
+          "shading": {
+            "anyOf": [
+              {
+                "enum": [
+                  "flat shading",
+                  "basic shading",
+                  "medium shading",
+                  "detailed shading",
+                  "highly detailed shading"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "basic shading",
+            "description": "Shading complexity (weakly guiding)."
+          },
+          "tile_shape": {
+            "enum": [
+              "thick tile",
+              "thin tile",
+              "block"
+            ],
+            "type": "string",
+            "default": "block",
+            "description": "Tile thickness. Thicker tiles allow more height variation in game maps. thin tile: ~10% canvas height, thick tile: ~25% height, block: ~50% height."
+          },
+          "description": {
+            "type": "string",
+            "description": "Text description of the tile (e.g., 'grass on top of dirt')"
+          },
+          "text_guidance_scale": {
+            "type": "number",
+            "default": 8,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "How closely to follow the text description (1.0-20.0)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_isometric_tile",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve an isometric tile by ID. Returns tile data if completed, or status information if still processing.\n\nThe tile will include:\n- Base64 PNG image data\n- Metadata about generation parameters\n- Download URL for the tile image\n\nCheck the 'status' field:\n- 'completed': Tile is ready with full data\n- 'processing': Still generating (check 'eta_seconds')\n- 'failed': Generation failed (see 'error' message)\n- 'not_found': Invalid tile ID",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tile_id"
+        ],
+        "properties": {
+          "tile_id": {
+            "type": "string",
+            "description": "The UUID of the isometric tile to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_isometric_tiles",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List all your created isometric tiles.\n\nReturns a paginated list of tiles with basic information.\nUse get_isometric_tile for detailed information about a specific tile.\n\nTiles are sorted by creation date (newest first).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of tiles to return"
+          },
+          "offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "Number of tiles to skip"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_isometric_tile",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete an isometric tile by ID. Only the owner can delete their own tiles.\n\nThis action is permanent and cannot be undone.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tile_id"
+        ],
+        "properties": {
+          "tile_id": {
+            "type": "string",
+            "description": "The UUID of the isometric tile to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_map_object",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Create a pixel art object with transparent background for use in game maps.\n\n**Canvas Size:**\n- MCP uses `width` and `height` parameters (supports non-square images)\n- Range: 32px minimum, 400px maximum for both dimensions\n- Basic mode: max 400\u00d7400 total area (160,000 pixels)\n- Inpainting mode: max 192\u00d7192 total area (36,864 pixels)\n- Optional when background_image provided (auto-detects from image)\n\n**Two Modes:**\n\n1. **Basic Mode** (no background_image):\n   - Generates standalone object from description\n   - Fast and simple\n   - Good for generic assets\n   - Requires width and height parameters\n\n2. **Style Matching Mode** (with background_image):\n   - AI sees frozen areas for style context\n   - Generates only in specified shape/mask\n   - Matches your map's art style automatically\n   - Perfect for creating objects that blend with existing map\n   - Width/height optional (auto-detects from background_image)\n   - **DEFAULT**: If you provide background_image without inpainting, automatically uses oval 60%\n\n**Background Image Options:**\n\n- **Path** (recommended - saves tokens):\n  ```json\n  {\"type\": \"path\", \"path\": \"assets/my-game-map.png\"}\n  ```\n  Returns a curl command you can run. Saves 5,000-20,000 tokens per image!\n  Note: Large images (>192\u00d7192) may cause \"argument list too long\" error with curl.\n\n- **Base64** (uses many tokens):\n  ```json\n  {\"type\": \"base64\", \"base64\": \"iVBORw0KGgo...\"}\n  ```\n  Sends image inline. Use only for small images or when curl isn't available.\n\n**Inpainting Options:**\n\n- **Default** (when background_image provided without inpainting):\n  - Automatically uses: `{\"type\": \"oval\", \"percentage\": 0.6}`\n  - Covers 60% of image with centered oval\n  - Good starting point for most objects\n\n- **Oval** (explicit): `{\"type\": \"oval\", \"percentage\": 0.3}`\n  - Auto-generates centered oval mask\n  - Percentage controls size (0.3 = 30% of background)\n  - Good for round objects (trees, pots, rocks)\n\n- **Rectangle**: `{\"type\": \"rectangle\", \"percentage\": 0.5}`\n  - Auto-generates centered rectangle mask\n  - Percentage controls size (0.5 = 50% of background)\n  - Good for buildings, chests, signs\n\n- **Custom Mask**: `{\"type\": \"mask\", \"mask_image\": \"base64...\"}`\n  - Provide your own mask for precise control\n  - Black (0,0,0) = frozen context for AI to see\n  - White (255,255,255) = area to generate object\n\n**How Style Matching Works:**\n- AI analyzes frozen (black) pixels around the generation area\n- Automatically matches colors, shading, detail level, and art style\n- Only generates in white mask area (oval/rectangle/custom)\n\nReturns immediately with job ID. Generation takes ~15-30 seconds.\nUse get_map_object to check status and retrieve results.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "description"
+        ],
+        "properties": {
+          "view": {
+            "enum": [
+              "low top-down",
+              "high top-down",
+              "side"
+            ],
+            "type": "string",
+            "default": "high top-down",
+            "description": "Camera angle. Options: \"low top-down\", \"high top-down\", \"side\""
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 400,
+                "minimum": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Canvas width in pixels (required for basic mode, auto-detected from background_image if provided)"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low detail",
+                  "medium detail",
+                  "high detail"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "medium detail",
+            "description": "Detail level. Options: \"low detail\", \"medium detail\", \"high detail\""
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 400,
+                "minimum": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Canvas height in pixels (required for basic mode, auto-detected from background_image if provided)"
+          },
+          "outline": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single color outline",
+                  "selective outline",
+                  "lineless"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "single color outline",
+            "description": "Outline style. Options: \"single color outline\", \"selective outline\", \"lineless\""
+          },
+          "shading": {
+            "anyOf": [
+              {
+                "enum": [
+                  "flat shading",
+                  "basic shading",
+                  "medium shading",
+                  "detailed shading"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "medium shading",
+            "description": "Shading complexity. Options: \"flat shading\", \"basic shading\", \"medium shading\", \"detailed shading\""
+          },
+          "inpainting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inpainting configuration as JSON string (optional). DEFAULT: If background_image provided but this omitted, uses oval 0.6. Options: {\"type\": \"oval\", \"fraction\": 0.3} for auto oval mask, {\"type\": \"rectangle\", \"fraction\": 0.5} for auto rectangle mask, {\"type\": \"mask\", \"mask_image\": \"base64...\"} for custom mask. Fraction is 0.05-0.95 (how much of background the shape covers)."
+          },
+          "description": {
+            "type": "string",
+            "description": "Object description (e.g., 'wooden barrel', 'stone fountain')"
+          },
+          "background_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Background image for style matching (optional). Options: {\"type\": \"path\", \"path\": \"assets/map.png\"} to get curl command (saves tokens), OR {\"type\": \"base64\", \"base64\": \"...\"} to provide image directly (uses many tokens). If provided without inpainting config, uses default: oval 60%."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_map_object",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get map object information and status.\n\nReturns:\n- Object details and metadata\n- Generation status and progress\n- Image data if completed\n- Download information",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "object_id"
+        ],
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "description": "Object ID to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_topdown_tileset",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Generate a Wang tileset for top-down game maps with corner-based autotiling.\n\nThis tool starts an asynchronous tileset generation that returns immediately with a tileset ID.\nUse the get_tileset tool to check status and retrieve the completed tileset.\n\nReturns 16 tiles (transition_size < 1.0) or 23 tiles (transition_size = 1.0).\nVertices define terrain, tiles render based on their 4 corner values.\n\nUse case: Building top-down game maps with seamless terrain transitions.\n\nAlgorithm: For each grid cell, sample terrain at 4 vertices, select matching tile.\n\n## Creating Connected Tilesets\n\nUse base tile IDs to create multiple tilesets that seamlessly connect:\n\n1. Create first tileset (e.g., ocean\u2192beach) and wait for completion\n2. Use get_tileset to retrieve the base tile IDs\n3. Use the beach base tile ID as lower_base_tile_id for next tileset (beach\u2192grass)\n\nExample workflow:\n- Tileset 1: ocean (lower) \u2192 beach (upper) \u2192 get beach base tile ID\n- Tileset 2: beach (lower, using base tile ID) \u2192 grass (upper) \u2192 get grass base tile ID\n- Tileset 3: grass (lower, using base tile ID) \u2192 stone (upper)\n\nThis ensures visual consistency across terrain transitions.\n\nGeneration time: ~100 seconds (async processing)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "lower_description",
+          "upper_description"
+        ],
+        "properties": {
+          "view": {
+            "enum": [
+              "low top-down",
+              "high top-down"
+            ],
+            "type": "string",
+            "default": "high top-down",
+            "description": "Camera angle. Options: \"low top-down\", \"high top-down\""
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low detail",
+                  "medium detail",
+                  "highly detailed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Detail level. Options: \"low detail\", \"medium detail\", \"highly detailed\""
+          },
+          "outline": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single color outline",
+                  "selective outline",
+                  "lineless"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Outline style. Options: \"single color outline\", \"selective outline\", \"lineless\""
+          },
+          "shading": {
+            "anyOf": [
+              {
+                "enum": [
+                  "flat shading",
+                  "basic shading",
+                  "medium shading",
+                  "detailed shading",
+                  "highly detailed shading"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Shading style. Options: \"flat shading\", \"basic shading\", \"medium shading\", \"detailed shading\", \"highly detailed shading\""
+          },
+          "tile_size": {
+            "type": "object",
+            "default": {
+              "width": 16,
+              "height": 16
+            },
+            "description": "Tile dimensions (16 or 32 pixels)",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "tile_strength": {
+            "type": "number",
+            "default": 1,
+            "maximum": 2,
+            "minimum": 0.1,
+            "description": "Pattern consistency"
+          },
+          "transition_size": {
+            "type": "number",
+            "default": 0,
+            "description": "Size of terrain transition. Often affects the height difference between terrains (0.0, 0.25, 0.5, or 1.0 for full tile transition)"
+          },
+          "lower_description": {
+            "type": "string",
+            "description": "Lower terrain type (e.g., 'ocean water', 'dirt path')"
+          },
+          "tileset_adherence": {
+            "type": "number",
+            "default": 100,
+            "maximum": 500,
+            "minimum": 0,
+            "description": "Structure strictness and adherence to reference image"
+          },
+          "upper_description": {
+            "type": "string",
+            "description": "Upper/elevated terrain type (e.g., 'sandy beach', 'grass')"
+          },
+          "lower_base_tile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ID of existing tile to use as lower terrain reference. Use to create connected tilesets"
+          },
+          "upper_base_tile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ID of existing tile to use as upper terrain reference. Use to create connected tilesets"
+          },
+          "text_guidance_scale": {
+            "type": "number",
+            "default": 8,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Prompt adherence strength"
+          },
+          "transition_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Blending between terrains (required if transition_size > 0, e.g. 'wet sand with foam')"
+          },
+          "tileset_adherence_freedom": {
+            "type": "number",
+            "default": 500,
+            "maximum": 900,
+            "minimum": 0,
+            "description": "Structure flexibility, higher values means more flexibility"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_topdown_tileset",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve a topdown tileset by ID. Returns tileset data with PNG and metadata download links if completed, or status information if still processing.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tileset_id"
+        ],
+        "properties": {
+          "tileset_id": {
+            "type": "string",
+            "description": "The UUID of the topdown tileset to retrieve"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_topdown_tilesets",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List all tilesets created by the authenticated user.\n\nReturns:\n    Array of tileset summaries with IDs, names, and creation dates",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of tilesets to return"
+          },
+          "offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "Number of tilesets to skip"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_topdown_tileset",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete a topdown tileset by ID. Only the owner can delete their own tilesets.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tileset_id"
+        ],
+        "properties": {
+          "tileset_id": {
+            "type": "string",
+            "description": "The UUID of the tileset to delete"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_sidescroller_tileset",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": false,
+        "destructiveHint": false
+      },
+      "description": "Generate a sidescroller tileset for 2D platformer games with side-view perspective.\n\nThis tool starts an asynchronous tileset generation that returns immediately with a tileset ID.\nUse the get_tileset tool to check status and retrieve the completed tileset.\n\nCreates tilesets optimized for 2D platformer games:\n- Side-view perspective (not top-down)\n- Transparent background (no background terrain)\n- Platform/ground tiles with flat surfaces (no slopes)\n- Optional decorative transition layer on top of base terrain\n\nUse case: Building 2D platformer games with seamless terrain tiles.\n\n## Creating Connected Tilesets\n\nUse base tile IDs to create multiple tilesets that seamlessly connect:\n\n1. Create first tileset (e.g., stone platform) and wait for completion\n2. Use get_tileset to retrieve the base tile ID\n3. Use that base tile ID when creating the next tileset for visual consistency\n\nExample workflow:\n- Tileset 1: stone brick platform \u2192 get base tile ID\n- Tileset 2: wood platform (using stone base tile ID for edge matching)\n- Tileset 3: metal grating platform (using wood base tile ID)\n\nThis ensures visual consistency across platform transitions.\n\nGeneration time: ~100 seconds (async processing)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "lower_description",
+          "transition_description"
+        ],
+        "properties": {
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Seed for reproducible generation"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low detail",
+                  "medium detail",
+                  "highly detailed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Detail level. Options: \"low detail\", \"medium detail\", \"highly detailed\""
+          },
+          "outline": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single color outline",
+                  "selective outline",
+                  "lineless"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Outline style. Options: \"single color outline\", \"selective outline\", \"lineless\""
+          },
+          "shading": {
+            "anyOf": [
+              {
+                "enum": [
+                  "flat shading",
+                  "basic shading",
+                  "medium shading",
+                  "detailed shading",
+                  "highly detailed shading"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Shading style. Options: \"flat shading\", \"basic shading\", \"medium shading\", \"detailed shading\", \"highly detailed shading\""
+          },
+          "tile_size": {
+            "type": "object",
+            "default": {
+              "width": 16,
+              "height": 16
+            },
+            "description": "Tile dimensions (16 or 32 pixels)",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "base_tile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ID of existing tile to use as reference. Use to create connected tilesets"
+          },
+          "tile_strength": {
+            "type": "number",
+            "default": 1,
+            "maximum": 2,
+            "minimum": 0.1,
+            "description": "Pattern consistency"
+          },
+          "transition_size": {
+            "type": "number",
+            "default": 0,
+            "description": "Size of terrain transition. Controls how much of the surface layer appears (0.0 = no surface layer, 0.25 = light surface layer, 0.5 = heavy surface layer)"
+          },
+          "lower_description": {
+            "type": "string",
+            "description": "Platform/center material (e.g., 'stone brick', 'wooden planks', 'metal grating')"
+          },
+          "tileset_adherence": {
+            "type": "number",
+            "default": 100,
+            "maximum": 500,
+            "minimum": 0,
+            "description": "Structure strictness and adherence to reference image"
+          },
+          "text_guidance_scale": {
+            "type": "number",
+            "default": 8,
+            "maximum": 20,
+            "minimum": 1,
+            "description": "Prompt adherence strength"
+          },
+          "transition_description": {
+            "type": "string",
+            "description": "Platform surface/top layer (e.g., 'grass', 'snow cover', 'moss')"
+          },
+          "tileset_adherence_freedom": {
+            "type": "number",
+            "default": 500,
+            "maximum": 900,
+            "minimum": 0,
+            "description": "Structure flexibility, higher values means more flexibility"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_sidescroller_tileset",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Retrieve a sidescroller tileset by ID. Returns tileset data with PNG and metadata download links if completed, or status information if still processing.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tileset_id"
+        ],
+        "properties": {
+          "tileset_id": {
+            "type": "string",
+            "description": "ID of the sidescroller tileset to retrieve"
+          },
+          "include_example_map": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include an example 2D platformer level using the tileset"
+          }
+        }
+      }
+    },
+    {
+      "name": "list_sidescroller_tilesets",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "List all sidescroller tilesets created by the authenticated user.\n\nReturns both completed and in-progress sidescroller tilesets, sorted by creation date.\nSidescroller tilesets are optimized for 2D platformer games with side-view perspective.\n\nExample usage:\n- list_sidescroller_tilesets() - Get first 20 tilesets\n- list_sidescroller_tilesets(limit=10) - Get first 10 tilesets\n- list_sidescroller_tilesets(limit=10, offset=10) - Get tilesets 11-20",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Maximum number of tilesets to return"
+          },
+          "offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "Number of tilesets to skip (for pagination)"
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_sidescroller_tileset",
+      "_meta": {
+        "_fastmcp": {
+          "tags": []
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "idempotentHint": true,
+        "destructiveHint": true
+      },
+      "description": "Delete a sidescroller tileset by ID. Only the owner can delete their own sidescroller tilesets.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "tileset_id"
+        ],
+        "properties": {
+          "tileset_id": {
+            "type": "string",
+            "description": "The UUID of the sidescroller tileset to delete"
+          }
+        }
+      }
+    }
+  ],
+  "_sync": {
+    "fetched_at": "2026-01-04T13:48:07.470214+00:00",
+    "source": "smithery"
+  }
+}

@@ -1,0 +1,394 @@
+{
+  "id": "@freebreaker/selfhosted-supabase",
+  "name": "@freebreaker/selfhosted-supabase",
+  "display_name": "selfhosted-supabase",
+  "version": null,
+  "description": "Control your self-hosted Supabase from your development environment. Browse schemas, run SQL, manage migrations and auth users, inspect stats, and work with storage and realtime. Generate TypeScript types to keep your code in sync.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "list_tables",
+      "description": "Lists all accessible tables in the connected database, grouped by schema.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "list_extensions",
+      "description": "Lists all installed PostgreSQL extensions in the database.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "list_migrations",
+      "description": "Lists applied database migrations recorded in supabase_migrations.schema_migrations table.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "apply_migration",
+      "description": "Applies a SQL migration script and records it in the supabase_migrations.schema_migrations table within a transaction.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "version",
+          "sql"
+        ],
+        "properties": {
+          "sql": {
+            "type": "string",
+            "description": "The SQL DDL content of the migration."
+          },
+          "name": {
+            "type": "string",
+            "description": "An optional descriptive name for the migration."
+          },
+          "version": {
+            "type": "string",
+            "description": "The migration version string (e.g., '20240101120000')."
+          }
+        }
+      }
+    },
+    {
+      "name": "execute_sql",
+      "description": "Executes an arbitrary SQL query against the database, using direct database connection when available or RPC function as fallback.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "sql"
+        ],
+        "properties": {
+          "sql": {
+            "type": "string",
+            "description": "The SQL query to execute."
+          },
+          "read_only": {
+            "type": "boolean",
+            "default": false,
+            "description": "Hint for the RPC function whether the query is read-only (best effort)."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_database_connections",
+      "description": "Retrieves information about active database connections from pg_stat_activity.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_database_stats",
+      "description": "Retrieves statistics about database activity and the background writer from pg_stat_database and pg_stat_bgwriter.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_project_url",
+      "description": "Returns the configured Supabase project URL for this server.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_anon_key",
+      "description": "Returns the configured Supabase anon key for this server.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_service_key",
+      "description": "Returns the configured Supabase service role key for this server, if available.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "generate_typescript_types",
+      "description": "Generates TypeScript types from the database schema using the Supabase CLI (`supabase gen types`) and downloads the file to the specified absolute path. The tool returns the current platform (win32, darwin, linux) to help with path formatting. Requires DATABASE_URL configuration and Supabase CLI installed.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "output_path"
+        ],
+        "properties": {
+          "output_path": {
+            "type": "string",
+            "description": "Absolute path where to download the generated TypeScript file. Examples: Windows: \"C:\\\\path\\\\to\\\\project\\\\database.types.ts\", macOS/Linux: \"/path/to/project/database.types.ts\". This parameter is required."
+          },
+          "output_filename": {
+            "type": "string",
+            "default": "database.types.ts",
+            "description": "Filename to save the generated types to in the workspace root."
+          },
+          "included_schemas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "public"
+            ],
+            "description": "Database schemas to include in type generation."
+          }
+        }
+      }
+    },
+    {
+      "name": "rebuild_hooks",
+      "description": "Attempts to restart the pg_net worker. Requires the pg_net extension to be installed and available.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "verify_jwt_secret",
+      "description": "Checks if the Supabase JWT secret is configured for this server and returns a preview.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "list_auth_users",
+      "description": "Lists users from the auth.users table.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 50,
+            "description": "Max number of users to return"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Number of users to skip"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_auth_user",
+      "description": "Retrieves details for a specific user from auth.users by their ID.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The UUID of the user to retrieve."
+          }
+        }
+      }
+    },
+    {
+      "name": "delete_auth_user",
+      "description": "Deletes a user from auth.users by their ID. Requires service_role key and direct DB connection.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The UUID of the user to delete."
+          }
+        }
+      }
+    },
+    {
+      "name": "create_auth_user",
+      "description": "Creates a new user directly in auth.users. WARNING: Requires plain password, insecure. Use with extreme caution.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "default": "authenticated",
+            "description": "User role."
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The email address for the new user."
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "description": "Plain text password (min 6 chars). WARNING: Insecure."
+          },
+          "app_metadata": {
+            "type": "object",
+            "description": "Optional app metadata."
+          },
+          "user_metadata": {
+            "type": "object",
+            "description": "Optional user metadata."
+          }
+        }
+      }
+    },
+    {
+      "name": "update_auth_user",
+      "description": "Updates fields for a user in auth.users. WARNING: Password handling is insecure. Requires service_role key and direct DB connection.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "New role."
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "New email address."
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The UUID of the user to update."
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "description": "New plain text password (min 6 chars). WARNING: Insecure."
+          },
+          "app_metadata": {
+            "type": "object",
+            "description": "New app metadata (will overwrite existing)."
+          },
+          "user_metadata": {
+            "type": "object",
+            "description": "New user metadata (will overwrite existing)."
+          }
+        }
+      }
+    },
+    {
+      "name": "list_storage_buckets",
+      "description": "Lists all storage buckets in the project.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    },
+    {
+      "name": "list_storage_objects",
+      "description": "Lists objects within a specific storage bucket, optionally filtering by prefix.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "bucket_id"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "default": 100,
+            "description": "Max number of objects to return"
+          },
+          "offset": {
+            "type": "number",
+            "default": 0,
+            "description": "Number of objects to skip"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Filter objects by a path prefix (e.g., 'public/')"
+          },
+          "bucket_id": {
+            "type": "string",
+            "description": "The ID of the bucket to list objects from."
+          }
+        }
+      }
+    },
+    {
+      "name": "list_realtime_publications",
+      "description": "Lists PostgreSQL publications, often used by Supabase Realtime.",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {}
+      }
+    }
+  ],
+  "tool_count": 21,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@freebreaker/selfhosted-supabase/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "list_tables",
+    "list_extensions",
+    "list_migrations",
+    "apply_migration",
+    "execute_sql",
+    "get_database_connections",
+    "get_database_stats",
+    "get_project_url",
+    "get_anon_key",
+    "get_service_key",
+    "generate_typescript_types",
+    "rebuild_hooks",
+    "verify_jwt_secret",
+    "list_auth_users",
+    "get_auth_user",
+    "delete_auth_user",
+    "create_auth_user",
+    "update_auth_user",
+    "list_storage_buckets",
+    "list_storage_objects",
+    "list_realtime_publications"
+  ]
+}

@@ -1,0 +1,281 @@
+{
+  "id": "@skymoore/grokipedia-mcp",
+  "name": "@skymoore/grokipedia-mcp",
+  "display_name": "grokipedia-mcp",
+  "version": null,
+  "description": "Search and retrieve Grokipedia articles with filters, full content, and citations. Explore related pages and extract sections to quickly gather relevant knowledge. Run guided workflows to research topics, find sources, and compare subjects.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/cc37576e-6e09-44a2-a91d-df91efb88177.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "search",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Search for articles in Grokipedia with optional filtering and sorting.",
+      "inputSchema": {
+        "type": "object",
+        "title": "searchArguments",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 12,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of results to return (default: 12, max: 50)"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "Search query string to find matching articles"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": 0,
+            "minimum": 0,
+            "description": "Pagination offset for results (default: 0)"
+          },
+          "sort_by": {
+            "type": "string",
+            "title": "Sort By",
+            "default": "relevance",
+            "description": "Sort results by 'relevance' or 'views' (default: relevance)"
+          },
+          "min_views": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Views",
+            "default": null,
+            "description": "Filter to articles with at least this many views (optional)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_page",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get complete page information including metadata, content preview, and citations summary.",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_pageArguments",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug",
+            "description": "Unique slug identifier of the page to retrieve"
+          },
+          "max_content_length": {
+            "type": "integer",
+            "title": "Max Content Length",
+            "default": 5000,
+            "minimum": 100,
+            "description": "Maximum length of content to return (default: 5000)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_page_content",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get only the article content without citations or metadata.",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_page_contentArguments",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug",
+            "description": "Unique slug identifier of the page to retrieve content from"
+          },
+          "max_length": {
+            "type": "integer",
+            "title": "Max Length",
+            "default": 10000,
+            "minimum": 100,
+            "description": "Maximum length of content to return (default: 10000)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_page_citations",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get the citations list for a specific page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_page_citationsArguments",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug",
+            "description": "Unique slug identifier of page to retrieve citations from"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Limit",
+            "default": null,
+            "description": "Maximum number of citations to return (optional, returns all if not specified)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_related_pages",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get pages that are linked from the specified page.",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_related_pagesArguments",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug",
+            "description": "Unique slug identifier of page to find related pages for"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 10,
+            "maximum": 50,
+            "minimum": 1,
+            "description": "Maximum number of related pages to return (default: 10)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_page_section",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Extract a specific section from an article by header name.",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_page_sectionArguments",
+        "required": [
+          "slug",
+          "section_header"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug",
+            "description": "Unique slug identifier of page to extract section from"
+          },
+          "max_length": {
+            "type": "integer",
+            "title": "Max Length",
+            "default": 5000,
+            "minimum": 100,
+            "description": "Maximum length of section content to return (default: 5000)"
+          },
+          "section_header": {
+            "type": "string",
+            "title": "Section Header",
+            "description": "Exact header text of the section to extract (case-insensitive)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_page_sections",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "Get a list of all section headers in an article.",
+      "inputSchema": {
+        "type": "object",
+        "title": "get_page_sectionsArguments",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug",
+            "description": "Unique slug identifier of page to list sections for"
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 7,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@skymoore/grokipedia-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "search",
+    "get_page",
+    "get_page_content",
+    "get_page_citations",
+    "get_related_pages",
+    "get_page_section",
+    "get_page_sections"
+  ]
+}

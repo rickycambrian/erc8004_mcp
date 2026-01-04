@@ -1,0 +1,927 @@
+{
+  "id": "@hithereiamaliff/mcp-malaysiatransit",
+  "name": "@hithereiamaliff/mcp-malaysiatransit",
+  "display_name": "Malaysia Transit MCP",
+  "version": null,
+  "description": "A Model Context Protocol server that taps access to real-time bus and train information across 12 Malaysian cities. Get live arrivals, vehicle tracking, and route details from Rapid KL, Rapid Penang, and various BAS.MY services across Malaysia.\n\nCurrently covering the following areas:\n\n- Kangar\n- Alor Setar\n- Penang\n- Klang Valley (Kuala Lumpur, Selangor, Putrajaya)\n- Melaka\n- Johor Bahru\n- Kota Bharu\n- Kuala Terengganu\n- Kuching\n- Ipoh\n- Seremban\n\nMore areas to be covered soon!\n\nNote: this is NOT an official MCP server by the Government of Malaysia or anyone from Prasarana Malaysia, Ministry of Transport (MOT), Agensi Pengangkutan Awam Darat (APAD), KTM Berhad, or operators involved in BAS.MY operations.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/0132c048-6009-488d-9146-cbbc465b6c20.png",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "list_service_areas",
+      "description": "List all available transit service areas in Malaysia (e.g., Klang Valley, Penang, Kuantan)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "detect_location_area",
+      "description": "Automatically detect which transit service area a location belongs to using geocoding. Use this when the user mentions a place name without specifying the area (e.g., \"KTM Alor Setar\", \"Komtar\", \"KLCC\"). IMPORTANT: After detecting the area, use find_nearby_stops_with_arrivals or find_nearby_stops with the location parameter - these tools handle geocoding automatically and are more reliable than using coordinates from this tool.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "Location name or place (e.g., \"KTM Alor Setar\", \"Komtar\", \"Pavilion KL\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_area_info",
+      "description": "Get detailed information about a specific transit service area",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "areaId": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\", \"kuantan\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "search_stops",
+      "description": "Search for bus or train stops by name in a specific area. The middleware will automatically geocode place names (like \"Ideal Foresta\") and find nearby stops if no exact stop name match is found. IMPORTANT: If you are unsure which area a location belongs to, use detect_location_area first to automatically determine the correct area.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\"). Use detect_location_area if unsure."
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query - can be a stop name (e.g., \"Komtar\") OR a place name (e.g., \"Ideal Foresta\"). Place names will be auto-geocoded to find nearby stops."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_stop_details",
+      "description": "Get detailed information about a specific bus or train stop",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          },
+          "stopId": {
+            "type": "string",
+            "description": "Stop ID from search results"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_stop_arrivals",
+      "description": "Get real-time arrival predictions for buses/trains at a specific stop",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          },
+          "stopId": {
+            "type": "string",
+            "description": "Stop ID from search results"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "find_nearby_stops",
+      "description": "Find bus or train stops near a specific location AND get all routes serving those stops. You can provide EITHER coordinates (lat/lon) OR a location name - the middleware will geocode place names automatically.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "Latitude coordinate (optional if location is provided)"
+          },
+          "lon": {
+            "type": "number",
+            "description": "Longitude coordinate (optional if location is provided)"
+          },
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          },
+          "radius": {
+            "type": "number",
+            "default": 500,
+            "description": "Search radius in meters (default: 500)"
+          },
+          "location": {
+            "type": "string",
+            "description": "Place name to geocode (e.g., \"Ideal Foresta\", \"KLCC\", \"Komtar\"). Use this instead of lat/lon for convenience."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "find_nearby_stops_with_arrivals",
+      "description": "Find bus stops near a location AND get real-time arrival predictions in one call. RECOMMENDED: Use this tool when users ask about nearby bus stops and arrival times together. Accepts a place name (e.g., \"Ideal Foresta\") - the middleware handles geocoding automatically.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "Latitude coordinate (optional if location is provided)"
+          },
+          "lon": {
+            "type": "number",
+            "description": "Longitude coordinate (optional if location is provided)"
+          },
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          },
+          "radius": {
+            "type": "number",
+            "default": 500,
+            "description": "Search radius in meters (default: 500)"
+          },
+          "location": {
+            "type": "string",
+            "description": "Place name to geocode (e.g., \"Ideal Foresta\", \"KLCC\", \"Komtar\")"
+          },
+          "routeFilter": {
+            "type": "string",
+            "description": "Filter arrivals by route number (e.g., \"302\", \"101\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "find_nearby_stops_with_routes",
+      "description": "Find bus stops near a location AND get all routes serving those stops in one call. Accepts a place name (e.g., \"Ideal Foresta\") - the middleware handles geocoding automatically.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "Latitude coordinate (optional if location is provided)"
+          },
+          "lon": {
+            "type": "number",
+            "description": "Longitude coordinate (optional if location is provided)"
+          },
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          },
+          "radius": {
+            "type": "number",
+            "default": 500,
+            "description": "Search radius in meters (default: 500)"
+          },
+          "location": {
+            "type": "string",
+            "description": "Place name to geocode (e.g., \"Ideal Foresta\", \"KLCC\", \"Komtar\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_routes",
+      "description": "List all available bus or train routes in a specific area",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_route_stops",
+      "description": "Get all stops on a specific route. Use this to find which stops a bus/train route serves. IMPORTANT: First call list_routes to get the correct route_id.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "Route ID from list_routes (e.g., \"302\", \"101\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_route_details",
+      "description": "Get detailed information about a specific route including stops and geometry. IMPORTANT: First call list_routes to get the correct route_id.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "Route ID from list_routes (e.g., \"302\", \"101\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_route_geometry",
+      "description": "Get the geographic path and stops for a specific route (for map visualization)",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "Route ID from list_routes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_live_vehicles",
+      "description": "Get real-time positions of all buses and trains in a specific area",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          },
+          "type": {
+            "enum": [
+              "bus",
+              "rail"
+            ],
+            "type": "string",
+            "description": "Filter by transit type (optional)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_provider_status",
+      "description": "Check the operational status of transit providers in a specific area",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_route_departures",
+      "description": "Get the next N departures for a specific route (both directions). Useful for showing upcoming bus/train times. IMPORTANT: Use route_short_name (e.g., \"K10\", \"A32\", \"R10\", \"101\") NOT the numeric route_id. Works for: penang, ipoh, seremban, kangar, alor-setar, kota-bharu, kuala-terengganu, melaka, johor, kuching.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"ipoh\", \"seremban\", \"alor-setar\")"
+          },
+          "count": {
+            "type": "number",
+            "default": 5,
+            "description": "Number of departures to return (default: 5)"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "Route SHORT NAME (e.g., \"101\", \"K10\", \"A32\") - NOT the numeric route_id. Get this from list_routes route_short_name field."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_next_departure",
+      "description": "Get the single next departure for a route in a specific direction. Quick way to find when the next bus/train leaves. IMPORTANT: Use route_short_name (e.g., \"101\", \"K10\", \"A32\") NOT numeric route_id. Works for: penang, ipoh, seremban, kangar, alor-setar, kota-bharu, kuala-terengganu, melaka, johor, kuching.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"ipoh\", \"seremban\", \"alor-setar\")"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "Route SHORT NAME (e.g., \"101\", \"K10\", \"A32\") - NOT numeric route_id"
+          },
+          "direction": {
+            "enum": [
+              "outbound",
+              "inbound",
+              "loop"
+            ],
+            "type": "string",
+            "description": "Direction of travel (optional)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_stop_routes",
+      "description": "Get all routes serving a specific stop with their next departures. Shows which buses/trains stop here and when. Works for: penang, ipoh, seremban, kangar, alor-setar, kota-bharu, kuala-terengganu, melaka, johor, kuching.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"ipoh\", \"seremban\", \"alor-setar\")"
+          },
+          "count": {
+            "type": "number",
+            "default": 3,
+            "description": "Number of departures per route (default: 3)"
+          },
+          "stopId": {
+            "type": "string",
+            "description": "Stop ID from search_stops"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_route_schedule",
+      "description": "Get the complete daily schedule for a route. Shows all departure times throughout the day. IMPORTANT: Use route_short_name (e.g., \"101\", \"K10\", \"A32\") NOT numeric route_id. Works for: penang, ipoh, seremban, kangar, alor-setar, kota-bharu, kuala-terengganu, melaka, johor, kuching.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"ipoh\", \"seremban\", \"alor-setar\")"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "Route SHORT NAME (e.g., \"101\", \"K10\", \"A32\") - NOT numeric route_id"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_route_origin",
+      "description": "Get the origin stop name for a route in a specific direction. Useful for showing where the bus/train starts. IMPORTANT: Use route_short_name (e.g., \"101\", \"K10\", \"A32\") NOT numeric route_id. Works for: penang, ipoh, seremban, kangar, alor-setar, kota-bharu, kuala-terengganu, melaka, johor, kuching.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"ipoh\", \"seremban\", \"alor-setar\")"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "Route SHORT NAME (e.g., \"101\", \"K10\", \"A32\") - NOT numeric route_id"
+          },
+          "direction": {
+            "enum": [
+              "outbound",
+              "inbound"
+            ],
+            "type": "string",
+            "description": "Direction of travel (optional)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_route_status",
+      "description": "Check if a route is currently operating based on its schedule. Shows if buses/trains are running now. IMPORTANT: Use route_short_name (e.g., \"101\", \"K10\", \"A32\") NOT numeric route_id. Works for: penang, ipoh, seremban, kangar, alor-setar, kota-bharu, kuala-terengganu, melaka, johor, kuching.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"ipoh\", \"seremban\", \"alor-setar\")"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "Route SHORT NAME (e.g., \"101\", \"K10\", \"A32\") - NOT numeric route_id"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_fare_routes",
+      "description": "Get all routes available for fare calculation in a specific area. MUST call this FIRST before calculate_fare to get valid route_id values. Supports: ipoh, seremban, kangar, alor-setar, kota-bharu, kuala-terengganu, melaka, johor, kuching, penang.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID - must be: ipoh, seremban, kangar, alor-setar, kota-bharu, kuala-terengganu, melaka, johor, kuching, or penang"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_route_stops_for_fare",
+      "description": "Get all stops on a route with their distances for fare calculation. MUST call this SECOND (after get_fare_routes) to get valid stop_id values for calculate_fare. Returns stop IDs and names.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID - same as used in get_fare_routes"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "The route_id value from get_fare_routes response (e.g., \"D62\", \"A32\", \"M15CWLMYMK\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_fare",
+      "description": "Calculate the bus fare between two stops on a route. IMPORTANT: You MUST first call get_fare_routes to get route_id, then get_route_stops_for_fare to get valid stop_id values. Do NOT guess IDs.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID - same as used in previous calls"
+          },
+          "toStop": {
+            "type": "string",
+            "description": "The exact stop_id from get_route_stops_for_fare response"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "The exact route_id from get_fare_routes (NOT route_short_name)"
+          },
+          "fromStop": {
+            "type": "string",
+            "description": "The exact stop_id from get_route_stops_for_fare response"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_journey_fare",
+      "description": "Calculate the total fare for a multi-leg journey with bus transfers. Each leg is a separate fare since BAS.MY does not have integrated transfers.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "legs"
+        ],
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Base service area ID (legs can specify different areas for inter-area journeys)"
+          },
+          "legs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "areaId": {
+                  "type": "string",
+                  "description": "Area ID for this leg (optional, defaults to base area)"
+                },
+                "toStop": {
+                  "type": "string",
+                  "description": "Destination stop ID"
+                },
+                "routeId": {
+                  "type": "string",
+                  "description": "Route ID for this leg"
+                },
+                "fromStop": {
+                  "type": "string",
+                  "description": "Origin stop ID"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Array of journey legs (max 5)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_route_directions_for_fare",
+      "description": "Get available directions for a route when calculating fares. Use this to determine which direction (outbound/inbound) to use for fare calculation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"ipoh\")"
+          },
+          "routeId": {
+            "type": "string",
+            "description": "Route ID from get_fare_routes"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_ktm_komuter_stations",
+      "description": "Get all 23 KTM Komuter Utara stations (Padang Besar - Butterworth - Ipoh line). Returns station codes, names, and coordinates.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_ktm_komuter_fare",
+      "description": "Calculate KTM Komuter Utara fare between two stations. Use station codes (e.g., \"BU\" for Butterworth, \"IP\" for Ipoh, \"PB\" for Padang Besar).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Destination station code (e.g., \"BU\", \"IP\", \"PB\")"
+          },
+          "from": {
+            "type": "string",
+            "description": "Origin station code (e.g., \"BU\", \"IP\", \"PB\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_ktm_komuter_fare_matrix",
+      "description": "Get the full KTM Komuter Utara fare matrix showing fares between all station pairs.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_ktm_station_departures",
+      "description": "Get departure times for a specific KTM station. Supports both KTM Komuter Utara and KTM Intercity schedules.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "ktm-komuter-utara",
+              "ktm-intercity"
+            ],
+            "type": "string",
+            "description": "Schedule type: ktm-komuter-utara (Padang Besar-Ipoh) or ktm-intercity (SH/ERT routes)"
+          },
+          "stationName": {
+            "type": "string",
+            "description": "Station name (e.g., \"Butterworth\", \"Ipoh\", \"Padang Besar\", \"Gemas\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_ktm_stations",
+      "description": "Get all KTM stations for a specific schedule type (Komuter Utara or Intercity).",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "ktm-komuter-utara",
+              "ktm-intercity"
+            ],
+            "type": "string",
+            "description": "Schedule type: ktm-komuter-utara or ktm-intercity"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_ktm_schedules",
+      "description": "Get full KTM schedule data for a specific schedule type. Returns complete timetable information.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "ktm-komuter-utara",
+              "ktm-intercity"
+            ],
+            "type": "string",
+            "description": "Schedule type: ktm-komuter-utara or ktm-intercity"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "find_nearby_ktm_stations",
+      "description": "Find KTM stations near a specific location. You can provide EITHER coordinates (lat/lon) OR a location name - the middleware will geocode place names automatically.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "Latitude coordinate (optional if location is provided)"
+          },
+          "lon": {
+            "type": "number",
+            "description": "Longitude coordinate (optional if location is provided)"
+          },
+          "type": {
+            "enum": [
+              "ktm-komuter-utara",
+              "ktm-intercity"
+            ],
+            "type": "string",
+            "description": "Schedule type: ktm-komuter-utara or ktm-intercity"
+          },
+          "radius": {
+            "type": "number",
+            "default": 10,
+            "description": "Search radius in kilometers (default: 10)"
+          },
+          "location": {
+            "type": "string",
+            "description": "Place name to geocode (e.g., \"Butterworth\", \"Ipoh\", \"Padang Besar\"). Use this instead of lat/lon for convenience."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_penang_ferry_overview",
+      "description": "Get Penang Ferry service overview including terminals, operating hours, frequency, and contact information. The ferry operates between Butterworth and George Town.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_penang_ferry_schedule",
+      "description": "Get full Penang Ferry schedule with departure times. Supports filtering by direction and day type.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "day": {
+            "enum": [
+              "weekday",
+              "weekend"
+            ],
+            "type": "string",
+            "description": "Filter by day type (optional)"
+          },
+          "direction": {
+            "enum": [
+              "butterworth-georgetown",
+              "georgetown-butterworth"
+            ],
+            "type": "string",
+            "description": "Filter by direction (optional)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_penang_ferry_next_departure",
+      "description": "Get next ferry departures from both Butterworth and George Town terminals in real-time. Shows minutes until departure.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_penang_ferry_terminals",
+      "description": "Get detailed information about Penang Ferry terminals including facilities, connections, parking, and nearby attractions.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_penang_ferry_fare",
+      "description": "Get Penang Ferry fare information, payment methods, and terminal coordinates.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_system_health",
+      "description": "Check the health status of the Malaysia Transit middleware service",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_debug_info",
+      "description": "Get comprehensive debug information about the middleware service including memory usage and initialized areas",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_api_analytics",
+      "description": "Get API usage analytics and statistics from the middleware. Shows total requests, requests per hour, error rates, and usage by service area. Useful for monitoring API health and usage patterns.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "type": {
+            "enum": [
+              "summary",
+              "endpoints",
+              "areas",
+              "cumulative",
+              "clients"
+            ],
+            "type": "string",
+            "default": "summary",
+            "description": "Type of analytics: summary (overview), endpoints (per-endpoint stats), areas (per-area stats), cumulative (all-time totals), clients (app/website usage)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_area_analytics",
+      "description": "Get detailed API usage analytics for a specific service area. Shows which endpoints are most used for that area.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Service area ID (e.g., \"penang\", \"klang-valley\", \"ipoh\")"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "hello",
+      "description": "A simple test tool to verify that the MCP server is working correctly",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 43,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@hithereiamaliff/mcp-malaysiatransit/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "list_service_areas",
+    "detect_location_area",
+    "get_area_info",
+    "search_stops",
+    "get_stop_details",
+    "get_stop_arrivals",
+    "find_nearby_stops",
+    "find_nearby_stops_with_arrivals",
+    "find_nearby_stops_with_routes",
+    "list_routes",
+    "get_route_stops",
+    "get_route_details",
+    "get_route_geometry",
+    "get_live_vehicles",
+    "get_provider_status",
+    "get_route_departures",
+    "get_next_departure",
+    "get_stop_routes",
+    "get_route_schedule",
+    "get_route_origin",
+    "get_route_status",
+    "get_fare_routes",
+    "get_route_stops_for_fare",
+    "calculate_fare",
+    "calculate_journey_fare",
+    "get_route_directions_for_fare",
+    "get_ktm_komuter_stations",
+    "calculate_ktm_komuter_fare",
+    "get_ktm_komuter_fare_matrix",
+    "get_ktm_station_departures",
+    "get_ktm_stations",
+    "get_ktm_schedules",
+    "find_nearby_ktm_stations",
+    "get_penang_ferry_overview",
+    "get_penang_ferry_schedule",
+    "get_penang_ferry_next_departure",
+    "get_penang_ferry_terminals",
+    "get_penang_ferry_fare",
+    "get_system_health",
+    "get_debug_info",
+    "get_api_analytics",
+    "get_area_analytics",
+    "hello"
+  ]
+}

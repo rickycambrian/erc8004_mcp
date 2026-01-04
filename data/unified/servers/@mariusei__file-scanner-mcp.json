@@ -1,0 +1,382 @@
+{
+  "id": "@mariusei/file-scanner-mcp",
+  "name": "@mariusei/file-scanner-mcp",
+  "display_name": "Scantool - File Structure Explorer",
+  "version": null,
+  "description": "Scan files and directories to map code structure and navigate large codebases faster. See a compact overview of key elements to decide what to read next. Search for specific structures\u2014like tests, async methods, or dataclasses\u2014to target exploration and refactoring.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "preview_directory",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "analysis",
+            "exploration",
+            "overview",
+            "primary"
+          ]
+        }
+      },
+      "description": "Preview directory with intelligent code analysis - PRIMARY TOOL for understanding codebases (5-10s, includes hot functions, replaces ls/find/grep)",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "directory"
+        ],
+        "properties": {
+          "depth": {
+            "type": "string",
+            "default": "deep"
+          },
+          "directory": {
+            "type": "string"
+          },
+          "max_files": {
+            "type": "integer",
+            "default": 10000
+          },
+          "max_entries": {
+            "type": "integer",
+            "default": 20
+          },
+          "respect_gitignore": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    {
+      "name": "code_map",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "analysis",
+            "deprecated",
+            "exploration",
+            "overview"
+          ]
+        }
+      },
+      "description": "[DEPRECATED] Use preview_directory() instead - Same functionality, better UX",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "directory"
+        ],
+        "properties": {
+          "directory": {
+            "type": "string"
+          },
+          "max_files": {
+            "type": "integer",
+            "default": 10000
+          },
+          "max_entries": {
+            "type": "integer",
+            "default": 20
+          },
+          "enable_layer2": {
+            "type": "boolean",
+            "default": true
+          },
+          "respect_gitignore": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    {
+      "name": "list_directories",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "directories",
+            "exploration",
+            "navigation"
+          ]
+        }
+      },
+      "description": "List directory tree structure (folders only, no files) - USE THIS to see folder hierarchy",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "directory"
+        ],
+        "properties": {
+          "directory": {
+            "type": "string"
+          },
+          "max_depth": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 3
+          },
+          "respect_gitignore": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    {
+      "name": "scan_file_content",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "content",
+            "http",
+            "remote"
+          ]
+        }
+      },
+      "description": "Scan file content directly - USE THIS for remote files, GitHub, APIs instead of saving to disk first",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "content",
+          "filename"
+        ],
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "output_format": {
+            "type": "string",
+            "default": "tree"
+          },
+          "show_complexity": {
+            "type": "boolean",
+            "default": false
+          },
+          "show_decorators": {
+            "type": "boolean",
+            "default": true
+          },
+          "show_docstrings": {
+            "type": "boolean",
+            "default": true
+          },
+          "show_signatures": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    {
+      "name": "scan_file",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "analysis",
+            "file",
+            "local"
+          ]
+        }
+      },
+      "description": "Scan local file structure - USE THIS BEFORE Read to get overview with line numbers",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "file_path"
+        ],
+        "properties": {
+          "file_path": {
+            "type": "string"
+          },
+          "output_format": {
+            "type": "string",
+            "default": "tree"
+          },
+          "show_complexity": {
+            "type": "boolean",
+            "default": false
+          },
+          "show_decorators": {
+            "type": "boolean",
+            "default": true
+          },
+          "show_docstrings": {
+            "type": "boolean",
+            "default": true
+          },
+          "show_signatures": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    {
+      "name": "scan_directory",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "directory",
+            "exploration",
+            "local"
+          ]
+        }
+      },
+      "description": "Scan directory structure - USE THIS INSTEAD of Glob when you want to see both file tree AND code structure",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "directory"
+        ],
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "default": "**/*"
+          },
+          "directory": {
+            "type": "string"
+          },
+          "max_files": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "output_format": {
+            "type": "string",
+            "default": "tree"
+          },
+          "exclude_patterns": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "respect_gitignore": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    {
+      "name": "search_structures",
+      "_meta": {
+        "_fastmcp": {
+          "tags": [
+            "filter",
+            "local",
+            "search"
+          ]
+        }
+      },
+      "description": "Search code structures - USE THIS INSTEAD of Grep when searching for classes, functions, or methods by name/type/decorator",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "directory"
+        ],
+        "properties": {
+          "directory": {
+            "type": "string"
+          },
+          "type_filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "name_pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "has_decorator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "output_format": {
+            "type": "string",
+            "default": "tree"
+          },
+          "min_complexity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 7,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@mariusei/file-scanner-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "preview_directory",
+    "code_map",
+    "list_directories",
+    "scan_file_content",
+    "scan_file",
+    "scan_directory",
+    "search_structures"
+  ]
+}

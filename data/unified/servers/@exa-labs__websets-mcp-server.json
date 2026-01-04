@@ -1,0 +1,632 @@
+{
+  "id": "@exa-labs/websets-mcp-server",
+  "name": "@exa-labs/websets-mcp-server",
+  "display_name": "Exa Websets",
+  "version": null,
+  "description": "Create and manage collections of companies, people, and papers, automatically discovering and verifying relevant entities. Enrich items with custom fields like CEO name, funding amount, or company stage, and inspect detailed results. Schedule recurring searches to keep collections fresh and catch new additions.",
+  "icon_url": "https://icons.duckduckgo.com/ip3/github.com.ico",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "create_webset",
+      "description": "Create a new Webset collection. Websets are collections of web entities (companies, people, papers) that can be automatically searched, verified, and enriched with custom data.\n\nIMPORTANT PARAMETER FORMATS:\n- searchCriteria: MUST be array of objects like [{description: \"...\"}] (NOT array of strings)\n- enrichments: Each must have description field, optional format and options\n- enrichment options: MUST be array of objects like [{label: \"...\"}] (NOT array of strings)\n\nExample call:\n{\n  \"name\": \"AI Startups\",\n  \"searchQuery\": \"AI startups in San Francisco\",\n  \"searchCriteria\": [{\"description\": \"Founded after 2020\"}],\n  \"enrichments\": [\n    {\"description\": \"CEO name\", \"format\": \"text\"},\n    {\"description\": \"Company stage\", \"format\": \"options\", \"options\": [{\"label\": \"Seed\"}, {\"label\": \"Series A\"}]}\n  ]\n}",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name for the webset"
+          },
+          "externalId": {
+            "type": "string",
+            "description": "Your own identifier for the webset"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the webset"
+          },
+          "enrichments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "description"
+              ],
+              "properties": {
+                "format": {
+                  "enum": [
+                    "text",
+                    "date",
+                    "number",
+                    "options",
+                    "email",
+                    "phone",
+                    "url"
+                  ],
+                  "type": "string",
+                  "description": "Format of the enrichment response"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "label"
+                    ],
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "description": "When format is 'options', the different options to choose from. Example: [{label: 'B2B'}, {label: 'B2C'}, {label: 'B2B2C'}]"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "What data to extract (e.g., 'Annual revenue in USD', 'Number of full-time employees')"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Data enrichments to automatically extract for each item. Example: [{description: 'CEO name', format: 'text'}, {description: 'Company type', format: 'options', options: [{label: 'B2B'}, {label: 'B2C'}]}]"
+          },
+          "searchCount": {
+            "type": "number",
+            "description": "Number of items to search for (default: 10)"
+          },
+          "searchQuery": {
+            "type": "string",
+            "description": "Natural language query to populate the webset (e.g., 'AI startups in San Francisco')"
+          },
+          "searchCriteria": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "description"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Additional criteria to filter search results. Each criterion is an object with a 'description' field. Example: [{description: 'Founded after 2020'}, {description: 'Has more than 50 employees'}]"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_websets",
+      "description": "List all websets in your account. Returns a paginated list of webset collections with their current status and item counts.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Number of websets to return (default: 25, max: 100)"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor from previous response"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_webset",
+      "description": "Get details about a specific webset by ID or externalId. Returns full webset information including status, item count, and metadata.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          },
+          "expandItems": {
+            "type": "boolean",
+            "description": "Include all items in the response (default: false)"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_webset",
+      "description": "Update a webset's metadata. Use this to add or update custom key-value pairs associated with the webset.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id",
+          "metadata"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID or externalId of the webset to update"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Key-value pairs to associate with the webset. Each value must be a string with max length 1000.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_webset",
+      "description": "Delete a webset and all its items. This action is permanent and cannot be undone.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID or externalId of the webset to delete"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_webset_items",
+      "description": "List all items in a webset. Returns entities (companies, people, papers) that have been discovered and verified in the collection.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Number of items to return (default: 25, max: 100)"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor from previous response"
+          },
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_item",
+      "description": "Get a specific item from a webset by its ID. Returns detailed information about the item including all enrichment data.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId",
+          "itemId"
+        ],
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "description": "The ID of the item to retrieve"
+          },
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_search",
+      "description": "Create a new search to find and add items to a webset. The search will discover entities matching your query and criteria.\n\nIMPORTANT PARAMETER FORMATS:\n- entity: MUST be an object like {type: \"company\"} (NOT a string)\n- criteria: MUST be array of objects like [{description: \"...\"}] (NOT array of strings)\n\nExample call:\n{\n  \"websetId\": \"webset_123\",\n  \"query\": \"AI startups in San Francisco\",\n  \"entity\": {\"type\": \"company\"},\n  \"criteria\": [{\"description\": \"Founded after 2020\"}],\n  \"count\": 10\n}",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId",
+          "query"
+        ],
+        "properties": {
+          "count": {
+            "type": "number",
+            "description": "Number of items to find (default: 10, min: 1)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Natural language query describing what to search for (e.g., 'AI startups in San Francisco')"
+          },
+          "entity": {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "enum": [
+                  "company",
+                  "person",
+                  "article",
+                  "research_paper",
+                  "custom"
+                ],
+                "type": "string",
+                "description": "Type of entity to search for"
+              }
+            },
+            "description": "Entity type to search for. Must be an object with a 'type' field. Example: {type: 'company'}",
+            "additionalProperties": false
+          },
+          "recall": {
+            "type": "boolean",
+            "description": "Whether to compute recall metrics for the search"
+          },
+          "behavior": {
+            "enum": [
+              "override",
+              "append"
+            ],
+            "type": "string",
+            "description": "'override' replaces existing items, 'append' adds to them (default: override)"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "description"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Additional criteria for evaluating search results. Each criterion is an object with a 'description' field. Example: [{description: 'Company is profitable'}, {description: 'Has raised Series A or later'}]"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Key-value pairs to associate with this search",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_search",
+      "description": "Get details about a specific search, including its status, progress, and results found.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId",
+          "searchId"
+        ],
+        "properties": {
+          "searchId": {
+            "type": "string",
+            "description": "The ID of the search to retrieve"
+          },
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "cancel_search",
+      "description": "Cancel a running search operation. This will stop the search from finding more items.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId",
+          "searchId"
+        ],
+        "properties": {
+          "searchId": {
+            "type": "string",
+            "description": "The ID of the search to cancel"
+          },
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_enrichment",
+      "description": "Create a new enrichment for a webset. Enrichments automatically extract custom data from each item using AI agents (e.g., 'company revenue', 'CEO name', 'funding amount').\n\nIMPORTANT PARAMETER FORMATS:\n- options (when format is \"options\"): MUST be array of objects like [{label: \"...\"}] (NOT array of strings)\n\nExample call (text format):\n{\"websetId\": \"webset_123\", \"description\": \"CEO name\", \"format\": \"text\"}\n\nExample call (options format):\n{\"websetId\": \"webset_123\", \"description\": \"Company stage\", \"format\": \"options\", \"options\": [{\"label\": \"Seed\"}, {\"label\": \"Series A\"}]}",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId",
+          "description"
+        ],
+        "properties": {
+          "format": {
+            "enum": [
+              "text",
+              "date",
+              "number",
+              "options",
+              "email",
+              "phone",
+              "url"
+            ],
+            "type": "string",
+            "description": "Format of the enrichment response. API auto-selects if not specified."
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "label"
+              ],
+              "properties": {
+                "label": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "When format is 'options', the different options for the enrichment agent to choose from (1-150 options). Each option is an object with a 'label' field. Example: [{label: 'Small (1-50)'}, {label: 'Medium (51-200)'}, {label: 'Large (201+)'}]"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Key-value pairs to associate with this enrichment",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of what data to extract (e.g., 'Annual revenue in USD', 'Number of full-time employees')"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_enrichment",
+      "description": "Get details about a specific enrichment, including its status and progress.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId",
+          "enrichmentId"
+        ],
+        "properties": {
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          },
+          "enrichmentId": {
+            "type": "string",
+            "description": "The ID of the enrichment to retrieve"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_enrichment",
+      "description": "Update an enrichment's metadata. You can associate custom key-value pairs with the enrichment.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId",
+          "enrichmentId",
+          "metadata"
+        ],
+        "properties": {
+          "metadata": {
+            "type": "object",
+            "description": "Key-value pairs to associate with this enrichment. Each value must be a string.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          },
+          "enrichmentId": {
+            "type": "string",
+            "description": "The ID of the enrichment to update"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_enrichment",
+      "description": "Delete an enrichment from a webset. This will remove all enriched data for this enrichment from all items.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId",
+          "enrichmentId"
+        ],
+        "properties": {
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          },
+          "enrichmentId": {
+            "type": "string",
+            "description": "The ID of the enrichment to delete"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "cancel_enrichment",
+      "description": "Cancel a running enrichment operation. This will stop the enrichment from processing more items.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId",
+          "enrichmentId"
+        ],
+        "properties": {
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          },
+          "enrichmentId": {
+            "type": "string",
+            "description": "The ID of the enrichment to cancel"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_monitor",
+      "description": "Create a monitor to automatically update a webset on a schedule. Monitors run search operations to find new items.\n\nIMPORTANT PARAMETER FORMATS:\n- cron: MUST be 5-field format \"minute hour day month weekday\" (e.g., \"0 9 * * 1\")\n- entity: MUST be an object like {type: \"company\"} (NOT a string)\n- criteria: MUST be array of objects like [{description: \"...\"}] (NOT array of strings)\n\nExample call:\n{\n  \"websetId\": \"webset_123\",\n  \"cron\": \"0 9 * * 1\",\n  \"query\": \"New AI startups\",\n  \"entity\": {\"type\": \"company\"},\n  \"criteria\": [{\"description\": \"Founded in last 30 days\"}],\n  \"count\": 10\n}",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "required": [
+          "websetId",
+          "cron"
+        ],
+        "properties": {
+          "cron": {
+            "type": "string",
+            "description": "Cron expression for the schedule (e.g., '0 9 * * 1' for every Monday at 9am). Must be valid Unix cron with 5 fields."
+          },
+          "count": {
+            "type": "number",
+            "description": "Maximum number of results to find per run"
+          },
+          "query": {
+            "type": "string",
+            "description": "The search query to use. Defaults to the last search query used."
+          },
+          "entity": {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string"
+              }
+            },
+            "description": "Entity type configuration for the search. Must be an object with a 'type' field. Example: {type: 'company'}",
+            "additionalProperties": false
+          },
+          "behavior": {
+            "enum": [
+              "append",
+              "override"
+            ],
+            "type": "string",
+            "description": "How new items should be added: 'append' adds to existing items, 'override' replaces them (default: append)"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "description"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "description": "Additional criteria for evaluating search results. Each criterion is an object with a 'description' field. Example: [{description: 'Recently received funding'}, {description: 'Hiring engineers'}]"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone (e.g., 'America/New_York'). Defaults to 'Etc/UTC'"
+          },
+          "websetId": {
+            "type": "string",
+            "description": "The ID or externalId of the webset"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ],
+  "tool_count": 16,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@exa-labs/websets-mcp-server/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "create_webset",
+    "list_websets",
+    "get_webset",
+    "update_webset",
+    "delete_webset",
+    "list_webset_items",
+    "get_item",
+    "create_search",
+    "get_search",
+    "cancel_search",
+    "create_enrichment",
+    "get_enrichment",
+    "update_enrichment",
+    "delete_enrichment",
+    "cancel_enrichment",
+    "create_monitor"
+  ]
+}

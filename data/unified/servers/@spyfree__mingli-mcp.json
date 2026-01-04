@@ -1,0 +1,524 @@
+{
+  "id": "@spyfree/mingli-mcp",
+  "name": "@spyfree/mingli-mcp",
+  "display_name": "Ziwei & Bazi Astrology",
+  "version": null,
+  "description": "Generate Ziwei Doushu and Bazi charts with insights into palaces, stars, and the five elements. Explore fortunes across decades, years, months, days, and hours to time decisions and plan ahead. Compare available astrology systems and analyze elemental strengths, balance, and gaps.",
+  "icon_url": "https://spjawbfpwezjfmicopsl.supabase.co/storage/v1/object/public/server-icons/0b881a7e-492e-431c-ada8-b550a1b1d396.svg",
+  "repository_url": null,
+  "status": "active",
+  "published_at": null,
+  "tools": [
+    {
+      "name": "get_ziwei_chart",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\u83b7\u53d6\u7d2b\u5fae\u6597\u6570\u6392\u76d8\u4fe1\u606f\uff0c\u5305\u542b\u547d\u76d8\u5341\u4e8c\u5bab\u3001\u4e3b\u661f\u3001\u8f85\u661f\u3001\u56db\u5316\u7b49\u8be6\u7ec6\u4fe1\u606f",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "date",
+          "time_index",
+          "gender"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "\u51fa\u751f\u65e5\u671f\uff0c\u683c\u5f0f\uff1aYYYY-MM-DD\uff0c\u4f8b\u5982\uff1a2000-08-16"
+          },
+          "format": {
+            "enum": [
+              "json",
+              "markdown"
+            ],
+            "type": "string",
+            "default": "markdown"
+          },
+          "gender": {
+            "enum": [
+              "\u7537",
+              "\u5973"
+            ],
+            "type": "string",
+            "description": "\u6027\u522b\uff1a\u7537 \u6216 \u5973"
+          },
+          "calendar": {
+            "enum": [
+              "solar",
+              "lunar"
+            ],
+            "type": "string",
+            "default": "solar",
+            "description": "\u5386\u6cd5\u7c7b\u578b\uff1asolar(\u9633\u5386) \u6216 lunar(\u519c\u5386)"
+          },
+          "language": {
+            "enum": [
+              "zh-CN",
+              "zh-TW",
+              "en-US",
+              "ja-JP",
+              "ko-KR",
+              "vi-VN"
+            ],
+            "type": "string",
+            "default": "zh-CN"
+          },
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "description": "\u51fa\u751f\u5730\u7eac\u5ea6"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "description": "\u51fa\u751f\u5730\u7ecf\u5ea6\uff0c\u7528\u4e8e\u771f\u592a\u9633\u65f6\u4fee\u6b63"
+          },
+          "birth_hour": {
+            "type": "integer",
+            "maximum": 23,
+            "minimum": 0,
+            "description": "\u7cbe\u786e\u51fa\u751f\u5c0f\u65f6\uff080-23\uff09"
+          },
+          "time_index": {
+            "type": "integer",
+            "maximum": 12,
+            "minimum": 0,
+            "description": "\u51fa\u751f\u65f6\u8fb0\u5e8f\u53f7\uff080-12\uff09"
+          },
+          "birth_minute": {
+            "type": "integer",
+            "maximum": 59,
+            "minimum": 0,
+            "description": "\u7cbe\u786e\u51fa\u751f\u5206\u949f\uff080-59\uff09"
+          },
+          "is_leap_month": {
+            "type": "boolean",
+            "default": false,
+            "description": "\u662f\u5426\u4e3a\u95f0\u6708\uff08\u4ec5\u5f53calendar=lunar\u65f6\u6709\u6548\uff09"
+          },
+          "use_solar_time": {
+            "type": "boolean",
+            "default": false,
+            "description": "\u662f\u5426\u542f\u7528\u771f\u592a\u9633\u65f6\u4fee\u6b63"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_ziwei_fortune",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\u83b7\u53d6\u7d2b\u5fae\u6597\u6570\u8fd0\u52bf\u4fe1\u606f\uff0c\u5305\u542b\u5927\u9650\u3001\u6d41\u5e74\u3001\u6d41\u6708\u3001\u6d41\u65e5\u3001\u6d41\u65f6\u7684\u8fd0\u52bf\u8be6\u60c5",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "birth_date",
+          "time_index",
+          "gender"
+        ],
+        "properties": {
+          "format": {
+            "enum": [
+              "json",
+              "markdown"
+            ],
+            "type": "string",
+            "default": "markdown"
+          },
+          "gender": {
+            "enum": [
+              "\u7537",
+              "\u5973"
+            ],
+            "type": "string",
+            "description": "\u6027\u522b\uff1a\u7537 \u6216 \u5973"
+          },
+          "calendar": {
+            "enum": [
+              "solar",
+              "lunar"
+            ],
+            "type": "string",
+            "default": "solar"
+          },
+          "language": {
+            "enum": [
+              "zh-CN",
+              "zh-TW",
+              "en-US",
+              "ja-JP",
+              "ko-KR",
+              "vi-VN"
+            ],
+            "type": "string",
+            "default": "zh-CN"
+          },
+          "birth_date": {
+            "type": "string",
+            "description": "\u51fa\u751f\u65e5\u671f\uff0c\u683c\u5f0f\uff1aYYYY-MM-DD"
+          },
+          "query_date": {
+            "type": "string",
+            "description": "\u67e5\u8be2\u8fd0\u52bf\u7684\u65e5\u671f\uff0c\u683c\u5f0f\uff1aYYYY-MM-DD"
+          },
+          "time_index": {
+            "type": "integer",
+            "maximum": 12,
+            "minimum": 0,
+            "description": "\u51fa\u751f\u65f6\u8fb0\u5e8f\u53f7\uff080-12\uff09"
+          },
+          "is_leap_month": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_ziwei_palace",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\u5206\u6790\u7d2b\u5fae\u6597\u6570\u7279\u5b9a\u5bab\u4f4d\u7684\u8be6\u7ec6\u4fe1\u606f",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "birth_date",
+          "time_index",
+          "gender",
+          "palace_name"
+        ],
+        "properties": {
+          "format": {
+            "enum": [
+              "json",
+              "markdown"
+            ],
+            "type": "string",
+            "default": "markdown"
+          },
+          "gender": {
+            "enum": [
+              "\u7537",
+              "\u5973"
+            ],
+            "type": "string"
+          },
+          "calendar": {
+            "enum": [
+              "solar",
+              "lunar"
+            ],
+            "type": "string",
+            "default": "solar"
+          },
+          "language": {
+            "enum": [
+              "zh-CN",
+              "zh-TW",
+              "en-US",
+              "ja-JP",
+              "ko-KR",
+              "vi-VN"
+            ],
+            "type": "string",
+            "default": "zh-CN"
+          },
+          "birth_date": {
+            "type": "string",
+            "description": "\u51fa\u751f\u65e5\u671f\uff0c\u683c\u5f0f\uff1aYYYY-MM-DD"
+          },
+          "time_index": {
+            "type": "integer",
+            "maximum": 12,
+            "minimum": 0,
+            "description": "\u51fa\u751f\u65f6\u8fb0\u5e8f\u53f7\uff080-12\uff09"
+          },
+          "palace_name": {
+            "enum": [
+              "\u547d\u5bab",
+              "\u5144\u5f1f\u5bab",
+              "\u592b\u59bb\u5bab",
+              "\u5b50\u5973\u5bab",
+              "\u8d22\u5e1b\u5bab",
+              "\u75be\u5384\u5bab",
+              "\u8fc1\u79fb\u5bab",
+              "\u4ea4\u53cb\u5bab",
+              "\u5b98\u7984\u5bab",
+              "\u7530\u5b85\u5bab",
+              "\u798f\u5fb7\u5bab",
+              "\u7236\u6bcd\u5bab"
+            ],
+            "type": "string",
+            "description": "\u8981\u5206\u6790\u7684\u5bab\u4f4d\u540d\u79f0"
+          },
+          "is_leap_month": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "list_fortune_systems",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\u5217\u51fa\u6240\u6709\u53ef\u7528\u7684\u547d\u7406\u7cfb\u7edf\uff08\u7d2b\u5fae\u6597\u6570\u3001\u516b\u5b57\u3001\u5360\u661f\u7b49\uff09",
+      "inputSchema": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "detailed": {
+            "type": "boolean",
+            "default": false,
+            "description": "\u662f\u5426\u8f93\u51fa\u66f4\u8be6\u7ec6\u4fe1\u606f"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_bazi_chart",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\u83b7\u53d6\u516b\u5b57\uff08\u56db\u67f1\uff09\u6392\u76d8\u4fe1\u606f\uff0c\u5305\u542b\u5e74\u6708\u65e5\u65f6\u56db\u67f1\u3001\u5341\u795e\u3001\u4e94\u884c\u3001\u5730\u652f\u85cf\u5e72\u7b49\u8be6\u7ec6\u4fe1\u606f",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "date",
+          "time_index",
+          "gender"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "\u51fa\u751f\u65e5\u671f\uff0c\u683c\u5f0f\uff1aYYYY-MM-DD"
+          },
+          "format": {
+            "enum": [
+              "json",
+              "markdown"
+            ],
+            "type": "string",
+            "default": "markdown"
+          },
+          "gender": {
+            "enum": [
+              "\u7537",
+              "\u5973"
+            ],
+            "type": "string"
+          },
+          "calendar": {
+            "enum": [
+              "solar",
+              "lunar"
+            ],
+            "type": "string",
+            "default": "solar"
+          },
+          "language": {
+            "enum": [
+              "zh-CN",
+              "zh-TW",
+              "en-US",
+              "ja-JP",
+              "ko-KR",
+              "vi-VN"
+            ],
+            "type": "string",
+            "default": "zh-CN"
+          },
+          "time_index": {
+            "type": "integer",
+            "maximum": 12,
+            "minimum": 0,
+            "description": "\u51fa\u751f\u65f6\u8fb0\u5e8f\u53f7\uff080-12\uff09"
+          },
+          "is_leap_month": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "get_bazi_fortune",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\u83b7\u53d6\u516b\u5b57\u8fd0\u52bf\u4fe1\u606f\uff0c\u5305\u542b\u5927\u8fd0\u3001\u6d41\u5e74\u7b49\u8be6\u60c5",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "birth_date",
+          "time_index",
+          "gender"
+        ],
+        "properties": {
+          "format": {
+            "enum": [
+              "json",
+              "markdown"
+            ],
+            "type": "string",
+            "default": "markdown"
+          },
+          "gender": {
+            "enum": [
+              "\u7537",
+              "\u5973"
+            ],
+            "type": "string"
+          },
+          "calendar": {
+            "enum": [
+              "solar",
+              "lunar"
+            ],
+            "type": "string",
+            "default": "solar"
+          },
+          "language": {
+            "enum": [
+              "zh-CN",
+              "zh-TW",
+              "en-US",
+              "ja-JP",
+              "ko-KR",
+              "vi-VN"
+            ],
+            "type": "string",
+            "default": "zh-CN"
+          },
+          "birth_date": {
+            "type": "string",
+            "description": "\u51fa\u751f\u65e5\u671f\uff0c\u683c\u5f0f\uff1aYYYY-MM-DD"
+          },
+          "query_date": {
+            "type": "string",
+            "description": "\u67e5\u8be2\u8fd0\u52bf\u7684\u65e5\u671f\uff0c\u683c\u5f0f\uff1aYYYY-MM-DD"
+          },
+          "time_index": {
+            "type": "integer",
+            "maximum": 12,
+            "minimum": 0,
+            "description": "\u51fa\u751f\u65f6\u8fb0\u5e8f\u53f7\uff080-12\uff09"
+          },
+          "is_leap_month": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_bazi_element",
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "description": "\u5206\u6790\u516b\u5b57\u4e94\u884c\u5f3a\u5f31\uff0c\u5305\u542b\u4e94\u884c\u5206\u6570\u3001\u5e73\u8861\u5ea6\u3001\u7f3a\u5931\u4e94\u884c\u7b49",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "birth_date",
+          "time_index",
+          "gender"
+        ],
+        "properties": {
+          "format": {
+            "enum": [
+              "json",
+              "markdown"
+            ],
+            "type": "string",
+            "default": "markdown"
+          },
+          "gender": {
+            "enum": [
+              "\u7537",
+              "\u5973"
+            ],
+            "type": "string"
+          },
+          "calendar": {
+            "enum": [
+              "solar",
+              "lunar"
+            ],
+            "type": "string",
+            "default": "solar"
+          },
+          "language": {
+            "enum": [
+              "zh-CN",
+              "zh-TW",
+              "en-US",
+              "ja-JP",
+              "ko-KR",
+              "vi-VN"
+            ],
+            "type": "string",
+            "default": "zh-CN"
+          },
+          "birth_date": {
+            "type": "string",
+            "description": "\u51fa\u751f\u65e5\u671f\uff0c\u683c\u5f0f\uff1aYYYY-MM-DD"
+          },
+          "time_index": {
+            "type": "integer",
+            "maximum": 12,
+            "minimum": 0,
+            "description": "\u51fa\u751f\u65f6\u8fb0\u5e8f\u53f7\uff080-12\uff09"
+          },
+          "is_leap_month": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    }
+  ],
+  "tool_count": 7,
+  "prompts": [],
+  "resources": [],
+  "remote_endpoint": "https://server.smithery.ai/@spyfree/mingli-mcp/mcp",
+  "packages": [],
+  "sources": [
+    "smithery"
+  ],
+  "primary_source": "smithery",
+  "is_latest": true,
+  "verified": false,
+  "use_count": 0,
+  "has_remote": true,
+  "has_tools": true,
+  "tool_names": [
+    "get_ziwei_chart",
+    "get_ziwei_fortune",
+    "analyze_ziwei_palace",
+    "list_fortune_systems",
+    "get_bazi_chart",
+    "get_bazi_fortune",
+    "analyze_bazi_element"
+  ]
+}
