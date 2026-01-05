@@ -45,10 +45,10 @@ RETRY_COUNT = 2
 # Paths
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR.parent / "data"
-SERVERS_DIR = DATA_DIR / "servers"
-INTROSPECTION_DIR = DATA_DIR / "introspection"
-INTROSPECTION_STATE_FILE = DATA_DIR / "introspection_state.json"
-ENRICHED_EXPORT_FILE = DATA_DIR / "servers_enriched.json"
+ANTHROPIC_DIR = DATA_DIR / "sources" / "anthropic" / "servers"
+INTROSPECTION_DIR = DATA_DIR / "sources" / "anthropic" / "introspection"
+INTROSPECTION_STATE_FILE = DATA_DIR / "sources" / "anthropic" / "introspection_state.json"
+ENRICHED_EXPORT_FILE = DATA_DIR / "exports" / "anthropic_enriched.json"
 
 # Logging setup
 logging.basicConfig(
@@ -403,11 +403,11 @@ async def introspect_servers(
     state = IntrospectionState(INTROSPECTION_STATE_FILE)
 
     # Load servers
-    servers = load_server_files(SERVERS_DIR, filter_pattern)
+    servers = load_server_files(ANTHROPIC_DIR, filter_pattern)
     logger.info(f"Found {len(servers)} servers to process")
 
     if not servers:
-        logger.warning("No servers found. Run pull_mcp_servers.py first.")
+        logger.warning("No servers found. Run pull_anthropic.py first.")
         return {"processed": 0, "success": 0, "failed": 0, "skipped": 0}
 
     # Filter already processed if not forcing

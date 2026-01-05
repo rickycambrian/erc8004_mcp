@@ -5,7 +5,7 @@ Register MCP servers on-chain via ERC-8004 using the Agent0 SDK.
 ## Overview
 
 This project:
-1. Pulls MCP server metadata from registries (Smithery, Official MCP Registry)
+1. Pulls MCP server metadata from registries (Smithery, Anthropic MCP Registry)
 2. Transforms the data to ERC-8004 registration format
 3. Uploads to IPFS and registers on-chain (Base Sepolia)
 
@@ -33,13 +33,13 @@ python scripts/pull_smithery.py
 
 Fetches ~3,200+ servers to `data/sources/smithery/servers/`.
 
-### Pull from Official MCP Registry
+### Pull from Anthropic MCP Registry
 
 ```bash
-python scripts/pull_official.py
+python scripts/pull_anthropic.py
 ```
 
-Fetches ~3,100+ servers to `data/sources/official/servers/`.
+Fetches ~3,100+ servers to `data/sources/anthropic/servers/`.
 
 ## Registration
 
@@ -64,8 +64,8 @@ npx tsx scripts/register-batch.ts --limit=10 --dry-run
 # Register from Smithery only, with tools
 npx tsx scripts/register-batch.ts --limit=5 --registry=smithery --tools-only
 
-# Register from Official registry, require endpoint
-npx tsx scripts/register-batch.ts --limit=5 --registry=official --require-endpoint
+# Register from Anthropic registry, require endpoint
+npx tsx scripts/register-batch.ts --limit=5 --registry=anthropic --require-endpoint
 
 # Register all (both registries)
 npx tsx scripts/register-batch.ts --limit=20 --require-endpoint
@@ -73,7 +73,7 @@ npx tsx scripts/register-batch.ts --limit=20 --require-endpoint
 
 Options:
 - `--limit=N` - Max servers to register (default: 10)
-- `--registry=smithery|official` - Filter by source
+- `--registry=smithery|anthropic` - Filter by source
 - `--tools-only` - Only servers with tools defined
 - `--require-endpoint` - Only servers with MCP endpoint
 - `--dry-run` - Preview without registering
@@ -151,7 +151,7 @@ Smithery-hosted servers require OAuth. See `scripts/test-mcp-client.ts` for the 
 ```
 scripts/
   pull_smithery.py      # Fetch from Smithery registry
-  pull_official.py      # Fetch from Official MCP registry
+  pull_anthropic.py      # Fetch from Anthropic MCP registry
   register-mcp.ts       # Register single server on ERC-8004
   register-batch.ts     # Batch register with deduplication
   test-mcp-local.ts     # Test via local stdio
@@ -160,7 +160,7 @@ scripts/
 data/
   sources/
     smithery/servers/   # Raw Smithery data (~3,200 servers)
-    official/servers/   # Raw Official registry data (~3,100 servers)
+    anthropic/servers/   # Raw Anthropic registry data (~3,100 servers)
   registrations/        # On-chain registration results
   registration-state.json  # Tracking for incremental sync
 ```

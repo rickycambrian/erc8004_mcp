@@ -1,7 +1,7 @@
 /**
- * Register specific Official MCP Registry server
+ * Register specific Anthropic MCP Registry server
  *
- * Usage: npx tsx scripts/register-official.ts <server-file> [--dry-run]
+ * Usage: npx tsx scripts/register-anthropic.ts <server-file> [--dry-run]
  */
 
 import { SDK } from 'agent0-sdk';
@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 
 const CHAIN_ID = 84532;
 const MCP_VERSION = '2025-06-18';
-const OFFICIAL_DIR = path.join(__dirname, '../data/sources/official/servers');
+const OFFICIAL_DIR = path.join(__dirname, '../data/sources/anthropic/servers');
 const REGISTRATIONS_DIR = path.join(__dirname, '../data/registrations');
 
 async function main() {
@@ -24,7 +24,7 @@ async function main() {
   const serverFile = args.find(a => !a.startsWith('--'));
 
   if (!serverFile) {
-    console.log('Usage: npx tsx scripts/register-official.ts <filename> [--dry-run]');
+    console.log('Usage: npx tsx scripts/register-anthropic.ts <filename> [--dry-run]');
     console.log('\nAvailable files:');
     const files = fs.readdirSync(OFFICIAL_DIR)
       .filter(f => f.endsWith('.json'))
@@ -55,7 +55,7 @@ async function main() {
   const publisherMeta = server._meta?.['io.modelcontextprotocol.registry/publisher-provided'];
   const tools = (publisherMeta?.tools || []).map((t: { name: string }) => t.name);
 
-  console.log('🔧 Register Official MCP Server\n');
+  console.log('🔧 Register Anthropic MCP Server\n');
   console.log(`Name: ${name}`);
   console.log(`Description: ${description.slice(0, 80)}...`);
   console.log(`Icon: ${iconUrl || 'none'}`);
@@ -105,7 +105,7 @@ async function main() {
     if (tools.length > 0) {
       endpoint.meta.mcpTools = tools;
     }
-    endpoint.meta.source = 'official';
+    endpoint.meta.source = 'anthropic';
     endpoint.meta.version = server.version;
   }
 
@@ -119,12 +119,12 @@ async function main() {
 
   // Save
   const safeName = server.name.replace(/[/:]/g, '_');
-  const outputFile = path.join(REGISTRATIONS_DIR, `official_${safeName}.json`);
+  const outputFile = path.join(REGISTRATIONS_DIR, `anthropic_${safeName}.json`);
   fs.mkdirSync(REGISTRATIONS_DIR, { recursive: true });
   fs.writeFileSync(outputFile, JSON.stringify({
     agentId: result.agentId,
     agentURI: result.agentURI,
-    source: 'official',
+    source: 'anthropic',
     serverName: server.name,
     displayName: name,
     mcpEndpoint,

@@ -5,7 +5,7 @@
  * Tracks registrations to avoid duplicates and supports updates.
  *
  * Usage:
- *   npx tsx scripts/register-batch.ts [--limit N] [--registry smithery|official] [--dry-run]
+ *   npx tsx scripts/register-batch.ts [--limit N] [--registry smithery|anthropic] [--dry-run]
  *
  * Environment:
  *   PRIVATE_KEY - Wallet private key
@@ -31,14 +31,14 @@ const SUBGRAPH_ID = 'GjQEDgEKqoh5Yc8MUgxoQoRATEJdEiH7HbocfR1aFiHa';
 
 // Data paths
 const SMITHERY_DIR = path.join(__dirname, '../data/sources/smithery/servers');
-const OFFICIAL_DIR = path.join(__dirname, '../data/sources/official/servers');
+const ANTHROPIC_DIR = path.join(__dirname, '../data/sources/anthropic/servers');
 const REGISTRATIONS_DIR = path.join(__dirname, '../data/registrations');
 const STATE_FILE = path.join(__dirname, '../data/registration-state.json');
 
 // Types
 interface ServerData {
   id: string;
-  source: 'smithery' | 'official';
+  source: 'smithery' | 'anthropic';
   name: string;
   displayName: string;
   description: string;
@@ -123,9 +123,9 @@ function loadSmitheryServer(filepath: string): ServerData | null {
 }
 
 /**
- * Load Official registry server data
+ * Load Anthropic registry server data
  */
-function loadOfficialServer(filepath: string): ServerData | null {
+function loadAnthropicServer(filepath: string): ServerData | null {
   try {
     const data = JSON.parse(fs.readFileSync(filepath, 'utf-8'));
 
@@ -199,8 +199,8 @@ function loadOfficialServer(filepath: string): ServerData | null {
     const contentHash = crypto.createHash('sha256').update(content).digest('hex').slice(0, 16);
 
     return {
-      id: `official:${server.name}:${server.version}`,
-      source: 'official',
+      id: `anthropic:${server.name}:${server.version}`,
+      source: 'anthropic',
       name: server.name,
       displayName,
       description: server.description || '',
@@ -398,7 +398,7 @@ async function main() {
   const limitArg = args.find(a => a.startsWith('--limit='));
   const limit = limitArg ? parseInt(limitArg.split('=')[1]) : 10;
   const registryArg = args.find(a => a.startsWith('--registry='));
-  const registry = registryArg?.split('=')[1] as 'smithery' | 'official' | undefined;
+  const registry = registryArg?.split('=')[1] as 'smithery' | 'anthropic' | undefined;
   const toolsOnly = args.includes('--tools-only');
   const requireEndpoint = args.includes('--require-endpoint');
 
@@ -426,17 +426,17 @@ async function main() {
     console.log(`   Smithery: ${servers.filter(s => s.source === 'smithery').length} servers`);
   }
 
-  if (!registry || registry === 'official') {
-    const officialFiles = fs.readdirSync(OFFICIAL_DIR).filter(f => f.endsWith('.json'));
-    for (const file of officialFiles) {
-      const server = loadOfficialServer(path.join(OFFICIAL_DIR, file));
+  if (!registry || registry === 'anthropic') {
+    const anthropicFiles = fs.readdirSync(ANTHROPIC_DIR).filter(f => f.endsWith('.json'));
+    for (const file of anthropicFiles) {
+      const server = loadAnthropicServer(path.join(ANTHROPIC_DIR, file));
       if (server &&
           (!toolsOnly || server.tools.length > 0) &&
           (!requireEndpoint || server.mcpEndpoint)) {
         servers.push(server);
       }
     }
-    console.log(`   Official: ${servers.filter(s => s.source === 'official').length} servers`);
+    console.log(`   Anthropic: ${servers.filter(s => s.source === 'anthropic').length} servers`);
   }
 
   console.log(`   Total: ${servers.length} servers\n`);

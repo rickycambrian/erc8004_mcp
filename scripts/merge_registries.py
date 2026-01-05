@@ -3,7 +3,7 @@
 Multi-Registry MCP Server Merger
 
 Merges data from multiple MCP server registries into a unified format:
-- Official MCP Registry (registry.modelcontextprotocol.io)
+- Anthropic MCP Registry (registry.modelcontextprotocol.io)
 - Smithery (registry.smithery.ai)
 - Future: mcpso, awesome-mcp-servers, etc.
 
@@ -78,8 +78,8 @@ def extract_repo_name(url: str) -> Optional[str]:
     return None
 
 
-def load_official_servers(source_dir: Path) -> List[Dict]:
-    """Load servers from official registry."""
+def load_anthropic_servers(source_dir: Path) -> List[Dict]:
+    """Load servers from anthropic registry."""
     servers = []
     servers_dir = source_dir / "servers"
     introspection_dir = source_dir / "introspection"
@@ -93,7 +93,7 @@ def load_official_servers(source_dir: Path) -> List[Dict]:
                 data = json.load(f)
 
             server = data.get("server", {})
-            meta = data.get("_meta", {}).get("io.modelcontextprotocol.registry/official", {})
+            meta = data.get("_meta", {}).get("io.modelcontextprotocol.registry/anthropic", {})
 
             # Load introspection if available
             introspection = None
@@ -118,7 +118,7 @@ def load_official_servers(source_dir: Path) -> List[Dict]:
             repo_url = server.get("repository", {}).get("url")
 
             servers.append({
-                "source": "official",
+                "source": "anthropic",
                 "source_priority": 1,  # Lower priority (less rich data)
                 "name": server.get("name"),
                 "version": server.get("version"),
@@ -209,7 +209,7 @@ def deduplicate_servers(all_servers: List[Dict]) -> List[Dict]:
     Strategy:
     1. Group by normalized name
     2. If same server in multiple sources, prefer the one with more tools
-    3. Keep all versions from official registry but only latest
+    3. Keep all versions from anthropic registry but only latest
     """
     # Group by normalized name
     by_name = defaultdict(list)
@@ -303,7 +303,7 @@ def merge_all_registries(force: bool = False):
     source_stats = {}
 
     # Load from each source
-    for source_name in ["official", "smithery"]:
+    for source_name in ["anthropic", "smithery"]:
         source_dir = SOURCES_DIR / source_name
 
         if not source_dir.exists():
@@ -312,8 +312,8 @@ def merge_all_registries(force: bool = False):
 
         logger.info(f"Loading from {source_name}...")
 
-        if source_name == "official":
-            servers = load_official_servers(source_dir)
+        if source_name == "anthropic":
+            servers = load_anthropic_servers(source_dir)
         elif source_name == "smithery":
             servers = load_smithery_servers(source_dir)
         else:

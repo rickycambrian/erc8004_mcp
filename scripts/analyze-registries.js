@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const SMITHERY_DIR = path.join(__dirname, '../data/sources/smithery/servers');
-const OFFICIAL_DIR = path.join(__dirname, '../data/sources/official/servers');
+const ANTHROPIC_DIR = path.join(__dirname, '../data/sources/anthropic/servers');
 
 const testPatterns = [
   /\btest\b/i, /\bdemo\b/i, /\bexample\b/i, /\bsample\b/i,
@@ -44,14 +44,14 @@ console.log('Endpoint + tools:   ' + sBoth);
 console.log('After test filter:  ' + sProd);
 console.log('Production + both:  ' + sProdBoth);
 
-// Official
-console.log('\n=== OFFICIAL MCP REGISTRY ===\n');
-const officialFiles = fs.readdirSync(OFFICIAL_DIR).filter(f => f.endsWith('.json'));
+// Anthropic
+console.log('\n=== ANTHROPIC MCP REGISTRY ===\n');
+const anthropicFiles = fs.readdirSync(ANTHROPIC_DIR).filter(f => f.endsWith('.json'));
 let oTotal = 0, oEndpoint = 0, oTools = 0, oBoth = 0, oProd = 0, oProdBoth = 0, oRepo = 0, oNpm = 0;
 
-for (const file of officialFiles) {
+for (const file of anthropicFiles) {
   try {
-    const raw = JSON.parse(fs.readFileSync(path.join(OFFICIAL_DIR, file), 'utf-8'));
+    const raw = JSON.parse(fs.readFileSync(path.join(ANTHROPIC_DIR, file), 'utf-8'));
     const server = raw.server;
     if (!server) continue;
     oTotal++;
